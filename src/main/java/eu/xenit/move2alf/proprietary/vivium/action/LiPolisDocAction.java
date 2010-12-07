@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import eu.xenit.move2alf.core.action.ActionPropertyDefinition;
+import eu.xenit.move2alf.common.ActionPropertyDefinition;
 import eu.xenit.move2alf.core.dto.Action;
 import eu.xenit.poller.vivium.LiDocDescription;
 import eu.xenit.poller.vivium.LiGroupType;

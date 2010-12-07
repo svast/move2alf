@@ -1,15 +1,15 @@
-package eu.xenit.move2alf.core.action;
+package eu.xenit.move2alf.common;
 
-public class ActionPropertyDefinition{
+public class PropertyDefinition{
 	private String name;
 	private Class type;
 	private Object defaultValue;
 
-	public ActionPropertyDefinition() {
+	public PropertyDefinition() {
 	}
 
 
-	public ActionPropertyDefinition(String name, Class type,
+	public PropertyDefinition(String name, Class type,
 			Object defaultValue) {
 		this.name = name;
 		this.type = type;

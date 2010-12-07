@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import eu.xenit.move2alf.common.PropertyDefinition;
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.action.ActionPropertyDefinition;
 
 public abstract class Action extends IdObject {
 	protected String name;
 	protected String description;
 	protected String className;
-	private Map<String,ActionPropertyDefinition> configPropertyDefinitionMap = new HashMap<String,ActionPropertyDefinition>();
-	private Map<String,ActionPropertyDefinition> inputPropertyDefinitionMap = new HashMap<String,ActionPropertyDefinition>();
-	private Map<String,ActionPropertyDefinition> reportPropertyDefinitionMap = new HashMap<String, ActionPropertyDefinition>();
+	private Map<String,PropertyDefinition> configPropertyDefinitionMap = new HashMap<String,PropertyDefinition>();
+	private Map<String,PropertyDefinition> inputPropertyDefinitionMap = new HashMap<String,PropertyDefinition>();
+	private Map<String,PropertyDefinition> reportPropertyDefinitionMap = new HashMap<String, PropertyDefinition>();
 	
 	public Action() {
 		super();
@@ -41,15 +41,15 @@ public abstract class Action extends IdObject {
 	}
 	
 	protected void setConfigPropertyDefinition(String name, Class type, Object defaultValue){
-		configPropertyDefinitionMap.put(name, new ActionPropertyDefinition(name,type,defaultValue));
+		configPropertyDefinitionMap.put(name, new PropertyDefinition(name,type,defaultValue));
 	}
 
 	protected void setInputPropertyDefinition(String name, Class type, Object defaultValue){
-		inputPropertyDefinitionMap.put(name, new ActionPropertyDefinition(name,type,defaultValue));
+		inputPropertyDefinitionMap.put(name, new PropertyDefinition(name,type,defaultValue));
 	}
 
 	protected void setReportPropertyDefinition(String name, Class type, Object defaultValue){
-		reportPropertyDefinitionMap.put(name, new ActionPropertyDefinition(name,type,defaultValue));
+		reportPropertyDefinitionMap.put(name, new PropertyDefinition(name,type,defaultValue));
 	}
 	
 	public Set<String> getConfigPropertyNames(){
@@ -64,13 +64,13 @@ public abstract class Action extends IdObject {
 		return reportPropertyDefinitionMap.keySet();
 	}
 	
-	public ActionPropertyDefinition getConfigPropertyDefinition(String name){
+	public PropertyDefinition getConfigPropertyDefinition(String name){
 		return configPropertyDefinitionMap.get(name);
 	}
-	public ActionPropertyDefinition getInputPropertyDefinition(String name){
+	public PropertyDefinition getInputPropertyDefinition(String name){
 		return inputPropertyDefinitionMap.get(name);
 	}
-	public ActionPropertyDefinition getReportPropertyDefinition(String name){
+	public PropertyDefinition getReportPropertyDefinition(String name){
 		return reportPropertyDefinitionMap.get(name);
 	}
 
