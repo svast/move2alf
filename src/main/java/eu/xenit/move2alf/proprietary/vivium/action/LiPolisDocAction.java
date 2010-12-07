@@ -41,12 +41,13 @@ public class LiPolisDocAction extends Action {
    
 	public LiPolisDocAction(){
 		super();
-		this.configPropertyDefinitionMap.put("test",new ActionPropertyDefinition("test",java.lang.String.class,null));
+		this.setConfigPropertyDefinition("test",java.lang.String.class,null);
 		
 	}
 
 	@Override
 	public boolean execute(Map<String, Object> configPropertyMap, Map<String, Object> inputPropertyMap) {
+		//TODO
 		String keyFilePath = inputPropertyMap.get(key)
 		String keyfilePath = resultPath + File.separator + "keyfile.txt";
 		logger.debug("keyfilePath " + keyfilePath);
