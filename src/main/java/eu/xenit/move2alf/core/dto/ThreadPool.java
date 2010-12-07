@@ -1,6 +1,8 @@
 package eu.xenit.move2alf.core.dto;
 
-public class ThreadPool {
+import eu.xenit.move2alf.common.IdObject;
+
+public class ThreadPool extends IdObject {
 	private String name = "";
 
 	private int size = 0;

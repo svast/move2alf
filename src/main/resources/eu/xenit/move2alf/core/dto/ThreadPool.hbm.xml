@@ -4,7 +4,7 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="eu.move2alf.core.dto.ThreadPool" table="userPswd">
+  <class name="eu.move2alf.core.dto.ThreadPool" table="threadPool">
     <id name="id">
       <generator class="identity"/>
     </id>

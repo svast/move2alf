@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.Job" table="job">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="name" />
+		<property name="description" />
+		<many-to-one name="creator" column="creatorId" />
+		<property name="creationDateTime" />
+		<property name="lastModifyDateTime" />
+		<many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true"/>
+		<set name="schedules" inverse="true">
+			<key column="jobId" />
+			<one-to-many class="eu.xenit.move2alf.core.dto.Schedule" />
+		</set>
+		<set name="reports" inverse="true">
+			<key column="jobId" />
+			<one-to-many class="eu.xenit.move2alf.core.dto.Report" />
+		</set>
+	</class>
+</hibernate-mapping>

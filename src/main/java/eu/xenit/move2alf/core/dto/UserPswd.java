@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.core.dto;
 
+import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.core.enums.ERole;
 
 import java.sql.Date;
@@ -9,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class UserPswd {
+public class UserPswd extends IdObject {
     private String userName = "";
     private String password = "";
     private Date creationDate = null;
