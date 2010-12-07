@@ -41,84 +41,6 @@ LOCK TABLES `action` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `actionConfigPropertyDefinition`
---
-
-DROP TABLE IF EXISTS `actionConfigPropertyDefinition`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `actionConfigPropertyDefinition` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `actionId` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `type` varchar(30) NOT NULL,
-  `defaultValue` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `actionConfigPropertyDefinition`
---
-
-LOCK TABLES `actionConfigPropertyDefinition` WRITE;
-/*!40000 ALTER TABLE `actionConfigPropertyDefinition` DISABLE KEYS */;
-/*!40000 ALTER TABLE `actionConfigPropertyDefinition` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `actionInputPropertyDefinition`
---
-
-DROP TABLE IF EXISTS `actionInputPropertyDefinition`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `actionInputPropertyDefinition` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `actionId` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `type` varchar(30) NOT NULL,
-  `defaultValue` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `actionInputPropertyDefinition`
---
-
-LOCK TABLES `actionInputPropertyDefinition` WRITE;
-/*!40000 ALTER TABLE `actionInputPropertyDefinition` DISABLE KEYS */;
-/*!40000 ALTER TABLE `actionInputPropertyDefinition` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `actionReportPropertyDefinition`
---
-
-DROP TABLE IF EXISTS `actionReportPropertyDefinition`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `actionReportPropertyDefinition` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `actionId` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `type` varchar(30) NOT NULL,
-  `defaultValue` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `actionReportPropertyDefinition`
---
-
-LOCK TABLES `actionReportPropertyDefinition` WRITE;
-/*!40000 ALTER TABLE `actionReportPropertyDefinition` DISABLE KEYS */;
-/*!40000 ALTER TABLE `actionReportPropertyDefinition` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `configuredAction`
 --
 
@@ -152,9 +74,9 @@ DROP TABLE IF EXISTS `configuredActionProperty`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `configuredActionProperty` (
   `configuredActionId` int(10) unsigned NOT NULL,
-  `actionConfigPropertyDefinitionId` int(10) unsigned NOT NULL,
+  `configPropertyName` varchar(50) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`configuredActionId`,`actionConfigPropertyDefinitionId`)
+  PRIMARY KEY (`configuredActionId`,`configPropertyName`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -283,7 +205,7 @@ DROP TABLE IF EXISTS `processedDocumentProperty`;
 CREATE TABLE `processedDocumentProperty` (
   `processedDocumentId` int(10) unsigned NOT NULL,
   `configuredActionId` int(10) unsigned NOT NULL,
-  `actionReportPropertyDefinitionId` int(10) unsigned NOT NULL,
+  `reportPropertyName` varchar(50) NOT NULL,
   `value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -333,8 +255,8 @@ DROP TABLE IF EXISTS `reportActionProperty`;
 CREATE TABLE `reportActionProperty` (
   `reportId` int(10) unsigned NOT NULL,
   `configuredActionId` int(10) unsigned NOT NULL,
-  `actionReportPropertyDefinitionId` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`configuredActionId`,`actionReportPropertyDefinitionId`,`reportId`) USING BTREE
+  `reportPropertyName` varchar(50) NOT NULL,
+  PRIMARY KEY (`reportId`,`configuredActionId`,`reportPropertyName`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -480,4 +402,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-12-07 14:18:20
+-- Dump completed on 2010-12-07 16:18:10

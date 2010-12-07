@@ -1,21 +1,25 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import eu.xenit.move2alf.common.IdObject;
+import eu.xenit.move2alf.core.action.ActionPropertyDefinition;
 
-public class Action extends IdObject {
-	private String name;
-	private String description;
-	private String className;
-	private Set<ActionConfigPropertyDefinition> configPropertyDefinitionSet = new HashSet<ActionConfigPropertyDefinition>();
-	private Set<ActionInputPropertyDefinition> inputPropertyDefinitionSet = new HashSet<ActionInputPropertyDefinition>();
-	private Set<ActionReportPropertyDefinition> reportPropertyDefinitionSet = new HashSet<ActionReportPropertyDefinition>();
+public abstract class Action extends IdObject {
+	protected String name;
+	protected String description;
+	protected String className;
+	protected Map<String,ActionPropertyDefinition> configPropertyDefinitionMap = new HashMap<String,ActionPropertyDefinition>();
+	protected Map<String,ActionPropertyDefinition> inputPropertyDefinitionMap = new HashMap<String,ActionPropertyDefinition>();
+	protected Map<String,ActionPropertyDefinition> reportPropertyDefinitionMap = new HashMap<String, ActionPropertyDefinition>();
 	
 	public Action() {
 		super();
+		name = getClass().getSimpleName();
+		className = getClass().getName();
 	}
+
 	public String getName() {
 		return name;
 	}
@@ -34,27 +38,9 @@ public class Action extends IdObject {
 	public void setClassName(String className) {
 		this.className = className;
 	}
-	public Set<ActionConfigPropertyDefinition> getConfigPropertyDefinitionSet() {
-		return configPropertyDefinitionSet;
-	}
-	public void setConfigPropertyDefinitionSet(
-			Set<ActionConfigPropertyDefinition> configPropertyDefinitionSet) {
-		this.configPropertyDefinitionSet = configPropertyDefinitionSet;
-	}
-	public Set<ActionInputPropertyDefinition> getInputPropertyDefinitionSet() {
-		return inputPropertyDefinitionSet;
-	}
-	public void setInputPropertyDefinitionSet(
-			Set<ActionInputPropertyDefinition> inputPropertyDefinitionSet) {
-		this.inputPropertyDefinitionSet = inputPropertyDefinitionSet;
-	}
-	public Set<ActionReportPropertyDefinition> getReportPropertyDefinitionSet() {
-		return reportPropertyDefinitionSet;
-	}
-	public void setReportPropertyDefinitionSet(
-			Set<ActionReportPropertyDefinition> reportPropertyDefinitionSet) {
-		this.reportPropertyDefinitionSet = reportPropertyDefinitionSet;
-	}
 	
+	
+	// interface
+	public abstract boolean execute(Map<String, Object> configPropertyMap, Map<String, Object> inputPropertyMap);
   
 }
