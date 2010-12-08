@@ -4,18 +4,15 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="eu.move2alf.core.dto.UserPswd" table="userPswd">
+  <class name="eu.xenit.move2alf.core.dto.UserPswd" table="userPswd">
     <id name="id">
       <generator class="identity"/>
     </id>
     <property name="userName"/>
     <property name="password"/>
-    <property name="creationDate"/>
-    <property name="lastEnableDate"/>
-    <property name="lastDisableDate"/>
     <set name="userRoleSet" table="userRole" lazy="false">
       <key column="userName"/>
-      <composite-element class="eu.move2alf.core.dto.UserPswd.UserRole">
+      <composite-element class="eu.xenit.move2alf.core.dto.UserRole">
         <property name="role"/>
       </composite-element>
     </set>

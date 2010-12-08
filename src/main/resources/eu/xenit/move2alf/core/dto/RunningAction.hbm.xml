@@ -4,7 +4,7 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="eu.xenit.move2alf.core.dto.RunnningAction" table="runningAction">
+	<class name="eu.xenit.move2alf.core.dto.RunningAction" table="runningAction">
 		<id name="id">
 			<generator class="identity" />
 		</id>

@@ -4,7 +4,7 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="eu.xenit.move2alf.core.dto.Cycle" table="cycle">
+  <class name="eu.xenit.move2alf.core.dto.ProcessedDocument" table="processedDocument">
     <id name="id">
       <generator class="identity"/>
     </id>
