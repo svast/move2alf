@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.ConfiguredAction" table="configuredAction">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<many-to-one name="action" column="actionId" />
+		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true"/>
+		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true"/>
+	</class>
+</hibernate-mapping>
