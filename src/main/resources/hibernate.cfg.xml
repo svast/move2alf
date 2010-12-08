@@ -5,44 +5,55 @@
 
 <hibernate-configuration>
 
-    <session-factory>
-        <!-- properties -->
-        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:6646/...?zeroDateTimeBehavior=convertToNull</property>
-        <property name="hibernate.connection.username">tomcat</property>
-        <property name="hibernate.connection.password">...</property>
-        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
-        <property name="show_sql">false</property>
-        <property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
-        <!--property name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property-->
-        <!-- this one updates the db based on mapping files property name="hibernate.hbm2ddl.auto">update</property-->
+	<session-factory>
+		<!-- properties -->
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:6646/...?zeroDateTimeBehavior=convertToNull</property>
+		<property name="hibernate.connection.username">tomcat</property>
+		<property name="hibernate.connection.password">...</property>
+		<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="show_sql">false</property>
+		<property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+		<!--
+			property
+			name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property
+		-->
+		<!--
+			this one updates the db based on mapping files property
+			name="hibernate.hbm2ddl.auto">update</property
+		-->
 
-        <!-- to be able to use true, false in HQL-->
-        <property name="hibernate.query.substitutions"> true 1, false 0 </property>
+		<!-- to be able to use true, false in HQL-->
+		<property name="hibernate.query.substitutions"> true 1, false 0 </property>
 
-        <property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
-        <property name="hibernate.c3p0.max_size">4</property> <!-- TODO: grotere pool gebruiken -->
-        <property name="hibernate.c3p0.min_size">2</property>
-        <property name="hibernate.c3p0.timeout">200</property>
-        <property name="hibernate.c3p0.max_statements">0</property>
-        <property name="hibernate.c3p0.acquire_increment">1</property>
+		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.max_size">4</property> <!-- TODO: grotere pool gebruiken -->
+		<property name="hibernate.c3p0.min_size">2</property>
+		<property name="hibernate.c3p0.timeout">200</property>
+		<property name="hibernate.c3p0.max_statements">0</property>
+		<property name="hibernate.c3p0.acquire_increment">1</property>
 
-              <!--there was an error when using net.sf.ehcache.hibernate.EhCacheProvider
-        "java.lang.IllegalAccessError: tried to access method net.sf.ehcache.CacheManager.<init>()V "
-        did some investigation, found suggestion to use net.sf.ehcache.hibernate.SingletonEhCacheProvider,
-        but without really understanding why
-        -->  
-        <property name="hibernate.cache.provider_class">net.sf.ehcache.hibernate.SingletonEhCacheProvider</property>
-        <property name="hibernate.cache.provider_configuration">ehcache.xml</property>
+		<!--
+			there was an error when using
+			net.sf.ehcache.hibernate.EhCacheProvider
+			"java.lang.IllegalAccessError: tried to access method
+			net.sf.ehcache.CacheManager.<init>()V " did some investigation, found
+			suggestion to use net.sf.ehcache.hibernate.SingletonEhCacheProvider,
+			but without really understanding why
+		-->
+		<property name="hibernate.cache.provider_class">net.sf.ehcache.hibernate.SingletonEhCacheProvider</property>
+		<property name="hibernate.cache.provider_configuration">ehcache.xml</property>
 
-        <!-- mapping files -->
-        <mapping resource="eu/xenit/move2alf/core/dto/UserPswd.hbm.xml"/>
-        <mapping resource="eu/xenit/move2alf/core/dto/ThreadPool.hbm.xml"/>
-        <mapping resource="eu/xenit/move2alf/core/dto/Destination.hbm.xml"/>
-        <mapping resource="eu/xenit/move2alf/core/dto/Job.hbm.xml"/>
-        <mapping resource="eu/xenit/move2alf/core/dto/Schedule.hbm.xml"/>
-		<mapping resource="eu/xenit/move2alf/core/dto/Cycle.hbm.xml"/>
-		<mapping resource="eu/xenit/move2alf/core/dto/Report.hbm.xml"/>
-    </session-factory>
+		<!-- mapping files -->
+		<mapping resource="eu/xenit/move2alf/core/dto/UserPswd.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/ThreadPool.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/Destination.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/Job.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/Schedule.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/Cycle.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/ProcessedDocument.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/RunningAction.hbm.xml" />
+		<mapping resource="eu/xenit/move2alf/core/dto/Report.hbm.xml" />
+	</session-factory>
 
 </hibernate-configuration>

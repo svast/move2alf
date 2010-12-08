@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.Report" table="report">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<many-to-one name="job" column="jobId" />
+		<property name="name" />
+		<property name="emailList" />
+		<property name="className" column="class" />
+		<set name="reportActionProperties" table="reportActionProperty">
+			<key column="reportId" />
+			<composite-element class="eu.xenit.move2alf.core.dto.ReportActionProperty">
+				<many-to-one name="configuredAction" column="configuredActionId"/>
+				<property name="reportPropertyName"/>
+			</composite-element>
+		</set>
+	</class>
+</hibernate-mapping>

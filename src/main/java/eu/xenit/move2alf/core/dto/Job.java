@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
@@ -12,9 +12,9 @@ public class Job extends IdObject {
 
 	private UserPswd creator;
 
-	private Date creationDateTime;
+	private Timestamp creationDateTime;
 
-	private Date lastModifyDateTime;
+	private Timestamp lastModifyDateTime;
 	
 	private ConfiguredAction firstConfiguredAction;
 	
@@ -50,19 +50,19 @@ public class Job extends IdObject {
 		return creator;
 	}
 
-	public void setCreationDateTime(Date creationDateTime) {
+	public void setCreationDateTime(Timestamp creationDateTime) {
 		this.creationDateTime = creationDateTime;
 	}
 
-	public Date getCreationDateTime() {
+	public Timestamp getCreationDateTime() {
 		return creationDateTime;
 	}
 
-	public void setLastModifyDateTime(Date lastModifyDateTime) {
+	public void setLastModifyDateTime(Timestamp lastModifyDateTime) {
 		this.lastModifyDateTime = lastModifyDateTime;
 	}
 
-	public Date getLastModifyDateTime() {
+	public Timestamp getLastModifyDateTime() {
 		return lastModifyDateTime;
 	}
 

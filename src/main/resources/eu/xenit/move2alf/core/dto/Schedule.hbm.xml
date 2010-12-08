@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.Schedule" table="schedule">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<many-to-one name="job" column="jobId"/>
+		<many-to-one name="creator" column="creatorId"/>
+		<property name="creationDateTime"/>
+		<property name="lastModifyDateTime"/>
+		<property name="state"/>
+		<property name="startDateTime"/>
+		<property name="endDateTime"/>
+		<property name="quartzScheduling"/>
+	</class>
+</hibernate-mapping>

@@ -1,36 +1,38 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
 
 public class Cycle extends IdObject {
-	private Date startDateTime;
+	private Timestamp startDateTime;
 	
-	private Date endDateTime;
+	private Timestamp endDateTime;
 	
 	private Schedule schedule;
 	
 	private Set<RunningAction> runningActions;
 	
+	private Set<ProcessedDocument> processedDocuments;
+	
 	public Cycle() {
 		
 	}
 
-	public void setStartDateTime(Date startDateTime) {
+	public void setStartDateTime(Timestamp startDateTime) {
 		this.startDateTime = startDateTime;
 	}
 
-	public Date getStartDateTime() {
+	public Timestamp getStartDateTime() {
 		return startDateTime;
 	}
 
-	public void setEndDateTime(Date endDateTime) {
+	public void setEndDateTime(Timestamp endDateTime) {
 		this.endDateTime = endDateTime;
 	}
 
-	public Date getEndDateTime() {
+	public Timestamp getEndDateTime() {
 		return endDateTime;
 	}
 
@@ -48,5 +50,13 @@ public class Cycle extends IdObject {
 
 	public Set<RunningAction> getRunningActions() {
 		return runningActions;
+	}
+
+	public void setProcessedDocuments(Set<ProcessedDocument> processedDocuments) {
+		this.processedDocuments = processedDocuments;
+	}
+
+	public Set<ProcessedDocument> getProcessedDocuments() {
+		return processedDocuments;
 	}
 }
