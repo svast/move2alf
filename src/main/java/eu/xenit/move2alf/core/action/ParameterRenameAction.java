@@ -10,8 +10,9 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredActionParameter;
 
 public class ParameterRenameAction extends Action {
-	private static final String oldParameterName = "oldParameterName";
-	private static final String newParameterName = "newParameterName";
+	// config parameters
+	private static final String PoldParameterName = "oldParameterName";
+	private static final String PnewParameterName = "newParameterName";
 
 	/*
 	 * the ActionFactory will only register Actions that have implemented the singleton pattern
@@ -25,9 +26,9 @@ public class ParameterRenameAction extends Action {
 	private ParameterRenameAction() {
 		name = "Parameter Rename Action";
 		description = "Action that renames the parameter name, without changing the value";
-		addConfigParameter(new ParameterDefinition(oldParameterName,
+		addConfigParameter(new ParameterDefinition(PoldParameterName,
 				String.class, null));
-		addConfigParameter(new ParameterDefinition(newParameterName,
+		addConfigParameter(new ParameterDefinition(PnewParameterName,
 				String.class, null));
 	}
 
@@ -38,10 +39,10 @@ public class ParameterRenameAction extends Action {
 		String newName = null;
 		for (ConfiguredActionParameter configuredActionParameter : configuredAction
 				.getConfiguredActionParameterSet()) {
-			if (configuredActionParameter.getName().equals(oldParameterName)) {
+			if (configuredActionParameter.getName().equals(PoldParameterName)) {
 				oldName = configuredActionParameter.getValue();
 			}
-			if (configuredActionParameter.getName().equals(newParameterName)) {
+			if (configuredActionParameter.getName().equals(PnewParameterName)) {
 				newName = configuredActionParameter.getValue();
 			}
 		}
@@ -63,7 +64,7 @@ public class ParameterRenameAction extends Action {
 		String oldName = null;
 		for (ConfiguredActionParameter configuredActionParameter : configuredAction
 				.getConfiguredActionParameterSet()) {
-			if (configuredActionParameter.getName().equals(oldParameterName)) {
+			if (configuredActionParameter.getName().equals(PoldParameterName)) {
 				oldName = configuredActionParameter.getValue();
 				if (oldName != null) {
 					inputParameterMap.put(oldName, new ParameterDefinition(
@@ -82,7 +83,7 @@ public class ParameterRenameAction extends Action {
 		String newName = null;
 		for (ConfiguredActionParameter configuredActionParameter : configuredAction
 				.getConfiguredActionParameterSet()) {
-			if (configuredActionParameter.getName().equals(newParameterName)) {
+			if (configuredActionParameter.getName().equals(PnewParameterName)) {
 				newName = configuredActionParameter.getValue();
 				if (newName != null) {
 					outputParameterMap.put(newName, new ParameterDefinition(

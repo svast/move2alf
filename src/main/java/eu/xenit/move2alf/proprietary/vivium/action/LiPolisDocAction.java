@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.action.ParameterRenameAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 /*
@@ -38,6 +37,13 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
  */
 
 public class LiPolisDocAction extends Action {
+	// config parameters
+	
+	// input parameters
+	
+	// output parameters
+	private static final String oldParameter = "oldParameterName";
+
 	/*
 	 * the ActionFactory will only register Actions that have implemented the singleton pattern
 	 */

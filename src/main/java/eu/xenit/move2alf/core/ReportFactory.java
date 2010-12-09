@@ -30,7 +30,7 @@ public class ReportFactory {
       return reportMap.keySet();	
     }
     
-    public Action getReport(String className){
+    public Report getReport(String className){
     	return reportMap.get(className);
     }
     	
