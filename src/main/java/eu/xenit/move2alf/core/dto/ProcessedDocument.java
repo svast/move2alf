@@ -13,7 +13,7 @@ public class ProcessedDocument extends IdObject {
 	
 	private EProcessedDocumentStatus status;
 	
-	private Set<ProcessedDocumentProperty> processedDocumentProperties;
+	private Set<ProcessedDocumentParameter> processedDocumentParameterSet;
 	
 	private Cycle cycle;
 	
@@ -45,13 +45,14 @@ public class ProcessedDocument extends IdObject {
 		return status;
 	}
 
-	public void setProcessedDocumentProperties(
-			Set<ProcessedDocumentProperty> processedDocumentProperties) {
-		this.processedDocumentProperties = processedDocumentProperties;
+
+	public Set<ProcessedDocumentParameter> getProcessedDocumentParameterSet() {
+		return processedDocumentParameterSet;
 	}
 
-	public Set<ProcessedDocumentProperty> getProcessedDocumentProperties() {
-		return processedDocumentProperties;
+	public void setProcessedDocumentParameterSet(
+			Set<ProcessedDocumentParameter> processedDocumentParameterSet) {
+		this.processedDocumentParameterSet = processedDocumentParameterSet;
 	}
 
 	public void setCycle(Cycle cycle) {

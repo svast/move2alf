@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.ConfiguredReport" table="configuredReport">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="reportClassName"/>
+    	<set name="configuredReportParameterSet" table="configuredReportParameter">
+      		<key column="configuredReportId"/>
+      		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredReportParameter">
+        		<property name="name"/>
+        		<property name="value"/>
+      		</composite-element>
+    	</set>
+    	<set name="configuredSourceSinkSet" table="configuredReportConfiguredSourceSink">
+      		<key column="configuredReportId"/>
+      		<many-to-many class="eu.xenit.move2alf.core.dto.ConfiguredSourceSink" column="configuredSourceSinkId"/>
+    	</set>
+    	
+	</class>
+</hibernate-mapping>

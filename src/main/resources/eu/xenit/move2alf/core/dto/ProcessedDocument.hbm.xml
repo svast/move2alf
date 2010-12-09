@@ -11,11 +11,11 @@
     <property name="name"/>
     <property name="processedDateTime"/>
     <property name="status"/>
-    <set name="processedDocumentProperties" table="processedDocumentProperty">
+    <set name="processedDocumentParameterSet" table="processedDocumentParameter">
       <key column="processedDocumentId"/>
-      <composite-element class="eu.xenit.move2alf.core.dto.ProcessedDocumentProperty">
-      	<many-to-one name="configuredAction" column="configuredActionId"/>
-      	<property name="reportPropertyName"/>
+      <composite-element class="eu.xenit.move2alf.core.dto.ProcessedDocumentParameter">
+      	<many-to-one name="processedDocument" column="processedDocumentId"/>
+      	<property name="name"/>
       	<property name="value"/>
       </composite-element>
     </set>

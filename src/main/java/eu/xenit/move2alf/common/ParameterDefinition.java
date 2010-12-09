@@ -1,15 +1,15 @@
 package eu.xenit.move2alf.common;
 
-public class PropertyDefinition{
+public class ParameterDefinition{
 	private String name;
 	private Class type;
 	private Object defaultValue;
 
-	public PropertyDefinition() {
+	public ParameterDefinition() {
 	}
 
 
-	public PropertyDefinition(String name, Class type,
+	public ParameterDefinition(String name, Class type,
 			Object defaultValue) {
 		this.name = name;
 		this.type = type;

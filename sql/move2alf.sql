@@ -71,9 +71,9 @@ DROP TABLE IF EXISTS `configuredActionParameter`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `configuredActionParameter` (
   `configuredActionId` int(10) unsigned NOT NULL,
-  `configParameterName` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`configuredActionId`,`configParameterName`) USING BTREE
+  PRIMARY KEY (`configuredActionId`,`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -140,9 +140,9 @@ DROP TABLE IF EXISTS `configuredReportParameter`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `configuredReportParameter` (
   `configuredReportId` int(10) unsigned NOT NULL,
-  `configParameterName` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`configuredReportId`,`configParameterName`) USING BTREE
+  PRIMARY KEY (`configuredReportId`,`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -187,9 +187,9 @@ DROP TABLE IF EXISTS `configuredSourceSinkParameter`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `configuredSourceSinkParameter` (
   `configuredSourceSinkId` int(10) unsigned NOT NULL,
-  `configParameterName` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`configuredSourceSinkId`,`configParameterName`) USING BTREE
+  PRIMARY KEY (`configuredSourceSinkId`,`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -444,4 +444,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-12-09 11:32:40
+-- Dump completed on 2010-12-09 17:03:13
