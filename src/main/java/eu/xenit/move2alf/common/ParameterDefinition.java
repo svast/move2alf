@@ -2,17 +2,17 @@ package eu.xenit.move2alf.common;
 
 public class ParameterDefinition{
 	private String name;
-	private Class type;
+	private Class<?> clazz;
 	private Object defaultValue;
 
 	public ParameterDefinition() {
 	}
 
 
-	public ParameterDefinition(String name, Class type,
+	public ParameterDefinition(String name, Class<?> clazz,
 			Object defaultValue) {
 		this.name = name;
-		this.type = type;
+		this.clazz = clazz;
 		this.defaultValue = defaultValue;
 	}
 
@@ -21,12 +21,15 @@ public class ParameterDefinition{
 		return name;
 	}
 
-	public Class getType() {
-		return type;
+	public Class<?> getClazz() {
+		return clazz;
 	}
 
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
-
+    
+	public <T> T cast(Object object, Class<T> clazz1){
+		  return clazz1.cast(object);
+	}
 }
