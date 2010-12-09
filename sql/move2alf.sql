@@ -399,6 +399,7 @@ CREATE TABLE `userPswd` (
   UNIQUE KEY `userName` (`userName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+INSERT INTO `userPswd` VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3');
 
 --
 -- Dumping data for table `userPswd`
@@ -421,7 +422,10 @@ CREATE TABLE `userRole` (
   `role` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
+INSERT INTO `userRole` VALUES ('admin', 'ROLE_CONSUMER');
+INSERT INTO `userRole` VALUES ('admin', 'ROLE_SCHEDULE_ADMIN');
+INSERT INTO `userRole` VALUES ('admin', 'ROLE_JOB_ADMIN');
+INSERT INTO `userRole` VALUES ('admin', 'ROLE_SYSTEM_ADMIN');
 --
 -- Dumping data for table `userRole`
 --
