@@ -16,31 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `action`
---
-
-DROP TABLE IF EXISTS `action`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `action` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `class` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `action`
---
-
-LOCK TABLES `action` WRITE;
-/*!40000 ALTER TABLE `action` DISABLE KEYS */;
-/*!40000 ALTER TABLE `action` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `configuredAction`
 --
 
@@ -49,7 +24,7 @@ DROP TABLE IF EXISTS `configuredAction`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `configuredAction` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `actionId` int(10) unsigned NOT NULL,
+  `actionClassName` varchar(255) NOT NULL,
   `appliedConfiguredActionOnSuccessId` int(10) unsigned DEFAULT NULL,
   `appliedConfiguredActionOnFailureId` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -66,27 +41,165 @@ LOCK TABLES `configuredAction` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `configuredActionProperty`
+-- Table structure for table `configuredActionConfiguredSourceSink`
 --
 
-DROP TABLE IF EXISTS `configuredActionProperty`;
+DROP TABLE IF EXISTS `configuredActionConfiguredSourceSink`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `configuredActionProperty` (
+CREATE TABLE `configuredActionConfiguredSourceSink` (
   `configuredActionId` int(10) unsigned NOT NULL,
-  `configPropertyName` varchar(50) NOT NULL,
-  `value` varchar(255) NOT NULL,
-  PRIMARY KEY (`configuredActionId`,`configPropertyName`) USING BTREE
+  `configuredSourceSinkId` int(10) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `configuredActionProperty`
+-- Dumping data for table `configuredActionConfiguredSourceSink`
 --
 
-LOCK TABLES `configuredActionProperty` WRITE;
-/*!40000 ALTER TABLE `configuredActionProperty` DISABLE KEYS */;
-/*!40000 ALTER TABLE `configuredActionProperty` ENABLE KEYS */;
+LOCK TABLES `configuredActionConfiguredSourceSink` WRITE;
+/*!40000 ALTER TABLE `configuredActionConfiguredSourceSink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredActionConfiguredSourceSink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredActionParameter`
+--
+
+DROP TABLE IF EXISTS `configuredActionParameter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredActionParameter` (
+  `configuredActionId` int(10) unsigned NOT NULL,
+  `configParameterName` varchar(50) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`configuredActionId`,`configParameterName`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredActionParameter`
+--
+
+LOCK TABLES `configuredActionParameter` WRITE;
+/*!40000 ALTER TABLE `configuredActionParameter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredActionParameter` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredReport`
+--
+
+DROP TABLE IF EXISTS `configuredReport`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredReport` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `reportClassName` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredReport`
+--
+
+LOCK TABLES `configuredReport` WRITE;
+/*!40000 ALTER TABLE `configuredReport` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredReport` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredReportConfiguredSourceSink`
+--
+
+DROP TABLE IF EXISTS `configuredReportConfiguredSourceSink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredReportConfiguredSourceSink` (
+  `configuredReportId` int(10) unsigned NOT NULL,
+  `configuredSourceSinkId` int(10) unsigned NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredReportConfiguredSourceSink`
+--
+
+LOCK TABLES `configuredReportConfiguredSourceSink` WRITE;
+/*!40000 ALTER TABLE `configuredReportConfiguredSourceSink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredReportConfiguredSourceSink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredReportParameter`
+--
+
+DROP TABLE IF EXISTS `configuredReportParameter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredReportParameter` (
+  `configuredReportId` int(10) unsigned NOT NULL,
+  `configParameterName` varchar(50) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`configuredReportId`,`configParameterName`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredReportParameter`
+--
+
+LOCK TABLES `configuredReportParameter` WRITE;
+/*!40000 ALTER TABLE `configuredReportParameter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredReportParameter` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredSourceSink`
+--
+
+DROP TABLE IF EXISTS `configuredSourceSink`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredSourceSink` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sourceSinkClassName` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredSourceSink`
+--
+
+LOCK TABLES `configuredSourceSink` WRITE;
+/*!40000 ALTER TABLE `configuredSourceSink` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredSourceSink` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `configuredSourceSinkParameter`
+--
+
+DROP TABLE IF EXISTS `configuredSourceSinkParameter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuredSourceSinkParameter` (
+  `configuredSourceSinkId` int(10) unsigned NOT NULL,
+  `configParameterName` varchar(50) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`configuredSourceSinkId`,`configParameterName`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `configuredSourceSinkParameter`
+--
+
+LOCK TABLES `configuredSourceSinkParameter` WRITE;
+/*!40000 ALTER TABLE `configuredSourceSinkParameter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `configuredSourceSinkParameter` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -115,33 +228,6 @@ LOCK TABLES `cycle` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `destination`
---
-
-DROP TABLE IF EXISTS `destination`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `destination` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `url` varchar(255) NOT NULL,
-  `user` varchar(50) DEFAULT NULL,
-  `password` varchar(50) DEFAULT NULL,
-  `communicationType` varchar(30) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `destination`
---
-
-LOCK TABLES `destination` WRITE;
-/*!40000 ALTER TABLE `destination` DISABLE KEYS */;
-/*!40000 ALTER TABLE `destination` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `job`
 --
 
@@ -156,7 +242,8 @@ CREATE TABLE `job` (
   `creationDateTime` datetime NOT NULL,
   `lastModifyDateTime` datetime NOT NULL,
   `firstConfiguredActionId` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -196,13 +283,13 @@ LOCK TABLES `processedDocument` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `processedDocumentProperty`
+-- Table structure for table `processedDocumentParameter`
 --
 
-DROP TABLE IF EXISTS `processedDocumentProperty`;
+DROP TABLE IF EXISTS `processedDocumentParameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `processedDocumentProperty` (
+CREATE TABLE `processedDocumentParameter` (
   `processedDocumentId` int(10) unsigned NOT NULL,
   `configuredActionId` int(10) unsigned NOT NULL,
   `reportPropertyName` varchar(50) NOT NULL,
@@ -211,62 +298,12 @@ CREATE TABLE `processedDocumentProperty` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `processedDocumentProperty`
+-- Dumping data for table `processedDocumentParameter`
 --
 
-LOCK TABLES `processedDocumentProperty` WRITE;
-/*!40000 ALTER TABLE `processedDocumentProperty` DISABLE KEYS */;
-/*!40000 ALTER TABLE `processedDocumentProperty` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `report`
---
-
-DROP TABLE IF EXISTS `report`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `report` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `jobId` int(10) unsigned NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `emailList` varchar(255) DEFAULT NULL,
-  `class` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `report`
---
-
-LOCK TABLES `report` WRITE;
-/*!40000 ALTER TABLE `report` DISABLE KEYS */;
-/*!40000 ALTER TABLE `report` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `reportActionProperty`
---
-
-DROP TABLE IF EXISTS `reportActionProperty`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `reportActionProperty` (
-  `reportId` int(10) unsigned NOT NULL,
-  `configuredActionId` int(10) unsigned NOT NULL,
-  `reportPropertyName` varchar(50) NOT NULL,
-  PRIMARY KEY (`reportId`,`configuredActionId`,`reportPropertyName`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `reportActionProperty`
---
-
-LOCK TABLES `reportActionProperty` WRITE;
-/*!40000 ALTER TABLE `reportActionProperty` DISABLE KEYS */;
-/*!40000 ALTER TABLE `reportActionProperty` ENABLE KEYS */;
+LOCK TABLES `processedDocumentParameter` WRITE;
+/*!40000 ALTER TABLE `processedDocumentParameter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `processedDocumentParameter` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -358,7 +395,8 @@ CREATE TABLE `userPswd` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `userName` varchar(30) NOT NULL,
   `password` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userName` (`userName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -402,4 +440,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-12-07 16:18:10
+-- Dump completed on 2010-12-09 11:32:40
