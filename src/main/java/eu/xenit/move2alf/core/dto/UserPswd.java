@@ -8,15 +8,11 @@ import java.util.Set;
 
 
 public class UserPswd extends IdObject {
-    private String userName = "";
+    private String userName;
     
-    private String password = "";
+    private String password;
     
     private Set<UserRole> userRoleSet = new HashSet<UserRole>();
-
-    // to temporarily store password in the clear (just lives in code, not persisted)
-    // cfr MgmtAccountForm
-    private String tempPassword = null;
 
     public UserPswd() {
     	
@@ -60,13 +56,4 @@ public class UserPswd extends IdObject {
 
         return false;
     }
-
-    public String getTempPassword() {
-        return tempPassword;
-    }
-
-    public void setTempPassword(String tempPassword) {
-        this.tempPassword = tempPassword;
-    }
-
 }
