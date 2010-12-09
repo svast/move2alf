@@ -8,5 +8,5 @@ import org.junit.runners.Suite;
 	HibernateTests.class,
 	UserPswdTests.class
 })
-public class AllTests {
+public class TestAll {
 }
