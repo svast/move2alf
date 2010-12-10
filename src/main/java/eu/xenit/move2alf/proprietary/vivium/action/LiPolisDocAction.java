@@ -218,6 +218,7 @@ public class LiPolisDocAction extends Action {
 						parameterMap.put(OP_LiNameInsured, nameInsured);
 						parameterMap.put(OP_LiContractType, contractTypeString);
 						parameterMap.put(OP_LiYear, year);
+						// not that this the relative path, it needs to be prepended with the sink path prefix in the AlfSinkAction
 						parameterMap.put(OP_LiSinkFolderRelativePath,
 								sb.toString());
 						parameterMap.put(OP_LiDocumentGroup, policyNumber);
