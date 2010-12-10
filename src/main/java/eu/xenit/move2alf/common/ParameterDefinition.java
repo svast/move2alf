@@ -1,17 +1,19 @@
 package eu.xenit.move2alf.common;
 
-public class ParameterDefinition<T> {
+public class ParameterDefinition{
 	private String name;
-	private Class<? extends T> clazz;
+	private Class<?> clazz;
 	private Object defaultValue;
+	private String className;
 
 	public ParameterDefinition() {
 	}
 
-	public ParameterDefinition(String name, Class<? extends T> clazz,
+	public ParameterDefinition(String name, Class<?> clazz,
 			Object defaultValue) {
 		this.name = name;
 		this.clazz = clazz;
+		this.className = clazz.getName();
 		this.defaultValue = defaultValue;
 	}
 
@@ -19,16 +21,16 @@ public class ParameterDefinition<T> {
 		return name;
 	}
 
-	public Class<? extends T> getClazz() {
+	public Class<?> getClazz() {
 		return clazz;
+	}
+
+	public String getClassName() {
+		return className;
 	}
 
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
     
-	@SuppressWarnings("unchecked")
-	public T cast(Object object) {
-		return clazz.cast(object);
-	}
 }
