@@ -116,10 +116,6 @@ public class LiPolisDocAction extends Action {
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		String keyFilePath = (String) parameterMap.get(IP_AdeptKeyFilePath);
-		// String keyFilePath =
-		// aprioriOutputParameterMap.get(IP_AdeptKeyFilePath).getClazz().cast((parameterMap.get(IP_AdeptKeyFilePath)));
-		// String keyFilePath =
-		// String.class.cast((parameterMap.get(IP_AdeptKeyFilePath)));
 		logger.debug("keyfilePath {}", keyFilePath);
 		File file = new File(keyFilePath);
 

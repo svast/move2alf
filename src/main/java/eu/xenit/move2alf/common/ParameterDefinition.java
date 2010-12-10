@@ -29,7 +29,7 @@ public class ParameterDefinition{
 		return defaultValue;
 	}
     
-	public <T> T cast(Object object, Class<T> clazz1){
-		  return clazz1.cast(object);
-	}
+//	public T cast(Object object){
+//		  return clazz.cast(object);
+//	}
 }
