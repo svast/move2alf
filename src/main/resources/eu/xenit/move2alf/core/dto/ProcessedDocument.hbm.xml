@@ -14,7 +14,8 @@
     <set name="processedDocumentParameterSet" table="processedDocumentParameter">
       <key column="processedDocumentId"/>
       <composite-element class="eu.xenit.move2alf.core.dto.ProcessedDocumentParameter">
-      	<many-to-one name="processedDocument" column="processedDocumentId"/>
+      	<!--<many-to-one name="processedDocument" column="processedDocumentId"/>
+      	-->
       	<property name="name"/>
       	<property name="value"/>
       </composite-element>

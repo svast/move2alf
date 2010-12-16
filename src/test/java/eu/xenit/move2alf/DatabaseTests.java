@@ -2,36 +2,36 @@ package eu.xenit.move2alf;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.junit.After;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+@Transactional
+@TransactionConfiguration(transactionManager="txManager", defaultRollback=true)
 public class DatabaseTests {
-	
-	private static final Logger logger = LoggerFactory.getLogger(DatabaseTests.class);
-	
-	private static final String TEST_DATBASE = "move2alf_test";
 
 	protected SessionFactory sessionFactory;
+	
 	protected Session session;
+	
+	@Autowired
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
 
-	@Before
-	public void setUp() {
-		logger.debug("Running test with test database: " + TEST_DATBASE);
-		sessionFactory = new Configuration()
-				.configure()
-				.setProperty("hibernate.connection.url",
-						"jdbc:mysql://localhost/" + TEST_DATBASE + "?zeroDateTimeBehavior=convertToNull")
-				.buildSessionFactory();
-		session = sessionFactory.openSession();
-		session.beginTransaction();
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
 	}
 	
-	@After
-	public void tearDown() {
-		session.getTransaction().rollback();
-		session.close();
+	@Before
+	public void setUp() {
+		System.out.println(System.getProperty("user.dir"));
+		session = getSessionFactory().getCurrentSession();
 	}
 }

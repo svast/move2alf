@@ -2,12 +2,7 @@ package eu.xenit.move2alf.core.dto;
 
 import eu.xenit.move2alf.core.enums.ERole;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 public class UserRole {
-    protected static Logger logger = LoggerFactory.getLogger(UserRole.class);
     private String userName = "";
     private ERole role = null;
 
@@ -49,11 +44,20 @@ public class UserRole {
     }
 
     //
-    public boolean equals(UserRole userRole) {
-        logger.debug("EQUALS " + userName + userRole.userName + role.name() +
-            userRole.role.name());
+    public boolean equals(Object obj) {
+    	if (obj == null) {
+            return false;
+    	}
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof UserRole)) {
+            return false;
+        }
+        
+        UserRole userRole = (UserRole) obj;
 
-        if (userName.equals(userRole.userName) && (role == userRole.role)) {
+        if (getUserName().equals(userRole.getUserName()) && (getRole() == userRole.getRole())) {
             return true;
         } else {
             return false;
@@ -62,7 +66,6 @@ public class UserRole {
 
     public int hashCode() {
         int result = (userName + role).hashCode();
-
         return result;
     }
 }
