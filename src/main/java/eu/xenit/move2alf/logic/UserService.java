@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import eu.xenit.move2alf.common.exceptions.DuplicateUserException;
+import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.enums.ERole;
 
@@ -12,6 +14,7 @@ public interface UserService {
 	 * Get current user.
 	 * 
 	 * @return The current user.
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("isAuthenticated()")
 	public UserPswd getCurrentUser();
@@ -23,6 +26,7 @@ public interface UserService {
 	 *            The user name of the user to return.
 	 * @return The user with the given user name. Return null if no user with the
 	 *         given name exists.
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("isAuthenticated()")
 	public UserPswd getUser(String username) throws IllegalArgumentException;
@@ -43,6 +47,7 @@ public interface UserService {
 	 * @param role
 	 *            The highest role of the user. The new user will also have all
 	 *            lower roles.
+	 * @throws DuplicateUserException
 	 */
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public UserPswd createUser(String userName, String password, ERole role);
@@ -50,6 +55,7 @@ public interface UserService {
 	/** Delete user with given user name.
 	 * 
 	 * @param userName
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public void deleteUser(String userName);
@@ -58,6 +64,7 @@ public interface UserService {
 	 * Change password of the logged in user.
 	 * 
 	 * @param newPassword The new password.
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("isAuthenticated()")
 	public void changePassword(String newPassword);
@@ -67,6 +74,7 @@ public interface UserService {
 	 * 
 	 * @param userName The user name of the user whose password to change.
 	 * @param newPassword The new password for the given user.
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public void changePassword(String userName, String newPassword);
@@ -79,6 +87,7 @@ public interface UserService {
 	 * @param newRole
 	 *            The highest role of the user. The new user will also have all
 	 *            lower roles. All higher roles will be removed.
+	 * @throws NonexistentUserException
 	 */
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public void changeRole(String userName, ERole newRole);

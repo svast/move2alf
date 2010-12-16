@@ -4,12 +4,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.common.exceptions.DuplicateUserException;
+import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
@@ -32,7 +35,7 @@ public class UserServiceImpl extends AbstractHibernateService implements
 		UserPswd user = getUser(userName);
 		changePassword(user, newPassword);
 	}
-	
+
 	private void changePassword(UserPswd user, String newPassword) {
 		user.setPassword(Util.convertToMd5(newPassword));
 		getSessionFactory().getCurrentSession().save(user);
@@ -53,10 +56,15 @@ public class UserServiceImpl extends AbstractHibernateService implements
 		newUser.setPassword(Util.convertToMd5(password));
 		Set<UserRole> userRoleSet = createRoleSet(userName, role);
 		newUser.setUserRoleSet(userRoleSet);
-		sessionFactory.getCurrentSession().save(newUser);
+		try {
+			sessionFactory.getCurrentSession().save(newUser);
+		} catch (ConstraintViolationException e) {
+			logger.debug("User already exists.");
+			throw new DuplicateUserException();
+		}
 		return newUser;
 	}
-	
+
 	@Override
 	public void deleteUser(String userName) {
 		UserPswd user = getUser(userName);
@@ -80,24 +88,29 @@ public class UserServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<UserPswd> getAllUsers() {
-		getSessionFactory().getCurrentSession()
+		return getSessionFactory().getCurrentSession().createQuery(
+				"from UserPswd").list();
 	}
 
 	@Override
 	public UserPswd getCurrentUser() {
-		return getUser(SecurityContextHolder.getContext().getAuthentication().getName());
+		return getUser(SecurityContextHolder.getContext().getAuthentication()
+				.getName());
 	}
 
 	@Override
 	public UserPswd getUser(String username) {
+		@SuppressWarnings("unchecked")
 		List users = sessionFactory.getCurrentSession().createQuery(
 				"from UserPswd as u where u.userName=?").setString(0, username)
 				.list();
 		if (users.size() == 1) {
 			return (UserPswd) users.get(0);
 		} else {
-			return null;
+			logger.debug("User does not exist.");
+			throw new NonexistentUserException();
 		}
 	}
 }

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-public class HibernateTests extends DatabaseTests {
+public class HibernateTests extends IntegrationTests {
 	
 	@Test
 	public void testHibernateConfiguration() {
