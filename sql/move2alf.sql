@@ -422,10 +422,10 @@ CREATE TABLE `userRole` (
   `role` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-INSERT INTO `userRole` VALUES ('admin', 'ROLE_CONSUMER');
-INSERT INTO `userRole` VALUES ('admin', 'ROLE_SCHEDULE_ADMIN');
-INSERT INTO `userRole` VALUES ('admin', 'ROLE_JOB_ADMIN');
-INSERT INTO `userRole` VALUES ('admin', 'ROLE_SYSTEM_ADMIN');
+INSERT INTO `userRole` VALUES ('admin', 'CONSUMER');
+INSERT INTO `userRole` VALUES ('admin', 'SCHEDULE_ADMIN');
+INSERT INTO `userRole` VALUES ('admin', 'JOB_ADMIN');
+INSERT INTO `userRole` VALUES ('admin', 'SYSTEM_ADMIN');
 --
 -- Dumping data for table `userRole`
 --

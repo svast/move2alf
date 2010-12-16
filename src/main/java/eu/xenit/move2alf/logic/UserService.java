@@ -2,6 +2,8 @@ package eu.xenit.move2alf.logic;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.enums.ERole;
 
@@ -11,27 +13,30 @@ public interface UserService {
 	 * 
 	 * @return The current user.
 	 */
+	@PreAuthorize("isAuthenticated()")
 	public UserPswd getCurrentUser();
 
 	/**
-	 * Get user with given username.
+	 * Get user with given user name.
 	 * 
 	 * @param username
-	 *            The username of the user to return.
-	 * @return The user with the given username. Return null if no user with the
+	 *            The user name of the user to return.
+	 * @return The user with the given user name. Return null if no user with the
 	 *         given name exists.
 	 */
-	public UserPswd getUser(String username);
+	@PreAuthorize("isAuthenticated()")
+	public UserPswd getUser(String username) throws IllegalArgumentException;
 
 	/**
 	 * Get all existing users.
 	 * 
 	 * @return A list containing all users.
 	 */
+	@PreAuthorize("isAuthenticated()")
 	public List<UserPswd> getAllUsers();
 
 	/**
-	 * Create user with username, password and role.
+	 * Create user with user name, password and role.
 	 * 
 	 * @param userName
 	 * @param password
@@ -39,31 +44,42 @@ public interface UserService {
 	 *            The highest role of the user. The new user will also have all
 	 *            lower roles.
 	 */
-	public void createUser(String userName, String password, ERole role);
+	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	public UserPswd createUser(String userName, String password, ERole role);
+	
+	/** Delete user with given user name.
+	 * 
+	 * @param userName
+	 */
+	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	public void deleteUser(String userName);
 
 	/**
 	 * Change password of the logged in user.
 	 * 
 	 * @param newPassword The new password.
 	 */
+	@PreAuthorize("isAuthenticated()")
 	public void changePassword(String newPassword);
 
 	/**
 	 * Change password of a given user.
 	 * 
-	 * @param user The user whose password to change.
+	 * @param userName The user name of the user whose password to change.
 	 * @param newPassword The new password for the given user.
 	 */
-	public void changePassword(UserPswd user, String newPassword);
+	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	public void changePassword(String userName, String newPassword);
 
 	/**
 	 * Change role of an existing user.
 	 * 
-	 * @param user
-	 *            The user to change.
+	 * @param userName
+	 *            The user name of the user whose role to change.
 	 * @param newRole
 	 *            The highest role of the user. The new user will also have all
 	 *            lower roles. All higher roles will be removed.
 	 */
-	public void changeRole(UserPswd user, ERole newRole);
+	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	public void changeRole(String userName, ERole newRole);
 }

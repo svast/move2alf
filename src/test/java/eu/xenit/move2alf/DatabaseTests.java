@@ -11,15 +11,16 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+@ContextConfiguration( { "file:src/main/webapp/WEB-INF/applicationContext.xml",
+		"file:src/main/webapp/WEB-INF/applicationContext-security.xml" })
 @Transactional
-@TransactionConfiguration(transactionManager="txManager", defaultRollback=true)
+@TransactionConfiguration(transactionManager = "txManager", defaultRollback = true)
 public class DatabaseTests {
 
 	protected SessionFactory sessionFactory;
-	
+
 	protected Session session;
-	
+
 	@Autowired
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -28,10 +29,9 @@ public class DatabaseTests {
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
 	}
-	
+
 	@Before
 	public void setUp() {
-		System.out.println(System.getProperty("user.dir"));
 		session = getSessionFactory().getCurrentSession();
 	}
 }
