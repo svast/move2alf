@@ -18,8 +18,18 @@
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
 
+	<filter>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+	</filter>
+
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>UrlRewriteFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
@@ -28,17 +38,22 @@
 	</listener>
 
 	<servlet>
-		<servlet-name>dispatch</servlet-name>
+		<servlet-name>move2alf</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>move2alf</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping><!--
 	
 	<servlet-mapping>
 		<servlet-name>dispatch</servlet-name>
-		<url-pattern>/test/*</url-pattern>
+		<url-pattern>/users/*</url-pattern>
 	</servlet-mapping>
 
-	<!--  Static content -->
+	--><!--  Static content -->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.css</url-pattern>
@@ -53,7 +68,7 @@
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.jpg</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.png</url-pattern>

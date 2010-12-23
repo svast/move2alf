@@ -1,0 +1,39 @@
+/*
+Primary Color:
+#0C5DA5	#26537C	#043A6B	#408DD2	#679FD2
+Complementary Color:
+#FF9500	#BF8430	#A66100	#FFB040	#FFC573
+*/
+body {
+	color: #043A6B;
+	background-color: #C2D9ED;
+	margin: 0;
+	padding: 0;
+}
+
+a:link {
+	color: #0C5DA5;
+	background-color: inherit;
+}
+
+a:visited {
+	color: #26537C;
+	background-color: inherit;
+}
+
+a:hover {
+	color: #FFB040;
+	background-color: inherit;
+}
+
+a:active {
+	color: #26537C;
+	background-color: inherit;
+}
+
+div.header {
+	color: #043A6B;
+	background-color: #679FD2;
+	width: 100%;
+	margin: 0;
+}
