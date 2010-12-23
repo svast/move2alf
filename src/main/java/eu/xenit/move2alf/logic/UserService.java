@@ -3,12 +3,14 @@ package eu.xenit.move2alf.logic;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.exceptions.DuplicateUserException;
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.enums.ERole;
 
+@Transactional
 public interface UserService {
 	/**
 	 * Get current user.

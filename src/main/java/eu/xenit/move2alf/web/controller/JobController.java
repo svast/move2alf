@@ -6,10 +6,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class JobController {
-	@RequestMapping("/job/test")
+	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
-		mav.setViewName("index");
+		mav.setViewName("dashboard");
 		return mav;
 	}
 }

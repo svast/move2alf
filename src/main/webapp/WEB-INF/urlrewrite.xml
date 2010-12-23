@@ -7,7 +7,7 @@
 
 	<rule>
 		<from>^/$</from>
-		<to>/job/test</to>
+		<to>/job/dashboard</to>
 	</rule>
 
 </urlrewrite>
