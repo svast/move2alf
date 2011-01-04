@@ -11,7 +11,7 @@
 <div class="header">
 <h1>XeniT Move2Alf</h1>
 <p><a href="<spring:url value="/" htmlEscape="true"/>">Home</a>
-| Username: <security:authentication property="principal.username" />
+| Username: <sec:authentication property="principal.username" />
 <sec:authorize access="hasRole('SYSTEM_ADMIN')">
 | <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
 </sec:authorize>

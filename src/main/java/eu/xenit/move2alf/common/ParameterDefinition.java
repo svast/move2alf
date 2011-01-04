@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.common;
 
-public class ParameterDefinition{
+public class ParameterDefinition {
 	private String name;
 	private Class<?> clazz;
 	private Object defaultValue;

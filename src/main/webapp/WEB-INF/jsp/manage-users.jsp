@@ -3,7 +3,7 @@
 
 <h2>Manage users</h2>
 
-<p>List of users, edit user, add user, delete user</p>
+<p>List of users, edit user, add user, delete user...</p>
 
 <table>
   <thead>
@@ -12,10 +12,10 @@
   </thead>
   <c:forEach var="user" items="${users}">
     <tr>
-      <td>${user.userName}</td>
+      <td><c:out value="${user.userName}" /></td>
       <td>
         <c:forEach var="role" items="${user.userRoleSet}">
-          ${role.role}<br />
+          <c:out value="${role.role}" /><br />
         </c:forEach>
       </td>
     </tr>
