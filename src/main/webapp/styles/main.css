@@ -6,9 +6,10 @@ Complementary Color:
 */
 body {
 	color: #043A6B;
-	background-color: #C2D9ED;
+	background-color: #E2E8ED;
 	margin: 0;
-	padding: 0;
+	padding: 12px 100px 100px 100px;
+	font-family: Geneva, Tahoma, sans-serif;
 }
 
 a:link {
@@ -34,6 +35,14 @@ a:active {
 div.header {
 	color: #043A6B;
 	background-color: #679FD2;
-	width: 100%;
+	padding: 2px 25px 2px 25px;
 	margin: 0;
 }
+
+div.main {
+	color: #043A6B;
+	background-color: #EBECED; 
+	padding: 2px 25px 2px 25px;
+	margin: 0;
+}
+
