@@ -19,7 +19,6 @@ import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
 
 @Service("userService")
-@Transactional
 public class UserServiceImpl extends AbstractHibernateService implements
 		UserService {
 

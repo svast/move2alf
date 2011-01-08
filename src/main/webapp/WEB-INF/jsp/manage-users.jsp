@@ -3,16 +3,15 @@
 
 <div class="span-24 last main">
 
-<h2>Manage users</h2>
+<h2>Manage Users</h2>
 
-<p>List of users, edit user, add user, delete user...</p>
-<p>Actions: <a href="dsfsdf">Add new user</a></p>
+<p>Actions: <a href="<spring:url value="/users/add" htmlEscape="true" />">add user</a></p>
 <table>
 	<thead>
 		<tr>
 			<th>Username</th>
 			<th>Roles</th>
-			<th>Actions</th>
+			<th></th>
 		</tr>
 	</thead>
 	<c:forEach var="user" items="${users}">
@@ -22,7 +21,7 @@
 				<c:out value="${role.role}" />
 				<br />
 			</c:forEach></td>
-			<td><a href="asdf">edit</a> | <a href="sdf">delete</a></td>
+			<td><a href="<spring:url value="/user/${user.userName}/delete" htmlEscape="true" />">delete</a></td>
 		</tr>
 	</c:forEach>
 </table>

@@ -6,7 +6,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 	HibernateTests.class,
-	UserPswdTests.class
+	UserPswdTests.class,
+	JobsTests.class
 })
 public class TestAll {
 }

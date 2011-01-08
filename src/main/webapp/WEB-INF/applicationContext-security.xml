@@ -8,8 +8,12 @@
 	<global-method-security pre-post-annotations="enabled"/>
 
 	<http use-expressions="true">
+		<intercept-url pattern="/login.jsp*" access="permitAll"/>
+		<intercept-url pattern="/styles/*" access="permitAll"/>
+		<intercept-url pattern="/scripts/*" access="permitAll"/>
+		<intercept-url pattern="/images/*" access="permitAll"/>
 		<intercept-url pattern="/**" access="hasRole('CONSUMER')" />
-		<form-login />
+		<form-login login-page="/login.jsp" />
 		<logout />
 		<remember-me />
 	</http>
