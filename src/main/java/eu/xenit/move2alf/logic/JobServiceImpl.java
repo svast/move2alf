@@ -6,14 +6,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
-	
+
 	private UserService userService;
-	
+
 	@Autowired
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -25,7 +26,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public List<Job> getAllJobs() {
-		return null;
+		return getSessionFactory().getCurrentSession().createQuery("from Job")
+				.list();
 	}
 
 	@Override
@@ -39,6 +41,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		job.setCreator(getUserService().getCurrentUser());
 		getSessionFactory().getCurrentSession().save(job);
 		return job;
+	}
+
+	@Override
+	public List<Cycle> getCyclesForJob(String jobName) {
+		return getSessionFactory().getCurrentSession().createQuery(
+				"from Cycle as c where c.schedule.job.name=?").setString(0,
+				jobName).list();
 	}
 
 }

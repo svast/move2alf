@@ -5,14 +5,14 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 
 @Transactional
 public interface JobService {
 
 	/**
-	 * 
-	 * @return
+	 * Return a list of all jobs.
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
 	public List<Job> getAllJobs();
@@ -26,5 +26,13 @@ public interface JobService {
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
 	public Job createJob(String name, String description);
+
+	/**
+	 * Return all cycles for a job with the given name.
+	 * 
+	 * @param jobName The name of the job
+	 */
+	@PreAuthorize("hasRole('CONSUMER')")
+	public List<Cycle> getCyclesForJob(String jobName);
 
 }
