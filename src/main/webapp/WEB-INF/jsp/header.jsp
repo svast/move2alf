@@ -1,6 +1,24 @@
 <!doctype html>
 <html>
 <head>
+<script type="text/javascript">
+
+function popup(mylink, windowname)
+{
+if (! window.focus)return true;
+var href;
+if (typeof(mylink) == 'string')
+   href=mylink;
+else
+   href=mylink.href;
+window.open(href, windowname, 'width=850,height=400,scrollbars=yes');
+return false;
+}
+
+function showInput(){
+	document.getElementById('destination').style.display='inline';
+}
+</script>
 <meta charset="utf-8">
 <link rel="stylesheet" href="/styles/blueprint/screen.css"
 	type="text/css" media="screen, projection">

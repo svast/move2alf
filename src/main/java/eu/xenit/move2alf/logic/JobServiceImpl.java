@@ -6,15 +6,16 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import eu.xenit.move2alf.core.dto.Cycle;
+import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.UserPswd;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
-
+	
 	private UserService userService;
-
+	
 	@Autowired
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -25,9 +26,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Job> getAllJobs() {
-		return getSessionFactory().getCurrentSession().createQuery("from Job")
-				.list();
+		return getSessionFactory().getCurrentSession().createQuery("from Job").list();
 	}
 
 	@Override
@@ -42,7 +43,39 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(job);
 		return job;
 	}
-
+	
+	@Override
+	public Job editJob(String name, String description) {
+		Date now = new Date();
+		Job job = getJob(name);
+		job.setName(name);
+		job.setDescription(description);
+		job.setCreationDateTime(now);
+		job.setLastModifyDateTime(now);
+		job.setCreator(getUserService().getCurrentUser());
+		getSessionFactory().getCurrentSession().save(job);
+		return job;
+	}
+	
+	@Override
+	public Job getJob(String name) {
+		@SuppressWarnings("unchecked")
+		List jobs = sessionFactory.getCurrentSession().createQuery(
+				"from Job as j where j.name=?").setString(0, name)
+				.list();
+		if (jobs.size() == 1) {
+			return (Job) jobs.get(0);
+		} else {
+			throw new NonexistentUserException();
+		}
+	}
+	
+	@Override
+	public void deleteJob(String id) {
+		Job job = getJob(id);
+		sessionFactory.getCurrentSession().delete(job);
+	}
+	
 	@Override
 	public List<Cycle> getCyclesForJob(String jobName) {
 		return getSessionFactory().getCurrentSession().createQuery(

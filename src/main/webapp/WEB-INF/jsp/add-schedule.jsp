@@ -23,9 +23,9 @@
 <tr><td><form:radiobutton path="runFrequency" value="Advanced" />Advanced</td></tr>
 </table>
 <br />
-<div style="float:left"><a href="JavaScript:window.close()">Cancel</a></div>
-<div style="float:right"><input type="submit" value="Ok"/></div>
-<br style="clear:both">
+<div class="left"><a href="JavaScript:window.close()">Cancel</a></div>
+<div class="right"><input type="submit" value="Ok"/></div>
+<br class="clear">
 </form:form>
 	
 </div>

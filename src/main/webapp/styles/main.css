@@ -68,3 +68,60 @@ div.main {
 	-webkit-border-bottom-right-radius: 12px;
 }
 
+.frame-dashboard{
+	padding-left:25%; 
+	padding-right:25%;
+}
+
+.frame-job{
+	padding-left:15%; 
+	padding-right:15%;
+}
+
+.link {
+	font-weight:bold;
+}
+
+.left{
+	float:left;
+}
+
+.right{
+	float:right;
+}
+
+.table-border{
+	border-style:solid;
+	border-width:3px;
+	padding:3px;
+}
+
+.clear{
+	clear:both;	
+}
+
+.reduce-bottom{
+	margin-bottom:-5px;	
+}
+
+.small{
+	font-size:90%;
+}
+
+.smaller{
+	font-size:75%;
+}
+
+.indent{
+	text-indent: 20px;
+}
+
+.double-indent{
+	text-indent: 40px;
+}
+
+.hide{
+	display:none;
+}
+
+

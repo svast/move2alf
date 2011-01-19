@@ -87,6 +87,7 @@ public class UserServiceImpl extends AbstractHibernateService implements
 		}
 		return userRoleSet;
 	}
+	
 
 	@Override
 	@SuppressWarnings("unchecked")
