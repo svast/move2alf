@@ -61,5 +61,12 @@ public class JobsTests extends IntegrationTests {
 		List<Cycle> cycles = getJobService().getCyclesForJob("testJob");
 		assertNotNull(cycles);
 		// TODO: run job, see if cycle is created
+		// TODO: do cycles need to be sorted chronologically?
 	}
+	
+	// get summary from latest cycle
+	
+	// get status of job (running, not running (last run), disabled, ...)
+	
+	
 }
