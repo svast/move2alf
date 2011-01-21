@@ -68,5 +68,4 @@ public class JobsTests extends IntegrationTests {
 	
 	// get status of job (running, not running (last run), disabled, ...)
 	
-	
 }

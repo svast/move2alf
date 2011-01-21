@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.web.dto.JobConfig;
-import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.UserService;
-import eu.xenit.move2alf.web.dto.User;
 
 @Controller
 public class JobController {
@@ -32,7 +30,7 @@ public class JobController {
 	public JobService getJobService() {
 		return jobService;
 	}
-	
+
 	@Autowired
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -50,7 +48,7 @@ public class JobController {
 		mav.setViewName("dashboard");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/create", method = RequestMethod.GET)
 	public ModelAndView createJobForm() {
 		ModelAndView mav = new ModelAndView();
@@ -58,7 +56,7 @@ public class JobController {
 		mav.setViewName("create-job");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/create", method = RequestMethod.POST)
 	public ModelAndView createJob(JobConfig job) {
 		ModelAndView mav = new ModelAndView();
@@ -66,7 +64,7 @@ public class JobController {
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/create/destination", method = RequestMethod.GET)
 	public ModelAndView createDestinationForm() {
 		ModelAndView mav = new ModelAndView();
@@ -74,25 +72,27 @@ public class JobController {
 		mav.setViewName("create-destination");
 		return mav;
 	}
-/*	
-	@RequestMapping(value = "/job/create/destination", method = RequestMethod.POST)
-	public ModelAndView createDestination(DestinationConfig destination) {
-		ModelAndView mav = new ModelAndView();
-		getJobService().createDestination(destination.getName(), destination.getDescription());
-		mav.setViewName("redirect:/job/dashboard");
-		return mav;
-	}
-*/
+
+	/*
+	 * @RequestMapping(value = "/job/create/destination", method =
+	 * RequestMethod.POST) public ModelAndView
+	 * createDestination(DestinationConfig destination) { ModelAndView mav = new
+	 * ModelAndView(); getJobService().createDestination(destination.getName(),
+	 * destination.getDescription());
+	 * mav.setViewName("redirect:/job/dashboard"); return mav; }
+	 */
 	@RequestMapping(value = "/job/{name}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable String name) {
 		ModelAndView mav = new ModelAndView();
-		JobConfig jobConfig = new JobConfig(getJobService().getJob(name).getName(),getJobService().getJob(name).getDescription());
-		mav.addObject("job",jobConfig);
-	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
+		JobConfig jobConfig = new JobConfig(getJobService().getJob(name)
+				.getName(), getJobService().getJob(name).getDescription());
+		mav.addObject("job", jobConfig);
+		// mav.addObject("schedules",
+		// getScheduleService().getSchedules(jobConfig.getName()));
 		mav.setViewName("edit-job");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/{name}/edit", method = RequestMethod.POST)
 	public ModelAndView editJob(JobConfig job) {
 		ModelAndView mav = new ModelAndView();
@@ -100,7 +100,7 @@ public class JobController {
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/{name}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteJob(@PathVariable String name) {
 		ModelAndView mav = new ModelAndView();
@@ -108,7 +108,7 @@ public class JobController {
 		mav.setViewName("delete-job");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/{name}/delete", method = RequestMethod.POST)
 	public ModelAndView deleteJob(@PathVariable String name) {
 		ModelAndView mav = new ModelAndView();
@@ -116,7 +116,7 @@ public class JobController {
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
-	
+
 	@RequestMapping(value = "/job/add/schedule", method = RequestMethod.GET)
 	public ModelAndView addSchedule() {
 		ModelAndView mav = new ModelAndView();

@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
+import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.UserPswd;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements

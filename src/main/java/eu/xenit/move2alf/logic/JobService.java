@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.UserPswd;
 
 @Transactional
 public interface JobService {
@@ -28,11 +28,19 @@ public interface JobService {
 	@PreAuthorize("hasRole('JOB_ADMIN')")
 	public Job createJob(String name, String description);
 
-	void deleteJob(String id);
+	/**
+	 * Delete a job
+	 * 
+	 * @param id	The id of the job to delete
+	 */
+	@PreAuthorize("hasRole('JOB_ADMIN')")
+	public void deleteJob(String id);
 
-	Job getJob(String id);
+	@PreAuthorize("hasRole('CONSUMER')")
+	public Job getJob(String id);
 
-	Job editJob(String name, String description);
+	@PreAuthorize("hasRole('JOB_ADMIN')")
+	public Job editJob(String name, String description);
 
 	/**
 	 * Return all cycles for a job with the given name.
