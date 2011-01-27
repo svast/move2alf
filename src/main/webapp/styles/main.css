@@ -124,4 +124,9 @@ div.main {
 	display:none;
 }
 
+.pointer{
+	text-decoration:underline;
+	cursor: pointer;
+}
+
 

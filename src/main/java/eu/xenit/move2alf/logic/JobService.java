@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.UserPswd;
 
 @Transactional
 public interface JobService {
@@ -34,13 +35,13 @@ public interface JobService {
 	 * @param id	The id of the job to delete
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public void deleteJob(String id);
+	void deleteJob(int id);
 
 	@PreAuthorize("hasRole('CONSUMER')")
-	public Job getJob(String id);
+	Job getJob(int id);
 
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job editJob(String name, String description);
+	Job editJob(int id, String name, String description);
 
 	/**
 	 * Return all cycles for a job with the given name.

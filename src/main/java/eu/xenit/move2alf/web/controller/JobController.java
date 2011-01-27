@@ -1,5 +1,9 @@
 package eu.xenit.move2alf.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +48,7 @@ public class JobController {
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("jobs", getJobService().getAllJobs());
-		mav.addObject("user", getUserService().getCurrentUser());
+		mav.addObject("roles", getUserService().getCurrentUser().getUserRoleSet());
 		mav.setViewName("dashboard");
 		return mav;
 	}
@@ -81,38 +85,62 @@ public class JobController {
 	 * destination.getDescription());
 	 * mav.setViewName("redirect:/job/dashboard"); return mav; }
 	 */
-	@RequestMapping(value = "/job/{name}/edit", method = RequestMethod.GET)
-	public ModelAndView editJobForm(@PathVariable String name) {
+	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
+	public ModelAndView editJobForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
+<<<<<<< .mine
+		JobConfig jobConfig = new JobConfig(id, getJobService().getJob(id).getName(),getJobService().getJob(id).getDescription());
+		mav.addObject("job",jobConfig);
+	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
+=======
 		JobConfig jobConfig = new JobConfig(getJobService().getJob(name)
 				.getName(), getJobService().getJob(name).getDescription());
 		mav.addObject("job", jobConfig);
 		// mav.addObject("schedules",
 		// getScheduleService().getSchedules(jobConfig.getName()));
+>>>>>>> .r536
 		mav.setViewName("edit-job");
 		return mav;
 	}
 
-	@RequestMapping(value = "/job/{name}/edit", method = RequestMethod.POST)
-	public ModelAndView editJob(JobConfig job) {
+	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
+	public ModelAndView editJob(@PathVariable int id, JobConfig job) {
 		ModelAndView mav = new ModelAndView();
-		getJobService().editJob(job.getName(), job.getDescription());
+		getJobService().editJob(id, job.getName(), job.getDescription());
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
 
-	@RequestMapping(value = "/job/{name}/delete", method = RequestMethod.GET)
-	public ModelAndView confirmDeleteJob(@PathVariable String name) {
+	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.GET)
+	public ModelAndView editScheduleForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", getJobService().getJob(name));
+		JobConfig jobConfig = new JobConfig(id, getJobService().getJob(id).getName(),getJobService().getJob(id).getDescription());
+		mav.addObject("job",jobConfig);
+	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
+		mav.setViewName("edit-job");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.POST)
+	public ModelAndView editSchedule(@PathVariable int id, JobConfig job) {
+		ModelAndView mav = new ModelAndView();
+		getJobService().editJob(id, job.getName(), job.getDescription());
+		mav.setViewName("redirect:/job/dashboard");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/job/{id}/delete", method = RequestMethod.GET)
+	public ModelAndView confirmDeleteJob(@PathVariable int id) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(id));
 		mav.setViewName("delete-job");
 		return mav;
 	}
 
-	@RequestMapping(value = "/job/{name}/delete", method = RequestMethod.POST)
-	public ModelAndView deleteJob(@PathVariable String name) {
+	@RequestMapping(value = "/job/{id}/delete", method = RequestMethod.POST)
+	public ModelAndView deleteJob(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		getJobService().deleteJob(name);
+		getJobService().deleteJob(id);
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}

@@ -45,9 +45,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
-	public Job editJob(String name, String description) {
+	public Job editJob(int id, String name, String description) {
 		Date now = new Date();
-		Job job = getJob(name);
+		Job job = getJob(id);
+		job.setId(id);
 		job.setName(name);
 		job.setDescription(description);
 		job.setCreationDateTime(now);
@@ -58,10 +59,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
-	public Job getJob(String name) {
+	public Job getJob(int id) {
 		@SuppressWarnings("unchecked")
 		List jobs = sessionFactory.getCurrentSession().createQuery(
-				"from Job as j where j.name=?").setString(0, name)
+				"from Job as j where j.id=?").setLong(0, id)
 				.list();
 		if (jobs.size() == 1) {
 			return (Job) jobs.get(0);
@@ -71,7 +72,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
-	public void deleteJob(String id) {
+	public void deleteJob(int id) {
 		Job job = getJob(id);
 		sessionFactory.getCurrentSession().delete(job);
 	}

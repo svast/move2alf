@@ -1,7 +1,11 @@
 package eu.xenit.move2alf.web.dto;
 
+import java.util.List;
+
 
 public class JobConfig {
+	private int id;
+	
 	private String name;
 
 	private String description;
@@ -12,9 +16,21 @@ public class JobConfig {
 	
 	private String runFrequency;
 	
-	private String runDate;
+	private String singleDate;
 	
-	private String runTime;
+	private String singleTime;
+	
+	private String hourTime;
+	
+	private String dayTime;
+	
+	private String weekDay;
+	
+	private String weekTime;
+	
+	private String cronJob;
+	
+	private List<String> cron;
 	
 	private String metadata;
 	
@@ -58,11 +74,19 @@ public class JobConfig {
 
 	}
 	
-	public JobConfig(String name, String description) {
+	public JobConfig(int id, String name, String description) {
+		this.id=id;
 		this.name = name;
 		this.description = description;
 	}
 
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
+		return id;
+	}
 
 	public void setName(String name) {
 		this.name = name;
@@ -104,20 +128,68 @@ public class JobConfig {
 		return runFrequency;
 	}
 	
-	public void setRunDate(String runDate) {
-		this.runDate = runDate;
+	public void setSingleDate(String singleDate) {
+		this.singleDate = singleDate;
 	}
 
-	public String getRunDate() {
-		return runDate;
+	public String getSingleDate() {
+		return singleDate;
 	}
 	
-	public void setRunTime(String runTime) {
-		this.runTime = runTime;
+	public void setSingleTime(String singleTime) {
+		this.singleTime = singleTime;
 	}
 
-	public String getRunTime() {
-		return runTime;
+	public String getSingleTime() {
+		return singleTime;
+	}
+	
+	public void setHourTime(String hourTime) {
+		this.hourTime = hourTime;
+	}
+
+	public String getHourTime() {
+		return hourTime;
+	}
+	
+	public void setDayTime(String dayTime) {
+		this.dayTime = dayTime;
+	}
+
+	public String getDayTime() {
+		return dayTime;
+	}
+	
+	public void setWeekDay(String weekDay) {
+		this.weekDay = weekDay;
+	}
+
+	public String getWeekDay() {
+		return weekDay;
+	}
+	
+	public void setWeekTime(String weekTime) {
+		this.weekTime = weekTime;
+	}
+
+	public String getWeekTime() {
+		return weekTime;
+	}
+	
+	public void setCronJob(String cronJob) {
+		this.cronJob = cronJob;
+	}
+
+	public String getCronJob() {
+		return cronJob;
+	}
+	
+	public void setCron(List<String> cron) {
+		this.cron = cron;
+	}
+
+	public List<String> getCron() {
+		return cron;
 	}
 	
 	public void setMetadata(String metadata) {

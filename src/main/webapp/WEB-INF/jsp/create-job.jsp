@@ -1,13 +1,14 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp"%>
 <%@ include file="/WEB-INF/jsp/header.jsp"%>
 
+
 <body>
 <div class="span-24 last main">
 
 <h2>Create new job</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post">
+<form:form modelAttribute="job" method="post" name="createJob">
 <h4>General</h4>
 <table class="indent">
 <tr>
@@ -36,21 +37,112 @@
 <div class="indent">
 
 <p>No existing destinations found.</p>
+
+<table id="tblDest">
+</table>
+
 <table>
 <tr>
-<td class="link small" onclick="showInput();"><a href="<spring:url value="/job/create/destination" htmlEscape="true" />" onclick="return popup(this, 'notes')">Create new destination</a></td>
+<td class="link small indent" onclick="showInput();"><a href="<spring:url value="/job/create/destination" htmlEscape="true" />" onclick="return popup(this, 'notes')">Create new destination</a></td>
 <td></td>
 </tr>
 <tr>
 <td id="destination" class="hide">Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
 </tr>
 </table>
+
+<!-- 
+<div id="addDestinationButton" class="link small indent" onclick="addDestination();"><span class="pointer">Create new destination</span></div>
+
+
+<table id="destinationForm" class="hide indent">
+<tr>
+<td id="destName">Name:</td> 
+<td><form:input path="destinationName" size="15" maxlength="30" /></td>
+</tr>
+<tr>
+<td id="destType">Type:</td> 
+<td><form:radiobutton path="destinationType" value="Alfresco" />Alfresco</td>
+</tr>
+<tr>
+<td></td>
+<td><form:radiobutton path="destinationType" value="CMIS" />CMIS</td>
+</tr>
+<tr>
+<td id="destURL">URL:</td>
+<td><form:input path="destinationURL" size="50" maxlength="40" /></td>
+</tr>
+
+<tr>
+<td id="destUser" >Username:</td>
+<td><form:input path="alfUser" size="30" maxlength="30" /></td>
+</tr>
+
+<tr>
+<td id="destPswd">Password:</td>
+<td><form:input path="alfPswd" size="30" maxlength="30" /></td>
+</tr>
+
+<tr>
+<td id="threadNbr">Number of threads:</td>
+<td><form:input path="nbrThreads" size="10" value="5" maxlength="2" onKeyPress="return numbersonly(this, event)"/></td>
+</tr>
+
+</table>
+-->
 </div>
+
 
 <br />
 
 <h4>Schedule</h4>
-<p class="link small indent"><a href="<spring:url value="/job/add/schedule" htmlEscape="true" />" onclick="return popup(this, 'notes')">Add schedule</a></p>
+
+<table id="tblSample">
+</table>
+
+<div id="addScheduleButton" class="link small indent" onclick="addSchedule();"><span class="pointer">Add Schedule</span></div>
+<div id="scheduleForm" class="hide">
+<table class="indent">
+<tr>
+<td><form:radiobutton path="runFrequency" value="Single run at" onclick="scheduleBox(0)"/>Single run at</td>
+<td id="sDate" class="hide">date: <form:input path="singleDate" size="8" maxlength="10" value="1/1/2011"/></td>
+<td id="sTime" class="hide">time: <form:input path="singleTime" size="5" maxlength="5" value="00:00" /></td>
+</tr>
+<tr>
+<td><form:radiobutton path="runFrequency" value="Hourly" onclick="scheduleBox(1)"/>Hourly</td>
+<td id="hourly" class="hide">minutes: <form:input path="hourTime" size="2" maxlength="2" value="00"/></td>
+</tr>
+<tr>
+<td><form:radiobutton path="runFrequency" value="Daily" onclick="scheduleBox(2)"/>Daily</td>
+<td id="daily" class="hide">time: <form:input path="dayTime" size="5" maxlength="5" value="00:00"/></td>
+</tr>
+<tr>
+<td><form:radiobutton path="runFrequency" value="Weekly" onclick="scheduleBox(3)"/>Weekly</td>
+<td id="weeklyDay" class="hide">day: <form:select path="weekDay">
+			<form:option value="Monday" label="Monday"/>
+			<form:option value="Tuesday" label="Tuesday"/>
+			<form:option value="Wednesday" label="Wednesday"/>
+			<form:option value="Thursday" label="Thursday"/>
+			<form:option value="Friday" label="Friday"/>
+			<form:option value="Saturday" label="Saturday"/>
+			<form:option value="Sunday" label="Sunday"/>
+			</form:select>
+</td>
+<td id="weeklyTime" class="hide">time: <form:input path="weekTime" size="5" maxlength="15" value="00:00"/></td>
+</tr>
+<tr>
+<td><form:radiobutton path="runFrequency" value="Advanced" onclick="scheduleBox(4)"/>Advanced</td>
+<td id="advanced" class="hide">cronjob: <form:input path="cronJob" size="15" maxlength="15" value="0 0 * * * ?"/></td>
+</tr>
+<tr>
+<td onclick="cancelSchedule();"><span class="pointer">Cancel</span></td>
+<td onclick="confirmSchedule();addRowToSchedule();"><span class="pointer">Ok</span></td>
+</tr>
+</table>
+</div>
+
+<table id="tblCron" class="hide">
+</table>
 
 <br />
 

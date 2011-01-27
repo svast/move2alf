@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.xenit.move2alf.common.exceptions.DuplicateUserException;
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.UserPswd;
+import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
 
 @Transactional
@@ -93,4 +94,5 @@ public interface UserService {
 	 */
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public void changeRole(String userName, ERole newRole);
+
 }

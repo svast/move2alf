@@ -7,6 +7,8 @@ import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.core.Report;
 
 public class Job extends IdObject {
+	private int id;
+	
 	private String name;
 
 	private String description;
@@ -27,6 +29,14 @@ public class Job extends IdObject {
 
 	}
 
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
+		return id;
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
