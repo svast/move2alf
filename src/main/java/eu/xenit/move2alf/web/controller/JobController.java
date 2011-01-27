@@ -88,17 +88,10 @@ public class JobController {
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-<<<<<<< .mine
+
 		JobConfig jobConfig = new JobConfig(id, getJobService().getJob(id).getName(),getJobService().getJob(id).getDescription());
 		mav.addObject("job",jobConfig);
 	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
-=======
-		JobConfig jobConfig = new JobConfig(getJobService().getJob(name)
-				.getName(), getJobService().getJob(name).getDescription());
-		mav.addObject("job", jobConfig);
-		// mav.addObject("schedules",
-		// getScheduleService().getSchedules(jobConfig.getName()));
->>>>>>> .r536
 		mav.setViewName("edit-job");
 		return mav;
 	}
