@@ -7,6 +7,7 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.SourceSink;
 
 public class ConfiguredSourceSink extends IdObject {
+	private int id;
 	private String sourceSinkClassName;
 	private Set<ConfiguredSourceSinkParameter> configuredSourceSinkParameterSet;
 	private Set<ConfiguredAction> configuredActionSet;
@@ -16,6 +17,14 @@ public class ConfiguredSourceSink extends IdObject {
 
 	}
 
+	public void setId(int id){
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
 	public void setSourceSinkClassName(String sourceSinkClassName) {
 		this.sourceSinkClassName = sourceSinkClassName;
 	}

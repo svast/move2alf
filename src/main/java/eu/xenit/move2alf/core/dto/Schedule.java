@@ -1,30 +1,43 @@
 package eu.xenit.move2alf.core.dto;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
 public class Schedule extends IdObject {
+	private int id;
+	
 	private Job job;
 	
 	private UserPswd creator;
 	
-	private Timestamp creationDateTime;
+	private Date creationDateTime;
 	
-	private Timestamp lastModifyDateTime;
+	private Date lastModifyDateTime;
 	
-	private EScheduleState state;
+//	private EScheduleState state;
+	private String state;
 	
-	private Timestamp startDateTime;
+	private Date startDateTime;
 	
-	private Timestamp endDateTime;
+	private Date endDateTime;
 	
 	private String quartzScheduling;
 
 	public Schedule() {
 	
 	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
+		return id;
+	}
+	
 	
 	public void setJob(Job job) {
 		this.job = job;
@@ -42,43 +55,46 @@ public class Schedule extends IdObject {
 		return creator;
 	}
 
-	public void setCreationDateTime(Timestamp creationDateTime) {
+	public void setCreationDateTime(Date creationDateTime) {
 		this.creationDateTime = creationDateTime;
 	}
 
-	public Timestamp getCreationDateTime() {
+	public Date getCreationDateTime() {
 		return creationDateTime;
 	}
 
-	public void setLastModifyDateTime(Timestamp lastModifyDateTime) {
+	public void setLastModifyDateTime(Date lastModifyDateTime) {
 		this.lastModifyDateTime = lastModifyDateTime;
 	}
 
-	public Timestamp getLastModifyDateTime() {
+	public Date getLastModifyDateTime() {
 		return lastModifyDateTime;
 	}
 
-	public void setState(EScheduleState state) {
-		this.state = state;
+//	public void setState(EScheduleState state) {
+	public void setState(String state) {
+	//	this.state = state;
+		this.state="TEST";
 	}
 
-	public EScheduleState getState() {
+	//public EScheduleState getState() {
+	public String getState() {
 		return state;
 	}
 
-	public void setStartDateTime(Timestamp startDateTime) {
+	public void setStartDateTime(Date startDateTime) {
 		this.startDateTime = startDateTime;
 	}
 
-	public Timestamp getStartDateTime() {
+	public Date getStartDateTime() {
 		return startDateTime;
 	}
 
-	public void setEndDateTime(Timestamp endDateTime) {
+	public void setEndDateTime(Date endDateTime) {
 		this.endDateTime = endDateTime;
 	}
 
-	public Timestamp getEndDateTime() {
+	public Date getEndDateTime() {
 		return endDateTime;
 	}
 

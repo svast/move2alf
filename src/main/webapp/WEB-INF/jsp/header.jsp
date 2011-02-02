@@ -96,37 +96,103 @@ var minutes='';
 
 	for (var counter = 0; counter < 5; counter++)
     {
-		if(document.createJob.runFrequency[counter].checked==true){
-
-			switch(counter){
-			case 0:
-					date = document.getElementById('singleDate').value;
-					time = document.getElementById('singleTime').value;
-					period = "Single run";
-					break;
-			case 1:
-					minutes = document.getElementById('hourTime').value;
-					period = "Hourly";
-					break;
-			case 2:
-					time = document.getElementById('dayTime').value;
-					period = "Daily";
-					break;
-			case 3:
-					day = document.getElementById('weekDay').value;
-					time = document.getElementById('weekTime').value;
-					period = "Weekly";
-					break;
-			case 4:
-					cronJob = document.getElementById('cronJob').value;
-					period = "Cron job";
-					break;
-			default:
-					break;
-			}
-		}			
+	    try{
+			if(document.createJob.runFrequency[counter].checked==true){
+	
+				switch(counter){
+				case 0:
+						date = document.getElementById('singleDate').value;
+						time = document.getElementById('singleTime').value;
+						period = "Single run";
+						break;
+				case 1:
+						minutes = document.getElementById('hourTime').value;
+						period = "Hourly";
+						break;
+				case 2:
+						time = document.getElementById('dayTime').value;
+						period = "Daily";
+						break;
+				case 3:
+						day = document.getElementById('weekDay').value;
+						time = document.getElementById('weekTime').value;
+						period = "Weekly";
+						break;
+				case 4:
+						cronJob = document.getElementById('cronJob').value;
+						period = "Cron job";
+						break;
+				default:
+						break;
+				}
+			}	
+	    }
+	    catch(e){
+		    try{
+		    	if(document.editJob.runFrequency[counter].checked==true){
+		    		
+					switch(counter){
+					case 0:
+							date = document.getElementById('singleDate').value;
+							time = document.getElementById('singleTime').value;
+							period = "Single run";
+							break;
+					case 1:
+							minutes = document.getElementById('hourTime').value;
+							period = "Hourly";
+							break;
+					case 2:
+							time = document.getElementById('dayTime').value;
+							period = "Daily";
+							break;
+					case 3:
+							day = document.getElementById('weekDay').value;
+							time = document.getElementById('weekTime').value;
+							period = "Weekly";
+							break;
+					case 4:
+							cronJob = document.getElementById('cronJob').value;
+							period = "Cron job";
+							break;
+					default:
+							break;
+					}
+				}	
+		    }
+		    catch(e){
+				if(document.editSchedule.runFrequency[counter].checked==true){
+		    		
+					switch(counter){
+					case 0:
+							date = document.getElementById('singleDate').value;
+							time = document.getElementById('singleTime').value;
+							period = "Single run";
+							break;
+					case 1:
+							minutes = document.getElementById('hourTime').value;
+							period = "Hourly";
+							break;
+					case 2:
+							time = document.getElementById('dayTime').value;
+							period = "Daily";
+							break;
+					case 3:
+							day = document.getElementById('weekDay').value;
+							time = document.getElementById('weekTime').value;
+							period = "Weekly";
+							break;
+					case 4:
+							cronJob = document.getElementById('cronJob').value;
+							period = "Cron job";
+							break;
+					default:
+							break;
+					}
+				}	
+		    }
+	    }		
     }
-
+    
 	if(period!="Cron job"){
 		cronJob = getCronJob(time, day, date, period, minutes);
 	}
@@ -186,6 +252,7 @@ var minutes='';
   sp.setAttribute('onclick', 'removeRowFromSchedule('+iteration+')');
   cellFourth.appendChild(sp);  
   setCronInForm(cronJob);
+
 }
 
 function setCronInForm(cronJob){
@@ -316,6 +383,47 @@ function adjustRows(tbl,row){
 		document.getElementById("remove"+row).setAttribute('onclick', 'removeRowFromSchedule('+row+')');
 	}
 }
+
+function addDestination(){
+	document.getElementById('destinationForm').style.display='block';
+	document.getElementById('addDestinationButton').style.display='none';
+}
+
+function confirmDestination(){
+	document.getElementById('destinationForm').style.display='none';
+	document.getElementById('addDestinationButton').style.display='block';
+}
+
+function cancelDestination(){
+	document.getElementById('destinationForm').style.display='none';
+	document.getElementById('addDestinationButton').style.display='block';
+}
+
+function addRowToDestination(){
+
+	  var tbl = document.getElementById('tblDestination');
+	  var lastRow = tbl.rows.length;
+
+	  var iteration = lastRow;
+	  var row = tbl.insertRow(lastRow);
+
+	  var cellFirst = row.insertCell(0);
+		
+	 var dest = document.createElement('input');
+	 var id = 'dest'+iteration;
+	 dest.id=id;
+	 dest.type='radio';
+	 dest.name='dest';
+	 var value = document.getElementById('destinationName').value;
+	 dest.value=value;
+
+	 var text=document.createTextNode(document.getElementById('destinationName').value+" - "+document.getElementById('destinationURL').value);
+	  cellFirst.appendChild(dest);
+	  cellFirst.appendChild(text);
+
+	  document.getElementById('noDestinations').style.display='none';
+	  
+ }
 
 //copyright 1999 Idocs, Inc. http://www.idocs.com
 //Distribute this script freely but keep this notice in place

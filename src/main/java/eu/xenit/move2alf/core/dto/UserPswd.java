@@ -8,6 +8,8 @@ import java.util.Set;
 
 
 public class UserPswd extends IdObject {
+	private int id;
+	
     private String userName;
     
     private String password;
@@ -23,6 +25,14 @@ public class UserPswd extends IdObject {
         this.password = encodedPassword;
     }
 
+    public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
+		return id;
+	}
+    
     public String getUserName() {
         return userName;
     }

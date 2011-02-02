@@ -38,7 +38,7 @@
 				<div class="link right"><a href="">run poller</a>	<a href="<spring:url value="/job/${job.id}/edit" htmlEscape="true" />">edit</a></div>
 				<br class="clear">
 			<%}else if(roleCheck==1){ %>
-				<div class="link right"><a href="<spring:url value="/job/${job.id}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
+				<div class="link right"><a href="">run poller</a>	<a href="<spring:url value="/job/${job.id}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
 				<br class="clear">
 			<%}%>
 

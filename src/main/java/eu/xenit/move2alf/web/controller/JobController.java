@@ -1,8 +1,8 @@
 package eu.xenit.move2alf.web.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.UserService;
 
@@ -64,7 +65,20 @@ public class JobController {
 	@RequestMapping(value = "/job/create", method = RequestMethod.POST)
 	public ModelAndView createJob(JobConfig job) {
 		ModelAndView mav = new ModelAndView();
-		getJobService().createJob(job.getName(), job.getDescription());
+		List<String> cronJobs = job.getCron();
+		int jobId = getJobService().createJob(job.getName(), job.getDescription()).getId();
+		for(int i = 0; i< cronJobs.size(); i++){
+			getJobService().createSchedule(jobId, cronJobs.get(i));
+		}
+		
+		HashMap destinationParams = new HashMap();
+	//	List<Object> destinationParams = new ArrayList();
+		destinationParams.put("name", job.getDestinationName());
+		destinationParams.put("url", job.getDestinationURL());
+		destinationParams.put("user", job.getAlfUser());
+		destinationParams.put("password", job.getAlfPswd());
+		destinationParams.put("threads", job.getNbrThreads());
+		getJobService().createDestination(job.getDestinationName(), job.getDestinationType(), destinationParams);
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -76,22 +90,16 @@ public class JobController {
 		mav.setViewName("create-destination");
 		return mav;
 	}
-
-	/*
-	 * @RequestMapping(value = "/job/create/destination", method =
-	 * RequestMethod.POST) public ModelAndView
-	 * createDestination(DestinationConfig destination) { ModelAndView mav = new
-	 * ModelAndView(); getJobService().createDestination(destination.getName(),
-	 * destination.getDescription());
-	 * mav.setViewName("redirect:/job/dashboard"); return mav; }
-	 */
+	
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-
-		JobConfig jobConfig = new JobConfig(id, getJobService().getJob(id).getName(),getJobService().getJob(id).getDescription());
+		JobConfig jobConfig = new JobConfig();
+		jobConfig.setId(id);
+		jobConfig.setName(getJobService().getJob(id).getName());
+		jobConfig.setDescription(getJobService().getJob(id).getDescription());
 		mav.addObject("job",jobConfig);
-	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
+		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.setViewName("edit-job");
 		return mav;
 	}
@@ -100,6 +108,46 @@ public class JobController {
 	public ModelAndView editJob(@PathVariable int id, JobConfig job) {
 		ModelAndView mav = new ModelAndView();
 		getJobService().editJob(id, job.getName(), job.getDescription());
+		boolean deleteSchedule=true;
+		List<String> cronJobs = job.getCron();
+		
+		List<String> existingCronJobs = getJobService().getCronjobsForJob(id);
+		
+		int listSize;
+		
+		try{
+			listSize = cronJobs.size();
+		}
+		catch(Exception e){
+			listSize = 0;
+		}
+		boolean removeEntry=false;
+	
+		for(int i=0; i<existingCronJobs.size(); i++){
+			for(int j=0; j<listSize; j++){
+				if(removeEntry==true){
+					removeEntry=false;
+				}
+				
+				if(existingCronJobs.get(i).equals(cronJobs.get(j))){
+					cronJobs.remove(j);
+					j--;
+					listSize--;
+					deleteSchedule=false;
+					removeEntry=true;
+				}
+				
+			}
+			if(deleteSchedule == true){
+				int scheduleId = getJobService().getScheduleId(id, existingCronJobs.get(i));
+				getJobService().deleteSchedule(scheduleId);
+			}
+			deleteSchedule=true;
+		}
+		
+		for(int i = 0; i< listSize; i++){
+			getJobService().createSchedule(id, cronJobs.get(i));
+		}
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -107,17 +155,59 @@ public class JobController {
 	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.GET)
 	public ModelAndView editScheduleForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		JobConfig jobConfig = new JobConfig(id, getJobService().getJob(id).getName(),getJobService().getJob(id).getDescription());
+		JobConfig jobConfig = new JobConfig();
+		jobConfig.setId(id);
+		jobConfig.setName(getJobService().getJob(id).getName());
 		mav.addObject("job",jobConfig);
-	//	mav.addObject("schedules", getScheduleService().getSchedules(jobConfig.getName()));
-		mav.setViewName("edit-job");
+		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+		mav.setViewName("edit-schedule");
 		return mav;
 	}
 	
 	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.POST)
 	public ModelAndView editSchedule(@PathVariable int id, JobConfig job) {
 		ModelAndView mav = new ModelAndView();
-		getJobService().editJob(id, job.getName(), job.getDescription());
+		
+		boolean deleteSchedule=true;
+		List<String> cronJobs = job.getCron();
+		
+		List<String> existingCronJobs = getJobService().getCronjobsForJob(id);
+		
+		int listSize;
+		
+		try{
+			listSize = cronJobs.size();
+		}
+		catch(Exception e){
+			listSize = 0;
+		}
+		boolean removeEntry=false;
+	
+		for(int i=0; i<existingCronJobs.size(); i++){
+			for(int j=0; j<listSize; j++){
+				if(removeEntry==true){
+					removeEntry=false;
+				}
+				
+				if(existingCronJobs.get(i).equals(cronJobs.get(j))){
+					cronJobs.remove(j);
+					j--;
+					listSize--;
+					deleteSchedule=false;
+					removeEntry=true;
+				}
+				
+			}
+			if(deleteSchedule == true){
+				int scheduleId = getJobService().getScheduleId(id, existingCronJobs.get(i));
+				getJobService().deleteSchedule(scheduleId);
+			}
+			deleteSchedule=true;
+		}
+		
+		for(int i = 0; i< listSize; i++){
+			getJobService().createSchedule(id, cronJobs.get(i));
+		}
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -135,14 +225,6 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteJob(id);
 		mav.setViewName("redirect:/job/dashboard");
-		return mav;
-	}
-
-	@RequestMapping(value = "/job/add/schedule", method = RequestMethod.GET)
-	public ModelAndView addSchedule() {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", new JobConfig());
-		mav.setViewName("add-schedule");
 		return mav;
 	}
 }

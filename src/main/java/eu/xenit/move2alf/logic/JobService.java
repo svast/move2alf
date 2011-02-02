@@ -1,12 +1,15 @@
 package eu.xenit.move2alf.logic;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.dto.UserPswd;
 
 @Transactional
@@ -49,5 +52,26 @@ public interface JobService {
 	 * @param jobName The name of the job
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
-	public List<Cycle> getCyclesForJob(String jobName);
+	public List<Cycle> getCyclesForJob(int jobId);
+
+	@PreAuthorize("hasRole('CONSUMER')")
+	List<Schedule> getSchedulesForJob(int jobId);
+
+	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
+	Schedule createSchedule(int jobId, String cronJob);
+
+	@PreAuthorize("hasRole('CONSUMER')")
+	List<String> getCronjobsForJob(int jobId);
+
+	@PreAuthorize("hasRole('CONSUMER')")
+	Schedule getSchedule(int scheduleId);
+
+	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
+	void deleteSchedule(int scheduleId);
+
+	@PreAuthorize("hasRole('CONSUMER')")
+	int getScheduleId(int jobId, String cronJob);
+
+	@PreAuthorize("hasRole('JOB_ADMIN')")
+	ConfiguredSourceSink createDestination(String destinationName, String destinationType, HashMap destinationParams);
 }
