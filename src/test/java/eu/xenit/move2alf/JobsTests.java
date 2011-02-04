@@ -57,8 +57,8 @@ public class JobsTests extends IntegrationTests {
 	
 	@Test
 	public void testGetCyclesForJob() {
-		getJobService().createJob("testJob", "description of test job");
-		List<Cycle> cycles = getJobService().getCyclesForJob("testJob");
+		Job newJob = getJobService().createJob("testJob", "description of test job");
+		List<Cycle> cycles = getJobService().getCyclesForJob(newJob.getId());
 		assertNotNull(cycles);
 		// TODO: run job, see if cycle is created
 		// TODO: do cycles need to be sorted chronologically?

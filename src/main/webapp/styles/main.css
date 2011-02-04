@@ -5,30 +5,30 @@ Complementary Color:
 #FF9500	#BF8430	#A66100	#FFB040	#FFC573
 */
 body {
-	color: #043A6B;
-	background-color: #E2E8ED;
+	color: #5E878F;
+	background-color: #D5E4E6;
 	margin: 0;
 	padding: 12px 100px 100px 100px;
 	font-family: Geneva, Tahoma, sans-serif;
 }
 
 a:link {
-	color: #0C5DA5;
+	color: #AF1317;
 	background-color: inherit;
 }
 
 a:visited {
-	color: #26537C;
+	color: #AF1317;
 	background-color: inherit;
 }
 
 a:hover {
-	color: #FFB040;
+	color: #AF1317;
 	background-color: inherit;
 }
 
 a:active {
-	color: #26537C;
+	color: #AF1317;
 	background-color: inherit;
 }
 
@@ -44,7 +44,7 @@ td {
 
 div.header {
 	color: #043A6B;
-	background-color: #679FD2;
+	background-color: #73979D;
 	padding: 2px 25px 2px 25px;
 	margin: 0;
 	border-top-left-radius: 12px;
@@ -55,8 +55,13 @@ div.header {
 	-webkit-border-top-right-radius: 12px;
 }
 
+div.header h1 {
+	color: white;
+	background-color: inherit;
+}
+
 div.main {
-	color: #043A6B;
+	color: #5E878F;
 	background-color: #EBECED; 
 	padding: 2px 25px 25px 25px;
 	margin: 0;
