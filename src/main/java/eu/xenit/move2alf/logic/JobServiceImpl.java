@@ -4,7 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
+	public void deleteJob(int id) {
+		Job job = getJob(id);
+		sessionFactory.getCurrentSession().delete(job);
+	}
+	
+	@Override
 	public Job getJob(int id) {
 		@SuppressWarnings("unchecked")
 		List jobs = sessionFactory.getCurrentSession().createQuery(
@@ -78,12 +86,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		} else {
 			throw new NonexistentUserException();
 		}
-	}
-	
-	@Override
-	public void deleteJob(int id) {
-		Job job = getJob(id);
-		sessionFactory.getCurrentSession().delete(job);
 	}
 	
 	@Override
@@ -156,29 +158,55 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
-	public ConfiguredSourceSink createDestination(String destinationName, String destinationType, HashMap destinationParams){
+	public ConfiguredSourceSink createDestination(String destinationType, HashMap destinationParams){
+			
 			ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
 			
-			sourceSink.setSourceSinkClassName(destinationName);
-		
-			ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
-			sourceSinkName.setName("name");
-			sourceSinkName.setValue((String) destinationParams.get("name"));
-			ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
-			sourceSinkURL.setName("url");
-			sourceSinkURL.setValue((String) destinationParams.get("url"));
-			ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
-			sourceSinkUser.setName("user");
-			sourceSinkUser.setValue((String) destinationParams.get("user"));
-			ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
-			sourceSinkPassword.setName("password");
-			sourceSinkPassword.setValue((String) destinationParams.get("password"));
-			ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
-			sourceSinkThreads.setName("threads");
-			sourceSinkThreads.setValue((String) destinationParams.get("threads"));
-			
+			sourceSink.setSourceSinkClassName(destinationType);
 
+			ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
+			sourceSinkName.setConfiguredSourceSink(sourceSink);
+			sourceSinkName.setName("name");
+			sourceSinkName.setValue((String) destinationParams.get(EDestinationParameter.NAME));
+			ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
+			sourceSinkURL.setConfiguredSourceSink(sourceSink);
+			sourceSinkURL.setName("url");
+			sourceSinkURL.setValue((String) destinationParams.get(EDestinationParameter.URL));
+			ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
+			sourceSinkUser.setConfiguredSourceSink(sourceSink);
+			sourceSinkUser.setName("user");
+			sourceSinkUser.setValue((String) destinationParams.get(EDestinationParameter.USER));
+			ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
+			sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+			sourceSinkPassword.setName("password");
+			sourceSinkPassword.setValue((String) destinationParams.get(EDestinationParameter.PASSWORD));
+			ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
+			sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+			sourceSinkThreads.setName("threads");
+			sourceSinkThreads.setValue(destinationParams.get(EDestinationParameter.THREADS).toString());
+			
+			Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+			parameterSet.add(sourceSinkName);
+			parameterSet.add(sourceSinkURL);
+			parameterSet.add(sourceSinkUser);
+			parameterSet.add(sourceSinkPassword);
+			parameterSet.add(sourceSinkThreads);
+			
+			sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+			
 			getSessionFactory().getCurrentSession().save(sourceSink);
+			
 			return sourceSink;
 	}
+	
+	@Override
+	public List<ConfiguredSourceSink> getConfiguredSourceSink(String sourceSinkName){
+		@SuppressWarnings("unchecked")
+		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory.getCurrentSession().createQuery(
+				"from ConfiguredSourceSink as c where c.sourceSinkClassName=?").setString(0, sourceSinkName)
+				.list();
+		
+			return (List<ConfiguredSourceSink>) configuredSourceSink;
+	}
+	
 }

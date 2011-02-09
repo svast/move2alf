@@ -70,6 +70,10 @@ public class JobConfig {
 	
 	private int nbrThreads = 5;
 	
+	private String dest;
+	
+	private List<String> sourceSink;
+	
 	public JobConfig() {
 
 	}
@@ -337,6 +341,21 @@ public class JobConfig {
 	public int getNbrThreads() {
 		return nbrThreads;
 	}
+	
+	public void setDest(String dest) {
+		this.dest = dest;
+	}
 
+	public String getDest() {
+		return dest;
+	}
+	
+	public void setSourceSink(List<String> sourceSink) {
+		this.sourceSink = sourceSink;
+	}
+
+	public List<String> getSourceSink() {
+		return sourceSink;
+	}
 }
 

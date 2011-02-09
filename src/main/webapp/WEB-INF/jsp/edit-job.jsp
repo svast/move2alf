@@ -35,51 +35,15 @@
 </table>
 
 <br />
-
 <h4>Destination</h4>
-<div class="indent">
-<p>No existing destinations found.</p>
-<table class="indent">
-<tr>
-<td class="link small" onclick="showInput();"><a href="<spring:url value="/job/create/destination" htmlEscape="true" />" onclick="return popup(this, 'notes')">Create new destination</a></td>
-<td></td>
-</tr>
-<tr>
-<td>Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
-</tr>
-</table>
-</div>
+
+<%@ include file="/WEB-INF/jsp/destination.jsp"%>
 
 <br />
 
-<%int counter = 1; %>
-<table id="tblSample" class="indent">
-<c:forEach var="schedule" items="${schedules}">
-<tr>
-<td>
-<div id="rowNumber<%=counter%>"><%=counter%></div>
-</td>
-<td>Cron job</td>
-<td>
-<div><c:out value="${schedule.quartzScheduling}" /></div>
-</td>
-<td>
-<div class="pointer" id="remove<%=counter%>" onclick="removeRowFromSchedule(<%=counter%>)">remove</div>
-</td>
-</tr>
-<%counter++; %>
-</c:forEach>
-</table>
+<h4>Schedule</h4>
 
 <%@ include file="/WEB-INF/jsp/schedule.jsp"%>
-
-<table id="tblCron" class="hide">
-<c:forEach var="schedule" items="${schedules}">
-<tr>
-<td><input name="cron" type="checkbox" value="<c:out value="${schedule.quartzScheduling}" />" checked /></td>
-</tr>
-</c:forEach>
-</table>
 
 <br />
 

@@ -9,7 +9,7 @@
 			<generator class="identity" />
 		</id>
 		<property name="sourceSinkClassName"/>
-    	<set name="configuredSourceSinkParameterSet" table="configuredSourceSinkParameter">
+    	<set name="configuredSourceSinkParameterSet" table="configuredSourceSinkParameter" lazy="false">
       		<key column="configuredSourceSinkId"/>
       		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter">
         		<property name="name"/>

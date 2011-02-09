@@ -58,6 +58,7 @@ public class JobController {
 	public ModelAndView createJobForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", new JobConfig());
+		mav.addObject("destinations", getJobService().getConfiguredSourceSink("AlfrescoSink"));
 		mav.setViewName("create-job");
 		return mav;
 	}
@@ -71,23 +72,25 @@ public class JobController {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
 		
-		HashMap destinationParams = new HashMap();
-	//	List<Object> destinationParams = new ArrayList();
-		destinationParams.put("name", job.getDestinationName());
-		destinationParams.put("url", job.getDestinationURL());
-		destinationParams.put("user", job.getAlfUser());
-		destinationParams.put("password", job.getAlfPswd());
-		destinationParams.put("threads", job.getNbrThreads());
-		getJobService().createDestination(job.getDestinationName(), job.getDestinationType(), destinationParams);
+		List<String> sourceSink = job.getSourceSink();
+		
+		for(int j =0; j<sourceSink.size(); j++){
+			
+			String createdSourceSink = sourceSink.get(j);
+			System.out.println("VALUE IS "+createdSourceSink);
+			String[] parameters = createdSourceSink.split("\\|");
+			
+			HashMap destinationParams = new HashMap();
+			
+			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
+			destinationParams.put(EDestinationParameter.URL, parameters[1]);
+			destinationParams.put(EDestinationParameter.USER, parameters[2]);
+			destinationParams.put(EDestinationParameter.PASSWORD, parameters[3]);
+			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
+			getJobService().createDestination(parameters[5], destinationParams);
+			
+		}
 		mav.setViewName("redirect:/job/dashboard");
-		return mav;
-	}
-
-	@RequestMapping(value = "/job/create/destination", method = RequestMethod.GET)
-	public ModelAndView createDestinationForm() {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", new JobConfig());
-		mav.setViewName("create-destination");
 		return mav;
 	}
 	
@@ -100,6 +103,7 @@ public class JobController {
 		jobConfig.setDescription(getJobService().getJob(id).getDescription());
 		mav.addObject("job",jobConfig);
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+		mav.addObject("destinations", getJobService().getConfiguredSourceSink("AlfrescoSink"));
 		mav.setViewName("edit-job");
 		return mav;
 	}
@@ -147,6 +151,25 @@ public class JobController {
 		
 		for(int i = 0; i< listSize; i++){
 			getJobService().createSchedule(id, cronJobs.get(i));
+		}
+		
+		
+		List<String> sourceSink = job.getSourceSink();
+		
+		for(int j =0; j<sourceSink.size(); j++){
+			
+			String createdSourceSink = sourceSink.get(j);
+			System.out.println("VALUE IS "+createdSourceSink);
+			String[] parameters = createdSourceSink.split("\\|");
+			
+			HashMap destinationParams = new HashMap();
+			
+			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
+			destinationParams.put(EDestinationParameter.URL, parameters[1]);
+			destinationParams.put(EDestinationParameter.USER, parameters[2]);
+			destinationParams.put(EDestinationParameter.PASSWORD, parameters[3]);
+			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
+			getJobService().createDestination(parameters[5], destinationParams);	
 		}
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;

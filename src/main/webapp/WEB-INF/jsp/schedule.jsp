@@ -1,3 +1,22 @@
+<%int counter = 1; %>
+<table id="tblSample" class="indent">
+<c:forEach var="schedule" items="${schedules}">
+<tr>
+<td>
+<div id="rowNumber<%=counter%>"><%=counter%></div>
+</td>
+<td>Cron job</td>
+<td>
+<div><c:out value="${schedule.quartzScheduling}" /></div>
+</td>
+<td>
+<div class="pointer" id="remove<%=counter%>" onclick="removeRowFromSchedule(<%=counter%>)">remove</div>
+</td>
+</tr>
+<%counter++; %>
+</c:forEach>
+</table>
+
 <div id="addScheduleButton" class="link small indent" onclick="addSchedule();"><span class="pointer">Add Schedule</span></div>
 <div id="scheduleForm" class="hide">
 <table class="indent">
@@ -39,6 +58,12 @@
 </table>
 </div>
 
-
+<table id="tblCron" class="hide">
+<c:forEach var="schedule" items="${schedules}">
+<tr>
+<td><input name="cron" type="checkbox" value="<c:out value="${schedule.quartzScheduling}" />" checked /></td>
+</tr>
+</c:forEach>
+</table>
 
 

@@ -24,71 +24,23 @@
 <br />
 
 <h4>Import from</h4>
-
-<div class="indent">
-
-<p id="noDestinations">No existing destinations found.</p>
-
-<table id="tblDestination" class="indent">
-</table>
-
-<div id="addDestinationButton" class="link small indent" onclick="addDestination();"><span class="pointer">Create new destination</span></div>
-
-<table id="destinationForm" class="hide indent">
+<table class="indent">
 <tr>
-<td id="destName">Name:</td> 
-<td><form:input path="destinationName" size="15" maxlength="30" /></td>
-</tr>
-<tr>
-<td id="destType">Type:</td> 
-<td><form:radiobutton path="destinationType" value="Alfresco" />Alfresco</td>
-</tr>
-<tr>
+<td>Path: <form:input path="InputFolder" size="50" maxlength="50" /></td>
 <td></td>
-<td><form:radiobutton path="destinationType" value="CMIS" />CMIS</td>
-</tr>
-<tr>
-<td id="destURL">URL:</td>
-<td><form:input path="destinationURL" size="50" maxlength="40" /></td>
-</tr>
-
-<tr>
-<td id="destUser" >Username:</td>
-<td><form:input path="alfUser" size="30" maxlength="30" /></td>
-</tr>
-
-<tr>
-<td id="destPswd">Password:</td>
-<td><form:input path="alfPswd" size="30" maxlength="30" /></td>
-</tr>
-
-<tr>
-<td id="threadNbr">Number of threads:</td>
-<td><form:input path="nbrThreads" size="10" value="5" maxlength="2" onKeyPress="return numbersonly(this, event)"/></td>
-</tr>
-
-<tr>
-<td onclick="cancelDestination();"><span class="pointer">Cancel</span></td>
-<td onclick="confirmDestination();addRowToDestination();"><span class="pointer">Ok</span></td>
 </tr>
 </table>
 
-<p>Path: <form:input path="InputFolder" size="50" maxlength="50" /></p>
+<br />
+<h4>Destination</h4>
 
-</div>
-
+<%@ include file="/WEB-INF/jsp/destination.jsp"%>
 
 <br />
 
 <h4>Schedule</h4>
 
-<table id="tblSample" class="indent">
-</table>
-
 <%@ include file="/WEB-INF/jsp/schedule.jsp"%>
-
-<table id="tblCron" class="hide">
-</table>
 
 <br />
 

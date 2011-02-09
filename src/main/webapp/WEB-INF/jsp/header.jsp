@@ -266,7 +266,6 @@ function setCronInForm(cronJob){
 	  var cellFirst = row.insertCell(0);
 
 		try{
-			var id = 'cron'+iteration;
 			var fi=document.createElement('<input name=\"cron\" type=\"checkbox\" checked>');
 			var id = 'cron'+iteration;
 			 fi.id=id;
@@ -414,16 +413,57 @@ function addRowToDestination(){
 	 dest.id=id;
 	 dest.type='radio';
 	 dest.name='dest';
-	 var value = document.getElementById('destinationName').value;
+	 
+	var len = document.createJob.destinationType.length;
+	var destType="";
+	for(var i=0; i<len; i++){
+		if(document.createJob.destinationType[i].checked){
+			destType=document.createJob.destinationType[i].value;
+		}
+	}
+
+	var value = document.getElementById('destinationName').value+"|"+document.getElementById('destinationURL').value+"|"+document.getElementById('alfUser').value+"|"+document.getElementById('alfPswd').value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
 	 dest.value=value;
 
 	 var text=document.createTextNode(document.getElementById('destinationName').value+" - "+document.getElementById('destinationURL').value);
-	  cellFirst.appendChild(dest);
-	  cellFirst.appendChild(text);
+	
 
+	cellFirst.appendChild(dest);
+	cellFirst.appendChild(text);
+
+		setDestInForm(value);
 	  document.getElementById('noDestinations').style.display='none';
-	  
+
  }
+
+function setDestInForm(value){
+	var tblDestForm = document.getElementById('tblDestForm');
+	
+	  var lastRow = tblDestForm.rows.length;
+
+	  var iteration = lastRow+1;
+	  var row = tblDestForm.insertRow(lastRow);
+	  
+	  var cellFirst = row.insertCell(0);
+
+		try{
+			var fi=document.createElement('<input name=\"sourceSink\" type=\"checkbox\" checked>');
+			var id = 'sourceSink'+iteration;
+			 fi.id=id;
+			 fi.value=value
+		}
+		catch(e){
+			 var fi = document.createElement('input');
+			 var id = 'sourceSink'+iteration;
+			 fi.id=id;
+			 fi.type='checkbox';
+			 fi.name='sourceSink';
+			 fi.value=value;
+			 fi.checked=true;
+			 
+		}
+	  cellFirst.appendChild(fi);
+}
 
 //copyright 1999 Idocs, Inc. http://www.idocs.com
 //Distribute this script freely but keep this notice in place

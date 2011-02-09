@@ -17,7 +17,6 @@ public class Schedule extends IdObject {
 	
 	private Date lastModifyDateTime;
 	
-//	private EScheduleState state;
 	private String state;
 	
 	private Date startDateTime;
@@ -71,13 +70,10 @@ public class Schedule extends IdObject {
 		return lastModifyDateTime;
 	}
 
-//	public void setState(EScheduleState state) {
 	public void setState(String state) {
-	//	this.state = state;
 		this.state="TEST";
 	}
 
-	//public EScheduleState getState() {
 	public String getState() {
 		return state;
 	}
