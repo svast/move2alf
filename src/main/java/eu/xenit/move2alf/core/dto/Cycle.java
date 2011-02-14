@@ -1,14 +1,17 @@
 package eu.xenit.move2alf.core.dto;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
 
 public class Cycle extends IdObject {
-	private Timestamp startDateTime;
+	private int id;
 	
-	private Timestamp endDateTime;
+	private Date startDateTime;
+	
+	private Date endDateTime;
 	
 	private Schedule schedule;
 	
@@ -19,20 +22,28 @@ public class Cycle extends IdObject {
 	public Cycle() {
 		
 	}
+	
+	public void setId(int id){
+		this.id = id;
+	}
+	
+	public int getId(){
+		return id;
+	}
 
-	public void setStartDateTime(Timestamp startDateTime) {
+	public void setStartDateTime(Date startDateTime) {
 		this.startDateTime = startDateTime;
 	}
 
-	public Timestamp getStartDateTime() {
+	public Date getStartDateTime() {
 		return startDateTime;
 	}
 
-	public void setEndDateTime(Timestamp endDateTime) {
+	public void setEndDateTime(Date endDateTime) {
 		this.endDateTime = endDateTime;
 	}
 
-	public Timestamp getEndDateTime() {
+	public Date getEndDateTime() {
 		return endDateTime;
 	}
 
