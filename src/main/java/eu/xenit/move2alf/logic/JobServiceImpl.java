@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.logic;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,10 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
@@ -19,11 +19,12 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.enums.EScheduleState;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
+	private static final Logger logger = LoggerFactory
+	.getLogger(JobServiceImpl.class);
 	
 	private UserService userService;
 	
@@ -274,6 +275,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.list();
 		
 			return (List<ConfiguredSourceSink>) configuredSourceSink;
+	}
+
+	@Override
+	public void executeJob(int jobId) {
+		Job job = getJob(jobId);
+		logger.debug("Executing job \"" + job.getName() + "\"");
 	}
 	
 	@Override

@@ -3,6 +3,9 @@ package eu.xenit.move2alf.logic;
 import javax.annotation.PostConstruct;
 
 import org.hibernate.SessionFactory;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -25,6 +28,8 @@ public class SchedulerImpl extends AbstractHibernateService implements Scheduler
 
 	private org.quartz.Scheduler scheduler;
 
+	private static final String JOB_ID = "jobId";
+	
 	@Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
@@ -64,8 +69,19 @@ public class SchedulerImpl extends AbstractHibernateService implements Scheduler
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
 				System.out.println("Adding schedule: " + cronExpression);
+				JobDetail jobDetail = new JobDetail("Schedule-" + job.getName() + "-" + schedule.getId(), JobExecutor.class);
 			}
 		}
 	}
 
+	class JobExecutor implements org.quartz.Job {
+
+		@Override
+		public void execute(JobExecutionContext context)
+				throws JobExecutionException {
+			Integer jobId = (Integer) context.get(JOB_ID);
+			getJobService().executeJob(jobId);
+		}
+		
+	}
 }
