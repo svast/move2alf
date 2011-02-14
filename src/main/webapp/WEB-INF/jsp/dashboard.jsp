@@ -28,6 +28,21 @@
 <p>No jobs found, use the link above to create a new one</p>
 </c:if>
 
+<%
+	int countCycles=0;
+	pageContext.setAttribute("countCycles", countCycles); 
+
+	String currentDate="";
+
+	java.util.Date currentDateTime = new java.util.Date();
+	
+	java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd");
+
+	currentDate = formatter.format(currentDateTime);
+	
+	pageContext.setAttribute("currentDate", currentDate);
+
+%>
 <table>
 <c:forEach var="job" items="${jobs}">
 		<tr>
@@ -43,16 +58,43 @@
 			<%}%>
 
 		<p class="reduce-bottom">
-		Last run: 
+		
+		<c:if test='${empty cycles[countCycles]}'>
+		Last run: None
 		<br />
-		Status:
+		Status: Not running
+		</c:if>
+		<c:if test='${not empty cycles[countCycles]}'>
+		
+			<div class=hide">
+				<fmt:formatDate var="date" value="${cycles[countCycles].startDateTime}" pattern="yyyy-MM-dd" type="both"/>
+			</div>
+			
+			<c:if test='${date == currentDate}'>
+				Last run: today <fmt:formatDate value="${cycles[countCycles].startDateTime}" pattern="HH:mm" type="both"/>
+			</c:if>
+			<c:if test='${date != currentDate}'>
+				Last run: <fmt:formatDate value="${cycles[countCycles].startDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/>
+			</c:if>
+			<br />
+			 <c:if test='${cycles[countCycles].endDateTime == null}'>
+				 Status: Running
+			 </c:if>
+			<c:if test='${cycles[countCycles].endDateTime != null}'>
+				 Status: Not running
+			</c:if>
+		<br />
+		</c:if>
 		</p>
-		<br/>
+		<br />
 		<div class="link"><a href="">View detailed report</a>		<a href="">History</a></div>
+		
 		</div>
 		</tr>
-		
+		<%countCycles++; %>
+		<%pageContext.setAttribute("countCycles", countCycles); %>
 	</c:forEach>
+
 </table>
 
 </div>

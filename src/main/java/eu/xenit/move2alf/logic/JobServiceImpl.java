@@ -91,8 +91,33 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public List<Cycle> getCyclesForJob(int jobId) {
 		return getSessionFactory().getCurrentSession().createQuery(
-				"from Cycle as c where c.schedule.job.id=?").setLong(0,
+				"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc").setLong(0,
 				jobId).list();
+	}
+	
+	@Override
+	public List<Cycle> getLastCycleForJobs(){
+		List<Job> allJobs = getAllJobs();
+		
+		List<Cycle> jobCycles = new ArrayList();
+	
+		List<Cycle> lastCycles = new ArrayList();
+		
+		for(int i=0; i<allJobs.size(); i++){
+			jobCycles = getCyclesForJob(allJobs.get(i).getId());
+			
+			if(jobCycles.size() == 0){
+				lastCycles.add(null);
+			}else{
+				if(jobCycles.get(0).getEndDateTime() == null){
+					lastCycles.add(jobCycles.get(0));
+				}else{
+					lastCycles.add(jobCycles.get(jobCycles.size()-1));
+				}
+			}		
+		}
+		
+		return lastCycles;
 	}
 
 	@Override
@@ -200,13 +225,76 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 	
 	@Override
-	public List<ConfiguredSourceSink> getConfiguredSourceSink(String sourceSinkName){
+	public ConfiguredSourceSink editDestination(int sinkId, String destinationType, HashMap destinationParams){
+			
+			ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
+			
+			sourceSink.setSourceSinkClassName(destinationType);
+
+			ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
+			sourceSinkName.setConfiguredSourceSink(sourceSink);
+			sourceSinkName.setName("name");
+			sourceSinkName.setValue((String) destinationParams.get(EDestinationParameter.NAME));
+			ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
+			sourceSinkURL.setConfiguredSourceSink(sourceSink);
+			sourceSinkURL.setName("url");
+			sourceSinkURL.setValue((String) destinationParams.get(EDestinationParameter.URL));
+			ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
+			sourceSinkUser.setConfiguredSourceSink(sourceSink);
+			sourceSinkUser.setName("user");
+			sourceSinkUser.setValue((String) destinationParams.get(EDestinationParameter.USER));
+			ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
+			sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+			sourceSinkPassword.setName("password");
+			sourceSinkPassword.setValue((String) destinationParams.get(EDestinationParameter.PASSWORD));
+			ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
+			sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+			sourceSinkThreads.setName("threads");
+			sourceSinkThreads.setValue(destinationParams.get(EDestinationParameter.THREADS).toString());
+			
+			Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+			parameterSet.add(sourceSinkName);
+			parameterSet.add(sourceSinkURL);
+			parameterSet.add(sourceSinkUser);
+			parameterSet.add(sourceSinkPassword);
+			parameterSet.add(sourceSinkThreads);
+			
+			sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+			
+			getSessionFactory().getCurrentSession().save(sourceSink);
+			
+			return sourceSink;
+	}
+	
+	@Override
+	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks(){
 		@SuppressWarnings("unchecked")
 		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory.getCurrentSession().createQuery(
-				"from ConfiguredSourceSink as c where c.sourceSinkClassName=?").setString(0, sourceSinkName)
+				"from ConfiguredSourceSink")
 				.list();
 		
 			return (List<ConfiguredSourceSink>) configuredSourceSink;
+	}
+	
+	@Override
+	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId){
+		@SuppressWarnings("unchecked")
+		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory.getCurrentSession().createQuery(
+				"from ConfiguredSourceSink as c where c.id=?").setLong(0, sourceSinkId)
+				.list();
+		
+			return (ConfiguredSourceSink) configuredSourceSink.get(0);
+	}
+	
+	@Override
+	public void deleteDestination(int id) {
+		ConfiguredSourceSink destination = getConfiguredSourceSink(id);
+		
+		Set emptySet = new HashSet();
+		
+		destination.setConfiguredSourceSinkParameterSet(emptySet);
+		
+		sessionFactory.getCurrentSession().delete(destination);
 	}
 	
 }

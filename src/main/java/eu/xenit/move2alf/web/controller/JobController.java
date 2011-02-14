@@ -50,6 +50,7 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("jobs", getJobService().getAllJobs());
 		mav.addObject("roles", getUserService().getCurrentUser().getUserRoleSet());
+		mav.addObject("cycles", getJobService().getLastCycleForJobs());
 		mav.setViewName("dashboard");
 		return mav;
 	}
@@ -58,7 +59,7 @@ public class JobController {
 	public ModelAndView createJobForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", new JobConfig());
-		mav.addObject("destinations", getJobService().getConfiguredSourceSink("AlfrescoSink"));
+		mav.addObject("destinations", getJobService().getAllConfiguredSourceSinks());
 		mav.setViewName("create-job");
 		return mav;
 	}
@@ -77,7 +78,6 @@ public class JobController {
 		for(int j =0; j<sourceSink.size(); j++){
 			
 			String createdSourceSink = sourceSink.get(j);
-			System.out.println("VALUE IS "+createdSourceSink);
 			String[] parameters = createdSourceSink.split("\\|");
 			
 			HashMap destinationParams = new HashMap();
@@ -103,7 +103,7 @@ public class JobController {
 		jobConfig.setDescription(getJobService().getJob(id).getDescription());
 		mav.addObject("job",jobConfig);
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
-		mav.addObject("destinations", getJobService().getConfiguredSourceSink("AlfrescoSink"));
+		mav.addObject("destinations", getJobService().getAllConfiguredSourceSinks());
 		mav.setViewName("edit-job");
 		return mav;
 	}
@@ -159,7 +159,6 @@ public class JobController {
 		for(int j =0; j<sourceSink.size(); j++){
 			
 			String createdSourceSink = sourceSink.get(j);
-			System.out.println("VALUE IS "+createdSourceSink);
 			String[] parameters = createdSourceSink.split("\\|");
 			
 			HashMap destinationParams = new HashMap();
@@ -250,4 +249,97 @@ public class JobController {
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
+	
+	@RequestMapping("/destinations")
+	public ModelAndView destinations() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("destinations", getJobService().getAllConfiguredSourceSinks());
+		mav.setViewName("manage-destinations");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/destinations/create", method = RequestMethod.GET)
+	public ModelAndView createDestinationsForm() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", new JobConfig());
+		mav.setViewName("create-destinations");
+		return mav;
+	}
+
+	@RequestMapping(value = "/destinations/create", method = RequestMethod.POST)
+	public ModelAndView createDestinations(JobConfig job) {
+		ModelAndView mav = new ModelAndView();
+		
+		List<String> sourceSink = job.getSourceSink();
+		
+		for(int j =0; j<sourceSink.size(); j++){
+			
+			String createdSourceSink = sourceSink.get(j);
+			String[] parameters = createdSourceSink.split("\\|");
+			
+			HashMap destinationParams = new HashMap();
+			
+			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
+			destinationParams.put(EDestinationParameter.URL, parameters[1]);
+			destinationParams.put(EDestinationParameter.USER, parameters[2]);
+			destinationParams.put(EDestinationParameter.PASSWORD, parameters[3]);
+			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
+			getJobService().createDestination(parameters[5], destinationParams);
+			
+		}
+		mav.setViewName("redirect:/destinations");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.GET)
+	public ModelAndView editDestinationForm(@PathVariable int id) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", new JobConfig());
+		mav.addObject("destination", getJobService().getConfiguredSourceSink(id));
+		mav.setViewName("edit-destination");
+		return mav;
+	}
+
+	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
+	public ModelAndView editDestination(@PathVariable int id, JobConfig job) {
+		ModelAndView mav = new ModelAndView();
+
+		
+		List<String> sourceSink = job.getSourceSink();
+		
+		for(int j =0; j<sourceSink.size(); j++){
+			
+			String createdSourceSink = sourceSink.get(j);
+			System.out.println(createdSourceSink);
+			String[] parameters = createdSourceSink.split("\\|");
+			
+			HashMap destinationParams = new HashMap();
+			
+			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
+			destinationParams.put(EDestinationParameter.URL, parameters[1]);
+			destinationParams.put(EDestinationParameter.USER, parameters[2]);
+			destinationParams.put(EDestinationParameter.PASSWORD, parameters[3]);
+			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
+			getJobService().editDestination(id, parameters[5], destinationParams);	
+		}
+		mav.setViewName("redirect:/destinations");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
+	public ModelAndView confirmDeleteDestination(@PathVariable int id) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("destination", getJobService().getConfiguredSourceSink(id));
+		mav.setViewName("delete-destination");
+		return mav;
+	}
+
+	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.POST)
+	public ModelAndView deleteDestination(@PathVariable int id) {
+		ModelAndView mav = new ModelAndView();
+		getJobService().deleteDestination(id);
+		mav.setViewName("redirect:/destinations");
+		return mav;
+	}
+
 }

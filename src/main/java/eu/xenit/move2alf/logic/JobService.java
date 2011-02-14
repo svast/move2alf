@@ -66,10 +66,19 @@ public interface JobService {
 	/**
 	 * Return all cycles for a job with the given name.
 	 * 
-	 * @param jobId 	The id of the job
+	 * @param jobId 		The id of the job
+	 * return List<Cycle> 	A list of cycles
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
 	public List<Cycle> getCyclesForJob(int jobId);
+	
+	/**
+	 * Return the last cycle for each job.
+	 * 
+	 * @return List<Cycle> 	A list of cycles
+	 */
+	@PreAuthorize("hasRole('CONSUMER')")
+	public List<Cycle> getLastCycleForJobs();
 
 	
 	/**
@@ -132,18 +141,43 @@ public interface JobService {
 	 * 
 	 * @param destinationType		The type of destination
 	 * @param destinationParams 	A map of parameters that define the destination
-	 * @return the schedule
+	 * @return the configured source sink
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
 	ConfiguredSourceSink createDestination(String destinationType, HashMap destinationParams);
 
 	/**
-	 * gets the configured source sinks based on the type of source sink (destination)
+	 * Edits a destination
 	 * 
-	 * @param sourceSinkName		The type/classname of the source sink
+	 * @param dinkId
+	 * @param destinationType		The type of destination
+	 * @param destinationParams 	A map of parameters that define the destination
+	 * @return the configured source sink
+	 */
+	ConfiguredSourceSink editDestination(int sinkId, String destinationType, HashMap destinationParams);
+	
+	
+	/**
+	 * gets all configured source sinks
+	 * 
 	 * @return a list of configured source sinks
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
-	List<ConfiguredSourceSink> getConfiguredSourceSink(String sourceSinkName);
+	List<ConfiguredSourceSink> getAllConfiguredSourceSinks();
+
+	/**
+	 * gets a configured source sink based on id.
+	 * 
+	 * @param sourceSinkId
+	 * @return a list of configured source sinks
+	 */
+	ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId);
+
+	/**
+	 * deletes a configured source sink based on id.
+	 * 
+	 * @param id
+	 */
+	void deleteDestination(int id);
 	
 }

@@ -407,21 +407,58 @@ function addRowToDestination(){
 	  var row = tbl.insertRow(lastRow);
 
 	  var cellFirst = row.insertCell(0);
-		
-	 var dest = document.createElement('input');
-	 var id = 'dest'+iteration;
-	 dest.id=id;
-	 dest.type='radio';
-	 dest.name='dest';
-	 
-	var len = document.createJob.destinationType.length;
-	var destType="";
-	for(var i=0; i<len; i++){
-		if(document.createJob.destinationType[i].checked){
-			destType=document.createJob.destinationType[i].value;
-		}
-	}
 
+	 try{
+		var len = document.createJob.destinationType.length;
+		var destType="";
+		for(var i=0; i<len; i++){
+			if(document.createJob.destinationType[i].checked){
+				destType=document.createJob.destinationType[i].value;
+			}
+		}
+		var dest = document.createElement('input');
+		 var id = 'dest'+iteration;
+		 dest.id=id;
+		 dest.type='radio';
+		 dest.name='dest';
+	 }catch(e){
+		 try{
+		 	var len = document.createDestinations.destinationType.length;
+			var destType="";
+			for(var i=0; i<len; i++){
+				if(document.createDestinations.destinationType[i].checked){
+					destType=document.createDestinations.destinationType[i].value;
+				}
+			}
+			var dest = document.createElement('div');
+		 }catch(e){
+			 try{
+			 	var len = document.editJob.destinationType.length;
+				var destType="";
+				for(var i=0; i<len; i++){
+					if(document.editJob.destinationType[i].checked){
+						destType=document.editJob.destinationType[i].value;
+					}
+				}
+				var dest = document.createElement('input');
+				 var id = 'dest'+iteration;
+				 dest.id=id;
+				 dest.type='radio';
+				 dest.name='dest';
+			 }
+			 catch(e){
+				 var len = document.editDestination.destinationType.length;
+					var destType="";
+					for(var i=0; i<len; i++){
+						if(document.editDestination.destinationType[i].checked){
+							destType=document.editDestination.destinationType[i].value;
+						}
+					}
+					var dest = document.createElement('div');
+			 }
+		 }
+	 }
+	 
 	var value = document.getElementById('destinationName').value+"|"+document.getElementById('destinationURL').value+"|"+document.getElementById('alfUser').value+"|"+document.getElementById('alfPswd').value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
 	 dest.value=value;
 
@@ -463,6 +500,10 @@ function setDestInForm(value){
 			 
 		}
 	  cellFirst.appendChild(fi);
+}
+
+function noDestNeeded(){
+	document.getElementById('noDestinations').style.display='none';
 }
 
 //copyright 1999 Idocs, Inc. http://www.idocs.com
@@ -516,12 +557,14 @@ function numbersonly(myfield, e, dec)
 <div class="container">
 <div class="span-24 last header">
 <h1>XeniT Move2Alf</h1>
+
 <sec:authorize access="hasRole('CONSUMER')">
 	<p><a href="<spring:url value="/" htmlEscape="true"/>">Home</a> |
-	Username: <sec:authentication property="principal.username" /> <sec:authorize
-		access="hasRole('SYSTEM_ADMIN')">
-| <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage
-		users</a>
-	</sec:authorize> | <a
-		href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a></p>
-</sec:authorize></div>
+	Username: <sec:authentication property="principal.username" /> 
+	</sec:authorize>
+	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
+| <a href="<spring:url value="/destinations/" htmlEscape="true"/>">Manage destinations</a>
+| <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
+	</sec:authorize> 
+| <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a></p>
+</div>

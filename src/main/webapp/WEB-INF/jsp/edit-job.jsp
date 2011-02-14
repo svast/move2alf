@@ -39,6 +39,7 @@
 
 <%@ include file="/WEB-INF/jsp/destination.jsp"%>
 
+<p class="indent">Path: <form:input path="InputFolder" size="50" maxlength="50" /></p>
 <br />
 
 <h4>Schedule</h4>

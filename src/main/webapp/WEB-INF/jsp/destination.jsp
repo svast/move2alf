@@ -14,8 +14,16 @@
 <td>
 <div>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}" />"  onclick="fillDestFields(<%=count %>)" />
-<c:out value="${destinationParams.value}" /> 
+<c:out value="${destinationParams.value}" /> - 
 <%count++; %>
+</c:if>
+</c:forEach>
+<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
+<c:if test="${destinationParams.name=='url'}" >
+<c:out value="${destinationParams.value}" />
+</div>
+</td>
+</tr>
 </c:if>
 </c:forEach>
 </c:forEach>
@@ -61,7 +69,5 @@
 
 <table id="tblDestForm" class="hide">
 </table>
-
-<p>Path: <form:input path="InputFolder" size="50" maxlength="50" /></p>
 
 </div>
