@@ -13,6 +13,8 @@ public class Schedule extends IdObject {
 	
 	private UserPswd creator;
 	
+	
+	
 	private Date creationDateTime;
 	
 	private Date lastModifyDateTime;
