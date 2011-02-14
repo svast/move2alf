@@ -347,8 +347,10 @@ function getCronJob(time, day, date, period, mins){
 		break;
 	case "Hourly":
 		hours='*';
+		dow='?';
 		break;
 	case "Daily":
+		dow='?';
 		break;
 	case "Weekly":
 		dom='?';
