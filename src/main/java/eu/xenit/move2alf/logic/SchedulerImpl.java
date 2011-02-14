@@ -1,12 +1,15 @@
 package eu.xenit.move2alf.logic;
 
+import java.text.ParseException;
+
 import javax.annotation.PostConstruct;
 
 import org.hibernate.SessionFactory;
+import org.quartz.CronTrigger;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,18 +21,19 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
 
 @Service("scheduler")
-public class SchedulerImpl extends AbstractHibernateService implements Scheduler {
+public class SchedulerImpl extends AbstractHibernateService implements
+		Scheduler {
 	private static final Logger logger = LoggerFactory
 			.getLogger(SchedulerImpl.class);
 
 	private JobService jobService;
-	
+
 	private SessionFactory sessionFactory;
 
 	private org.quartz.Scheduler scheduler;
 
-	private static final String JOB_ID = "jobId";
-	
+	static final String JOB_ID = "jobId";
+
 	@Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
@@ -43,7 +47,7 @@ public class SchedulerImpl extends AbstractHibernateService implements Scheduler
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
-	
+
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
 	}
@@ -59,6 +63,11 @@ public class SchedulerImpl extends AbstractHibernateService implements Scheduler
 		logger.debug("Reloading schedules");
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
+			if (scheduler.isStarted()) {
+				// stop previous scheduler and get new one
+				scheduler.shutdown(true); // TODO: will this block creating new schedules when jobs are running?
+				scheduler = StdSchedulerFactory.getDefaultScheduler();
+			}
 			scheduler.start();
 		} catch (SchedulerException e) {
 			logger.error("Failed to create scheduler");
@@ -66,22 +75,29 @@ public class SchedulerImpl extends AbstractHibernateService implements Scheduler
 			return;
 		}
 		for (Job job : getJobService().getAllJobs()) {
+			logger.debug("Scheduling job: " + job.getName());
+			JobDetail jobDetail = new JobDetail("Schedule-" + job.getName()
+					+ "-" + job.getId(), JobExecutor.class);
+			JobDataMap jobData = new JobDataMap();
+			jobData.put(JOB_ID, job.getId());
+			jobDetail.setJobDataMap(jobData);
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
-				System.out.println("Adding schedule: " + cronExpression);
-				JobDetail jobDetail = new JobDetail("Schedule-" + job.getName() + "-" + schedule.getId(), JobExecutor.class);
+				try {
+					Trigger trigger = new CronTrigger("Trigger-"
+							+ schedule.getId(), "JobScheduleGroup",
+							cronExpression);
+					scheduler.scheduleJob(jobDetail, trigger);
+				} catch (SchedulerException schedulerException) {
+					logger.error("Scheduling job \"" + job.getName()
+							+ "\" failed");
+					schedulerException.printStackTrace();
+				} catch (ParseException parseException) {
+					logger.error("Parsing of cron expression for job \""
+							+ job.getName() + "\" failed: " + cronExpression);
+					parseException.printStackTrace();
+				}
 			}
 		}
-	}
-
-	class JobExecutor implements org.quartz.Job {
-
-		@Override
-		public void execute(JobExecutionContext context)
-				throws JobExecutionException {
-			Integer jobId = (Integer) context.get(JOB_ID);
-			getJobService().executeJob(jobId);
-		}
-		
 	}
 }

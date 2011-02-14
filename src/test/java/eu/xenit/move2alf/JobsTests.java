@@ -33,10 +33,10 @@ public class JobsTests extends IntegrationTests {
 		assertEquals("test job", newJob.getName());
 		assertEquals("description of test job", newJob.getDescription());
 		Date after = new Date();
-		assertTrue(before.before(newJob.getCreationDateTime()));
-		assertTrue(after.after(newJob.getCreationDateTime()));
-		assertTrue(before.before(newJob.getLastModifyDateTime()));
-		assertTrue(after.after(newJob.getLastModifyDateTime()));
+		assertTrue(before.before(newJob.getCreationDateTime()) || before.equals(newJob.getCreationDateTime()));
+		assertTrue(after.after(newJob.getCreationDateTime()) || after.equals(newJob.getCreationDateTime()));
+		assertTrue(before.before(newJob.getLastModifyDateTime()) || before.equals(newJob.getLastModifyDateTime()));
+		assertTrue(after.after(newJob.getLastModifyDateTime()) || after.equals(newJob.getLastModifyDateTime()));
 		assertEquals("admin", newJob.getCreator().getUserName());
 	}
 	
