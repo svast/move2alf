@@ -80,7 +80,4 @@
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
-	
-	<bean id="scheduler" class="eu.xenit.move2alf.core.scheduler.Scheduler" init-method="init">
-	</bean>
 </beans>

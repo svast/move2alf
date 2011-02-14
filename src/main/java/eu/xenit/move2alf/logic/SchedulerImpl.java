@@ -1,4 +1,6 @@
-package eu.xenit.move2alf.core.scheduler;
+package eu.xenit.move2alf.logic;
+
+import javax.annotation.PostConstruct;
 
 import org.hibernate.SessionFactory;
 import org.quartz.SchedulerException;
@@ -6,16 +8,16 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.logic.JobService;
 
-public class Scheduler {
+@Service("scheduler")
+public class SchedulerImpl extends AbstractHibernateService implements Scheduler {
 	private static final Logger logger = LoggerFactory
-			.getLogger(Scheduler.class);
+			.getLogger(SchedulerImpl.class);
 
 	private JobService jobService;
 	
@@ -41,9 +43,15 @@ public class Scheduler {
 		return sessionFactory;
 	}
 
+	@PostConstruct
 	public void init() {
+		logger.debug("Initializing scheduler");
 		Util.authenticateAsSystem();
-		// Start Quartz
+		reloadSchedules();
+	}
+
+	public void reloadSchedules() {
+		logger.debug("Reloading schedules");
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 			scheduler.start();
@@ -54,11 +62,10 @@ public class Scheduler {
 		}
 		for (Job job : getJobService().getAllJobs()) {
 			for (Schedule schedule : job.getSchedules()) {
-				
+				String cronExpression = schedule.getQuartzScheduling();
+				System.out.println("Adding schedule: " + cronExpression);
 			}
 		}
 	}
 
-
-	// shutdown
 }
