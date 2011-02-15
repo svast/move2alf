@@ -13,7 +13,7 @@ public class JobExecutor implements org.quartz.Job {
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
 		Integer jobId = (Integer) context.getMergedJobDataMap().get(
-				SchedulerImpl.JOB_ID);
+				SchedulerImpl.SCHEDULE_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
 		jobService.executeJob(jobId);

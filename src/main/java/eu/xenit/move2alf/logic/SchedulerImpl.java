@@ -32,7 +32,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	private org.quartz.Scheduler scheduler;
 
-	static final String JOB_ID = "jobId";
+	static final String SCHEDULE_ID = "jobId";
 
 	static final String JOB_SERVICE = "jobService";
 
@@ -81,16 +81,17 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			logger.debug("Scheduling job: " + job.getName());
 			JobDetail jobDetail = new JobDetail("Schedule-" + job.getName()
 					+ "-" + job.getId(), JobExecutor.class);
-			JobDataMap jobData = new JobDataMap();
-			jobData.put(JOB_ID, job.getId());
-			jobData.put(JOB_SERVICE, getJobService());
-			jobDetail.setJobDataMap(jobData);
+			
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
 				try {
 					Trigger trigger = new CronTrigger("Trigger-"
 							+ schedule.getId(), "JobScheduleGroup",
 							cronExpression);
+					JobDataMap jobData = new JobDataMap();
+					jobData.put(SCHEDULE_ID, schedule.getId());
+					jobData.put(JOB_SERVICE, getJobService());
+					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {
 					logger.error("Scheduling job \"" + job.getName()

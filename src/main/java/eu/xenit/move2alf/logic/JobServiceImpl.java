@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -85,7 +87,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		if (jobs.size() == 1) {
 			return (Job) jobs.get(0);
 		} else {
-			throw new NonexistentUserException();
+			throw new NonexistentUserException(); // TODO: exception type??
 		}
 	}
 
@@ -291,9 +293,37 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public void executeJob(int jobId) {
-		Job job = getJob(jobId);
+	public void executeJob(int scheduleId) {
+		Schedule schedule = getSchedule(scheduleId);
+		Job job = schedule.getJob();
 		logger.debug("Executing job \"" + job.getName() + "\"");
+
+		Cycle cycle = new Cycle();
+		cycle.setSchedule(schedule);
+		cycle.setStartDateTime(new Date());
+
+		// TODO: status
+
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		ConfiguredAction action = job.getFirstConfiguredAction();
+		while (action != null) {
+			// TODO: set running action(s) on cycle
+			try {
+				action.execute(parameterMap);
+				// TODO: status?
+			} catch (Exception e) {
+				action.getAppliedConfiguredActionOnFailure().execute(
+						parameterMap);
+				// TODO: status
+				break;
+			}
+			action = action.getAppliedConfiguredActionOnSuccess();
+		}
+
+		// TODO: status?
+
+		cycle.setEndDateTime(new Date());
+		getSessionFactory().getCurrentSession().save(cycle);
 	}
 
 	@Override

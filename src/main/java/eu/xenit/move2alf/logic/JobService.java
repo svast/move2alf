@@ -191,11 +191,11 @@ public interface JobService {
 	/**
 	 * Start execution of a job
 	 * 
-	 * @param jobId
-	 *            The id of the job to start
+	 * @param scheduleId
+	 *            The id of the schedule to start
 	 */
 	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
-	public void executeJob(int jobId);
+	public void executeJob(int scheduleId);
 
 	/**
 	 * deletes a configured source sink based on id.

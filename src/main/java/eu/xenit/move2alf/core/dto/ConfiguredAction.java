@@ -30,8 +30,6 @@ public class ConfiguredAction extends IdObject {
 		this.actionClassName = actionClassName;
 	}
 
-
-
 	public void setAppliedConfiguredActionOnSuccess(
 			ConfiguredAction appliedConfiguredActionOnSuccess) {
 		this.appliedConfiguredActionOnSuccess = appliedConfiguredActionOnSuccess;
