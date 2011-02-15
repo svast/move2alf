@@ -24,10 +24,10 @@ import eu.xenit.move2alf.core.enums.EDestinationParameter;
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
-	.getLogger(JobServiceImpl.class);
-	
+			.getLogger(JobServiceImpl.class);
+
 	private UserService userService;
-	
+
 	@Autowired
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -40,7 +40,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Job> getAllJobs() {
-		return getSessionFactory().getCurrentSession().createQuery("from Job").list();
+		return getSessionFactory().getCurrentSession().createQuery("from Job")
+				.list();
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(job);
 		return job;
 	}
-	
+
 	@Override
 	public Job editJob(int id, String name, String description) {
 		Date now = new Date();
@@ -69,55 +70,56 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(job);
 		return job;
 	}
-	
+
 	@Override
 	public void deleteJob(int id) {
 		Job job = getJob(id);
 		sessionFactory.getCurrentSession().delete(job);
 	}
-	
+
 	@Override
 	public Job getJob(int id) {
 		@SuppressWarnings("unchecked")
 		List jobs = sessionFactory.getCurrentSession().createQuery(
-				"from Job as j where j.id=?").setLong(0, id)
-				.list();
+				"from Job as j where j.id=?").setLong(0, id).list();
 		if (jobs.size() == 1) {
 			return (Job) jobs.get(0);
 		} else {
 			throw new NonexistentUserException();
 		}
 	}
-	
+
 	@Override
 	public List<Cycle> getCyclesForJob(int jobId) {
-		return getSessionFactory().getCurrentSession().createQuery(
-				"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc").setLong(0,
-				jobId).list();
+		return getSessionFactory()
+				.getCurrentSession()
+				.createQuery(
+						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc")
+				.setLong(0, jobId).list();
 	}
-	
+
 	@Override
-	public List<Cycle> getLastCycleForJobs(){
+	public List<Cycle> getLastCycleForJobs() {
 		List<Job> allJobs = getAllJobs();
-		
+
 		List<Cycle> jobCycles = new ArrayList();
-	
+
 		List<Cycle> lastCycles = new ArrayList();
-		
-		for(int i=0; i<allJobs.size(); i++){
+
+		for (int i = 0; i < allJobs.size(); i++) {
 			jobCycles = getCyclesForJob(allJobs.get(i).getId());
-			
-			if(jobCycles.size() == 0){
+
+			if (jobCycles.size() == 0) {
 				lastCycles.add(null);
-			}else{
-				if(jobCycles.get(0).getEndDateTime() == null){
+			} else {
+				if (jobCycles.get(0).getEndDateTime() == null) {
 					lastCycles.add(jobCycles.get(0));
-				}else{
-					lastCycles.add(jobCycles.get(jobCycles.size()-1));
+				} else {
+					lastCycles.add(jobCycles.get(jobCycles.size() - 1));
 				}
-			}		
+			}
 		}
-		
+
 		return lastCycles;
 	}
 
@@ -125,11 +127,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<Schedule> getSchedulesForJob(int jobId) {
 		@SuppressWarnings("unchecked")
 		List schedules = sessionFactory.getCurrentSession().createQuery(
-				"from Schedule as s where s.job.id=?").setLong(0, jobId)
-				.list();
-			return (List<Schedule>) schedules;
+				"from Schedule as s where s.job.id=?").setLong(0, jobId).list();
+		return (List<Schedule>) schedules;
 	}
-	
+
 	@Override
 	public Schedule getSchedule(int scheduleId) {
 		@SuppressWarnings("unchecked")
@@ -137,30 +138,30 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				"from Schedule as s where s.id=?").setLong(0, scheduleId)
 				.list();
 
-			return (Schedule) schedules.get(0);
+		return (Schedule) schedules.get(0);
 	}
-	
+
 	@Override
 	public int getScheduleId(int jobId, String cronJob) {
 		@SuppressWarnings("unchecked")
 		List schedule = sessionFactory.getCurrentSession().createQuery(
-				"from Schedule as s where s.job.id=? and s.quartzScheduling=?").setLong(0, jobId).setString(1,cronJob)
-				.list();
+				"from Schedule as s where s.job.id=? and s.quartzScheduling=?")
+				.setLong(0, jobId).setString(1, cronJob).list();
 
-			return ((Schedule) schedule.get(0)).getId();
+		return ((Schedule) schedule.get(0)).getId();
 	}
-	
+
 	@Override
 	public List<String> getCronjobsForJob(int jobId) {
 		List<Schedule> schedules = getSchedulesForJob(jobId);
 		List<String> cronjobs = new ArrayList();
-		
-		for(int i=0; i<schedules.size(); i++){
+
+		for (int i = 0; i < schedules.size(); i++) {
 			cronjobs.add(schedules.get(i).getQuartzScheduling());
 		}
-			return cronjobs;
+		return cronjobs;
 	}
-	
+
 	@Override
 	public Schedule createSchedule(int jobId, String cronJob) {
 		Date now = new Date();
@@ -176,105 +177,117 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(schedule);
 		return schedule;
 	}
-	
+
 	@Override
 	public void deleteSchedule(int scheduleId) {
 		Schedule schedule = getSchedule(scheduleId);
 		sessionFactory.getCurrentSession().delete(schedule);
 	}
-	
-	@Override
-	public ConfiguredSourceSink createDestination(String destinationType, HashMap destinationParams){
-			
-			ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
-			
-			sourceSink.setSourceSinkClassName(destinationType);
 
-			ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
-			sourceSinkName.setConfiguredSourceSink(sourceSink);
-			sourceSinkName.setName("name");
-			sourceSinkName.setValue((String) destinationParams.get(EDestinationParameter.NAME));
-			ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
-			sourceSinkURL.setConfiguredSourceSink(sourceSink);
-			sourceSinkURL.setName("url");
-			sourceSinkURL.setValue((String) destinationParams.get(EDestinationParameter.URL));
-			ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
-			sourceSinkUser.setConfiguredSourceSink(sourceSink);
-			sourceSinkUser.setName("user");
-			sourceSinkUser.setValue((String) destinationParams.get(EDestinationParameter.USER));
-			ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
-			sourceSinkPassword.setConfiguredSourceSink(sourceSink);
-			sourceSinkPassword.setName("password");
-			sourceSinkPassword.setValue((String) destinationParams.get(EDestinationParameter.PASSWORD));
-			ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
-			sourceSinkThreads.setConfiguredSourceSink(sourceSink);
-			sourceSinkThreads.setName("threads");
-			sourceSinkThreads.setValue(destinationParams.get(EDestinationParameter.THREADS).toString());
-			
-			Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
-			parameterSet.add(sourceSinkName);
-			parameterSet.add(sourceSinkURL);
-			parameterSet.add(sourceSinkUser);
-			parameterSet.add(sourceSinkPassword);
-			parameterSet.add(sourceSinkThreads);
-			
-			sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
-			
-			getSessionFactory().getCurrentSession().save(sourceSink);
-			
-			return sourceSink;
-	}
-	
 	@Override
-	public ConfiguredSourceSink editDestination(int sinkId, String destinationType, HashMap destinationParams){
-			
-			ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
-			
-			sourceSink.setSourceSinkClassName(destinationType);
+	public ConfiguredSourceSink createDestination(String destinationType,
+			HashMap destinationParams) {
 
-			ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
-			sourceSinkName.setConfiguredSourceSink(sourceSink);
-			sourceSinkName.setName("name");
-			sourceSinkName.setValue((String) destinationParams.get(EDestinationParameter.NAME));
-			ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
-			sourceSinkURL.setConfiguredSourceSink(sourceSink);
-			sourceSinkURL.setName("url");
-			sourceSinkURL.setValue((String) destinationParams.get(EDestinationParameter.URL));
-			ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
-			sourceSinkUser.setConfiguredSourceSink(sourceSink);
-			sourceSinkUser.setName("user");
-			sourceSinkUser.setValue((String) destinationParams.get(EDestinationParameter.USER));
-			ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
-			sourceSinkPassword.setConfiguredSourceSink(sourceSink);
-			sourceSinkPassword.setName("password");
-			sourceSinkPassword.setValue((String) destinationParams.get(EDestinationParameter.PASSWORD));
-			ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
-			sourceSinkThreads.setConfiguredSourceSink(sourceSink);
-			sourceSinkThreads.setName("threads");
-			sourceSinkThreads.setValue(destinationParams.get(EDestinationParameter.THREADS).toString());
-			
-			Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
-			parameterSet.add(sourceSinkName);
-			parameterSet.add(sourceSinkURL);
-			parameterSet.add(sourceSinkUser);
-			parameterSet.add(sourceSinkPassword);
-			parameterSet.add(sourceSinkThreads);
-			
-			sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
-			
-			getSessionFactory().getCurrentSession().save(sourceSink);
-			
-			return sourceSink;
+		ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
+
+		sourceSink.setSourceSinkClassName(destinationType);
+
+		ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
+		sourceSinkName.setConfiguredSourceSink(sourceSink);
+		sourceSinkName.setName("name");
+		sourceSinkName.setValue((String) destinationParams
+				.get(EDestinationParameter.NAME));
+		ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
+		sourceSinkURL.setConfiguredSourceSink(sourceSink);
+		sourceSinkURL.setName("url");
+		sourceSinkURL.setValue((String) destinationParams
+				.get(EDestinationParameter.URL));
+		ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
+		sourceSinkUser.setConfiguredSourceSink(sourceSink);
+		sourceSinkUser.setName("user");
+		sourceSinkUser.setValue((String) destinationParams
+				.get(EDestinationParameter.USER));
+		ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
+		sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+		sourceSinkPassword.setName("password");
+		sourceSinkPassword.setValue((String) destinationParams
+				.get(EDestinationParameter.PASSWORD));
+		ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
+		sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+		sourceSinkThreads.setName("threads");
+		sourceSinkThreads.setValue(destinationParams.get(
+				EDestinationParameter.THREADS).toString());
+
+		Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+		parameterSet.add(sourceSinkName);
+		parameterSet.add(sourceSinkURL);
+		parameterSet.add(sourceSinkUser);
+		parameterSet.add(sourceSinkPassword);
+		parameterSet.add(sourceSinkThreads);
+
+		sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+
+		getSessionFactory().getCurrentSession().save(sourceSink);
+
+		return sourceSink;
 	}
-	
+
 	@Override
-	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks(){
+	public ConfiguredSourceSink editDestination(int sinkId,
+			String destinationType, HashMap destinationParams) {
+
+		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
+
+		sourceSink.setSourceSinkClassName(destinationType);
+
+		ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
+		sourceSinkName.setConfiguredSourceSink(sourceSink);
+		sourceSinkName.setName("name");
+		sourceSinkName.setValue((String) destinationParams
+				.get(EDestinationParameter.NAME));
+		ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
+		sourceSinkURL.setConfiguredSourceSink(sourceSink);
+		sourceSinkURL.setName("url");
+		sourceSinkURL.setValue((String) destinationParams
+				.get(EDestinationParameter.URL));
+		ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
+		sourceSinkUser.setConfiguredSourceSink(sourceSink);
+		sourceSinkUser.setName("user");
+		sourceSinkUser.setValue((String) destinationParams
+				.get(EDestinationParameter.USER));
+		ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
+		sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+		sourceSinkPassword.setName("password");
+		sourceSinkPassword.setValue((String) destinationParams
+				.get(EDestinationParameter.PASSWORD));
+		ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
+		sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+		sourceSinkThreads.setName("threads");
+		sourceSinkThreads.setValue(destinationParams.get(
+				EDestinationParameter.THREADS).toString());
+
+		Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+		parameterSet.add(sourceSinkName);
+		parameterSet.add(sourceSinkURL);
+		parameterSet.add(sourceSinkUser);
+		parameterSet.add(sourceSinkPassword);
+		parameterSet.add(sourceSinkThreads);
+
+		sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+
+		getSessionFactory().getCurrentSession().save(sourceSink);
+
+		return sourceSink;
+	}
+
+	@Override
+	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks() {
 		@SuppressWarnings("unchecked")
-		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory.getCurrentSession().createQuery(
-				"from ConfiguredSourceSink")
+		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
+				.getCurrentSession().createQuery("from ConfiguredSourceSink")
 				.list();
-		
-			return (List<ConfiguredSourceSink>) configuredSourceSink;
+
+		return (List<ConfiguredSourceSink>) configuredSourceSink;
 	}
 
 	@Override
@@ -282,26 +295,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		Job job = getJob(jobId);
 		logger.debug("Executing job \"" + job.getName() + "\"");
 	}
-	
+
 	@Override
-	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId){
+	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId) {
 		@SuppressWarnings("unchecked")
-		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory.getCurrentSession().createQuery(
-				"from ConfiguredSourceSink as c where c.id=?").setLong(0, sourceSinkId)
-				.list();
-		
-			return (ConfiguredSourceSink) configuredSourceSink.get(0);
+		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
+				.getCurrentSession().createQuery(
+						"from ConfiguredSourceSink as c where c.id=?").setLong(
+						0, sourceSinkId).list();
+
+		return (ConfiguredSourceSink) configuredSourceSink.get(0);
 	}
-	
+
 	@Override
 	public void deleteDestination(int id) {
 		ConfiguredSourceSink destination = getConfiguredSourceSink(id);
-		
+
 		Set emptySet = new HashSet();
-		
+
 		destination.setConfiguredSourceSinkParameterSet(emptySet);
-		
+
 		sessionFactory.getCurrentSession().delete(destination);
 	}
-	
+
 }

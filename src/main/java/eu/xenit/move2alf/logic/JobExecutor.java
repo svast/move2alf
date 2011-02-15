@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.xenit.move2alf.logic;
 
 import org.quartz.JobExecutionContext;
@@ -15,9 +12,11 @@ public class JobExecutor implements org.quartz.Job {
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
-		Integer jobId = (Integer) context.getMergedJobDataMap().get(SchedulerImpl.JOB_ID);
-		logger.debug("executing: " + jobId); // tmp 
-		// getJobService().executeJob(jobId);
+		Integer jobId = (Integer) context.getMergedJobDataMap().get(
+				SchedulerImpl.JOB_ID);
+		JobService jobService = (JobService) context.getMergedJobDataMap().get(
+				SchedulerImpl.JOB_SERVICE);
+		jobService.executeJob(jobId);
 	}
 
 }

@@ -34,6 +34,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	static final String JOB_ID = "jobId";
 
+	static final String JOB_SERVICE = "jobService";
+
 	@Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
@@ -65,7 +67,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 			if (scheduler.isStarted()) {
 				// stop previous scheduler and get new one
-				scheduler.shutdown(true); // TODO: will this block creating new schedules when jobs are running?
+				scheduler.shutdown(true); // TODO: will this block creating new
+											// schedules when jobs are running?
 				scheduler = StdSchedulerFactory.getDefaultScheduler();
 			}
 			scheduler.start();
@@ -80,6 +83,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					+ "-" + job.getId(), JobExecutor.class);
 			JobDataMap jobData = new JobDataMap();
 			jobData.put(JOB_ID, job.getId());
+			jobData.put(JOB_SERVICE, getJobService());
 			jobDetail.setJobDataMap(jobData);
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
