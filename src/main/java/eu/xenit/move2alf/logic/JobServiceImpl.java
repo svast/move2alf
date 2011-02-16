@@ -90,6 +90,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteJob(int id) {
 		Job job = getJob(id);
 		sessionFactory.getCurrentSession().delete(job);
+	
+		logger.debug("Reloading scheduler");
+		getSessionFactory().getCurrentSession().flush();
+		getScheduler().reloadSchedules();
 	}
 
 	@Override
