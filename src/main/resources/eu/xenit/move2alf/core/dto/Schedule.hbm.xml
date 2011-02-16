@@ -8,13 +8,18 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<many-to-one name="job" column="jobId"/>
-		<many-to-one name="creator" column="creatorId"/>
-		<property name="creationDateTime"/>
-		<property name="lastModifyDateTime"/>
-		<property name="state"/>
-		<property name="startDateTime"/>
-		<property name="endDateTime"/>
-		<property name="quartzScheduling"/>
+		<many-to-one name="job" column="jobId" />
+		<many-to-one name="creator" column="creatorId" />
+		<property name="creationDateTime" />
+		<property name="lastModifyDateTime" />
+		<property name="state">
+			<type name="org.hibernate.type.EnumType">
+				<param name="enumClass">eu.xenit.move2alf.core.enums.EScheduleState</param>
+				<param name="type">12</param>
+			</type>
+		</property>
+		<property name="startDateTime" />
+		<property name="endDateTime" />
+		<property name="quartzScheduling" />
 	</class>
 </hibernate-mapping>

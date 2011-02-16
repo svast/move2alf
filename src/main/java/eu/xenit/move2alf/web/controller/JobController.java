@@ -74,7 +74,7 @@ public class JobController {
 		}
 		
 		List<String> sourceSink = job.getSourceSink();
-		
+		if (sourceSink != null) {
 		for(int j =0; j<sourceSink.size(); j++){
 			
 			String createdSourceSink = sourceSink.get(j);
@@ -89,6 +89,7 @@ public class JobController {
 			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
 			getJobService().createDestination(parameters[5], destinationParams);
 			
+		}
 		}
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
@@ -302,7 +303,7 @@ public class JobController {
 
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
 	public ModelAndView editDestination(@PathVariable int id, JobConfig job) {
-		ModelAndView mav = new ModelAndView();
+		ModelAndView mav = new ModelAndView();	
 
 		
 		List<String> sourceSink = job.getSourceSink();

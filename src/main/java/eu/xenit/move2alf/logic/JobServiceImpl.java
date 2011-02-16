@@ -21,6 +21,7 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.core.enums.EScheduleState;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
@@ -29,6 +30,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			.getLogger(JobServiceImpl.class);
 
 	private UserService userService;
+	
+	private Scheduler scheduler;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -37,6 +40,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public UserService getUserService() {
 		return userService;
+	}
+
+	@Autowired
+	public void setScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	public Scheduler getScheduler() {
+		return scheduler;
 	}
 
 	@Override
@@ -173,10 +185,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		schedule.setCreationDateTime(now);
 		schedule.setLastModifyDateTime(now);
 		schedule.setQuartzScheduling(cronJob);
-		schedule.setState("test");
+		schedule.setState(EScheduleState.TEST);
 		schedule.setStartDateTime(now);
 		schedule.setEndDateTime(now);
 		getSessionFactory().getCurrentSession().save(schedule);
+		
+		getScheduler().reloadSchedules();
+		
 		return schedule;
 	}
 
@@ -184,6 +199,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteSchedule(int scheduleId) {
 		Schedule schedule = getSchedule(scheduleId);
 		sessionFactory.getCurrentSession().delete(schedule);
+		
+		getScheduler().reloadSchedules();
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 import eu.xenit.move2alf.common.IdObject;
@@ -17,7 +16,7 @@ public class Schedule extends IdObject {
 	
 	private Date lastModifyDateTime;
 	
-	private String state;
+	private EScheduleState state;
 	
 	private Date startDateTime;
 	
@@ -70,11 +69,11 @@ public class Schedule extends IdObject {
 		return lastModifyDateTime;
 	}
 
-	public void setState(String state) {
-		this.state="TEST";
+	public void setState(EScheduleState state) {
+		this.state = state;
 	}
 
-	public String getState() {
+	public EScheduleState getState() {
 		return state;
 	}
 
