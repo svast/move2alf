@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -30,7 +31,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			.getLogger(JobServiceImpl.class);
 
 	private UserService userService;
-	
+
 	private Scheduler scheduler;
 
 	@Autowired
@@ -99,7 +100,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		if (jobs.size() == 1) {
 			return (Job) jobs.get(0);
 		} else {
-			throw new NonexistentUserException(); // TODO: exception type??
+			throw new Move2AlfException("Job with id " + id + " not found."); // TODO:
+			// exception
+			// type??
 		}
 	}
 
@@ -151,8 +154,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		List schedules = sessionFactory.getCurrentSession().createQuery(
 				"from Schedule as s where s.id=?").setLong(0, scheduleId)
 				.list();
-
-		return (Schedule) schedules.get(0);
+		if (schedules.size() == 1) {
+			return (Schedule) schedules.get(0);
+		} else {
+			throw new Move2AlfException("Schedule with id " + scheduleId
+					+ " not found.");
+		}
 	}
 
 	@Override
@@ -180,26 +187,33 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public Schedule createSchedule(int jobId, String cronJob) {
 		Date now = new Date();
 		Schedule schedule = new Schedule();
-		schedule.setJob(getJob(jobId));
+		Job job = getJob(jobId);
+		schedule.setJob(job);
 		schedule.setCreator(getUserService().getCurrentUser());
 		schedule.setCreationDateTime(now);
 		schedule.setLastModifyDateTime(now);
 		schedule.setQuartzScheduling(cronJob);
-		schedule.setState(EScheduleState.TEST);
+		schedule.setState(EScheduleState.NOT_RUNNING);
 		schedule.setStartDateTime(now);
 		schedule.setEndDateTime(now);
 		getSessionFactory().getCurrentSession().save(schedule);
-		
+
+		logger.debug("Reloading scheduler");
+		getSessionFactory().getCurrentSession().evict(job); // job object is still in cache with old schedules
 		getScheduler().reloadSchedules();
-		
+
 		return schedule;
 	}
 
 	@Override
 	public void deleteSchedule(int scheduleId) {
 		Schedule schedule = getSchedule(scheduleId);
+		Job job = schedule.getJob();
 		sessionFactory.getCurrentSession().delete(schedule);
-		
+
+		logger.debug("Reloading scheduler");
+		getSessionFactory().getCurrentSession().evict(job); // job object is still in cache with old schedules
+		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
 	}
 
@@ -311,8 +325,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public void executeJob(int scheduleId) {
-		Schedule schedule = getSchedule(scheduleId);
-		Job job = schedule.getJob();
+		Schedule schedule;
+		Job job;
+		try {
+			schedule = getSchedule(scheduleId);
+			job = schedule.getJob();
+		} catch (Move2AlfException e) {
+			logger.error("Could not execute job with schedule ID " + scheduleId
+					+ " because schedule or job does not exist.");
+			return;
+		}
 		logger.debug("Executing job \"" + job.getName() + "\"");
 
 		Cycle cycle = new Cycle();
@@ -350,8 +372,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.getCurrentSession().createQuery(
 						"from ConfiguredSourceSink as c where c.id=?").setLong(
 						0, sourceSinkId).list();
-
-		return (ConfiguredSourceSink) configuredSourceSink.get(0);
+		if (configuredSourceSink.size() == 1) {
+			return (ConfiguredSourceSink) configuredSourceSink.get(0);
+		} else {
+			throw new Move2AlfException("ConfiguredSourceSink with id "
+					+ sourceSinkId + " not found");
+		}
 	}
 
 	@Override

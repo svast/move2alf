@@ -81,6 +81,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			logger.debug("Scheduling job: " + job.getName());
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
+				logger.debug("Adding schedule " + cronExpression);
 				try {
 					JobDetail jobDetail = new JobDetail("Schedule-"
 							+ job.getName() + "-" + job.getId() + "-"
