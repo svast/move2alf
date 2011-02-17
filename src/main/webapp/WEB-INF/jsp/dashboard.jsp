@@ -62,7 +62,7 @@
 		<c:if test='${empty cycles[countCycles]}'>
 		Last run: None
 		<br />
-		Status: Not running
+		Status: Not Running
 		</c:if>
 		<c:if test='${not empty cycles[countCycles]}'>
 		
@@ -77,18 +77,17 @@
 				Last run: <fmt:formatDate value="${cycles[countCycles].startDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/>
 			</c:if>
 			<br />
-			 <c:if test='${cycles[countCycles].endDateTime == null}'>
-				 Status: Running
-			 </c:if>
-			<c:if test='${cycles[countCycles].endDateTime != null}'>
-				 Status: Not running
-			</c:if>
+			Status: <c:out value="${cycles[countCycles].schedule.state.displayName}" />
 		<br />
 		</c:if>
 		</p>
 		<br />
 
-		<div class="link"><a href="<spring:url value="/job/${job.id}/${cycles[countCycles].id}/report" htmlEscape="true" />">View detailed report</a>		<a href="<spring:url value="/job/${job.id}/history" htmlEscape="true"/>" >History</a></div>
+		<div class="link"><a href="<spring:url value="/job/${job.id}/history" htmlEscape="true"/>" >History</a>		
+		<c:if test='${not empty cycles[countCycles]}'>
+		<a href="<spring:url value="/job/${job.id}/${cycles[countCycles].id}/report" htmlEscape="true" />">View last report</a>
+		</c:if>
+		</div>
 		
 		</div>
 		</tr>

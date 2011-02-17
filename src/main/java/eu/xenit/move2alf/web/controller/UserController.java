@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.UserService;
+import eu.xenit.move2alf.web.dto.JobConfig;
 import eu.xenit.move2alf.web.dto.User;
 
 @Controller
@@ -77,6 +79,113 @@ public class UserController {
 		logger.info("deleting user " + userName);
 		getUserService().deleteUser(userName);
 		mav.setViewName("redirect:/users/");
+		return mav;
+	}
+	
+	@RequestMapping("/user/profile")
+	public ModelAndView profile() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("user", getUserService().getCurrentUser());
+		mav.setViewName("profile");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/profile/{userName}/edit", method = RequestMethod.GET)
+	public ModelAndView changePasswordForm(@PathVariable String userName) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("userClass", new User());
+		mav.addObject("user", getUserService().getUser(userName));
+		mav.setViewName("edit-profile");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/profile/{userName}/edit", method = RequestMethod.POST)
+	public ModelAndView changePassword(@PathVariable String userName, User user) {
+		ModelAndView mav = new ModelAndView();
+		
+		String oldPassword = getUserService().getUser(userName).getPassword();
+		String oldPasswordEntered = Util.convertToMd5(user.getOldPassword());
+		
+		if(oldPassword.equals(oldPasswordEntered)){
+			mav.setViewName("redirect:/user/profile");
+		}
+		else{
+			mav.setViewName("redirect:/user/profile/edit/failed");
+		}
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/profile/edit/failed", method = RequestMethod.GET)
+	public ModelAndView changePasswordFailed() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("user", getUserService().getCurrentUser());
+		mav.setViewName("edit-profile-failed");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/{userName}/edit/password", method = RequestMethod.GET)
+	public ModelAndView editUserForm(@PathVariable String userName) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("userClass", new User());
+		mav.addObject("user", getUserService().getUser(userName));
+		mav.setViewName("edit-user");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/{userName}/edit/password", method = RequestMethod.POST)
+	public ModelAndView editUser(@PathVariable String userName, User user) {
+		ModelAndView mav = new ModelAndView();
+		
+		String currentUserPassword = getUserService().getCurrentUser().getPassword();
+		String currentUserPasswordEntered = Util.convertToMd5(user.getOldPassword());
+		
+		if(currentUserPassword.equals(currentUserPasswordEntered)){
+			mav.setViewName("redirect:/users");
+		}
+		else{
+			mav.setViewName("redirect:/user/edit/password/failed");
+		}
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/edit/password/failed", method = RequestMethod.GET)
+	public ModelAndView editUserPasswordFailed() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("user", getUserService().getCurrentUser());
+		mav.setViewName("edit-user-password-failed");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/{userName}/edit/role", method = RequestMethod.GET)
+	public ModelAndView editRoleForm(@PathVariable String userName) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("userClass", new User());
+		mav.addObject("user", getUserService().getUser(userName));
+		mav.setViewName("edit-user-role");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/{userName}/edit/role", method = RequestMethod.POST)
+	public ModelAndView editRole(@PathVariable String userName, User user) {
+		ModelAndView mav = new ModelAndView();
+		
+		String currentUserPassword = getUserService().getCurrentUser().getPassword();
+		String currentUserPasswordEntered = Util.convertToMd5(user.getOldPassword());
+		
+		if(currentUserPassword.equals(currentUserPasswordEntered)){
+			mav.setViewName("redirect:/users");
+		}
+		else{
+			mav.setViewName("redirect:/user/edit/role/failed");
+		}
+		return mav;
+	}
+	
+	@RequestMapping(value = "/user/edit/role/failed", method = RequestMethod.GET)
+	public ModelAndView editUserRoleFailed() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("user", getUserService().getCurrentUser());
+		mav.setViewName("edit-user-role-failed");
 		return mav;
 	}
 }

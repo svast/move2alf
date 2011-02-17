@@ -11,7 +11,7 @@
 <div class="frame-job">
 <h3><c:out value="${job.name}" /> - <fmt:formatDate value="${cycle.startDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/></h3>
 
-<table class="indent">
+<table>
 <tr>
 <th class="alignRight">Description:</th><td style="width: 200px;"><c:out value="${job.description}" /></td>
 </tr>
@@ -29,7 +29,7 @@
 </tr>
 <tr><td><br /> </td></tr>
 <tr>
-<th class="alignRight">Status:</th><td><c:out value="" /></td>
+<th class="alignRight">Status:</th><td><c:out value="${cycle.schedule.state.displayName}" /></td>
 <th>Nr. of documents:</th><td><c:out value="" /></td>
 </tr>
 <tr><td><br /> </td></tr>

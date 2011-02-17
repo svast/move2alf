@@ -537,6 +537,16 @@ function setDuration(startTime, endTime){
 	document.getElementById('duration').innerHTML = durationDateString;
 }
 
+function comparePasswords(){
+	if(document.getElementById('newPassword').value != document.getElementById('newPasswordRetype').value){
+		window.alert("You must type the same new password twice.");
+		return false;
+	}
+
+	return true;
+	
+}
+
 //copyright 1999 Idocs, Inc. http://www.idocs.com
 //Distribute this script freely but keep this notice in place
 function numbersonly(myfield, e, dec)
@@ -590,12 +600,23 @@ function numbersonly(myfield, e, dec)
 <h1>XeniT Move2Alf</h1>
 
 <sec:authorize access="hasRole('CONSUMER')">
-	<p><a href="<spring:url value="/" htmlEscape="true"/>">Home</a> |
-	Username: <sec:authentication property="principal.username" /> 
+	<p>
+	<div>
+	<div class="left">
+	<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
 	</sec:authorize>
 	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
 | <a href="<spring:url value="/destinations/" htmlEscape="true"/>">Manage destinations</a>
 | <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
 	</sec:authorize> 
-| <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a></p>
+	<sec:authorize access="hasRole('CONSUMER')">
+| 		<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
+	</sec:authorize>
+| </div>
+<div class="right">
+Username: <sec:authentication property="principal.username" /> 
+| <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a>
+</div>
+<div class="clear"></div>
+</div></p>
 </div>

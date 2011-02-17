@@ -10,6 +10,12 @@ public class User {
 	
 	private String role;
 	
+	private String oldPassword;
+	
+	private String newPassword;
+	
+	private String newPasswordRetype;
+	
 	public User() {
 		
 	}
@@ -36,5 +42,29 @@ public class User {
 	
 	public String getRole() {
 		return role;
+	}
+	
+	public void setOldPassword(String oldPassword) {
+		this.oldPassword = oldPassword;
+	}
+	
+	public String getOldPassword() {
+		return oldPassword;
+	}
+	
+	public void setNewPassword(String newPassword) {
+		this.newPassword = newPassword;
+	}
+	
+	public String getNewPassword() {
+		return newPassword;
+	}
+	
+	public void setNewPasswordRetype(String newPasswordRetype) {
+		this.newPasswordRetype = newPasswordRetype;
+	}
+	
+	public String getNewPasswordRetype() {
+		return newPasswordRetype;
 	}
 }

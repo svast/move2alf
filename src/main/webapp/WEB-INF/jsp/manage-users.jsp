@@ -21,6 +21,8 @@
 				<c:out value="${role.role}" />
 				<br />
 			</c:forEach></td>
+			<td><a href="<spring:url value="/user/${user.userName}/edit/password" htmlEscape="true" />">edit password</a></td>
+			<td><a href="<spring:url value="/user/${user.userName}/edit/role" htmlEscape="true" />">edit role</a></td>
 			<td><a href="<spring:url value="/user/${user.userName}/delete" htmlEscape="true" />">delete</a></td>
 		</tr>
 	</c:forEach>
