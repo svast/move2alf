@@ -67,6 +67,14 @@ public interface JobService {
 	public Job getJob(int id);
 
 	/**
+	 * Return a cycle based on the cycle id
+	 * 
+	 * @param cycleId 		The id of the cycle
+	 * return Cycle 		A cycles
+	 */
+	Cycle getCycle(int cycleId);
+	
+	/**
 	 * Return all cycles for a job with the given name.
 	 * 
 	 * @param jobId

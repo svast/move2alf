@@ -111,6 +111,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	public Cycle getCycle(int cycleId) {
+		List<Cycle> cycles = getSessionFactory().getCurrentSession().createQuery(
+				"from Cycle as c where c.id=?").setLong(0,
+				cycleId).list();
+		
+		return cycles.get(0);
+	}
+	
+	@Override
 	public List<Cycle> getCyclesForJob(int jobId) {
 		return getSessionFactory()
 				.getCurrentSession()

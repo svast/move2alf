@@ -1,5 +1,9 @@
 package eu.xenit.move2alf.web.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -360,6 +364,24 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteDestination(id);
 		mav.setViewName("redirect:/destinations");
+		return mav;
+	}
+	
+	@RequestMapping("/job/{jobId}/{cycleId}/report")
+	public ModelAndView report(@PathVariable int jobId, @PathVariable int cycleId) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(jobId));
+		mav.addObject("cycle", getJobService().getCycle(cycleId));
+		mav.setViewName("report");
+		return mav;
+	}
+	
+	@RequestMapping("/job/{jobId}/history")
+	public ModelAndView history(@PathVariable int jobId) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(jobId));
+		mav.addObject("cycles", getJobService().getCyclesForJob(jobId));
+		mav.setViewName("history");
 		return mav;
 	}
 

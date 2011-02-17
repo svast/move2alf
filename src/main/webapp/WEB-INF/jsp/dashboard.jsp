@@ -87,7 +87,8 @@
 		</c:if>
 		</p>
 		<br />
-		<div class="link"><a href="">View detailed report</a>		<a href="">History</a></div>
+
+		<div class="link"><a href="<spring:url value="/job/${job.id}/${cycles[countCycles].id}/report" htmlEscape="true" />">View detailed report</a>		<a href="<spring:url value="/job/${job.id}/history" htmlEscape="true"/>" >History</a></div>
 		
 		</div>
 		</tr>

@@ -508,6 +508,35 @@ function noDestNeeded(){
 	document.getElementById('noDestinations').style.display='none';
 }
 
+function setDuration(startTime, endTime){
+
+	var duration = endTime - startTime;
+
+	var durationDate = new Date(duration);
+
+	var date = durationDate.getDate() - 1;
+	var hours = durationDate.getHours() - 1;
+	var minutes = ""+durationDate.getMinutes();
+	var seconds = ""+durationDate.getSeconds();
+		
+	if(date > 0){
+		hours = hours + date*24;
+	}
+
+	var hoursString = ""+hours;
+	
+	if (hoursString.length < 2)
+		hoursString = "0"+hours;
+	if(minutes.length < 2)
+		minutes = "0"+minutes;
+	if(seconds.length < 2)
+		seconds = "0"+seconds;
+	
+	var durationDateString = hoursString+":"+minutes+":"+seconds;
+	
+	document.getElementById('duration').innerHTML = durationDateString;
+}
+
 //copyright 1999 Idocs, Inc. http://www.idocs.com
 //Distribute this script freely but keep this notice in place
 function numbersonly(myfield, e, dec)

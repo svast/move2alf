@@ -33,11 +33,15 @@ a:active {
 }
 
 th {
-	text-align: left;
 	padding-right: 25px;
 }
 
+th.alignRight{
+	text-align: right;
+}
+
 td {
+	text-align: left;
 	vertical-align: top;
 	padding-right: 25px;
 }
@@ -102,6 +106,13 @@ div.main {
 	padding:3px;
 }
 
+.table-border-thin{
+	border-style:solid;
+	border-width:1px;
+	padding:3px;
+	border-collapse:collapse;
+}
+
 .clear{
 	clear:both;	
 }
@@ -134,5 +145,7 @@ div.main {
 	text-decoration:underline;
 	cursor: pointer;
 }
+
+
 
 
