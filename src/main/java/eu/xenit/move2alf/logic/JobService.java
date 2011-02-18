@@ -201,9 +201,10 @@ public interface JobService {
 	 * 
 	 * @param scheduleId
 	 *            The id of the schedule to start
-	 */
+	 
 	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
 	public void executeJob(int scheduleId);
+	*/
 
 	/**
 	 * deletes a configured source sink based on id.
@@ -211,5 +212,20 @@ public interface JobService {
 	 * @param id
 	 */
 	public void deleteDestination(int id);
+
+	/**
+	 * Start a new cycle for a job. This is the first step when executing a job.
+	 * 
+	 * @param scheduleId The id of the schedule that's starting the job.
+	 * @return The new cycle
+	 */
+	public Cycle openCycleForSchedule(Integer scheduleId);
+
+	/**
+	 * Stop/close a cycle after executing the job.
+	 * 
+	 * @param cycleId The cycle to close
+	 */
+	public void closeCycle(Cycle cycle);
 
 }

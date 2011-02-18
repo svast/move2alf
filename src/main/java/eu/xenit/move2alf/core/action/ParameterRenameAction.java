@@ -46,15 +46,16 @@ public class ParameterRenameAction extends Action {
 				newName = configuredActionParameter.getValue();
 			}
 		}
-		if (oldName != null && newName != null) {
-			parameterMap.put(newName, parameterMap.get(oldName));
-			parameterMap.remove(oldName);
-			configuredAction.getAppliedConfiguredActionOnSuccess().execute(
-					parameterMap);
-		} else {
-			configuredAction.getAppliedConfiguredActionOnFailure().execute(
-					parameterMap);
-		}
+// TODO
+//		if (oldName != null && newName != null) {
+//			parameterMap.put(newName, parameterMap.get(oldName));
+//			parameterMap.remove(oldName);
+//			configuredAction.getAppliedConfiguredActionOnSuccess().execute(
+//					parameterMap);
+//		} else {
+//			configuredAction.getAppliedConfiguredActionOnFailure().execute(
+//					parameterMap);
+//		}
 	}
 
 	public Collection<ParameterDefinition> getInputParameters(

@@ -65,10 +65,4 @@ public class ConfiguredAction extends IdObject {
 			Set<ConfiguredSourceSink> configuredSourceSinkSet) {
 		this.configuredSourceSinkSet = configuredSourceSinkSet;
 	}
-	
-	// convenience
-	public void execute(Map<String,Object> parameterMap){
-		ActionFactory.getInstance().getAction(actionClassName).execute(this, parameterMap);
-	}
-	
 }

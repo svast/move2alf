@@ -220,12 +220,14 @@ public class LiPolisDocAction extends Action {
 								sb.toString());
 						parameterMap.put(OP_LiDocumentGroup, policyNumber);
 
-						configuredAction.getAppliedConfiguredActionOnSuccess()
-								.execute(parameterMap);
+						// TODO
+//						configuredAction.getAppliedConfiguredActionOnSuccess()
+//								.execute(parameterMap);
 					} catch (Exception e) {
 						logger.error("Invalid metadata {}, skipping ...", line);
-						configuredAction.getAppliedConfiguredActionOnFailure()
-								.execute(parameterMap);
+						// TODO
+//						configuredAction.getAppliedConfiguredActionOnFailure()
+//								.execute(parameterMap);
 						continue;// go to next line
 					}
 				}
@@ -234,12 +236,14 @@ public class LiPolisDocAction extends Action {
 			fileReader.close();
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage());
-			configuredAction.getAppliedConfiguredActionOnFailure().execute(
-					parameterMap);
+			// TODO
+//			configuredAction.getAppliedConfiguredActionOnFailure().execute(
+//					parameterMap);
 		} catch (IOException e) {
 			logger.error(e.getMessage());
-			configuredAction.getAppliedConfiguredActionOnFailure().execute(
-					parameterMap);
+			// TODO
+//			configuredAction.getAppliedConfiguredActionOnFailure().execute(
+//					parameterMap);
 		}
 	}
 }

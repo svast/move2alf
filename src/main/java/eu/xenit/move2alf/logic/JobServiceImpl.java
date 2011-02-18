@@ -5,17 +5,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -90,7 +88,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteJob(int id) {
 		Job job = getJob(id);
 		sessionFactory.getCurrentSession().delete(job);
-	
+
 		logger.debug("Reloading scheduler");
 		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
@@ -212,7 +210,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(schedule);
 
 		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job); // job object is still in cache with old schedules
+		getSessionFactory().getCurrentSession().evict(job); // job object is
+		// still in cache
+		// with old
+		// schedules
 		getScheduler().reloadSchedules();
 
 		return schedule;
@@ -225,7 +226,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		sessionFactory.getCurrentSession().delete(schedule);
 
 		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job); // job object is still in cache with old schedules
+		getSessionFactory().getCurrentSession().evict(job); // job object is
+		// still in cache
+		// with old
+		// schedules
 		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
 	}
@@ -337,48 +341,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public void executeJob(int scheduleId) {
-		Schedule schedule;
-		Job job;
-		try {
-			schedule = getSchedule(scheduleId);
-			job = schedule.getJob();
-		} catch (Move2AlfException e) {
-			logger.error("Could not execute job with schedule ID " + scheduleId
-					+ " because schedule or job does not exist.");
-			return;
-		}
-		logger.debug("Executing job \"" + job.getName() + "\"");
-
-		Cycle cycle = new Cycle();
-		cycle.setSchedule(schedule);
-		cycle.setStartDateTime(new Date());
-
-		// TODO: status
-
-		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		ConfiguredAction action = job.getFirstConfiguredAction();
-		while (action != null) {
-			// TODO: set running action(s) on cycle
-			try {
-				action.execute(parameterMap);
-				// TODO: status?
-			} catch (Exception e) {
-				action.getAppliedConfiguredActionOnFailure().execute(
-						parameterMap);
-				// TODO: status
-				break;
-			}
-			action = action.getAppliedConfiguredActionOnSuccess();
-		}
-
-		// TODO: status?
-
-		cycle.setEndDateTime(new Date());
-		getSessionFactory().getCurrentSession().save(cycle);
-	}
-
-	@Override
 	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId) {
 		@SuppressWarnings("unchecked")
 		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
@@ -402,6 +364,37 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		destination.setConfiguredSourceSinkParameterSet(emptySet);
 
 		sessionFactory.getCurrentSession().delete(destination);
+	}
+
+	@Override
+	public void closeCycle(Cycle cycle) {
+		Session session = getSessionFactory().getCurrentSession();
+		
+		Schedule schedule = cycle.getSchedule();
+		schedule.setState(EScheduleState.NOT_RUNNING);
+		session.update(schedule);
+
+		cycle.setEndDateTime(new Date());
+		session.update(cycle);
+	}
+
+	@Override
+	public Cycle openCycleForSchedule(Integer scheduleId) {
+		Session session = getSessionFactory().getCurrentSession();
+		
+		Schedule schedule = getSchedule(scheduleId);
+		Job job = schedule.getJob();
+		logger.debug("Executing job \"" + job.getName() + "\"");
+
+		Cycle cycle = new Cycle();
+		cycle.setSchedule(schedule);
+		cycle.setStartDateTime(new Date());
+		session.save(cycle);
+
+		schedule.setState(EScheduleState.RUNNING);
+		session.update(schedule);
+
+		return cycle;
 	}
 
 }

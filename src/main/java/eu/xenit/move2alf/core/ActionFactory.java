@@ -1,37 +1,72 @@
 package eu.xenit.move2alf.core;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collection;
 import java.util.Set;
 
-public class ActionFactory {
-	private static final ActionFactory instance = new ActionFactory();
-	
-	private Map<String, Action> actionMap = new HashMap<String, Action>();
-	 
-    public static ActionFactory getInstance() {
-        return instance;
-    }
+import javax.annotation.PostConstruct;
 
-    private ActionFactory() {
-    	rescanActions();
-    }
- 
-    public void rescanActions(){
-    	//TODO scan for available action classes and store an instance ()
-    }
-    
-    public Collection<Action> getActionCollection(){
-      return actionMap.values();
-    }
-    
-    public Set<String> getActionClassNames(){
-      return actionMap.keySet();	
-    }
-    
-    public Action getAction(String className){
-    	return actionMap.get(className);
-    }
-    	
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.stereotype.Service;
+
+@Service("actionFactory")
+public class ActionFactory {
+	private static final Logger logger = LoggerFactory
+			.getLogger(ActionFactory.class);
+
+	private Map<String, Action> actionMap = new HashMap<String, Action>();
+
+	@PostConstruct
+	public void rescanActions() {
+		logger.info("Loading actions");
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
+				false);
+		provider.addIncludeFilter(new AssignableTypeFilter(Action.class));
+		Set<BeanDefinition> components = provider.findCandidateComponents("");
+		for (BeanDefinition component : components) {
+			logger.debug("Action: " + component.getBeanClassName());
+			try {
+				actionMap.put(component.getBeanClassName(), (Action) Class
+						.forName(component.getBeanClassName()).getMethod(
+								"getInstance").invoke(null));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public Collection<Action> getActionCollection() {
+		return actionMap.values();
+	}
+
+	public Set<String> getActionClassNames() {
+		return actionMap.keySet();
+	}
+
+	public Action getAction(String className) {
+		return actionMap.get(className);
+	}
+
 }
