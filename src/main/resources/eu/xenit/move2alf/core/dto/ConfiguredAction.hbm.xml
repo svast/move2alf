@@ -9,9 +9,9 @@
 			<generator class="identity" />
 		</id>
 		<property name="actionClassName"/>
-		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true"/>
-		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true"/>
-    	<set name="configuredActionParameterSet" table="configuredActionParameter">
+		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true" lazy="false"/>
+		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true" lazy="false"/>
+    	<set name="configuredActionParameterSet" table="configuredActionParameter" lazy="false">
       		<key column="configuredActionId"/>
       		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredActionParameter">
         		<property name="name"/>

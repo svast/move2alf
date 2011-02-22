@@ -71,7 +71,7 @@
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-				<prop key="hibernate.query.substitutions"> true 1, false 0 </prop>
+				<prop key="hibernate.query.substitutions"> true 1, false 0 </prop>	
 			</props>
 		</property>
 	</bean>
