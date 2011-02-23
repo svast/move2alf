@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -175,7 +176,7 @@ public interface JobService {
 	 * @return the configured source sink
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public ConfiguredSourceSink createDestination(String destinationType,
+	public ConfiguredObject createDestination(String destinationType,
 			HashMap destinationParams);
 
 	/**
@@ -188,7 +189,7 @@ public interface JobService {
 	 *            A map of parameters that define the destination
 	 * @return the configured source sink
 	 */
-	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
+	public ConfiguredObject editDestination(int sinkId, String destinationType,
 			HashMap destinationParams);
 
 	/**
@@ -205,7 +206,7 @@ public interface JobService {
 	 * @param sourceSinkId
 	 * @return a list of configured source sinks
 	 */
-	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId);
+	public ConfiguredObject getConfiguredSourceSink(int sourceSinkId);
 
 	/**
 	 * gets the duration of the cycle based on startDateTime and EndDateTime

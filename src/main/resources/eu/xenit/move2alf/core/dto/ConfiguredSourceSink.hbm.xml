@@ -8,10 +8,10 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<property name="sourceSinkClassName"/>
-    	<set name="configuredSourceSinkParameterSet" table="configuredSourceSinkParameter" lazy="false">
+		<property name="className" column="sourceSinkClassName"/>
+    	<set name="configuredObjectParameterSet" table="configuredSourceSinkParameter" lazy="false">
       		<key column="configuredSourceSinkId"/>
-      		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter">
+      		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredObjectParameter">
         		<property name="name"/>
         		<property name="value"/>
       		</composite-element>

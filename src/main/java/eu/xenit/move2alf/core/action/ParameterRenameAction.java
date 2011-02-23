@@ -6,8 +6,8 @@ import java.util.Map;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredActionParameter;
+import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 
 public class ParameterRenameAction extends Action {
 	// config parameters
@@ -24,12 +24,12 @@ public class ParameterRenameAction extends Action {
 	}
 
 	@Override
-	public void executeImpl(ConfiguredAction configuredAction,
+	public void executeImpl(ConfiguredObject configuredAction,
 			Map<String, Object> parameterMap) {
 		String oldName = null;
 		String newName = null;
-		for (ConfiguredActionParameter configuredActionParameter : configuredAction
-				.getConfiguredActionParameterSet()) {
+		for (ConfiguredObjectParameter configuredActionParameter : configuredAction
+				.getConfiguredObjectParameterSet()) {
 			if (configuredActionParameter.getName().equals(CP_OldParameterName)) {
 				oldName = configuredActionParameter.getValue();
 			}
@@ -50,12 +50,12 @@ public class ParameterRenameAction extends Action {
 	}
 
 	public Collection<ParameterDefinition> getInputParameters(
-			ConfiguredAction configuredAction) {
+			ConfiguredObject configuredAction) {
 		Map<String, ParameterDefinition> inputParameterMap = new HashMap<String, ParameterDefinition>();
 		inputParameterMap.putAll(aprioriInputParameterMap);
 		String oldName = null;
-		for (ConfiguredActionParameter configuredActionParameter : configuredAction
-				.getConfiguredActionParameterSet()) {
+		for (ConfiguredObjectParameter configuredActionParameter : configuredAction
+				.getConfiguredObjectParameterSet()) {
 			if (configuredActionParameter.getName().equals(CP_OldParameterName)) {
 				oldName = configuredActionParameter.getValue();
 				if (oldName != null) {
@@ -69,12 +69,12 @@ public class ParameterRenameAction extends Action {
 	}
 
 	public Collection<ParameterDefinition> getOutputParameters(
-			ConfiguredAction configuredAction) {
+			ConfiguredObject configuredAction) {
 		Map<String, ParameterDefinition> outputParameterMap = new HashMap<String, ParameterDefinition>();
 		outputParameterMap.putAll(aprioriOutputParameterMap);
 		String newName = null;
-		for (ConfiguredActionParameter configuredActionParameter : configuredAction
-				.getConfiguredActionParameterSet()) {
+		for (ConfiguredObjectParameter configuredActionParameter : configuredAction
+				.getConfiguredObjectParameterSet()) {
 			if (configuredActionParameter.getName().equals(CP_NewParameterName)) {
 				newName = configuredActionParameter.getValue();
 				if (newName != null) {

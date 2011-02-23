@@ -2,37 +2,11 @@ package eu.xenit.move2alf.core.dto;
 
 import java.util.Set;
 
-import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.Report;
+import eu.xenit.move2alf.core.ConfiguredObject;
 
-public class ConfiguredReport extends IdObject {
-	private String reportClassName;
-		
-	private Set<ConfiguredReportParameter> configuredReportParameterSet;
-	
+public class ConfiguredReport extends ConfiguredObject {
+
 	private Set<ConfiguredSourceSink> configuredSourceSinkSet;
-	
-	public ConfiguredReport() {
-		
-	}
-
-	public String getReportClassName() {
-		return reportClassName;
-	}
-
-	public void setReportClassName(String reportClassName) {
-		this.reportClassName = reportClassName;
-	}
-
-	public Set<ConfiguredReportParameter> getConfiguredReportParameterSet() {
-		return configuredReportParameterSet;
-	}
-
-	public void setConfiguredReportParameterSet(
-			Set<ConfiguredReportParameter> configuredReportParameterSet) {
-		this.configuredReportParameterSet = configuredReportParameterSet;
-	}
 
 	public Set<ConfiguredSourceSink> getConfiguredSourceSinkSet() {
 		return configuredSourceSinkSet;
@@ -43,5 +17,4 @@ public class ConfiguredReport extends IdObject {
 		this.configuredSourceSinkSet = configuredSourceSinkSet;
 	}
 
-	
 }

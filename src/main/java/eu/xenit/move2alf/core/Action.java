@@ -16,13 +16,23 @@ public abstract class Action {
 	protected Map<String, ParameterDefinition> aprioriOutputParameterMap = new HashMap<String, ParameterDefinition>();
 
 	private ActionFactory actionFactory;
+	
+	private SourceSinkFactory sourceSinkFactory;
 
 	public void setActionFactory(ActionFactory actionFactory) {
 		this.actionFactory = actionFactory;
 	}
 
-	public AbstractFactory<Action> getActionFactory() {
+	public ActionFactory getActionFactory() {
 		return actionFactory;
+	}
+
+	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
+		this.sourceSinkFactory = sourceSinkFactory;
+	}
+
+	public SourceSinkFactory getSourceSinkFactory() {
+		return sourceSinkFactory;
 	}
 
 	protected void addConfigParameter(ParameterDefinition parameterDefinition) {
@@ -68,13 +78,11 @@ public abstract class Action {
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
 		if (nextAction != null) {
-			getActionFactory().getObject(nextAction.getActionClassName())
-					.execute(nextAction, parameterMap); // TODO: helper method
-			// in ActionFactory?
+			getActionFactory().execute(nextAction, parameterMap);
 		}
 	}
 
-	protected abstract void executeImpl(ConfiguredAction configuredAction,
+	protected abstract void executeImpl(ConfiguredObject configuredAction,
 			Map<String, Object> parameterMap);
 
 	/*
@@ -82,12 +90,12 @@ public abstract class Action {
 	 * be oveloaded in subclass
 	 */
 	public Collection<ParameterDefinition> getInputParameters(
-			ConfiguredAction configuredAction) {
+			ConfiguredObject configuredAction) {
 		return aprioriInputParameterMap.values();
 	}
 
 	public Collection<ParameterDefinition> getOutputParameters(
-			ConfiguredAction configuredAction) {
+			ConfiguredObject configuredAction) {
 		return aprioriOutputParameterMap.values();
 	}
 

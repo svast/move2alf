@@ -2,23 +2,17 @@ package eu.xenit.move2alf.core.dto;
 
 import eu.xenit.move2alf.core.ConfiguredObject;
 
-public class ProcessedDocumentParameter {
-	private ConfiguredObject configuredAction;
-
+public class ConfiguredObjectParameter {
+	private ConfiguredObject configuredObject;
 	private String name;
-	
 	private String value;
-	
-	public ProcessedDocumentParameter() {
-		
+
+	public ConfiguredObject getConfiguredObject() {
+		return configuredObject;
 	}
 
-	public ConfiguredObject getConfiguredAction() {
-		return configuredAction;
-	}
-
-	public void setConfiguredAction(ConfiguredObject configuredAction) {
-		this.configuredAction = configuredAction;
+	public void setConfiguredObject(ConfiguredObject configuredObject) {
+		this.configuredObject = configuredObject;
 	}
 
 	public String getName() {
@@ -36,6 +30,5 @@ public class ProcessedDocumentParameter {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 
 }

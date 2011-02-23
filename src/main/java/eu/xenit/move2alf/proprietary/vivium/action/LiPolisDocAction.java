@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.ConfiguredObject;
 
 /*
  * This parser is used for parsing the life polis docs
@@ -103,7 +103,7 @@ public class LiPolisDocAction extends Action {
 	}
 
 	@Override
-	public void executeImpl(ConfiguredAction configuredAction,
+	public void executeImpl(ConfiguredObject configuredAction,
 			Map<String, Object> parameterMap) {
 		String keyFilePath = (String) parameterMap.get(IP_AdeptKeyFilePath);
 		

@@ -1,7 +1,5 @@
 package eu.xenit.move2alf.core;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;

@@ -16,11 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.AbstractFactory;
-import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ActionFactory;
+import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
@@ -37,7 +37,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private Scheduler scheduler;
 
-	private AbstractFactory<Action> actionFactory;
+	private ActionFactory actionFactory;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -58,11 +58,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Autowired
-	public void setActionFactory(AbstractFactory<Action> actionFactory) {
+	public void setActionFactory(ActionFactory actionFactory) {
 		this.actionFactory = actionFactory;
 	}
 
-	public AbstractFactory<Action> getActionFactory() {
+	public ActionFactory getActionFactory() {
 		return actionFactory;
 	}
 
@@ -126,13 +126,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public Cycle getCycle(int cycleId) {
-		List<Cycle> cycles = getSessionFactory().getCurrentSession().createQuery(
-				"from Cycle as c where c.id=?").setLong(0,
-				cycleId).list();
-		
+		List<Cycle> cycles = getSessionFactory().getCurrentSession()
+				.createQuery("from Cycle as c where c.id=?")
+				.setLong(0, cycleId).list();
+
 		return cycles.get(0);
 	}
-	
+
 	@Override
 	public List<Cycle> getCyclesForJob(int jobId) {
 		return getSessionFactory()
@@ -141,7 +141,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc")
 				.setLong(0, jobId).list();
 	}
-	
+
 	@Override
 	public List<Cycle> getCyclesForJobDesc(int jobId) {
 		return getSessionFactory()
@@ -158,7 +158,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		List<Cycle> jobCycles = new ArrayList();
 
 		Cycle lastCycle;
-		
+
 		jobCycles = getCyclesForJob(job.getId());
 
 		if (jobCycles.size() == 0) {
@@ -258,47 +258,47 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredSourceSink createDestination(String destinationType,
+	public ConfiguredObject createDestination(String destinationType,
 			HashMap destinationParams) {
 
 		ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
 
-		sourceSink.setSourceSinkClassName(destinationType);
+		sourceSink.setClassName(destinationType);
 
-		ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
-		sourceSinkName.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkName = new ConfiguredObjectParameter();
+		sourceSinkName.setConfiguredObject(sourceSink);
 		sourceSinkName.setName("name");
 		sourceSinkName.setValue((String) destinationParams
 				.get(EDestinationParameter.NAME));
-		ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
-		sourceSinkURL.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkURL = new ConfiguredObjectParameter();
+		sourceSinkURL.setConfiguredObject(sourceSink);
 		sourceSinkURL.setName("url");
 		sourceSinkURL.setValue((String) destinationParams
 				.get(EDestinationParameter.URL));
-		ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
-		sourceSinkUser.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkUser = new ConfiguredObjectParameter();
+		sourceSinkUser.setConfiguredObject(sourceSink);
 		sourceSinkUser.setName("user");
 		sourceSinkUser.setValue((String) destinationParams
 				.get(EDestinationParameter.USER));
-		ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
-		sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkPassword = new ConfiguredObjectParameter();
+		sourceSinkPassword.setConfiguredObject(sourceSink);
 		sourceSinkPassword.setName("password");
 		sourceSinkPassword.setValue((String) destinationParams
 				.get(EDestinationParameter.PASSWORD));
-		ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
-		sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkThreads = new ConfiguredObjectParameter();
+		sourceSinkThreads.setConfiguredObject(sourceSink);
 		sourceSinkThreads.setName("threads");
 		sourceSinkThreads.setValue(destinationParams.get(
 				EDestinationParameter.THREADS).toString());
 
-		Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+		Set<ConfiguredObjectParameter> parameterSet = new HashSet();
 		parameterSet.add(sourceSinkName);
 		parameterSet.add(sourceSinkURL);
 		parameterSet.add(sourceSinkUser);
 		parameterSet.add(sourceSinkPassword);
 		parameterSet.add(sourceSinkThreads);
 
-		sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+		sourceSink.setConfiguredObjectParameterSet(parameterSet);
 
 		getSessionFactory().getCurrentSession().save(sourceSink);
 
@@ -306,47 +306,47 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredSourceSink editDestination(int sinkId,
+	public ConfiguredObject editDestination(int sinkId,
 			String destinationType, HashMap destinationParams) {
 
 		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
 
-		sourceSink.setSourceSinkClassName(destinationType);
+		sourceSink.setClassName(destinationType);
 
-		ConfiguredSourceSinkParameter sourceSinkName = new ConfiguredSourceSinkParameter();
-		sourceSinkName.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkName = new ConfiguredObjectParameter();
+		sourceSinkName.setConfiguredObject(sourceSink);
 		sourceSinkName.setName("name");
 		sourceSinkName.setValue((String) destinationParams
 				.get(EDestinationParameter.NAME));
-		ConfiguredSourceSinkParameter sourceSinkURL = new ConfiguredSourceSinkParameter();
-		sourceSinkURL.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkURL = new ConfiguredObjectParameter();
+		sourceSinkURL.setConfiguredObject(sourceSink);
 		sourceSinkURL.setName("url");
 		sourceSinkURL.setValue((String) destinationParams
 				.get(EDestinationParameter.URL));
-		ConfiguredSourceSinkParameter sourceSinkUser = new ConfiguredSourceSinkParameter();
-		sourceSinkUser.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkUser = new ConfiguredObjectParameter();
+		sourceSinkUser.setConfiguredObject(sourceSink);
 		sourceSinkUser.setName("user");
 		sourceSinkUser.setValue((String) destinationParams
 				.get(EDestinationParameter.USER));
-		ConfiguredSourceSinkParameter sourceSinkPassword = new ConfiguredSourceSinkParameter();
-		sourceSinkPassword.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkPassword = new ConfiguredObjectParameter();
+		sourceSinkPassword.setConfiguredObject(sourceSink);
 		sourceSinkPassword.setName("password");
 		sourceSinkPassword.setValue((String) destinationParams
 				.get(EDestinationParameter.PASSWORD));
-		ConfiguredSourceSinkParameter sourceSinkThreads = new ConfiguredSourceSinkParameter();
-		sourceSinkThreads.setConfiguredSourceSink(sourceSink);
+		ConfiguredObjectParameter sourceSinkThreads = new ConfiguredObjectParameter();
+		sourceSinkThreads.setConfiguredObject(sourceSink);
 		sourceSinkThreads.setName("threads");
 		sourceSinkThreads.setValue(destinationParams.get(
 				EDestinationParameter.THREADS).toString());
 
-		Set<ConfiguredSourceSinkParameter> parameterSet = new HashSet();
+		Set<ConfiguredObjectParameter> parameterSet = new HashSet();
 		parameterSet.add(sourceSinkName);
 		parameterSet.add(sourceSinkURL);
 		parameterSet.add(sourceSinkUser);
 		parameterSet.add(sourceSinkPassword);
 		parameterSet.add(sourceSinkThreads);
 
-		sourceSink.setConfiguredSourceSinkParameterSet(parameterSet);
+		sourceSink.setConfiguredObjectParameterSet(parameterSet);
 
 		getSessionFactory().getCurrentSession().save(sourceSink);
 
@@ -384,7 +384,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		Set emptySet = new HashSet();
 
-		destination.setConfiguredSourceSinkParameterSet(emptySet);
+		destination.setConfiguredObjectParameterSet(emptySet);
 
 		sessionFactory.getCurrentSession().delete(destination);
 	}
@@ -392,7 +392,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void closeCycle(Cycle cycle) {
 		Session session = getSessionFactory().getCurrentSession();
-		
+
 		Schedule schedule = cycle.getSchedule();
 		schedule.setState(EScheduleState.NOT_RUNNING);
 		session.update(schedule);
@@ -404,7 +404,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public Cycle openCycleForSchedule(Integer scheduleId) {
 		Session session = getSessionFactory().getCurrentSession();
-		
+
 		Schedule schedule = getSchedule(scheduleId);
 		Job job = schedule.getJob();
 		logger.debug("Executing job \"" + job.getName() + "\"");
@@ -419,52 +419,52 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		return cycle;
 	}
-	
-	public String getDuration(Date startDateTime, Date endDateTime){
+
+	public String getDuration(Date startDateTime, Date endDateTime) {
 		Long duration = endDateTime.getTime() - startDateTime.getTime();
 		Date dateDuration = new Date(duration);
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dateDuration);
 
-		int date = cal.get(Calendar.DATE) -1;
-		int hours = cal.get(Calendar.HOUR_OF_DAY) -1;
+		int date = cal.get(Calendar.DATE) - 1;
+		int hours = cal.get(Calendar.HOUR_OF_DAY) - 1;
 		int minutes = cal.get(Calendar.MINUTE);
 		int seconds = cal.get(Calendar.SECOND);
-			
-		if(date > 0){
-			hours = hours + date*24;
+
+		if (date > 0) {
+			hours = hours + date * 24;
 		}
 
 		String hoursString = Integer.toString(hours);
 		String minutesString = Integer.toString(minutes);
 		String secondsString = Integer.toString(seconds);
-		
+
 		if (hoursString.length() < 2)
-			hoursString = "0"+hours;
-		if(minutesString.length() < 2)
-			minutesString = "0"+minutes;
-		if(secondsString.length() < 2)
-			secondsString = "0"+seconds;
-		
-		String durationDateString = hoursString+":"+minutesString+":"+secondsString;
-		
+			hoursString = "0" + hours;
+		if (minutesString.length() < 2)
+			minutesString = "0" + minutes;
+		if (secondsString.length() < 2)
+			secondsString = "0" + seconds;
+
+		String durationDateString = hoursString + ":" + minutesString + ":"
+				+ secondsString;
+
 		return durationDateString;
 	}
 
 	@Override
 	public void executeJob(int scheduleId) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void executeAction(ConfiguredAction action,
 			Map<String, Object> parameterMap) {
 		logger.debug("Executing action: " + action.getId() + " - "
-				+ action.getActionClassName());
-		getActionFactory().getObject(action.getActionClassName()).execute(
-				action, parameterMap);
+				+ action.getClassName());
+		getActionFactory().execute(action, parameterMap);
 	}
 
 }

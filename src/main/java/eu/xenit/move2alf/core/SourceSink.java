@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public abstract class SourceSink {
 	protected String name = "Undefined";
@@ -38,7 +37,7 @@ public abstract class SourceSink {
 		return configParameterMap.keySet();
 	}
 
-	public abstract void send(ConfiguredSourceSink configuredSourceSink,
+	public abstract void send(ConfiguredObject configuredSourceSink,
 			Map<String, Object> parameterMap);
 
 }
