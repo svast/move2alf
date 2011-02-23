@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 
 public class TestAction extends Action {
 	private static final Logger logger = LoggerFactory
@@ -19,12 +18,7 @@ public class TestAction extends Action {
 		// TODO: check if class name of configured action matches class of this
 		// action?
 		logger.debug("Test action executed");
-		for (ConfiguredObjectParameter param : configuredAction
-				.getConfiguredObjectParameterSet()) {
-			if (param.getName().equals("test")) {
-				logger.debug("Output: " + param.getValue());
-			}
-		}
+		logger.debug("Output (map): " + configuredAction.getParameter("test"));
 	}
 
 }

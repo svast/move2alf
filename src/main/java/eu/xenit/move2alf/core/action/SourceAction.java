@@ -6,7 +6,6 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 
 public class SourceAction extends Action {
 	
@@ -17,16 +16,9 @@ public class SourceAction extends Action {
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		// TODO: filters; in separate action?
-		String path = null;
-		boolean recursive = false;
-		for (ConfiguredObjectParameter param : configuredAction.getConfiguredObjectParameterSet()) {
-			if (PARAM_PATH.equals(param.getName())) {
-				path = param.getValue();
-			}
-			if (PARAM_RECURSIVE.equals(param.getName())) {
-				recursive = "true".equals(param.getValue());
-			}
-		}
+		String path = configuredAction.getParameter(PARAM_PATH);
+		boolean recursive = "true".equals(configuredAction.getParameter(PARAM_RECURSIVE));
+
 		ConfiguredObject sourceConfig = (ConfiguredObject) configuredAction.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink source = getSourceSinkFactory().getObject(sourceConfig.getClassName());
 //		source.list(sourceConfig, path, recursive);

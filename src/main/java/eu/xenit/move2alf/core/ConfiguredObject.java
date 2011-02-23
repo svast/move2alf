@@ -1,13 +1,13 @@
 package eu.xenit.move2alf.core;
 
-import java.util.Set;
+import java.util.Map;
 
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 
 public abstract class ConfiguredObject extends IdObject {
 	private String className;
-	private Set<ConfiguredObjectParameter> configuredObjectParameterSet;
+	
+	private Map<String, String> parameters;
 
 	public void setClassName(String sourceSinkClassName) {
 		this.className = sourceSinkClassName;
@@ -17,11 +17,15 @@ public abstract class ConfiguredObject extends IdObject {
 		return className;
 	}
 
-	public Set<ConfiguredObjectParameter> getConfiguredObjectParameterSet() {
-		return configuredObjectParameterSet;
+	public void setParameters(Map<String, String> parameters) {
+		this.parameters = parameters;
 	}
 
-	public void setConfiguredObjectParameterSet(Set<ConfiguredObjectParameter> configuredObjectParameterSet) {
-		this.configuredObjectParameterSet = configuredObjectParameterSet;
+	public Map<String, String> getParameters() {
+		return parameters;
+	}
+	
+	public String getParameter(String name) {
+		return getParameters().get(name);
 	}
 }

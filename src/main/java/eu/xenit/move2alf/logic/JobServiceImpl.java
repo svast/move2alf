@@ -19,7 +19,6 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredObjectParameter;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
@@ -260,97 +259,38 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public ConfiguredObject createDestination(String destinationType,
 			HashMap destinationParams) {
-
 		ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
-
-		sourceSink.setClassName(destinationType);
-
-		ConfiguredObjectParameter sourceSinkName = new ConfiguredObjectParameter();
-		sourceSinkName.setConfiguredObject(sourceSink);
-		sourceSinkName.setName("name");
-		sourceSinkName.setValue((String) destinationParams
-				.get(EDestinationParameter.NAME));
-		ConfiguredObjectParameter sourceSinkURL = new ConfiguredObjectParameter();
-		sourceSinkURL.setConfiguredObject(sourceSink);
-		sourceSinkURL.setName("url");
-		sourceSinkURL.setValue((String) destinationParams
-				.get(EDestinationParameter.URL));
-		ConfiguredObjectParameter sourceSinkUser = new ConfiguredObjectParameter();
-		sourceSinkUser.setConfiguredObject(sourceSink);
-		sourceSinkUser.setName("user");
-		sourceSinkUser.setValue((String) destinationParams
-				.get(EDestinationParameter.USER));
-		ConfiguredObjectParameter sourceSinkPassword = new ConfiguredObjectParameter();
-		sourceSinkPassword.setConfiguredObject(sourceSink);
-		sourceSinkPassword.setName("password");
-		sourceSinkPassword.setValue((String) destinationParams
-				.get(EDestinationParameter.PASSWORD));
-		ConfiguredObjectParameter sourceSinkThreads = new ConfiguredObjectParameter();
-		sourceSinkThreads.setConfiguredObject(sourceSink);
-		sourceSinkThreads.setName("threads");
-		sourceSinkThreads.setValue(destinationParams.get(
-				EDestinationParameter.THREADS).toString());
-
-		Set<ConfiguredObjectParameter> parameterSet = new HashSet();
-		parameterSet.add(sourceSinkName);
-		parameterSet.add(sourceSinkURL);
-		parameterSet.add(sourceSinkUser);
-		parameterSet.add(sourceSinkPassword);
-		parameterSet.add(sourceSinkThreads);
-
-		sourceSink.setConfiguredObjectParameterSet(parameterSet);
-
+		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
-
 		return sourceSink;
 	}
 
 	@Override
-	public ConfiguredObject editDestination(int sinkId,
-			String destinationType, HashMap destinationParams) {
-
+	public ConfiguredObject editDestination(int sinkId, String destinationType,
+			HashMap destinationParams) {
 		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
+		sourceSink.setClassName(destinationType);
+		createSourceSink(destinationType, destinationParams, sourceSink);
+		getSessionFactory().getCurrentSession().save(sourceSink);
+		return sourceSink;
+	}
 
+	private void createSourceSink(String destinationType,
+			HashMap destinationParams, ConfiguredSourceSink sourceSink) {
 		sourceSink.setClassName(destinationType);
 
-		ConfiguredObjectParameter sourceSinkName = new ConfiguredObjectParameter();
-		sourceSinkName.setConfiguredObject(sourceSink);
-		sourceSinkName.setName("name");
-		sourceSinkName.setValue((String) destinationParams
+		Map<String, String> sourceSinkParameters = new HashMap<String, String>();
+		sourceSinkParameters.put("name", (String) destinationParams
 				.get(EDestinationParameter.NAME));
-		ConfiguredObjectParameter sourceSinkURL = new ConfiguredObjectParameter();
-		sourceSinkURL.setConfiguredObject(sourceSink);
-		sourceSinkURL.setName("url");
-		sourceSinkURL.setValue((String) destinationParams
+		sourceSinkParameters.put("url", (String) destinationParams
 				.get(EDestinationParameter.URL));
-		ConfiguredObjectParameter sourceSinkUser = new ConfiguredObjectParameter();
-		sourceSinkUser.setConfiguredObject(sourceSink);
-		sourceSinkUser.setName("user");
-		sourceSinkUser.setValue((String) destinationParams
+		sourceSinkParameters.put("user", (String) destinationParams
 				.get(EDestinationParameter.USER));
-		ConfiguredObjectParameter sourceSinkPassword = new ConfiguredObjectParameter();
-		sourceSinkPassword.setConfiguredObject(sourceSink);
-		sourceSinkPassword.setName("password");
-		sourceSinkPassword.setValue((String) destinationParams
+		sourceSinkParameters.put("password", (String) destinationParams
 				.get(EDestinationParameter.PASSWORD));
-		ConfiguredObjectParameter sourceSinkThreads = new ConfiguredObjectParameter();
-		sourceSinkThreads.setConfiguredObject(sourceSink);
-		sourceSinkThreads.setName("threads");
-		sourceSinkThreads.setValue(destinationParams.get(
-				EDestinationParameter.THREADS).toString());
-
-		Set<ConfiguredObjectParameter> parameterSet = new HashSet();
-		parameterSet.add(sourceSinkName);
-		parameterSet.add(sourceSinkURL);
-		parameterSet.add(sourceSinkUser);
-		parameterSet.add(sourceSinkPassword);
-		parameterSet.add(sourceSinkThreads);
-
-		sourceSink.setConfiguredObjectParameterSet(parameterSet);
-
-		getSessionFactory().getCurrentSession().save(sourceSink);
-
-		return sourceSink;
+		sourceSinkParameters.put("threads", (String) destinationParams
+				.get(EDestinationParameter.THREADS));
+		sourceSink.setParameters(sourceSinkParameters);
 	}
 
 	@Override
@@ -381,11 +321,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void deleteDestination(int id) {
 		ConfiguredSourceSink destination = getConfiguredSourceSink(id);
-
-		Set emptySet = new HashSet();
-
-		destination.setConfiguredObjectParameterSet(emptySet);
-
+		Map<String, String> emptyMap = new HashMap<String, String>();
+		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);
 	}
 

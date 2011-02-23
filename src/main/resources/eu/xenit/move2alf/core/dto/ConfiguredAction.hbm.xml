@@ -11,13 +11,13 @@
 		<property name="className" column="actionClassName"/>
 		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true" lazy="false"/>
 		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true" lazy="false"/>
-    	<set name="configuredObjectParameterSet" table="configuredActionParameter" lazy="false">
-      		<key column="configuredActionId"/>
-      		<composite-element class="eu.xenit.move2alf.core.dto.ConfiguredObjectParameter">
-        		<property name="name"/>
-        		<property name="value"/>
-      		</composite-element>
-    	</set>
+    	
+    	<map name="parameters" table="configuredActionParameter" lazy="false">
+    		<key column="configuredActionId"/>
+    		<map-key column="name" type="string"/>
+    		<element column="value" type="string"/>
+    	</map>
+    	
     	<set name="configuredSourceSinkSet" table="configuredActionConfiguredSourceSink">
       		<key column="configuredActionId"/>
       		<many-to-many class="eu.xenit.move2alf.core.dto.ConfiguredSourceSink" column="configuredSourceSinkId"/>
