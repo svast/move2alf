@@ -64,11 +64,6 @@ public class JobsTests extends IntegrationTests {
 		// TODO: do cycles need to be sorted chronologically?
 	}
 	
-	@Test
-	public void testDieAltijdFaalt() {
-		assertTrue(false);
-	}
-	
 	// get summary from latest cycle
 	
 	// get status of job (running, not running (last run), disabled, ...)
