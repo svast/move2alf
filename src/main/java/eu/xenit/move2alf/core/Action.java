@@ -21,7 +21,7 @@ public abstract class Action {
 		this.actionFactory = actionFactory;
 	}
 
-	public ActionFactory getActionFactory() {
+	public AbstractFactory<Action> getActionFactory() {
 		return actionFactory;
 	}
 
@@ -68,7 +68,7 @@ public abstract class Action {
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
 		if (nextAction != null) {
-			getActionFactory().getAction(nextAction.getActionClassName())
+			getActionFactory().getObject(nextAction.getActionClassName())
 					.execute(nextAction, parameterMap); // TODO: helper method
 			// in ActionFactory?
 		}

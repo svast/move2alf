@@ -1,37 +1,25 @@
 package eu.xenit.move2alf.core;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collection;
-import java.util.Set;
+import javax.annotation.PostConstruct;
 
-public class SourceSinkFactory {
-	private static final SourceSinkFactory instance = new SourceSinkFactory();
-	
-	private Map<String, SourceSink> sourceSinkMap = new HashMap<String, SourceSink>();
-	 
-    public static SourceSinkFactory getInstance() {
-        return instance;
-    }
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.stereotype.Service;
 
-    private SourceSinkFactory() {
-    	rescanSourceSinks();
-    }
- 
-    public void rescanSourceSinks(){
-    	//TODO scan for available report classes and store an instance ()
-    }
-    
-    public Collection<SourceSink> getSourceSinkCollection(){
-      return sourceSinkMap.values();
-    }
-    
-    public Set<String> getSourceSinkClassNames(){
-      return sourceSinkMap.keySet();	
-    }
-    
-    public SourceSink getSourceSink(String className){
-    	return sourceSinkMap.get(className);
-    }
-    	
+@Service("sourceSinkFactory")
+public class SourceSinkFactory extends AbstractFactory<SourceSink> {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(SourceSinkFactory.class);
+
+	@Override
+	protected AssignableTypeFilter getTypeFilter() {
+		return new AssignableTypeFilter(SourceSink.class);
+	}
+
+	@Override
+	protected void initializeObject(SourceSink object) {
+		// no initialization required for SourceSink objects
+	}
 }

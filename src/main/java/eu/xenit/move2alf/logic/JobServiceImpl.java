@@ -16,7 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ActionFactory;
+import eu.xenit.move2alf.core.AbstractFactory;
+import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
@@ -36,7 +37,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private Scheduler scheduler;
 
-	private ActionFactory actionFactory;
+	private AbstractFactory<Action> actionFactory;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -57,11 +58,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Autowired
-	public void setActionFactory(ActionFactory actionFactory) {
+	public void setActionFactory(AbstractFactory<Action> actionFactory) {
 		this.actionFactory = actionFactory;
 	}
 
-	public ActionFactory getActionFactory() {
+	public AbstractFactory<Action> getActionFactory() {
 		return actionFactory;
 	}
 
@@ -462,7 +463,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			Map<String, Object> parameterMap) {
 		logger.debug("Executing action: " + action.getId() + " - "
 				+ action.getActionClassName());
-		getActionFactory().getAction(action.getActionClassName()).execute(
+		getActionFactory().getObject(action.getActionClassName()).execute(
 				action, parameterMap);
 	}
 
