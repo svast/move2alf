@@ -3,6 +3,7 @@ package eu.xenit.move2alf.web.controller;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import eu.xenit.move2alf.core.dto.Cycle;
+import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.JobInfo;
 
 @Controller
 public class JobController {
@@ -51,10 +55,27 @@ public class JobController {
 	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("jobs", getJobService().getAllJobs());
+		List<JobInfo> jobInfoList = new ArrayList();
+		List<Job> jobs = getJobService().getAllJobs();
+		if(null != jobs){
+			for(int i=0; i<jobs.size(); i++){
+				JobInfo jobInfo = new JobInfo();
+				jobInfo.setJobId(jobs.get(i).getId());
+				jobInfo.setJobName(jobs.get(i).getName());
+				try{
+					jobInfo.setCycleId(getJobService().getLastCycleForJob(jobs.get(i)).getId());
+					jobInfo.setCycleStartDateTime(getJobService().getLastCycleForJob(jobs.get(i)).getStartDateTime());
+					jobInfo.setScheduleState(getJobService().getLastCycleForJob(jobs.get(i)).getSchedule().getState().getDisplayName());
+					
+				}catch(Exception e){
+				}
+				
+				jobInfoList.add(jobInfo);
+			}
+		}
+		mav.addObject("jobInfoList", jobInfoList);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
-		mav.addObject("cycles", getJobService().getLastCycleForJobs());
 		mav.setViewName("dashboard");
 		return mav;
 	}
@@ -371,7 +392,12 @@ public class JobController {
 	public ModelAndView report(@PathVariable int jobId, @PathVariable int cycleId) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
-		mav.addObject("cycle", getJobService().getCycle(cycleId));
+		Cycle cycle = getJobService().getCycle(cycleId);
+		Date startDateTime = cycle.getStartDateTime();
+		Date endDateTime = cycle.getEndDateTime();
+		String duration = getJobService().getDuration(startDateTime, endDateTime);
+		mav.addObject("cycle", cycle);
+		mav.addObject("duration", duration);
 		mav.setViewName("report");
 		return mav;
 	}
@@ -380,7 +406,7 @@ public class JobController {
 	public ModelAndView history(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
-		mav.addObject("cycles", getJobService().getCyclesForJob(jobId));
+		mav.addObject("cycles", getJobService().getCyclesForJobDesc(jobId));
 		mav.setViewName("history");
 		return mav;
 	}

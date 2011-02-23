@@ -39,8 +39,7 @@ public class UserController {
 	@RequestMapping("/users")
 	public ModelAndView manageUsers() {
 		ModelAndView mav = new ModelAndView();
-		List<UserPswd> users = getUserService().getAllUsers();
-		mav.addObject("users", users);
+		mav.addObject("users", getUserService().getAllUsers());
 		mav.setViewName("manage-users");
 		return mav;
 	}
@@ -67,8 +66,7 @@ public class UserController {
 	public ModelAndView confirmDeleteUser(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
 		logger.info("deleting user " + userName);
-		UserPswd user = getUserService().getUser(userName);
-		mav.addObject("user", user);
+		mav.addObject("user", getUserService().getUser(userName));
 		mav.setViewName("delete-user");
 		return mav;
 	}
@@ -107,6 +105,8 @@ public class UserController {
 		String oldPasswordEntered = Util.convertToMd5(user.getOldPassword());
 		
 		if(oldPassword.equals(oldPasswordEntered)){
+			
+			getUserService().changePassword(user.getNewPassword());
 			mav.setViewName("redirect:/user/profile");
 		}
 		else{
@@ -140,18 +140,19 @@ public class UserController {
 		String currentUserPasswordEntered = Util.convertToMd5(user.getOldPassword());
 		
 		if(currentUserPassword.equals(currentUserPasswordEntered)){
+			getUserService().changePassword(userName, user.getNewPassword());
 			mav.setViewName("redirect:/users");
 		}
 		else{
-			mav.setViewName("redirect:/user/edit/password/failed");
+			mav.setViewName("redirect:/user/"+userName+"/edit/password/failed");
 		}
 		return mav;
 	}
 	
-	@RequestMapping(value = "/user/edit/password/failed", method = RequestMethod.GET)
-	public ModelAndView editUserPasswordFailed() {
+	@RequestMapping(value = "/user/{userName}/edit/password/failed", method = RequestMethod.GET)
+	public ModelAndView editUserPasswordFailed(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("user", getUserService().getCurrentUser());
+		mav.addObject("user", getUserService().getUser(userName));
 		mav.setViewName("edit-user-password-failed");
 		return mav;
 	}
@@ -173,18 +174,19 @@ public class UserController {
 		String currentUserPasswordEntered = Util.convertToMd5(user.getOldPassword());
 		
 		if(currentUserPassword.equals(currentUserPasswordEntered)){
+			getUserService().changeRole(userName, ERole.valueOf(user.getRole()));
 			mav.setViewName("redirect:/users");
 		}
 		else{
-			mav.setViewName("redirect:/user/edit/role/failed");
+			mav.setViewName("redirect:/user/"+userName+"/edit/role/failed");
 		}
 		return mav;
 	}
 	
-	@RequestMapping(value = "/user/edit/role/failed", method = RequestMethod.GET)
-	public ModelAndView editUserRoleFailed() {
+	@RequestMapping(value = "/user/{userName}/edit/role/failed", method = RequestMethod.GET)
+	public ModelAndView editUserRoleFailed(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("user", getUserService().getCurrentUser());
+		mav.addObject("user", getUserService().getUser(userName));
 		mav.setViewName("edit-user-role-failed");
 		return mav;
 	}

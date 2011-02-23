@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html>
 <head>
@@ -508,35 +509,6 @@ function noDestNeeded(){
 	document.getElementById('noDestinations').style.display='none';
 }
 
-function setDuration(startTime, endTime){
-
-	var duration = endTime - startTime;
-
-	var durationDate = new Date(duration);
-
-	var date = durationDate.getDate() - 1;
-	var hours = durationDate.getHours() - 1;
-	var minutes = ""+durationDate.getMinutes();
-	var seconds = ""+durationDate.getSeconds();
-		
-	if(date > 0){
-		hours = hours + date*24;
-	}
-
-	var hoursString = ""+hours;
-	
-	if (hoursString.length < 2)
-		hoursString = "0"+hours;
-	if(minutes.length < 2)
-		minutes = "0"+minutes;
-	if(seconds.length < 2)
-		seconds = "0"+seconds;
-	
-	var durationDateString = hoursString+":"+minutes+":"+seconds;
-	
-	document.getElementById('duration').innerHTML = durationDateString;
-}
-
 function comparePasswords(){
 	if(document.getElementById('newPassword').value != document.getElementById('newPasswordRetype').value){
 		window.alert("You must type the same new password twice.");
@@ -598,11 +570,12 @@ function numbersonly(myfield, e, dec)
 <div class="container">
 <div class="span-24 last header">
 <h1>XeniT Move2Alf</h1>
-
-<sec:authorize access="hasRole('CONSUMER')">
+ 
+<!-- 
 	<p>
 	<div>
 	<div class="left">
+	<sec:authorize access="hasRole('CONSUMER')">
 	<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
 	</sec:authorize>
 	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
@@ -612,11 +585,37 @@ function numbersonly(myfield, e, dec)
 	<sec:authorize access="hasRole('CONSUMER')">
 | 		<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
 	</sec:authorize>
-| </div>
+</div>
 <div class="right">
+<sec:authorize access="hasRole('CONSUMER')">
 Username: <sec:authentication property="principal.username" /> 
+</sec:authorize>
 | <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a>
 </div>
 <div class="clear"></div>
 </div></p>
+-->
+
+	<p>
+	<div>
+	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
+	<div class="left">
+	
+	<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
+
+| <a href="<spring:url value="/destinations/" htmlEscape="true"/>">Manage destinations</a>
+| <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
+
+| 		<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
+
+</div>
+<div class="right">
+Username: <sec:authentication property="principal.username" /> 
+
+| <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a>
+</div>
+<div class="clear"></div>
+</sec:authorize>
+</div></p>
+
 </div>

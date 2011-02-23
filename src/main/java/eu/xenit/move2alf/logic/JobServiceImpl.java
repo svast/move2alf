@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -139,30 +140,37 @@ public class JobServiceImpl extends AbstractHibernateService implements
 						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc")
 				.setLong(0, jobId).list();
 	}
+	
+	@Override
+	public List<Cycle> getCyclesForJobDesc(int jobId) {
+		return getSessionFactory()
+				.getCurrentSession()
+				.createQuery(
+						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime desc")
+				.setLong(0, jobId).list();
+	}
 
 	@Override
-	public List<Cycle> getLastCycleForJobs() {
+	public Cycle getLastCycleForJob(Job job) {
 		List<Job> allJobs = getAllJobs();
 
 		List<Cycle> jobCycles = new ArrayList();
 
-		List<Cycle> lastCycles = new ArrayList();
+		Cycle lastCycle;
+		
+		jobCycles = getCyclesForJob(job.getId());
 
-		for (int i = 0; i < allJobs.size(); i++) {
-			jobCycles = getCyclesForJob(allJobs.get(i).getId());
-
-			if (jobCycles.size() == 0) {
-				lastCycles.add(null);
+		if (jobCycles.size() == 0) {
+			lastCycle = null;
+		} else {
+			if (jobCycles.get(0).getEndDateTime() == null) {
+				lastCycle = jobCycles.get(0);
 			} else {
-				if (jobCycles.get(0).getEndDateTime() == null) {
-					lastCycles.add(jobCycles.get(0));
-				} else {
-					lastCycles.add(jobCycles.get(jobCycles.size() - 1));
-				}
+				lastCycle = jobCycles.get(jobCycles.size() - 1);
 			}
 		}
 
-		return lastCycles;
+		return lastCycle;
 	}
 
 	@Override
@@ -409,6 +417,44 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		session.update(schedule);
 
 		return cycle;
+	}
+	
+	public String getDuration(Date startDateTime, Date endDateTime){
+		Long duration = endDateTime.getTime() - startDateTime.getTime();
+		Date dateDuration = new Date(duration);
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dateDuration);
+
+		int date = cal.get(Calendar.DATE) -1;
+		int hours = cal.get(Calendar.HOUR_OF_DAY) -1;
+		int minutes = cal.get(Calendar.MINUTE);
+		int seconds = cal.get(Calendar.SECOND);
+			
+		if(date > 0){
+			hours = hours + date*24;
+		}
+
+		String hoursString = Integer.toString(hours);
+		String minutesString = Integer.toString(minutes);
+		String secondsString = Integer.toString(seconds);
+		
+		if (hoursString.length() < 2)
+			hoursString = "0"+hours;
+		if(minutesString.length() < 2)
+			minutesString = "0"+minutes;
+		if(secondsString.length() < 2)
+			secondsString = "0"+seconds;
+		
+		String durationDateString = hoursString+":"+minutesString+":"+secondsString;
+		
+		return durationDateString;
+	}
+
+	@Override
+	public void executeJob(int scheduleId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

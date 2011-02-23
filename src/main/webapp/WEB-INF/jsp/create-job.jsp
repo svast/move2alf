@@ -14,10 +14,12 @@
 <tr>
 <td>Name:</td>
 <td><form:input path="name" size="30" maxlength="30" /></td>
+<td><form:errors path="name" cssClass="error"/></td>
 </tr>
 <tr>
 <td>Description:</td>
 <td><form:textarea path="description" cols="50" rows="4"/></td>
+<td><form:errors path="description" cssClass="error"/></td>
 </tr>
 </table>
 

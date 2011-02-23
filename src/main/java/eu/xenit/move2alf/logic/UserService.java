@@ -95,4 +95,5 @@ public interface UserService {
 	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public void changeRole(String userName, ERole newRole);
 
+	
 }

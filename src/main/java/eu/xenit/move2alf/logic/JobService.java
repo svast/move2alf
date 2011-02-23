@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.logic;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,12 +87,20 @@ public interface JobService {
 	public List<Cycle> getCyclesForJob(int jobId);
 
 	/**
+	 * Return all cycles for a job with the given name.
+	 * 
+	 * @param jobId
+	 *            The id of the job return List<Cycle> A list of cycles
+	 */
+	List<Cycle> getCyclesForJobDesc(int jobId);
+	
+	/**
 	 * Return the last cycle for each job.
 	 * 
 	 * @return List<Cycle> A list of cycles
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
-	public List<Cycle> getLastCycleForJobs();
+	public Cycle getLastCycleForJob(Job job);
 
 	/**
 	 * Return all the schedules of a particular job
@@ -199,14 +208,22 @@ public interface JobService {
 	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId);
 
 	/**
+	 * gets the duration of the cycle based on startDateTime and EndDateTime
+	 * 
+	 * @param startDateTime
+	 * @param endDateTime
+	 * @return String
+	 */
+	public String getDuration(Date startDateTime, Date endDateTime);
+	
+	/**
 	 * Start execution of a job
 	 * 
 	 * @param scheduleId
 	 *            The id of the schedule to start
-	 
+	 */
 	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
 	public void executeJob(int scheduleId);
-	*/
 
 	/**
 	 * deletes a configured source sink based on id.
@@ -214,6 +231,8 @@ public interface JobService {
 	 * @param id
 	 */
 	public void deleteDestination(int id);
+
+
 
 	/**
 	 * Start a new cycle for a job. This is the first step when executing a job.

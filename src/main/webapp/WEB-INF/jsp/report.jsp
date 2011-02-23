@@ -1,8 +1,8 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
-
+<!-- 
 <body onload='setDuration("<c:out value="${cycle.startDateTime.time}"/>","<c:out value="${cycle.endDateTime.time}"/>");'>
-
+-->
 <div class="span-24 last main">
 
 <h2>Report</h2>
@@ -25,7 +25,7 @@
 </tr>
 <tr><td><br /> </td></tr>
 <tr>
-<th class="alignRight">Duration:</th><td id="duration"></td>
+<th class="alignRight">Duration:</th><td id="duration"><c:out value="${duration}" /></td>
 </tr>
 <tr><td><br /> </td></tr>
 <tr>
@@ -48,7 +48,8 @@
 </div>
 
 </div>
-
+<!-- 
 </body>
+-->
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
