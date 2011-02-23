@@ -13,19 +13,11 @@ public class TestAction extends Action {
 	private static final Logger logger = LoggerFactory
 			.getLogger(TestAction.class);
 
-	private static final TestAction instance = new TestAction();
-
-	private TestAction() {
-
-	}
-
-	public static TestAction getInstance() {
-		return instance;
-	}
-
 	@Override
-	public void execute(ConfiguredAction configuredAction,
+	public void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
+		// TODO: check if class name of configured action matches class of this
+		// action?
 		logger.debug("Test action executed");
 		for (ConfiguredActionParameter param : configuredAction
 				.getConfiguredActionParameterSet()) {

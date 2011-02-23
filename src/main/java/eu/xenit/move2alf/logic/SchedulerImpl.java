@@ -30,16 +30,12 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	private JobService jobService;
 
 	private SessionFactory sessionFactory;
-	
-	private ActionFactory actionFactory;
 
 	private org.quartz.Scheduler scheduler;
 
 	static final String SCHEDULE_ID = "jobId";
 
 	static final String JOB_SERVICE = "jobService";
-	
-	static final String ACTION_FACTORY = "actionFactory";
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -57,15 +53,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
-	}
-	
-	@Autowired
-	public void setActionFactory(ActionFactory actionFactory) {
-		this.actionFactory = actionFactory;
-	}
-	
-	public ActionFactory getActionFactory() {
-		return actionFactory;
 	}
 
 	@PostConstruct
@@ -106,7 +93,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					JobDataMap jobData = new JobDataMap();
 					jobData.put(SCHEDULE_ID, schedule.getId());
 					jobData.put(JOB_SERVICE, getJobService());
-					jobData.put(ACTION_FACTORY, getActionFactory());
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {

@@ -65,17 +65,7 @@ public class LiPolisDocAction extends Action {
 	private static final String OP_LiSinkFolderRelativePath = "liSinkFolderRelativePath";
 	private static final String OP_LiDocumentGroup = "liDocumentGroup";
 
-	/*
-	 * the ActionFactory will only register Actions that have implemented the
-	 * singleton pattern
-	 */
-	private static final LiPolisDocAction instance = new LiPolisDocAction();
-
-	public static LiPolisDocAction getInstance() {
-		return instance;
-	}
-
-	private LiPolisDocAction() {
+	public LiPolisDocAction() {
 		name = "Vivium Life PolisDoc Action";
 		description = "Action that parses the adept keyfile";
 		addAprioriInputParameter(new ParameterDefinition(IP_AdeptKeyFilePath,
@@ -113,7 +103,7 @@ public class LiPolisDocAction extends Action {
 	}
 
 	@Override
-	public void execute(ConfiguredAction configuredAction,
+	public void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		String keyFilePath = (String) parameterMap.get(IP_AdeptKeyFilePath);
 		

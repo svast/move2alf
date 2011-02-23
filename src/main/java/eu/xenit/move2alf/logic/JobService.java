@@ -2,10 +2,12 @@ package eu.xenit.move2alf.logic;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
@@ -227,5 +229,12 @@ public interface JobService {
 	 * @param cycleId The cycle to close
 	 */
 	public void closeCycle(Cycle cycle);
-
+	
+	/**
+	 * Execute a configured action.
+	 * 
+	 * @param action
+	 * @param parameterMap
+	 */
+	public void executeAction(ConfiguredAction action, Map<String, Object> parameterMap);
 }

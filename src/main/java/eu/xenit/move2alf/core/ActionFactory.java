@@ -32,9 +32,10 @@ public class ActionFactory {
 		for (BeanDefinition component : components) {
 			logger.debug("Action: " + component.getBeanClassName());
 			try {
-				actionMap.put(component.getBeanClassName(), (Action) Class
-						.forName(component.getBeanClassName()).getMethod(
-								"getInstance").invoke(null));
+				Action action = (Action) Class
+						.forName(component.getBeanClassName()).getConstructor().newInstance();
+				action.setActionFactory(this);
+				actionMap.put(component.getBeanClassName(), action);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -51,6 +52,9 @@ public class ActionFactory {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

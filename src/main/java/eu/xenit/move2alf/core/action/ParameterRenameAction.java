@@ -14,16 +14,7 @@ public class ParameterRenameAction extends Action {
 	private static final String CP_OldParameterName = "oldParameterName";
 	private static final String CP_NewParameterName = "newParameterName";
 
-	/*
-	 * the ActionFactory will only register Actions that have implemented the singleton pattern
-	 */
-	private static final ParameterRenameAction instance = new ParameterRenameAction();
-	
-    public static ParameterRenameAction getInstance() {
-        return instance;
-    }
-
-	private ParameterRenameAction() {
+	public ParameterRenameAction() {
 		name = "Parameter Rename Action";
 		description = "Action that renames the parameter name, without changing the value";
 		addConfigParameter(new ParameterDefinition(CP_OldParameterName,
@@ -33,7 +24,7 @@ public class ParameterRenameAction extends Action {
 	}
 
 	@Override
-	public void execute(ConfiguredAction configuredAction,
+	public void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		String oldName = null;
 		String newName = null;

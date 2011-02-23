@@ -25,10 +25,6 @@ public class JobExecutor implements org.quartz.Job {
 				SchedulerImpl.SCHEDULE_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
-		ActionFactory actionFactory = (ActionFactory) context
-				.getMergedJobDataMap().get(SchedulerImpl.ACTION_FACTORY);
-
-		// TODO: extract job execution responsibility to separate class
 
 		Cycle cycle;
 		try {
@@ -41,31 +37,9 @@ public class JobExecutor implements org.quartz.Job {
 
 		Job job = cycle.getSchedule().getJob();
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();	
-		}
-
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		ConfiguredAction action = job.getFirstConfiguredAction();
-		while (action != null) {
-			// TODO: set running action(s) on cycle
-			try {
-				logger.debug("Executing action: " + action.getId() + " - "
-						+ action.getActionClassName());
-				actionFactory.getAction(action.getActionClassName()).execute(
-						action, parameterMap);
-				// TODO: status?
-			} catch (Exception e) {
-				e.printStackTrace();
-				// action.getAppliedConfiguredActionOnFailure().execute(
-				// parameterMap);
-				// TODO: status
-				break;
-			}
-			action = action.getAppliedConfiguredActionOnSuccess();
-		}
+		jobService.executeAction(action, parameterMap);
 
 		jobService.closeCycle(cycle);
 	}

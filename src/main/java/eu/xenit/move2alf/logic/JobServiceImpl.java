@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.ActionFactory;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSinkParameter;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -32,6 +35,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private Scheduler scheduler;
 
+	private ActionFactory actionFactory;
+
 	@Autowired
 	public void setUserService(UserService userService) {
 		this.userService = userService;
@@ -48,6 +53,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public Scheduler getScheduler() {
 		return scheduler;
+	}
+
+	@Autowired
+	public void setActionFactory(ActionFactory actionFactory) {
+		this.actionFactory = actionFactory;
+	}
+
+	public ActionFactory getActionFactory() {
+		return actionFactory;
 	}
 
 	@Override
@@ -395,6 +409,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		session.update(schedule);
 
 		return cycle;
+	}
+
+	@Override
+	public void executeAction(ConfiguredAction action,
+			Map<String, Object> parameterMap) {
+		logger.debug("Executing action: " + action.getId() + " - "
+				+ action.getActionClassName());
+		getActionFactory().getAction(action.getActionClassName()).execute(
+				action, parameterMap);
 	}
 
 }
