@@ -26,7 +26,7 @@ public abstract class AbstractFactory<T> {
 	}
 
 	public void rescan() {
-		logger.info("Loading objects (" + this.getClass() + ")");
+		logger.info("Scanning for objects (" + this.getClass() + ")");
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
 				false);
 		provider.addIncludeFilter(getTypeFilter());

@@ -1,7 +1,9 @@
 package eu.xenit.move2alf.core;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,5 +41,8 @@ public abstract class SourceSink {
 
 	public abstract void send(ConfiguredObject configuredSourceSink,
 			Map<String, Object> parameterMap);
+
+	public abstract List<File> list(ConfiguredObject sourceConfig, String path,
+			boolean recursive);
 
 }
