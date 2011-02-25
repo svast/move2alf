@@ -82,7 +82,7 @@ public abstract class Action {
 		}
 	}
 
-	protected abstract void executeImpl(ConfiguredObject configuredAction,
+	protected abstract void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap);
 
 	/*
@@ -90,12 +90,12 @@ public abstract class Action {
 	 * be oveloaded in subclass
 	 */
 	public Collection<ParameterDefinition> getInputParameters(
-			ConfiguredObject configuredAction) {
+			ConfiguredAction configuredAction) {
 		return aprioriInputParameterMap.values();
 	}
 
 	public Collection<ParameterDefinition> getOutputParameters(
-			ConfiguredObject configuredAction) {
+			ConfiguredAction configuredAction) {
 		return aprioriOutputParameterMap.values();
 	}
 

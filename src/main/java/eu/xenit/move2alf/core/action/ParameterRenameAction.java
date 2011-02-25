@@ -6,7 +6,7 @@ import java.util.Map;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class ParameterRenameAction extends Action {
 	// config parameters
@@ -23,7 +23,7 @@ public class ParameterRenameAction extends Action {
 	}
 
 	@Override
-	public void executeImpl(ConfiguredObject configuredAction,
+	public void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		String oldName = configuredAction.getParameter(CP_OldParameterName);
 		String newName = configuredAction.getParameter(CP_NewParameterName);
@@ -40,8 +40,9 @@ public class ParameterRenameAction extends Action {
 		// }
 	}
 
+	@Override
 	public Collection<ParameterDefinition> getInputParameters(
-			ConfiguredObject configuredAction) {
+			ConfiguredAction configuredAction) {
 		Map<String, ParameterDefinition> inputParameterMap = new HashMap<String, ParameterDefinition>();
 		inputParameterMap.putAll(aprioriInputParameterMap);
 		String oldName = configuredAction.getParameter(CP_OldParameterName);
@@ -52,8 +53,9 @@ public class ParameterRenameAction extends Action {
 		return inputParameterMap.values();
 	}
 
+	@Override
 	public Collection<ParameterDefinition> getOutputParameters(
-			ConfiguredObject configuredAction) {
+			ConfiguredAction configuredAction) {
 		Map<String, ParameterDefinition> outputParameterMap = new HashMap<String, ParameterDefinition>();
 		outputParameterMap.putAll(aprioriOutputParameterMap);
 		

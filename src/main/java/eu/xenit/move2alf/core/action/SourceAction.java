@@ -9,6 +9,7 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SourceAction extends Action {
 
@@ -23,12 +24,13 @@ public class SourceAction extends Action {
 		boolean recursive = "true".equals(configuredAction
 				.getParameter(PARAM_RECURSIVE));
 
-		ConfiguredObject sourceConfig = (ConfiguredObject) configuredAction
+		ConfiguredSourceSink sourceConfig = (ConfiguredSourceSink) configuredAction
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink source = getSourceSinkFactory().getObject(
 				sourceConfig.getClassName());
 		List<File> files = source.list(sourceConfig, path, recursive);
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
+		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
@@ -40,7 +42,7 @@ public class SourceAction extends Action {
 	}
 
 	@Override
-	protected void executeImpl(ConfiguredObject configuredAction,
+	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		// empty; SourceAction overrides the execute method to execute the next
 		// action for each file separately
