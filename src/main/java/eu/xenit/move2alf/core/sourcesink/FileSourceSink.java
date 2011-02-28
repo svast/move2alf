@@ -8,8 +8,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class FileSourceSink extends SourceSink {
 
@@ -17,7 +17,7 @@ public class FileSourceSink extends SourceSink {
 			.getLogger(FileSourceSink.class);
 
 	@Override
-	public List<File> list(ConfiguredObject sourceConfig, String path,
+	public List<File> list(ConfiguredSourceSink sourceConfig, String path,
 			boolean recursive) {
 		File source = new File(path);
 		return listFiles(source, recursive, new ArrayList<File>());
@@ -38,7 +38,7 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void send(ConfiguredObject configuredSourceSink,
+	public void send(ConfiguredSourceSink configuredSourceSink,
 			Map<String, Object> parameterMap) {
 
 	}

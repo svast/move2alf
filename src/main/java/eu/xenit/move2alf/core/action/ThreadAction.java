@@ -32,7 +32,7 @@ public class ThreadAction extends Action {
 		}
 		
 		public void run() {
-			parameterMap.put("thread", Thread.currentThread().toString()); // TODO: remove this, for debugging only
+			parameterMap.put("thread", Thread.currentThread().toString());
 			getActionFactory().execute(configuredAction, parameterMap);
 		}
 	}
