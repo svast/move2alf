@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -31,6 +30,7 @@ public class SourceAction extends Action {
 		List<File> files = source.list(sourceConfig, path, recursive);
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
 		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
+		parameterMap.put("path", path);
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
