@@ -1,7 +1,9 @@
 package eu.xenit.move2alf.logic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -400,6 +402,36 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		logger.debug("Executing action: " + action.getId() + " - "
 				+ action.getClassName());
 		getActionFactory().execute(action, parameterMap);
+	}
+
+	@Override
+	public void addSourceSinkToAction(ConfiguredAction action,
+			ConfiguredSourceSink sourceSink) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void createAction(String className, Map<String, String> parameters) {
+		ConfiguredAction action = new ConfiguredAction();
+		action.setClassName(className);
+		action.setParameters(parameters);
+		getSessionFactory().getCurrentSession().save(action);
+	}
+
+	@Override
+	public void createSourceSink(String className,
+			Map<String, String> parameters) {
+		ConfiguredSourceSink ss = new ConfiguredSourceSink();
+		ss.setClassName(className);
+		ss.setParameters(parameters);
+		getSessionFactory().getCurrentSession().save(ss);
+	}
+
+	@Override
+	public void setNextAction(ConfiguredAction action,
+			ConfiguredAction nextAction) {
+		// TODO Auto-generated method stub
 	}
 
 }

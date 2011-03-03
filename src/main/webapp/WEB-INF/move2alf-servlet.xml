@@ -20,13 +20,13 @@
 		<property name="suffix" value=".jsp" />
 	</bean>
 	
-	<bean name="jobController" class="eu.xenit.move2alf.web.controller.JobController">
-		<property name="commandName"><value>job</value></property>
-		<property name="commandClass"><value>eu.xenit.move2alf.web.dto.JobConfig</value></property>
+	<!--  <bean name="jobController" class="eu.xenit.move2alf.web.controller.JobController">
 		<property name="formView"><value>job-create</value></property>
 		<property name="validator">
-        	<ref bean="eu.xenit.move2alf.web.validator.JobValidator"/>
+        	<ref bean="jobValidator"/>
         </property>
         <property name="successView"><value>dashboard</value></property>
     </bean>
+    
+    <bean name="jobValidator" class="eu.xenit.move2alf.web.validator.JobValidator"/> -->
 </beans>

@@ -233,8 +233,6 @@ public interface JobService {
 	 */
 	public void deleteDestination(int id);
 
-
-
 	/**
 	 * Start a new cycle for a job. This is the first step when executing a job.
 	 * 
@@ -257,4 +255,32 @@ public interface JobService {
 	 * @param parameterMap
 	 */
 	public void executeAction(ConfiguredAction action, Map<String, Object> parameterMap);
+	
+	/**
+	 * 
+	 * @param className
+	 * @param parameters
+	 */
+	public void createAction(String className, Map<String, String> parameters);
+	
+	/**
+	 * 
+	 * @param className
+	 * @param parameters
+	 */
+	public void createSourceSink(String className, Map<String, String> parameters);
+	
+	/**
+	 * 
+	 * @param action
+	 * @param sourceSink
+	 */
+	public void addSourceSinkToAction(ConfiguredAction action, ConfiguredSourceSink sourceSink);
+	
+	/**
+	 * 
+	 * @param action
+	 * @param nextAction
+	 */
+	public void setNextAction(ConfiguredAction action, ConfiguredAction nextAction);
 }
