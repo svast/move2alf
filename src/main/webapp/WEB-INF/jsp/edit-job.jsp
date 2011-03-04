@@ -11,16 +11,30 @@
 <a href="<spring:url value="/job/${job.id}/delete" htmlEscape="true" />" class="right"><button type="button">Delete</button></a>
 
 
-<form:form modelAttribute="job" method="post" name="editJob">
+<form:form modelAttribute="job" method="post" name="editJob" onSubmit="return formValidator(this);">
 <h4>General</h4>
 <table class="indent">
 <tr>
 <td>Name:</td>
 <td><form:input path="name" size="30" maxlength="30" /></td>
+<td><form:errors path="name" cssClass="error"/></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "name",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "name cannot be empty",
+                                               	promptMessage : "name cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 </tr>
 <tr>
 <td>Description:</td>
 <td><form:textarea path="description" cols="50" rows="4"/></td>
+<td><form:errors path="description" cssClass="error"/></td>
 </tr>
 </table>
 
@@ -29,8 +43,20 @@
 <h4>Import from</h4>
 <table class="indent">
 <tr>
-<td>Path: <form:input path="InputFolder" size="50" maxlength="50" /></td>
-<td></td>
+<td>Path: <form:input path="inputFolder" size="50" maxlength="50" /></td>
+<td><form:errors path="inputFolder" cssClass="error"/></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "inputFolder",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "Path cannot be empty",
+                                               	promptMessage : "Path cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 </tr>
 </table>
 
@@ -38,8 +64,24 @@
 <h4>Destination</h4>
 
 <%@ include file="/WEB-INF/jsp/destination.jsp"%>
-
-<p class="indent">Path: <form:input path="InputFolder" size="50" maxlength="50" /></p>
+<table class="indent">
+<tr>
+<td class="indent">Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
+<td><form:errors path="destinationFolder" cssClass="error"/></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "destinationFolder",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "Path cannot be empty",
+                                               	promptMessage : "Path cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
+</tr>
+</table>
 <br />
 
 <h4>Schedule</h4>
@@ -86,6 +128,14 @@
 <table>
 <tr>
 <td class="double-indent">Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "beforeProcPath",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <td></td>
 </tr>
 </table>
@@ -95,6 +145,14 @@
 <table >
 <tr>
 <td class="double-indent">Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "afterLoadPath",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <td></td>
 </tr>
 </table>
@@ -104,6 +162,14 @@
 <table>
 <tr>
 <td class="double-indent">Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "notLoadPath",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <td></td>
 </tr>
 </table>
@@ -112,15 +178,36 @@
 <div class="indent"><form:checkbox path="sendNotification" value="Send notification e-mails on errors" />Send notification e-mails on errors</div>
 <div class="double-indent">To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
 <div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "emailAddressError",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <br />
 
 <div class="indent"><form:checkbox path="sendReport" value="Send load reports" />Send load reports</div>
 <div class="double-indent">To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
 <div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "emailAddressRep",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <br />
 
 <a href="<spring:url value="/job/dashboard" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
-<input type="submit" value="Update job" class="right"/>
+<input id="proceed" type="submit" value="Update job" class="right"/>
+						<script type="text/javascript">
+                            Spring.addDecoration(new Spring.ValidateAllDecoration({
+                                    elementId: "proceed",
+                                    event: "onclick" }));
+                        </script>
 </form:form>
 </div>	
 </div>

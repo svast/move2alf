@@ -8,7 +8,7 @@
 <h2>Create new destinations</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post" name="createDestinations">
+<form:form modelAttribute="destination" method="post" name="createDestinations">
 
 <h4>Destination</h4>
 

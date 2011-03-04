@@ -12,6 +12,7 @@
 <tr>
 <td>Please enter your password:</td>
 <td><form:password path="oldPassword" size="15" maxlength="15" /></td>
+<td><form:errors path="oldPassword" cssClass="error"/></td>
 </tr>
 </table>
 <br />
@@ -20,6 +21,8 @@
 <tr>
 <td>new user's password:</td>
 <td><form:password path="newPassword" size="15" maxlength="15" /></td>
+<td><form:errors path="newPassword" cssClass="error"/></td>
+
 </tr>
 <tr>
 <td>Please retype the new user's password:</td>

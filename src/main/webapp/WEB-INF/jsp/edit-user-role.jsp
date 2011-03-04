@@ -12,6 +12,7 @@
 <tr>
 <td>Please enter your password:</td>
 <td><form:password path="oldPassword" size="15" maxlength="15" /></td>
+<td><form:errors path="oldPassword" cssClass="error"/></td>
 </tr>
 </table>
 <br />
@@ -19,7 +20,9 @@
 <table class="indent">
 <tr>
 <td>Role: </td>
-<td><form:input path="role" size="30" maxlength="30" /></td>
+<td><form:select path="role">
+    		<form:options items="${roleList}" />
+		</form:select></td>
 </tr>
 </table>
 

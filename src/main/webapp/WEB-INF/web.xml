@@ -48,7 +48,18 @@
 	<servlet-mapping>
 		<servlet-name>move2alf</servlet-name>
 		<url-pattern>/</url-pattern>
-	</servlet-mapping><!--
+	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>Resources Servlet</servlet-name>
+        <servlet-class>org.springframework.js.resource.ResourceServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+        <servlet-name>Resources Servlet</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
+	</servlet-mapping>
+	<!--
 	
 	<servlet-mapping>
 		<servlet-name>dispatch</servlet-name>
@@ -75,6 +86,8 @@
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.png</url-pattern>
 	</servlet-mapping>
+	
+	
 
 	<welcome-file-list>
 		<welcome-file>/index.jsp</welcome-file>

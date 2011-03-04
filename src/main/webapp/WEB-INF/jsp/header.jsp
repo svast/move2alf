@@ -2,6 +2,11 @@
 <!doctype html>
 <html>
 <head>
+
+		<script type="text/javascript" src="<c:url value="/resources/dojo/dojo.js" />"></script>
+        <script type="text/javascript" src="<c:url value="/resources/spring/Spring.js" />"></script>
+        <script type="text/javascript" src="<c:url value="/resources/spring/Spring-Dojo.js" />"></script>
+        <link type="text/css" rel="stylesheet" href="<c:url value="/resources/dijit/themes/tundra/tundra.css" />" /> 
 <script type="text/javascript">
 
 function popup(mylink, windowname)
@@ -357,6 +362,7 @@ function getCronJob(time, day, date, period, mins){
 		dom='?';
 		break;
 	default:
+		dow='?';
 		break;
 	}
 
@@ -424,6 +430,7 @@ function addRowToDestination(){
 		 dest.id=id;
 		 dest.type='radio';
 		 dest.name='dest';
+		 dest.checked=true;
 	 }catch(e){
 		 try{
 		 	var len = document.createDestinations.destinationType.length;
@@ -448,6 +455,7 @@ function addRowToDestination(){
 				 dest.id=id;
 				 dest.type='radio';
 				 dest.name='dest';
+				 dest.checked=true;
 			 }
 			 catch(e){
 				 var len = document.editDestination.destinationType.length;
@@ -509,14 +517,65 @@ function noDestNeeded(){
 	document.getElementById('noDestinations').style.display='none';
 }
 
+function checkDestinationFields(){
+	var destName = document.getElementById('destinationName').value;
+		if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
+			
+		return false;
+	}
+
+	var destURL = document.getElementById('destinationURL').value;
+	if(null==destURL || 'undefined'==destURL || ''==destURL || 'null'==destURL){
+
+		return false;
+	}
+	
+
+	var alfUser = document.getElementById('alfUser').value;
+	if(null==alfUser || 'undefined'==alfUser || ''==alfUser || 'null'==alfUser){
+		return false;
+	}
+
+	var alfPswd = document.getElementById('alfPswd').value;
+	if(null==alfPswd || 'undefined'==alfPswd || ''==alfPswd || 'null'==alfPswd){
+		return false;
+	}
+
+	var nbrThreads = document.getElementById('nbrThreads').value;
+	if(null==nbrThreads || 'undefined'==nbrThreads || ''==nbrThreads || 'null'==nbrThreads){
+		return false;
+	}
+
+	confirmDestination(); 
+	addRowToDestination();
+}
+
 function comparePasswords(){
 	if(document.getElementById('newPassword').value != document.getElementById('newPasswordRetype').value){
 		window.alert("You must type the same new password twice.");
 		return false;
 	}
 
-	return true;
+	confirmDestination();
+	addRowToDestination();
 	
+}
+
+function formValidator(form){
+
+	if(form.description.value=="" || form.description.value==null || form.description.value=="null" || form.description.value=="undefined"){
+		return false;
+	}
+
+	if(!document.getElementById("dest1")){
+		return false;
+	}
+	
+	if(!document.getElementById("rowNumber1")){
+		return false;
+	}
+	
+	alert("Submitted");
 }
 
 //copyright 1999 Idocs, Inc. http://www.idocs.com

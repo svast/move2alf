@@ -8,10 +8,12 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 
 public class JobValidator implements Validator{
 
+	@Override
 	public boolean supports(Class aClass) {
 		return JobConfig.class.equals(aClass);
 	}
  
+	@Override
 	public void validate(Object obj, Errors errors) {
 		JobConfig jobConfig = (JobConfig) obj;
  

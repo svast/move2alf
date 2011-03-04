@@ -12,10 +12,12 @@
 <tr>
 <td>old password:</td>
 <td><form:password path="oldPassword" size="15" maxlength="15" /></td>
+<td><form:errors path="oldPassword" cssClass="error"/></td>
 </tr>
 <tr>
 <td>new password:</td>
 <td><form:password path="newPassword" size="15" maxlength="15" /></td>
+<td><form:errors path="newPassword" cssClass="error"/></td>
 </tr>
 <tr>
 <td>Please retype the new password:</td>

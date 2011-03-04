@@ -1,17 +1,22 @@
 package eu.xenit.move2alf.web.dto;
 
 import java.util.List;
-
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.NotEmpty;
 
 public class JobConfig {
 	private int id;
 	
+	@NotEmpty
 	private String name;
 
+	@NotEmpty
 	private String description;
 
+	@NotEmpty
 	private String inputFolder;
 	
+	@NotEmpty
 	private String destinationFolder;
 	
 	private String runFrequency;
@@ -30,12 +35,16 @@ public class JobConfig {
 	
 	private String cronJob;
 	
+	@NotEmpty
 	private List<String> cron;
 	
+	@NotEmpty
 	private String metadata;
 	
+	@NotEmpty
 	private String transform;
 	
+	@NotEmpty
 	private String docExist;
 	
 	private boolean moveBeforeProc = false;
@@ -70,6 +79,7 @@ public class JobConfig {
 	
 	private int nbrThreads = 5;
 	
+	@NotEmpty
 	private String dest;
 	
 	private List<String> sourceSink;
@@ -357,5 +367,6 @@ public class JobConfig {
 	public List<String> getSourceSink() {
 		return sourceSink;
 	}
+	
 }
 

@@ -14,7 +14,7 @@
 <table>
 <tr>
 <td>Name:</td>
-<td><c:out value="${job.name}" /></td>
+<td><c:out value="${jobConfig.name}" /></td>
 </tr>
 </table>
 </h3>

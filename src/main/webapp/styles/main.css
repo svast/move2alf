@@ -153,5 +153,11 @@ div.main {
 .error {
     	color: black;
     }
-
+    
+textarea{
+    border: 1px solid black;
+    color: #5E878F;
+    background-color: #EBECED;
+    font-family: Geneva, Tahoma, sans-serif;
+}
 

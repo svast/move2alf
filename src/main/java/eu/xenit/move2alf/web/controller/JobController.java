@@ -7,14 +7,26 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
@@ -24,8 +36,12 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.UserService;
+import eu.xenit.move2alf.web.dto.DestinationConfig;
+import eu.xenit.move2alf.web.dto.DestinationInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
 import eu.xenit.move2alf.web.dto.JobInfo;
+import eu.xenit.move2alf.web.dto.ScheduleConfig;
+import eu.xenit.move2alf.web.validator.JobValidator;
 
 @Controller
 public class JobController {
@@ -109,7 +125,48 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/job/create", method = RequestMethod.POST)
-	public ModelAndView createJob(JobConfig job) {
+	public ModelAndView createJob(@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
+		
+		List<String> sourceSinks = job.getSourceSink();
+		boolean notNull=true;
+		if(sourceSinks!= null){
+			for(int i=0; i<sourceSinks.size(); i++){
+				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+				for(int j=0; j<sourceSinkElements.length; j++){
+					if("".equals(sourceSinkElements[j]) || null == sourceSinkElements[j])
+						notNull=false;
+				}
+			}
+		}
+		
+		if (errors.hasErrors() || notNull==false) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			List<DestinationInfo> destinationInfoList = new ArrayList();
+			
+			if(sourceSinks!= null){
+				for(int i=0; i<sourceSinks.size(); i++){
+					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+					DestinationInfo destinationInfo = new DestinationInfo();
+					
+					destinationInfo.setDestinationName(sourceSinkElements[0]);
+					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
+					destinationInfo.setDestinationValue(sourceSinks.get(i));
+					
+					destinationInfoList.add(destinationInfo);
+				}
+			}
+			ModelAndView mav = new ModelAndView("create-job");
+			mav.addObject("job",job);
+			mav.addObject("destinations", getJobService()
+					.getAllConfiguredSourceSinks());
+			mav.addObject("destinationInfoList", destinationInfoList);
+			mav.addObject("notNull", notNull);
+			
+
+            return mav;
+		}
+		
 		ModelAndView mav = new ModelAndView();
 		List<String> cronJobs = job.getCron();
 		int jobId = getJobService().createJob(job.getName(),
@@ -161,7 +218,49 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editJob(@PathVariable int id, JobConfig job) {
+	public ModelAndView editJob(@PathVariable int id, @ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
+		
+		List<String> sourceSinks = job.getSourceSink();
+		boolean notNull=true;
+		if(sourceSinks!= null){
+			for(int i=0; i<sourceSinks.size(); i++){
+				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+				for(int j=0; j<sourceSinkElements.length; j++){
+					if("".equals(sourceSinkElements[j]) || null == sourceSinkElements[j])
+						notNull=false;
+				}
+			}
+		}
+		
+		if (errors.hasErrors() || notNull==false) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			List<DestinationInfo> destinationInfoList = new ArrayList();
+			
+			if(sourceSinks!= null){
+				for(int i=0; i<sourceSinks.size(); i++){
+					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+					DestinationInfo destinationInfo = new DestinationInfo();
+					
+					destinationInfo.setDestinationName(sourceSinkElements[0]);
+					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
+					destinationInfo.setDestinationValue(sourceSinks.get(i));
+					
+					destinationInfoList.add(destinationInfo);
+				}
+			}
+			ModelAndView mav = new ModelAndView("create-job");
+			mav.addObject("job",job);
+			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+			mav.addObject("destinations", getJobService()
+					.getAllConfiguredSourceSinks());
+			mav.addObject("destinationInfoList", destinationInfoList);
+			mav.addObject("notNull", notNull);
+			
+
+            return mav;
+		}
+		
 		ModelAndView mav = new ModelAndView();
 		getJobService().editJob(id, job.getName(), job.getDescription());
 		boolean deleteSchedule = true;
@@ -239,14 +338,26 @@ public class JobController {
 		JobConfig jobConfig = new JobConfig();
 		jobConfig.setId(id);
 		jobConfig.setName(getJobService().getJob(id).getName());
-		mav.addObject("job", jobConfig);
+		mav.addObject("jobConfig", jobConfig);
+		mav.addObject("job", new ScheduleConfig());
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.setViewName("edit-schedule");
 		return mav;
 	}
 
 	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.POST)
-	public ModelAndView editSchedule(@PathVariable int id, JobConfig job) {
+	public ModelAndView editSchedule(@PathVariable int id, @ModelAttribute("job") @Valid ScheduleConfig job, BindingResult errors) {
+		
+		if (errors.hasErrors()) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			ModelAndView mav = new ModelAndView("edit-schedule");
+			mav.addObject("job",job);
+			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+
+            return mav;
+		}
+		
 		ModelAndView mav = new ModelAndView();
 
 		boolean deleteSchedule = true;
@@ -321,16 +432,54 @@ public class JobController {
 	@RequestMapping(value = "/destinations/create", method = RequestMethod.GET)
 	public ModelAndView createDestinationsForm() {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", new JobConfig());
+		mav.addObject("destination", new DestinationConfig());
 		mav.setViewName("create-destinations");
 		return mav;
 	}
 
 	@RequestMapping(value = "/destinations/create", method = RequestMethod.POST)
-	public ModelAndView createDestinations(JobConfig job) {
+	public ModelAndView createDestinations(@ModelAttribute("destination") @Valid DestinationConfig destination, BindingResult errors) {
+		
+		List<String> sourceSinks = destination.getSourceSink();
+		boolean notNull=true;
+		if(sourceSinks!= null){
+			for(int i=0; i<sourceSinks.size(); i++){
+				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+				for(int j=0; j<sourceSinkElements.length; j++){
+					if("".equals(sourceSinkElements[j]) || null == sourceSinkElements[j])
+						notNull=false;
+				}
+			}
+		}
+		
+		if (errors.hasErrors() || notNull==false) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			List<DestinationInfo> destinationInfoList = new ArrayList();
+			
+			if(sourceSinks!= null){
+				for(int i=0; i<sourceSinks.size(); i++){
+					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+					DestinationInfo destinationInfo = new DestinationInfo();
+					
+					destinationInfo.setDestinationName(sourceSinkElements[0]);
+					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
+					destinationInfo.setDestinationValue(sourceSinks.get(i));
+					
+					destinationInfoList.add(destinationInfo);
+				}
+			}
+			ModelAndView mav = new ModelAndView("create-destinations");
+			mav.addObject("createDestinationInfoList", destinationInfoList);
+			mav.addObject("destination",destination);
+			mav.addObject("notNull", notNull);
+		
+            return mav;
+		}
+		
 		ModelAndView mav = new ModelAndView();
 
-		List<String> sourceSink = job.getSourceSink();
+		List<String> sourceSink = destination.getSourceSink();
 
 		for (int j = 0; j < sourceSink.size(); j++) {
 
@@ -355,7 +504,7 @@ public class JobController {
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editDestinationForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", new JobConfig());
+		mav.addObject("destinations", new DestinationConfig());
 		mav.addObject("destination", getJobService()
 				.getConfiguredSourceSink(id));
 		mav.setViewName("edit-destination");
@@ -363,10 +512,25 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editDestination(@PathVariable int id, JobConfig job) {
+	public ModelAndView editDestination(@PathVariable int id, @ModelAttribute("destinations") @Valid DestinationConfig destinations, BindingResult errors) {
+		
+		
+		
+		if (errors.hasErrors()) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			
+			ModelAndView mav = new ModelAndView("edit-destination");
+			mav.addObject("destinations",destinations);
+			mav.addObject("destination", getJobService()
+					.getConfiguredSourceSink(id));
+		
+            return mav;
+		}
+		
 		ModelAndView mav = new ModelAndView();
 
-		List<String> sourceSink = job.getSourceSink();
+		List<String> sourceSink = destinations.getSourceSink();
 
 		for (int j = 0; j < sourceSink.size(); j++) {
 
