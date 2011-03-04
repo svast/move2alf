@@ -10,14 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Transactional
 public abstract class PipelineAssembler extends AbstractHibernateService {
 	
+	private JobService jobService;
+	
 	public abstract void assemblePipeline(JobConfig jobConfig);
 	
-	protected void assemble(ActionBuilder... actionBuilders) {
+	protected void assemble(JobConfig jobConfig, ActionBuilder... actionBuilders) {
 		ConfiguredAction firstAction = null;
 		ConfiguredAction prevAction = null;
 		for(ActionBuilder actionBuilder : actionBuilders) {
@@ -30,6 +33,9 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 			}
 		}
 		getSessionFactory().getCurrentSession().save(firstAction);
+		Job job = getJobService().getJob(jobConfig.getId());
+		job.setFirstConfiguredAction(firstAction);
+		getSessionFactory().getCurrentSession().update(job);
 	}
 
 	protected ActionBuilder action(String className) {
@@ -38,6 +44,14 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 
 	protected SourceSinkBuilder sourceSink(String className) {
 		return new SourceSinkBuilder().setClassName(className);
+	}
+
+	public void setJobService(JobService jobService) {
+		this.jobService = jobService;
+	}
+
+	public JobService getJobService() {
+		return jobService;
 	}
 
 	protected abstract class ConfiguredObjectBuilder<T extends ConfiguredObjectBuilder<T>> {

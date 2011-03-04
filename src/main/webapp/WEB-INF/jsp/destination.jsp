@@ -13,7 +13,7 @@
 <tr><td><form:errors path="dest" cssClass="error"/></td></tr>
 
 <c:forEach var="destination" items="${destinations}">
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
+<c:forEach var="destinationParams" items="${destination.parameters}">
 <c:if test="${destinationParams.name=='name'}" >
 <tr>
 <td>
@@ -27,7 +27,7 @@
 <%count++; %>
 </c:if>
 </c:forEach>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
+<c:forEach var="destinationParams" items="${destination.parameters}">
 <c:if test="${destinationParams.name=='url'}" >
 <c:out value="${destinationParams.value}" />
 </div>

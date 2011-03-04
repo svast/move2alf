@@ -9,7 +9,7 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 
 	@Override
 	public void assemblePipeline(JobConfig jobConfig) {
-		assemble(
+		assemble(jobConfig,
 				action("eu.xenit.move2alf.core.action.SourceAction")
 						.param("path", jobConfig.getInputFolder())
 						.param("recursive", "true")

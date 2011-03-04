@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sun.xml.ws.api.pipe.PipelineAssembler;
+import eu.xenit.move2alf.logic.PipelineAssembler;
 
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
@@ -175,6 +175,9 @@ public class JobController {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
 
+		job.setId(jobId);
+		getPipelineAssembler().assemblePipeline(job);
+		
 		List<String> sourceSink = job.getSourceSink();
 		if (sourceSink != null) {
 			for (int j = 0; j < sourceSink.size(); j++) {
