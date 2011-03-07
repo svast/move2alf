@@ -561,17 +561,25 @@ function comparePasswords(){
 	
 }
 
-function formValidator(form){
+function formValidator(form, formType){
+var formType = formType;
+	if(formType == "destination"){
 
+		if(!document.getElementById("sourceSink1")){
+			return false;
+		}
+	}
+
+	
 	if(form.description.value=="" || form.description.value==null || form.description.value=="null" || form.description.value=="undefined"){
 		return false;
 	}
 
-	if(!document.getElementById("dest1")){
+	if(!document.getElementById("rowNumber1")){
 		return false;
 	}
-	
-	if(!document.getElementById("rowNumber1")){
+
+	if(!document.getElementById("dest1")){
 		return false;
 	}
 	

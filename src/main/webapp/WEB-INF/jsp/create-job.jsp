@@ -8,7 +8,7 @@
 <h2>Create new job</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return formValidator(this);">
+<form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return formValidator(this, 'job');">
 
 <h4>General</h4>
 <table class="indent">
@@ -91,7 +91,7 @@
 
 <h4>Metadata</h4>
 <table class="indent">
-<tr><td><form:radiobutton path="metadata" value="No metadata" />No metadata</td>
+<tr><td><form:radiobutton path="metadata" value="No metadata" checked="true" />No metadata</td>
 <td><form:errors path="metadata" cssClass="error"/></td>
 </tr>
 <tr>
@@ -104,7 +104,7 @@
 
 <h4>Transform</h4>
 <table class="indent">
-<tr><td><form:radiobutton path="transform" value="No transformation" />No transformation</td>
+<tr><td><form:radiobutton path="transform" value="No transformation" checked="true"/>No transformation</td>
 <td><form:errors path="transform" cssClass="error"/></td></tr>
 <tr>
 <td><form:radiobutton path="transform" value="Convert to PDF" />Convert to PDF</td>
@@ -118,7 +118,7 @@
 <div class="indent">
 <p>If document already exists in destination:</p>
 <table>
-<tr><td><form:radiobutton path="docExist" value="SkipLog"/>Skip document and log error</td>
+<tr><td><form:radiobutton path="docExist" value="SkipLog" checked="true"/>Skip document and log error</td>
 <td><form:errors path="docExist" cssClass="error"/></td></tr>
 <tr><td><form:radiobutton path="docExist" value="Skip" />Skip document silently</td></tr>
 <tr><td><form:radiobutton path="docExist" value="Overwrite" />Overwrite document</td></tr>

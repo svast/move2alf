@@ -13,8 +13,13 @@
 <tr><td><form:errors path="dest" cssClass="error"/></td></tr>
 
 <c:forEach var="destination" items="${destinations}">
+<<<<<<< .mine
+<c:if test="${not empty destination.parameters}" >
+
+=======
 <c:forEach var="destinationParams" items="${destination.parameters}">
 <c:if test="${destinationParams.name=='name'}" >
+>>>>>>> .r717
 <tr>
 <td>
 <div>
@@ -23,8 +28,11 @@
 <%}else{ %>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}"/>"  />
 <%} %>
-<c:out value="${destinationParams.value}" /> - 
+<c:out value="${destination.parameters.name}" /> - <c:out value="${destination.parameters.url}" />
 <%count++; %>
+<<<<<<< .mine
+
+=======
 </c:if>
 </c:forEach>
 <c:forEach var="destinationParams" items="${destination.parameters}">
@@ -33,8 +41,8 @@
 </div>
 </td>
 </tr>
+>>>>>>> .r717
 </c:if>
-</c:forEach>
 </c:forEach>
 
 <c:if test="${not empty destinationInfoList}" >
@@ -59,7 +67,7 @@
 <tr>
 <td>
 <div>
-<input type="hidden" id="dest<%=count %>" name="dest" value="<c:out value="${destinationInfo.destinationValue}" />"  />
+<input type="hidden" id="dest<%=count %>" name="dest" value="<c:out value='${destinationInfo.destinationValue}' />"  />
 <c:out value="${destinationInfo.destinationName}" /> - <c:out value="${destinationInfo.destinationUrl}" />
 
 </div>

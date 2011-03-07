@@ -18,20 +18,11 @@
 <table>
 <tr>
 <td>Name:</td>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='name'}" >
-<td><c:out value="${destinationParams.value}" /></td>
-</c:if>
-</c:forEach>
+<td><c:out value="${destination.parameters.name}" /></td>
 </tr>
 </table>
 </h3>
 <br />
-
-<%int type=0; %>
-<c:if test="${destination.sourceSinkClassName == 'CMIS'}" >
-<%type= 1;%>
-</c:if> 
 
 <table id="tblDestination" class="hide">
 </table>
@@ -39,14 +30,16 @@
 <table id="destinationForm" class="indent">
 <tr>
 <td>Name:</td> 
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='name'}" >
-<td><form:input path="destinationName" size="15" maxlength="30" value="${destinationParams.value}" /> </td>
+
+<td><form:input path="destinationName" size="15" maxlength="30" value="${destination.parameters.name}" /> </td>
 <td><form:errors path="destinationName" cssClass="error"/></td>
-</c:if>
-</c:forEach>
+
 </tr>
 <tr>
+<%int type=0; %>
+<c:if test="${destination.className == 'CMIS'}" >
+<%type= 1;%>
+</c:if> 
 <td>Type:</td> 
 <td><input type="radio" id="destinationType0" name="destinationType" value="AlfrescoSink" <%if(type==0){ %>CHECKED <%} %> />Alfresco</td>
 <td><form:errors path="destinationType" cssClass="error"/></td>
@@ -57,39 +50,23 @@
 </tr>
 <tr>
 <td>URL:</td>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='url'}" >
-<td><form:input path="destinationURL" size="50" maxlength="40" value="${destinationParams.value}" /></td>
+<td><form:input path="destinationURL" size="50" maxlength="40" value="${destination.parameters.url}" /></td>
 <td><form:errors path="destinationURL" cssClass="error"/></td>
-</c:if>
-</c:forEach>
 </tr>
 <tr>
 <td>Username:</td>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='user'}" >
-<td><form:input path="alfUser" size="30" maxlength="30" value="${destinationParams.value}" /></td>
+<td><form:input path="alfUser" size="30" maxlength="30" value="${destination.parameters.user}" /></td>
 <td><form:errors path="alfUser" cssClass="error"/></td>
-</c:if>
-</c:forEach>
 </tr>
 <tr>
 <td>Password:</td>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='password'}" >
-<td><form:input path="alfPswd" size="30" maxlength="30" value="${destinationParams.value}" /></td>
+<td><form:input path="alfPswd" size="30" maxlength="30" value="${destination.parameters.password}" /></td>
 <td><form:errors path="alfPswd" cssClass="error"/></td>
-</c:if>
-</c:forEach>
 </tr>
 <tr>
 <td>Number of threads:</td>
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='threads'}" >
-<td><form:input path="nbrThreads" size="10" value="${destinationParams.value}" maxlength="2" onKeyPress="return numbersonly(this, event)"/></td>
+<td><form:input path="nbrThreads" size="10" value="${destination.parameters.threads}" maxlength="2" onKeyPress="return numbersonly(this, event)"/></td>
 <td><form:errors path="nbrThreads" cssClass="error"/></td>
-</c:if>
-</c:forEach>
 </tr>
 
 </table>

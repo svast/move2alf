@@ -5,11 +5,8 @@
 
 <h2>Delete Destination</h2>
 
-<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-<c:if test="${destinationParams.name=='name'}" >
-Are you sure you want to delete destination "<c:out value="${destinationParams.value}" />"?
-</c:if>
-</c:forEach>
+Are you sure you want to delete destination "<c:out value="${destination.parameters.name}" />"?
+
 
 <form:form modelAttribute="job" method="post">
 <p><input type="submit" value="Delete Destination"/></p>

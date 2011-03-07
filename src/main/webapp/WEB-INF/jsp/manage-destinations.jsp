@@ -18,44 +18,21 @@
 <c:forEach var="destination" items="${destinations}">
 		<tr>
 		<div class="table-border">
-		<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-		<c:if test="${destinationParams.name=='name'}" >
-		<div class="link left"><c:out value="${destinationParams.value}" /> </div>
-		</c:if>
-		</c:forEach>
+
+		<div class="link left"><c:out value="${destination.parameters.name}" /> </div>
 		<div class="link right"> <a href="<spring:url value="/destination/${destination.id}/edit" htmlEscape="true" />">edit</a></div>
 		<br class="clear">
 
 		<p class="reduce-bottom">
-		Type: <c:out value="${destination.sourceSinkClassName}" />
+		Type: <c:out value="${destination.className}" />
 		<br />
-		URL: 
-		<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-		<c:if test="${destinationParams.name=='url'}" >
-		<c:out value="${destinationParams.value}" /> 
-		</c:if>
-		</c:forEach>
+		URL: <c:out value="${destination.parameters.name}" />
 		<br />
-		Username: 
-		<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-		<c:if test="${destinationParams.name=='user'}" >
-		<c:out value="${destinationParams.value}" />
-		</c:if>
-		</c:forEach>
+		Username: <c:out value="${destination.parameters.user}" />
 		<br />
-		Password: 
-		<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-		<c:if test="${destinationParams.name=='password'}" >
-		<c:out value="${destinationParams.value}" />
-		</c:if>
-		</c:forEach>
+		Password: <c:out value="${destination.parameters.password}" />
 		<br />
-		Threads: 
-		<c:forEach var="destinationParams" items="${destination.configuredSourceSinkParameterSet}">
-		<c:if test="${destinationParams.name=='threads'}" >
-		<c:out value="${destinationParams.value}" /> 
-		</c:if>
-		</c:forEach>
+		Threads: <c:out value="${destination.parameters.threads}" />
 		
 		</p>
 		<br />
