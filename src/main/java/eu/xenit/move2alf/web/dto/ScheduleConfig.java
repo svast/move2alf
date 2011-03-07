@@ -7,24 +7,24 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class ScheduleConfig {
 
 	private String runFrequency;
-	
+
 	private String singleDate;
-	
+
 	private String singleTime;
-	
+
 	private String hourTime;
-	
+
 	private String dayTime;
-	
+
 	private String weekDay;
-	
+
 	private String weekTime;
-	
+
 	private String cronJob;
-	
+
 	@NotEmpty
 	private List<String> cron;
-	
+
 	public void setRunFrequency(String runFrequency) {
 		this.runFrequency = runFrequency;
 	}
@@ -32,7 +32,7 @@ public class ScheduleConfig {
 	public String getRunFrequency() {
 		return runFrequency;
 	}
-	
+
 	public void setSingleDate(String singleDate) {
 		this.singleDate = singleDate;
 	}
@@ -40,7 +40,7 @@ public class ScheduleConfig {
 	public String getSingleDate() {
 		return singleDate;
 	}
-	
+
 	public void setSingleTime(String singleTime) {
 		this.singleTime = singleTime;
 	}
@@ -48,7 +48,7 @@ public class ScheduleConfig {
 	public String getSingleTime() {
 		return singleTime;
 	}
-	
+
 	public void setHourTime(String hourTime) {
 		this.hourTime = hourTime;
 	}
@@ -56,7 +56,7 @@ public class ScheduleConfig {
 	public String getHourTime() {
 		return hourTime;
 	}
-	
+
 	public void setDayTime(String dayTime) {
 		this.dayTime = dayTime;
 	}
@@ -64,7 +64,7 @@ public class ScheduleConfig {
 	public String getDayTime() {
 		return dayTime;
 	}
-	
+
 	public void setWeekDay(String weekDay) {
 		this.weekDay = weekDay;
 	}
@@ -72,7 +72,7 @@ public class ScheduleConfig {
 	public String getWeekDay() {
 		return weekDay;
 	}
-	
+
 	public void setWeekTime(String weekTime) {
 		this.weekTime = weekTime;
 	}
@@ -80,7 +80,7 @@ public class ScheduleConfig {
 	public String getWeekTime() {
 		return weekTime;
 	}
-	
+
 	public void setCronJob(String cronJob) {
 		this.cronJob = cronJob;
 	}
@@ -88,7 +88,7 @@ public class ScheduleConfig {
 	public String getCronJob() {
 		return cronJob;
 	}
-	
+
 	public void setCron(List<String> cron) {
 		this.cron = cron;
 	}
@@ -96,5 +96,5 @@ public class ScheduleConfig {
 	public List<String> getCron() {
 		return cron;
 	}
-	
+
 }

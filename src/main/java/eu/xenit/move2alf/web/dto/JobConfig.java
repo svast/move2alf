@@ -1,12 +1,12 @@
 package eu.xenit.move2alf.web.dto;
 
 import java.util.List;
-import javax.validation.constraints.NotNull;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 public class JobConfig {
 	private int id;
-	
+
 	@NotEmpty
 	private String name;
 
@@ -15,79 +15,79 @@ public class JobConfig {
 
 	@NotEmpty
 	private String inputFolder;
-	
+
 	@NotEmpty
 	private String destinationFolder;
-	
+
 	private String runFrequency;
-	
+
 	private String singleDate;
-	
+
 	private String singleTime;
-	
+
 	private String hourTime;
-	
+
 	private String dayTime;
-	
+
 	private String weekDay;
-	
+
 	private String weekTime;
-	
+
 	private String cronJob;
-	
+
 	@NotEmpty
 	private List<String> cron;
-	
+
 	@NotEmpty
 	private String metadata;
-	
+
 	@NotEmpty
 	private String transform;
-	
+
 	@NotEmpty
 	private String docExist;
-	
+
 	private boolean moveBeforeProc = false;
-	
+
 	private String beforeProcPath;
-	
+
 	private boolean moveAfterLoad = false;
-	
+
 	private String afterLoadPath;
-	
+
 	private boolean moveNotLoad = false;
-	
+
 	private String notLoadPath;
-	
+
 	private boolean sendNotification = false;
-	
+
 	private String emailAddressError;
-	
+
 	private boolean sendReport = false;
-	
+
 	private String emailAddressRep;
-	
+
 	private String destinationName;
-	
+
 	private String destinationType;
-	
+
 	private String destinationURL;
-	
+
 	private String alfUser;
-	
+
 	private String alfPswd;
-	
+
 	private int nbrThreads = 5;
-	
+
 	@NotEmpty
 	private String dest;
-	
+
 	private List<String> sourceSink;
-	
+
 	public JobConfig() {
 
 	}
-	
+
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -119,7 +119,7 @@ public class JobConfig {
 	public String getInputFolder() {
 		return inputFolder;
 	}
-	
+
 	public void setDestinationFolder(String destinationFolder) {
 		this.destinationFolder = destinationFolder;
 	}
@@ -127,7 +127,7 @@ public class JobConfig {
 	public String getDestinationFolder() {
 		return destinationFolder;
 	}
-	
+
 	public void setRunFrequency(String runFrequency) {
 		this.runFrequency = runFrequency;
 	}
@@ -135,7 +135,7 @@ public class JobConfig {
 	public String getRunFrequency() {
 		return runFrequency;
 	}
-	
+
 	public void setSingleDate(String singleDate) {
 		this.singleDate = singleDate;
 	}
@@ -143,7 +143,7 @@ public class JobConfig {
 	public String getSingleDate() {
 		return singleDate;
 	}
-	
+
 	public void setSingleTime(String singleTime) {
 		this.singleTime = singleTime;
 	}
@@ -151,7 +151,7 @@ public class JobConfig {
 	public String getSingleTime() {
 		return singleTime;
 	}
-	
+
 	public void setHourTime(String hourTime) {
 		this.hourTime = hourTime;
 	}
@@ -159,7 +159,7 @@ public class JobConfig {
 	public String getHourTime() {
 		return hourTime;
 	}
-	
+
 	public void setDayTime(String dayTime) {
 		this.dayTime = dayTime;
 	}
@@ -167,7 +167,7 @@ public class JobConfig {
 	public String getDayTime() {
 		return dayTime;
 	}
-	
+
 	public void setWeekDay(String weekDay) {
 		this.weekDay = weekDay;
 	}
@@ -175,7 +175,7 @@ public class JobConfig {
 	public String getWeekDay() {
 		return weekDay;
 	}
-	
+
 	public void setWeekTime(String weekTime) {
 		this.weekTime = weekTime;
 	}
@@ -183,7 +183,7 @@ public class JobConfig {
 	public String getWeekTime() {
 		return weekTime;
 	}
-	
+
 	public void setCronJob(String cronJob) {
 		this.cronJob = cronJob;
 	}
@@ -191,7 +191,7 @@ public class JobConfig {
 	public String getCronJob() {
 		return cronJob;
 	}
-	
+
 	public void setCron(List<String> cron) {
 		this.cron = cron;
 	}
@@ -199,7 +199,7 @@ public class JobConfig {
 	public List<String> getCron() {
 		return cron;
 	}
-	
+
 	public void setMetadata(String metadata) {
 		this.metadata = metadata;
 	}
@@ -207,7 +207,7 @@ public class JobConfig {
 	public String getMetadata() {
 		return metadata;
 	}
-	
+
 	public void setTransform(String transform) {
 		this.transform = transform;
 	}
@@ -215,7 +215,7 @@ public class JobConfig {
 	public String getTransform() {
 		return transform;
 	}
-	
+
 	public void setDocExist(String docExist) {
 		this.docExist = docExist;
 	}
@@ -223,7 +223,7 @@ public class JobConfig {
 	public String getDocExist() {
 		return docExist;
 	}
-	
+
 	public void setMoveBeforeProc(boolean moveBeforeProc) {
 		this.moveBeforeProc = moveBeforeProc;
 	}
@@ -231,7 +231,7 @@ public class JobConfig {
 	public boolean getMoveBeforeProc() {
 		return moveBeforeProc;
 	}
-	
+
 	public void setBeforeProcPath(String beforeProcPath) {
 		this.beforeProcPath = beforeProcPath;
 	}
@@ -239,15 +239,15 @@ public class JobConfig {
 	public String getBeforeProcPath() {
 		return beforeProcPath;
 	}
-	
+
 	public void setMoveAfterLoad(boolean moveAfterLoad) {
 		this.moveAfterLoad = moveAfterLoad;
 	}
-	
+
 	public boolean getMoveAfterLoad() {
 		return moveAfterLoad;
 	}
-	
+
 	public void setAfterLoadPath(String afterLoadPath) {
 		this.afterLoadPath = afterLoadPath;
 	}
@@ -255,7 +255,7 @@ public class JobConfig {
 	public String getAfterLoadPath() {
 		return afterLoadPath;
 	}
-	
+
 	public void setMoveNotLoad(boolean moveNotLoad) {
 		this.moveNotLoad = moveNotLoad;
 	}
@@ -263,7 +263,7 @@ public class JobConfig {
 	public boolean getMoveNotLoad() {
 		return moveNotLoad;
 	}
-	
+
 	public void setNotLoadPath(String notLoadPath) {
 		this.notLoadPath = notLoadPath;
 	}
@@ -271,7 +271,7 @@ public class JobConfig {
 	public String getNotLoadPath() {
 		return notLoadPath;
 	}
-	
+
 	public void setSendNotification(boolean sendNotification) {
 		this.sendNotification = sendNotification;
 	}
@@ -279,7 +279,7 @@ public class JobConfig {
 	public boolean getSendNotification() {
 		return sendNotification;
 	}
-	
+
 	public void setEmailAddressError(String emailAddressError) {
 		this.emailAddressError = emailAddressError;
 	}
@@ -287,7 +287,7 @@ public class JobConfig {
 	public String getEmailAddressError() {
 		return emailAddressError;
 	}
-	
+
 	public void setSendReport(boolean sendReport) {
 		this.sendReport = sendReport;
 	}
@@ -295,7 +295,7 @@ public class JobConfig {
 	public boolean getSendReport() {
 		return sendReport;
 	}
-	
+
 	public void setEmailAddressRep(String emailAddressRep) {
 		this.emailAddressRep = emailAddressRep;
 	}
@@ -303,7 +303,7 @@ public class JobConfig {
 	public String getEmailAddressRep() {
 		return emailAddressRep;
 	}
-	
+
 	public void setDestinationName(String destinationName) {
 		this.destinationName = destinationName;
 	}
@@ -311,7 +311,7 @@ public class JobConfig {
 	public String getDestinationName() {
 		return destinationName;
 	}
-	
+
 	public void setDestinationType(String destinationType) {
 		this.destinationType = destinationType;
 	}
@@ -319,7 +319,7 @@ public class JobConfig {
 	public String getDestinationType() {
 		return destinationType;
 	}
-	
+
 	public void setDestinationURL(String destinationURL) {
 		this.destinationURL = destinationURL;
 	}
@@ -327,7 +327,7 @@ public class JobConfig {
 	public String getDestinationURL() {
 		return destinationURL;
 	}
-	
+
 	public void setAlfUser(String alfUser) {
 		this.alfUser = alfUser;
 	}
@@ -335,7 +335,7 @@ public class JobConfig {
 	public String getAlfUser() {
 		return alfUser;
 	}
-	
+
 	public void setAlfPswd(String alfPswd) {
 		this.alfPswd = alfPswd;
 	}
@@ -343,7 +343,7 @@ public class JobConfig {
 	public String getAlfPswd() {
 		return alfPswd;
 	}
-	
+
 	public void setNbrThreads(int nbrThreads) {
 		this.nbrThreads = nbrThreads;
 	}
@@ -351,7 +351,7 @@ public class JobConfig {
 	public int getNbrThreads() {
 		return nbrThreads;
 	}
-	
+
 	public void setDest(String dest) {
 		this.dest = dest;
 	}
@@ -359,7 +359,7 @@ public class JobConfig {
 	public String getDest() {
 		return dest;
 	}
-	
+
 	public void setSourceSink(List<String> sourceSink) {
 		this.sourceSink = sourceSink;
 	}
@@ -367,6 +367,5 @@ public class JobConfig {
 	public List<String> getSourceSink() {
 		return sourceSink;
 	}
-	
-}
 
+}

@@ -9,10 +9,10 @@ public class JobInfo {
 	private int cycleId = -1;
 	private Date cycleStartDateTime;
 	private String scheduleState;
-	
-	public JobInfo(){		
+
+	public JobInfo() {
 	}
-	
+
 	public void setJobId(int jobId) {
 		this.jobId = jobId;
 	}
@@ -20,7 +20,7 @@ public class JobInfo {
 	public int getJobId() {
 		return jobId;
 	}
-	
+
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
 	}
@@ -28,7 +28,7 @@ public class JobInfo {
 	public String getJobName() {
 		return jobName;
 	}
-	
+
 	public void setCycleId(int cycleId) {
 		this.cycleId = cycleId;
 	}
@@ -36,7 +36,7 @@ public class JobInfo {
 	public int getCycleId() {
 		return cycleId;
 	}
-	
+
 	public void setCycleStartDateTime(Date cycleStartDateTime) {
 		this.cycleStartDateTime = cycleStartDateTime;
 	}
@@ -44,7 +44,7 @@ public class JobInfo {
 	public Date getCycleStartDateTime() {
 		return cycleStartDateTime;
 	}
-	
+
 	public void setScheduleState(String scheduleState) {
 		this.scheduleState = scheduleState;
 	}
