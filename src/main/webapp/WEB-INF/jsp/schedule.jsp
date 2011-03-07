@@ -126,6 +126,18 @@
 			<form:option value="Sunday" label="Sunday"/>
 			</form:select>
 </td>
+								<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "weekDay",
+                                        widgetType : "dijit.form.FilteringSelect",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "this value is not allowed in this field",
+                                               	promptMessage : "day of week cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 
 <td id="weeklyTime" class="hide">time: <form:input path="weekTime" size="5" maxlength="15" value="00:00"/></td>
 						<script type="text/javascript">

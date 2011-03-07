@@ -9,6 +9,12 @@
         <link type="text/css" rel="stylesheet" href="<c:url value="/resources/dijit/themes/tundra/tundra.css" />" /> 
 <script type="text/javascript">
 
+function putFocus(formInst, elementInst) {
+    if (document.forms.length > 0) {
+      document.forms[formInst].elements[elementInst].focus();
+    }
+}
+
 function popup(mylink, windowname)
 {
 if (! window.focus)return true;
@@ -564,23 +570,23 @@ function comparePasswords(){
 function formValidator(form, formType){
 var formType = formType;
 	if(formType == "destination"){
-
 		if(!document.getElementById("sourceSink1")){
 			return false;
 		}
-	}
+	}else{
+		if(formType == "job"){
+			if(form.description.value=="" || form.description.value==null || form.description.value=="null" || form.description.value=="undefined"){
+				return false;
+			}
+		
+			if(!document.getElementById("dest1")){
+				return false;
+			}
+		}
 
-	
-	if(form.description.value=="" || form.description.value==null || form.description.value=="null" || form.description.value=="undefined"){
-		return false;
-	}
-
-	if(!document.getElementById("rowNumber1")){
-		return false;
-	}
-
-	if(!document.getElementById("dest1")){
-		return false;
+		if(!document.getElementById("rowNumber1")){
+			return false;
+		}
 	}
 	
 	alert("Submitted");
@@ -633,7 +639,7 @@ function numbersonly(myfield, e, dec)
 	type="text/css" />
 <title>XeniT Move2Alf</title>
 </head>
-<body>
+<body onLoad="putFocus(0,0);">
 <div class="container">
 <div class="span-24 last header">
 <h1>XeniT Move2Alf</h1>

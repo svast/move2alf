@@ -13,6 +13,18 @@
 <td>Please enter your password:</td>
 <td><form:password path="oldPassword" size="15" maxlength="15" /></td>
 <td><form:errors path="oldPassword" cssClass="error"/></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "oldPassword",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "password cannot be empty",
+                                               	promptMessage : "password cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 </tr>
 </table>
 <br />
@@ -22,16 +34,44 @@
 <td>new user's password:</td>
 <td><form:password path="newPassword" size="15" maxlength="15" /></td>
 <td><form:errors path="newPassword" cssClass="error"/></td>
-
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "newPassword",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "password cannot be empty",
+                                               	promptMessage : "password cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 </tr>
 <tr>
 <td>Please retype the new user's password:</td>
 <td><form:password path="newPasswordRetype" size="15" maxlength="15" /></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "newPasswordRetype",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {
+                                                required : true,
+                                               	invalidMessage : "password cannot be empty",
+                                               	promptMessage : "password cannot be empty"
+                                                   	
+                                        }
+                                }));
+                        </script>
 </tr>
 </table>
 
 <a href="<spring:url value="/users" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
-<input type="submit" value="Update password" class="right" />
+<input id="proceed" type="submit" value="Update password" class="right" />
+						<script type="text/javascript">
+                            Spring.addDecoration(new Spring.ValidateAllDecoration({
+                                    elementId: "proceed",
+                                    event: "onclick" }));
+                        </script>
 </form:form>
 </div>
 

@@ -288,8 +288,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.get(EDestinationParameter.USER));
 		sourceSinkParameters.put("password", (String) destinationParams
 				.get(EDestinationParameter.PASSWORD));
-		sourceSinkParameters.put("threads", (String) destinationParams
-				.get(EDestinationParameter.THREADS));
+		sourceSinkParameters.put("threads", destinationParams
+				.get(EDestinationParameter.THREADS).toString());
 		sourceSink.setParameters(sourceSinkParameters);
 	}
 

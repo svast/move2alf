@@ -8,7 +8,7 @@
 <h2>Edit schedule</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post" name="editSchedule">
+<form:form modelAttribute="job" method="post" name="editSchedule" onSubmit="return formValidator(this, 'schedule');">
 
 <h3>
 <table>
@@ -26,7 +26,12 @@
 <br />
 
 <a href="<spring:url value="/job/dashboard" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
-<input type="submit" value="Update schedule" class="right"/>
+<input id="proceed" type="submit" value="Update schedule" class="right"/>
+						<script type="text/javascript">
+                            Spring.addDecoration(new Spring.ValidateAllDecoration({
+                                    elementId: "proceed",
+                                    event: "onclick" }));
+                        </script>
 </form:form>
 </div>	
 </div>

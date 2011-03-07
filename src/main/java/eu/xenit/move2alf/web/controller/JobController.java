@@ -516,7 +516,7 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editDestination(@PathVariable int id, @ModelAttribute("destinations") @Valid DestinationConfig destinations, BindingResult errors) {
+	public ModelAndView editDestination(@PathVariable int id, @ModelAttribute("destinations") @Valid EditDestinationConfig destinations, BindingResult errors) {
 		
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: "+errors.toString());
@@ -532,25 +532,17 @@ public class JobController {
 		
 		ModelAndView mav = new ModelAndView();
 
-		List<String> sourceSink = destinations.getSourceSink();
-
-		for (int j = 0; j < sourceSink.size(); j++) {
-
-			String createdSourceSink = sourceSink.get(j);
-			System.out.println(createdSourceSink);
-			String[] parameters = createdSourceSink.split("\\|");
-
 			HashMap destinationParams = new HashMap();
 
-			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
-			destinationParams.put(EDestinationParameter.URL, parameters[1]);
-			destinationParams.put(EDestinationParameter.USER, parameters[2]);
+			destinationParams.put(EDestinationParameter.NAME, destinations.getDestinationName());
+			destinationParams.put(EDestinationParameter.URL, destinations.getDestinationURL());
+			destinationParams.put(EDestinationParameter.USER, destinations.getAlfUser());
 			destinationParams
-					.put(EDestinationParameter.PASSWORD, parameters[3]);
-			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
-			getJobService().editDestination(id, parameters[5],
+					.put(EDestinationParameter.PASSWORD, destinations.getAlfPswd());
+			destinationParams.put(EDestinationParameter.THREADS, destinations.getNbrThreads());
+			getJobService().editDestination(id, destinations.getDestinationType(),
 					destinationParams);
-		}
+
 		mav.setViewName("redirect:/destinations");
 		return mav;
 	}
