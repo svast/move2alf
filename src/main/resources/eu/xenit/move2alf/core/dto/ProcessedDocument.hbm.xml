@@ -9,7 +9,7 @@
       <generator class="identity"/>
     </id>
     <property name="name"/>
-    <property name="processedDateTime"/>
+    <property name="processedDateTime" column="processingDateTime"/>
     <property name="status"/>
     <set name="processedDocumentParameterSet" table="processedDocumentParameter">
       <key column="processedDocumentId"/>

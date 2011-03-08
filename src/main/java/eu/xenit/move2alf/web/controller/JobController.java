@@ -9,16 +9,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,6 +36,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
@@ -566,6 +571,31 @@ public class JobController {
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report")
 	public ModelAndView report(@PathVariable int jobId,
+			@PathVariable int cycleId, HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(jobId));
+		Cycle cycle = getJobService().getCycle(cycleId);
+		Date startDateTime = cycle.getStartDateTime();
+		Date endDateTime = cycle.getEndDateTime();
+		String duration = getJobService().getDuration(startDateTime,
+				endDateTime);
+		
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
+		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
+		pagedListHolder.setPage(page);
+		int pageSize = 10;
+		pagedListHolder.setPageSize(pageSize);
+		
+		mav.addObject("cycle", cycle);
+		mav.addObject("duration", duration);
+		mav.addObject("pagedListHolder", pagedListHolder);
+		mav.setViewName("report");
+		return mav;
+	}
+	
+	@RequestMapping("/job/{jobId}/{cycleId}/report/export")
+	public ModelAndView exportReport(@PathVariable int jobId,
 			@PathVariable int cycleId) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
@@ -574,17 +604,28 @@ public class JobController {
 		Date endDateTime = cycle.getEndDateTime();
 		String duration = getJobService().getDuration(startDateTime,
 				endDateTime);
+
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
-		mav.setViewName("report");
+		mav.addObject("processedDocuments", getJobService().getProcessedDocuments(cycleId));
+		mav.setViewName("export-report");
 		return mav;
 	}
 
 	@RequestMapping("/job/{jobId}/history")
-	public ModelAndView history(@PathVariable int jobId) {
+	public ModelAndView history(@PathVariable int jobId, HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
+		
+		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
+		PagedListHolder pagedListHolder = new PagedListHolder(cycles);
+		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
+		pagedListHolder.setPage(page);
+		int pageSize = 10;
+		pagedListHolder.setPageSize(pageSize);
+		
 		mav.addObject("job", getJobService().getJob(jobId));
-		mav.addObject("cycles", getJobService().getCyclesForJobDesc(jobId));
+		mav.addObject("pagedListHolder", pagedListHolder);
+		mav.addObject("cycles", cycles);
 		mav.setViewName("history");
 		return mav;
 	}

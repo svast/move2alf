@@ -1,8 +1,18 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
-<!-- 
-<body onload='setDuration("<c:out value="${cycle.startDateTime.time}"/>","<c:out value="${cycle.endDateTime.time}"/>");'>
--->
+<%@ taglib prefix="tg" tagdir="/WEB-INF/tags" %>
+
+
+<jsp:useBean id="pagedListHolder" scope="request" 
+   type="org.springframework.beans.support.PagedListHolder"/>
+<%-- // create link for pages, "~" will be replaced 
+   later on with the proper page number --%>
+<c:url value="/job/${job.id}/${cycle.id}/report" var="pagedLink">
+<c:param name="action" value="list"/>
+<c:param name="p" value="~"/>
+</c:url>
+
+
 <div class="span-24 last main">
 
 <h2>Report</h2>
@@ -42,14 +52,33 @@
 
 <div class="indent"><b>List of imported documents </b></div>
 
-<button type="button" class="right">export</button>
+<a href="<spring:url value="/job/${job.id}/${cycle.id}/report/export" htmlEscape="true" />" class="right"><button type="button">export</button></a>
 
+<table class="table-border-thin">
+<tr>
+<th width="20px" class="table-border-thin">No.</th>
+<th class="table-border-thin">Name</th>
+<th class="table-border-thin">Processing date and time</th>
+<th class="table-border-thin">Status</th>
+</tr>
+<c:forEach items="${pagedListHolder.pageList}" var="item">
+<tr>
+<td class="table-border-thin">${item.key}</td>
+<td class="table-border-thin">${item.name}</td>
+<td class="table-border-thin">${item.processedDateTime}</td>
+<td class="table-border-thin">${item.status}</td>
+</tr>
+</c:forEach>
+</table>
+
+
+<%-- // load our paging tag, pass pagedListHolder and the link --%>
+<tg:paging pagedListHolder="${pagedListHolder}" pagedLink="${pagedLink}"/>
 
 </div>
 
 </div>
-<!-- 
-</body>
--->
+
+
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

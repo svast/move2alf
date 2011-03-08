@@ -13,6 +13,7 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.Schedule;
 
 @Transactional
@@ -283,4 +284,10 @@ public interface JobService {
 	 * @param nextAction
 	 */
 	public void setNextAction(ConfiguredAction action, ConfiguredAction nextAction);
+
+	/**
+	 * 
+	 * @param cycleId
+	 */
+	public List<ProcessedDocument> getProcessedDocuments(int cycleId);
 }
