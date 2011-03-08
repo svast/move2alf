@@ -19,10 +19,6 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				action("eu.xenit.move2alf.core.action.ThreadAction"),
 				action("eu.xenit.move2alf.core.action.SinkAction")
 						.sourceSink(
-								sourceSink(
-										"eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink")
-										.param("url", null)
-										.param("user", null)
-										.param("password", null)));
+								sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
 	}
 }

@@ -258,7 +258,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredObject createDestination(String destinationType,
+	public ConfiguredSourceSink createDestination(String destinationType,
 			HashMap destinationParams) {
 		ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
 		createSourceSink(destinationType, destinationParams, sourceSink);
@@ -267,13 +267,18 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredObject editDestination(int sinkId, String destinationType,
+	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
 			HashMap destinationParams) {
 		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
 		sourceSink.setClassName(destinationType);
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
 		return sourceSink;
+	}
+	
+	@Override
+	public ConfiguredSourceSink getDestination(int id) {
+		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession().get(ConfiguredSourceSink.class, id);
 	}
 
 	private void createSourceSink(String destinationType,

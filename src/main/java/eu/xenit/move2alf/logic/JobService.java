@@ -177,7 +177,7 @@ public interface JobService {
 	 * @return the configured source sink
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public ConfiguredObject createDestination(String destinationType,
+	public ConfiguredSourceSink createDestination(String destinationType,
 			HashMap destinationParams);
 
 	/**
@@ -190,8 +190,16 @@ public interface JobService {
 	 *            A map of parameters that define the destination
 	 * @return the configured source sink
 	 */
-	public ConfiguredObject editDestination(int sinkId, String destinationType,
+	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
 			HashMap destinationParams);
+	
+	/**
+	 * Get ConfiguredSourceSink by id.
+	 * 
+	 * @param sinkId
+	 * @return
+	 */
+	public ConfiguredSourceSink getDestination(int sinkId);
 
 	/**
 	 * gets all configured source sinks
