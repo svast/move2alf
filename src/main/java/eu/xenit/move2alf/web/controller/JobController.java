@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
-
+import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
@@ -186,6 +186,12 @@ public class JobController {
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
+		
+		int destId = 0;
+		
+		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
+			destId = Integer.parseInt(job.getDest().substring(10));
+		}
 
 		List<String> sourceSink = job.getSourceSink();
 		if (sourceSink != null) {
@@ -205,13 +211,17 @@ public class JobController {
 						parameters[3]);
 				destinationParams.put(EDestinationParameter.THREADS,
 						parameters[4]);
-				getJobService().createDestination(parameters[5],
+				ConfiguredObject dest = getJobService().createDestination(parameters[5],
 						destinationParams);
 
+				if (createdSourceSink.equals(job.getDest())) {
+					destId = dest.getId();
+				}
 			}
 		}
 		
 		job.setId(jobId);
+		job.setDest("" + destId);
 		getPipelineAssembler().assemblePipeline(job);
 		
 		mav.setViewName("redirect:/job/dashboard");
@@ -346,6 +356,10 @@ public class JobController {
 						destinationParams);
 			}
 		}
+		
+		job.setId(jobId);
+		job.setDest("" + destId);
+		getPipelineAssembler().assemblePipeline(job);
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;

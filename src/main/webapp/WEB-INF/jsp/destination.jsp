@@ -89,11 +89,11 @@
 </tr>
 <tr>
 <td>Type:</td> 
-<td><form:radiobutton path="destinationType" value="AlfrescoSink" checked="true" />Alfresco</td>
+<td><form:radiobutton path="destinationType" value="eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink" checked="true" />Alfresco</td>
 </tr>
 <tr>
 <td></td>
-<td><form:radiobutton path="destinationType" value="CMIS" />CMIS</td>
+<td><form:radiobutton path="destinationType" value="eu.xenit.move2alf.core.sourcesink.CmisSourceSink" />CMIS</td>
 </tr>
 <tr>
 <td>URL:</td>
