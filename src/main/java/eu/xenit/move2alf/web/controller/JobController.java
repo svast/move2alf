@@ -291,7 +291,8 @@ public class JobController {
 		}
 		
 		ModelAndView mav = new ModelAndView();
-		getJobService().editJob(id, job.getName(), job.getDescription());
+		Job editedJob = getJobService().editJob(id, job.getName(), job.getDescription());
+		int jobId = editedJob.getId();
 		boolean deleteSchedule = true;
 		List<String> cronJobs = job.getCron();
 
@@ -334,6 +335,11 @@ public class JobController {
 		}
 
 		List<String> sourceSink = job.getSourceSink();
+		
+		int destId = 0;
+		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
+			destId = Integer.parseInt(job.getDest().substring(10));
+		}
 
 		if (sourceSink != null) {
 			for (int j = 0; j < sourceSink.size(); j++) {
@@ -352,8 +358,12 @@ public class JobController {
 						parameters[3]);
 				destinationParams.put(EDestinationParameter.THREADS,
 						parameters[4]);
-				getJobService().createDestination(parameters[5],
+				ConfiguredObject dest = getJobService().createDestination(parameters[5],
 						destinationParams);
+				
+				if (createdSourceSink.equals(job.getDest())) {
+					destId = dest.getId();
+				}
 			}
 		}
 		
