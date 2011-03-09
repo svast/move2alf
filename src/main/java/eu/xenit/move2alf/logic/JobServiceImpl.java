@@ -445,6 +445,43 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					"from ProcessedDocument as d where d.cycle.id=?")
 			.setLong(0, cycleId).list();
 	}
+	
+	@Override
+	public String getInstantCronJob(){
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+
+		Integer y = new Integer(cal.get(Calendar.YEAR));
+		Integer mon = new Integer(cal.get(Calendar.MONTH)+1);
+		Integer dom = new Integer(cal.get(Calendar.DAY_OF_MONTH));
+		Integer hour = new Integer(cal.get(Calendar.HOUR_OF_DAY));
+		Integer mins = new Integer(cal.get(Calendar.MINUTE));
+		Integer secs = new Integer(cal.get(Calendar.SECOND));
+		
+		secs=secs+10;
+		
+		if(secs > 59){
+			secs = secs-60;
+			mins=mins+1;
+			
+			if(mins>59){
+				mins = mins-60;
+				hour = hour+1;
+			}
+		}
+		
+		String seconds = secs.toString();
+		String minutes = mins.toString();
+		String hours=hour.toString();
+		String day = dom.toString();		
+		String month = mon.toString();		
+		String year = y.toString();
+		
+		String cronjob = seconds+" "+minutes+" "+hours+" "+day+" "+month+" ? "+year;
+
+		return cronjob;
+	}
 
 	@Override
 	public void setNextAction(ConfiguredAction action,

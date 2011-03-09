@@ -11,7 +11,10 @@
 
 function putFocus(formInst, elementInst) {
     if (document.forms.length > 0) {
-      document.forms[formInst].elements[elementInst].focus();
+        try{
+      	document.forms[formInst].elements[elementInst].focus();
+        }catch(e){
+        }
     }
 }
 
@@ -98,7 +101,7 @@ function scheduleBox(number){
 }
 
 
-function addRowToSchedule(){
+function addRowToSchedule(form){
 var date ='';
 var time = '';
 var day = '';
@@ -108,6 +111,36 @@ var minutes='';
 
 	for (var counter = 0; counter < 5; counter++)
     {
+		if(form.runFrequency[counter].checked==true){
+			
+			switch(counter){
+			case 0:
+					date = document.getElementById('singleDate').value;
+					time = document.getElementById('singleTime').value;
+					period = "Single run";
+					break;
+			case 1:
+					minutes = document.getElementById('hourTime').value;
+					period = "Hourly";
+					break;
+			case 2:
+					time = document.getElementById('dayTime').value;
+					period = "Daily";
+					break;
+			case 3:
+					day = document.getElementById('weekDay').value;
+					time = document.getElementById('weekTime').value;
+					period = "Weekly";
+					break;
+			case 4:
+					cronJob = document.getElementById('cronJob').value;
+					period = "Cron job";
+					break;
+			default:
+					break;
+			}
+		}	
+	    /*
 	    try{
 			if(document.createJob.runFrequency[counter].checked==true){
 	
@@ -202,7 +235,7 @@ var minutes='';
 					}
 				}	
 		    }
-	    }		
+	    }*/		
     }
     
 	if(period!="Cron job"){
@@ -256,7 +289,7 @@ var minutes='';
   var cellFourth = row.insertCell(3);
  
   var sp = document.createElement('div');
- // sp.style.textDecoration = "underline";
+ 
   sp.className = 'pointer';
   sp.innerHTML='remove';
   var id = 'remove'+iteration;
@@ -413,8 +446,8 @@ function cancelDestination(){
 	document.getElementById('addDestinationButton').style.display='block';
 }
 
-function addRowToDestination(){
-
+function addRowToDestination(form){
+	
 	  var tbl = document.getElementById('tblDestination');
 	  var lastRow = tbl.rows.length;
 
@@ -423,60 +456,28 @@ function addRowToDestination(){
 
 	  var cellFirst = row.insertCell(0);
 
-	 try{
-		var len = document.createJob.destinationType.length;
+
+	  var len = form.destinationType.length;
 		var destType="";
 		for(var i=0; i<len; i++){
-			if(document.createJob.destinationType[i].checked){
-				destType=document.createJob.destinationType[i].value;
+			if(form.destinationType[i].checked){
+				destType=form.destinationType[i].value;
 			}
 		}
-		var dest = document.createElement('input');
-		 var id = 'dest'+iteration;
-		 dest.id=id;
-		 dest.type='radio';
-		 dest.name='dest';
-		 dest.checked=true;
-	 }catch(e){
-		 try{
-		 	var len = document.createDestinations.destinationType.length;
-			var destType="";
-			for(var i=0; i<len; i++){
-				if(document.createDestinations.destinationType[i].checked){
-					destType=document.createDestinations.destinationType[i].value;
-				}
-			}
+
+		if(document.createJob || document.editJob){
+			var dest = document.createElement('input');
+			 var id = 'dest'+iteration;
+			 dest.id=id;
+			 dest.type='radio';
+			 dest.name='dest';
+			 dest.checked=true;
+		}
+		else{
 			var dest = document.createElement('div');
-		 }catch(e){
-			 try{
-			 	var len = document.editJob.destinationType.length;
-				var destType="";
-				for(var i=0; i<len; i++){
-					if(document.editJob.destinationType[i].checked){
-						destType=document.editJob.destinationType[i].value;
-					}
-				}
-				var dest = document.createElement('input');
-				 var id = 'dest'+iteration;
-				 dest.id=id;
-				 dest.type='radio';
-				 dest.name='dest';
-				 dest.checked=true;
-			 }
-			 catch(e){
-				 var len = document.editDestination.destinationType.length;
-					var destType="";
-					for(var i=0; i<len; i++){
-						if(document.editDestination.destinationType[i].checked){
-							destType=document.editDestination.destinationType[i].value;
-						}
-					}
-					var dest = document.createElement('div');
-			 }
-		 }
-	 }
+		}
 	 
-	var value = document.getElementById('destinationName').value+"|"+document.getElementById('destinationURL').value+"|"+document.getElementById('alfUser').value+"|"+document.getElementById('alfPswd').value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
+	var value = form.destinationName.value+"|"+form.destinationURL.value+"|"+form.alfUser.value+"|"+form.alfPswd.value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
 	 dest.value=value;
 
 	 var text=document.createTextNode(document.getElementById('destinationName').value+" - "+document.getElementById('destinationURL').value);
@@ -492,30 +493,21 @@ function addRowToDestination(){
 
 function setDestInForm(value){
 	var tblDestForm = document.getElementById('tblDestForm');
-	
-	  var lastRow = tblDestForm.rows.length;
+	var lastRow = tblDestForm.rows.length;
 
 	  var iteration = lastRow+1;
 	  var row = tblDestForm.insertRow(lastRow);
 	  
 	  var cellFirst = row.insertCell(0);
 
-		try{
-			var fi=document.createElement('<input name=\"sourceSink\" type=\"checkbox\" checked>');
-			var id = 'sourceSink'+iteration;
-			 fi.id=id;
-			 fi.value=value
-		}
-		catch(e){
-			 var fi = document.createElement('input');
-			 var id = 'sourceSink'+iteration;
-			 fi.id=id;
-			 fi.type='checkbox';
-			 fi.name='sourceSink';
-			 fi.value=value;
-			 fi.checked=true;
-			 
-		}
+		var fi = document.createElement('input');
+		var id = 'sourceSink'+iteration;
+		fi.id=id;
+		fi.type='checkbox';
+		fi.name='sourceSink';
+		fi.value=value;
+		fi.checked=true;
+
 	  cellFirst.appendChild(fi);
 }
 
@@ -523,25 +515,24 @@ function noDestNeeded(){
 	document.getElementById('noDestinations').style.display='none';
 }
 
-function checkDestinationFields(){
+//destination validation
+function checkDestinationFields(form){
+
 	var destName = document.getElementById('destinationName').value;
-		if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
-			
+	if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
 		return false;
 	}
 
 	var destURL = document.getElementById('destinationURL').value;
 	if(null==destURL || 'undefined'==destURL || ''==destURL || 'null'==destURL){
-
 		return false;
 	}
 	
-
 	var alfUser = document.getElementById('alfUser').value;
 	if(null==alfUser || 'undefined'==alfUser || ''==alfUser || 'null'==alfUser){
 		return false;
 	}
-
+	
 	var alfPswd = document.getElementById('alfPswd').value;
 	if(null==alfPswd || 'undefined'==alfPswd || ''==alfPswd || 'null'==alfPswd){
 		return false;
@@ -553,76 +544,49 @@ function checkDestinationFields(){
 	}
 
 	confirmDestination(); 
-	addRowToDestination();
+	addRowToDestination(form);
 }
 
-function comparePasswords(){
-	if(document.getElementById('newPassword').value != document.getElementById('newPasswordRetype').value){
+//password validation 
+function comparePasswords(form){
+	if(form.newPassword.value != form.newPasswordRetype.value){
 		window.alert("You must type the same new password twice.");
 		return false;
 	}
 
 	confirmDestination();
-	addRowToDestination();
+	addRowToDestination(form);
 	
 }
 
-function formValidator(form, formType){
-var formType = formType;
-	if(formType == "destination"){
-		if(!document.getElementById("sourceSink1")){
-			return false;
-		}
-	}else{
-		if(formType == "job"){
-			if(form.description.value=="" || form.description.value==null || form.description.value=="null" || form.description.value=="undefined"){
-				return false;
-			}
-		
-			if(!document.getElementById("dest1")){
-				return false;
-			}
-		}
-
-		if(!document.getElementById("rowNumber1")){
-			return false;
-		}
-	}
+//form validation 
+function formValidator(form){
 	
-	alert("Submitted");
-}
-
-//copyright 1999 Idocs, Inc. http://www.idocs.com
-//Distribute this script freely but keep this notice in place
-function numbersonly(myfield, e, dec)
-{
-	var key;
-	var keychar;
-
-	if (window.event)
-		key = window.event.keyCode;
-	else if (e)
-		key = e.which;
-	else
-		return true;
-	keychar = String.fromCharCode(key);
-
-	//control keys
-	if ((key==null) || (key==0) || (key==8) || 
-	(key==9) || (key==13) || (key==27) )
-		return true;
-
-	//numbers
-	else if ((("0123456789").indexOf(keychar) > -1))
-		return true;
-
-	//decimal point jump
-	else if (dec && (keychar == ".")){
-		myfield.form.elements[dec].focus();
-		return false;
+	//If it is the createDestinations form
+	if(document.createDestinations){
+		if(!form.sourceSink1){
+			return false;
+		}
 	}
-	else
-		return false;
+
+	//If it is the createJob form
+	if(document.createJob || document.editJob){
+		var description = form.description.value;
+		if(""==description || null==description || "null"==description || "undefined"==description){
+			return false;
+		}
+	
+		if(!form.dest1){
+			return false;
+		}
+	}
+
+	//If it is the editSchedule form
+	if(document.editSchedule || document.createJob || document.editJob){
+		if(!document.getElementById('rowNumber1')){
+			return false;
+		}
+	}
 }
 
 </script>
@@ -669,26 +633,49 @@ Username: <sec:authentication property="principal.username" />
 </div></p>
 -->
 
+<%String roleCheck= "";%>
+<c:forEach var="role" items="${roles}">
+		<c:if test='${role.role=="SYSTEM_ADMIN"}'>
+		<%roleCheck="systemAdmin"; %>
+		</c:if>
+		<%if(roleCheck=="consumer" ||roleCheck=="scheduleAdmin" || roleCheck==""){ %>
+		<c:if test='${role.role=="JOB_ADMIN"}'>
+		<%roleCheck="jobAdmin"; %>
+		</c:if>
+		<%}if(roleCheck=="consumer" || roleCheck==""){ %>
+		<c:if test='${role.role=="SCHEDULE_ADMIN"}'>
+		<%roleCheck="scheduleAdmin"; %>
+		</c:if>
+		<%}if(roleCheck==""){ %>
+		<c:if test='${role.role=="CONSUMER"}'>
+		<%roleCheck="consumer"; %>
+		</c:if>
+		<%}%>
+</c:forEach>
+
 	<p>
 	<div>
-	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
+
 	<div class="left">
-	
-	<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
-
+<%if(roleCheck=="systemAdmin" || roleCheck=="jobAdmin" || roleCheck=="scheduleAdmin" || roleCheck=="consumer"){ %>
+<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
+<%if(roleCheck=="systemAdmin" || roleCheck=="jobAdmin"){ %>
 | <a href="<spring:url value="/destinations/" htmlEscape="true"/>">Manage destinations</a>
+<%}if(roleCheck=="systemAdmin"){ %>
 | <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
-
-| 		<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
+<%} %>
+| 	<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
 
 </div>
+
 <div class="right">
 Username: <sec:authentication property="principal.username" /> 
 
 | <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a>
+<%} %>
 </div>
 <div class="clear"></div>
-</sec:authorize>
+
 </div></p>
 
 </div>

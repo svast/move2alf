@@ -100,17 +100,27 @@ div.main {
 	float:right;
 }
 
+.table-jobAndDestination{
+	width:100%;
+	
+}
+
 .table-border{
 	border-style:solid;
+	border-color:#73979D;
 	border-width:3px;
-	padding:3px;
+	padding:3px; 
+	width:100%;
+	
 }
 
 .table-border-thin{
 	border-style:solid;
 	border-width:1px;
+	border-color:#73979D;
 	padding:3px;
 	border-collapse:collapse;
+	
 }
 
 .clear{
@@ -159,6 +169,7 @@ textarea{
     color: #5E878F;
     background-color: #EBECED;
     font-family: Geneva, Tahoma, sans-serif;
+    font-size:100%;
 }
 
 .pagingItem {
@@ -180,5 +191,9 @@ textarea{
 	background-color: #bfbfbf;
 	border: 1px solid #bfbfbf;
 	font-size: 0.9em;
+}
+
+.spacer{
+	height:1.5em;
 }
 

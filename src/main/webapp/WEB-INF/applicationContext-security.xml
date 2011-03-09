@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-	<global-method-security pre-post-annotations="enabled"/>
+	<global-method-security pre-post-annotations="enabled" />
 
 	<http use-expressions="true" >
 		<intercept-url pattern="/login.jsp*" access="permitAll"/>
@@ -21,32 +21,10 @@
 	<authentication-manager alias="authenticationManager">
 		<authentication-provider>
 			<password-encoder hash="md5" />
-			<jdbc-user-service data-source-ref="dataSource"
+	 		<jdbc-user-service data-source-ref="dataSource"
 				users-by-username-query="select userName, password, true from userPswd where userName=?"
 				authorities-by-username-query="select userPswd.userName, userRole.role from userPswd join userRole where userPswd.userName=?"/>
 		</authentication-provider>
 	</authentication-manager>
-	 
-		<beans:bean
-		id="accessDecisionManager"
-		class="org.springframework.security.access.vote.AffirmativeBased">
-		<beans:property name="decisionVoters">
-		<beans:list>
-		<beans:ref bean="roleVoter" />
-		<beans:ref bean="authenticatedVoter" />
-		</beans:list>
-		</beans:property>
-		</beans:bean>
-		
-		<beans:bean
-		id="roleVoter"
-		class="org.springframework.security.access.vote.RoleVoter">
-		<beans:property name="rolePrefix" value="" />
-		</beans:bean>
-		
-		<beans:bean
-		id="authenticatedVoter"
-		class="org.springframework.security.access.vote.AuthenticatedVoter">
-		</beans:bean>
 	
 </beans:beans>

@@ -10,8 +10,8 @@
 <br />
 <h3 class="center">The old password you entered did not coincide <br />with the actual value for the old password</h3>
 
-<a href="<spring:url value="/user/profile" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
-<a href="<spring:url value="/user/profile/${user.userName}/edit" htmlEscape="true" />" class="right"><button type="button">Try again</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/user/profile" htmlEscape="true" />';">Cancel</button>
+<button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/user/profile/${user.userName}/edit" htmlEscape="true" />';">Try again</button>
 
 </div>
 

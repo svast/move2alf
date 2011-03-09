@@ -18,7 +18,8 @@
 		</c:forEach></td>
 	</tr>
 </table>
-<p><a href="<spring:url value="/user/profile/${user.userName}/edit" htmlEscape="true" />" class="left"><button type="button">Change password</button></a></p>
+
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/user/profile/${user.userName}/edit" htmlEscape="true" />';">Change password</button>
 
 
 

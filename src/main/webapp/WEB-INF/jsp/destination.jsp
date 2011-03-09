@@ -155,9 +155,12 @@
 </tr>
 
 <tr>
+<td><button type="button" class="cancelButton" onclick="cancelDestination();"/>Cancel</button></td>
+<td id="confirm"><input name="cancelButton" type="button" class="cancelButton" value="Ok" onclick="checkDestinationFields(this.form);" /></td>
+<!-- 
 <td onclick="cancelDestination();"><span class="pointer">Cancel</span></td>
-<td id="confirm" onclick="checkDestinationFields();"><span class="pointer">Ok</span></td>
-
+<td id="confirm" onclick="checkDestinationFields(this.form);"><span class="pointer">Ok</span></td>
+-->
 </tr>
 </table>
 

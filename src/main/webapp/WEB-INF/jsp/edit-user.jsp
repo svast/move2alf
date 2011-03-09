@@ -7,7 +7,7 @@
 
 <div class="frame-job">
 
-<form:form modelAttribute="userClass" method="post" name="changePassword" onsubmit='return comparePasswords();' >
+<form:form modelAttribute="userClass" method="post" name="changePassword" onsubmit='return comparePasswords(this);' >
 <table class="indent">
 <tr>
 <td>Please enter your password:</td>
@@ -26,10 +26,7 @@
                                 }));
                         </script>
 </tr>
-</table>
-<br />
-<br />
-<table class="indent">
+
 <tr>
 <td>new user's password:</td>
 <td><form:password path="newPassword" size="15" maxlength="15" /></td>
@@ -65,7 +62,8 @@
 </tr>
 </table>
 
-<a href="<spring:url value="/users" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/users" htmlEscape="true" />';">Cancel</button>
+
 <input id="proceed" type="submit" value="Update password" class="right" />
 						<script type="text/javascript">
                             Spring.addDecoration(new Spring.ValidateAllDecoration({

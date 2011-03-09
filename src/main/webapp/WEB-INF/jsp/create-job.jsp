@@ -8,7 +8,7 @@
 <h2>Create new job</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return formValidator(this, 'job');">
+<form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return formValidator(this);">
 
 <h4>General</h4>
 <table class="indent">
@@ -204,7 +204,7 @@
                         </script>
 <br />
 
-<a href="<spring:url value="/job/dashboard" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/job/dashboard" htmlEscape="true" />';">Cancel</button>
 <input id="proceed" type="submit" value="Create new job" class="right"/>
 						<script type="text/javascript">
                             Spring.addDecoration(new Spring.ValidateAllDecoration({

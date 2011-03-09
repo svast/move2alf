@@ -1,18 +1,16 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp"%>
 <%@ include file="/WEB-INF/jsp/header.jsp"%>
 
-
-<body onload>
 <div class="span-24 last main">
 
 <h2>Edit Destination</h2>
 
 <div class="frame-job">
 
-<a href="<spring:url value="/destination/${destination.id}/delete" htmlEscape="true" />" class="right"><button type="button">Delete</button></a>
+<button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/destination/${destination.id}/delete" htmlEscape="true" />';">Delete</button>
 
 
-<form:form modelAttribute="destinations" method="post" name="editDestination" onSubmit="return checkDestinationFields();">
+<form:form modelAttribute="destinations" method="post" name="editDestination" onSubmit="return checkDestinationFields(this);">
 
 <h3>
 <table>
@@ -52,12 +50,12 @@
 <%type= 1;%>
 </c:if> 
 <td>Type:</td> 
-<td><input type="radio" id="destinationType0" name="destinationType" value="AlfrescoSink" <%if(type==0){ %>CHECKED <%} %> />Alfresco</td>
+<td><input type="radio" id="destinationType0" name="destinationType" value="AlfrescoSink" <%if(type==0){ %>checked="true" <%} %> />Alfresco</td>
 <td><form:errors path="destinationType" cssClass="error"/></td>
 </tr>
 <tr>
 <td></td>
-<td><input type="radio" id="destinationType1" name="destinationType" value="CMIS" <%if(type==1){ %>CHECKED <%} %> />CMIS</td>
+<td><input type="radio" id="destinationType1" name="destinationType" value="CMIS" <%if(type==1){ %>checked="true" <%} %> />CMIS</td>
 </tr>
 <tr>
 <td>URL:</td>
@@ -135,7 +133,7 @@
 
 <br />
 
-<a href="<spring:url value="/destinations" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/destinations" htmlEscape="true" />';">Cancel</button>
 <input id="proceed" type="submit" value="Update Destination" class="right" onclick="addRowToDestination();"/>
 						<script type="text/javascript">
                             Spring.addDecoration(new Spring.ValidateAllDecoration({
@@ -145,7 +143,5 @@
 </form:form>
 </div>	
 </div>
-
-</body>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp"%>

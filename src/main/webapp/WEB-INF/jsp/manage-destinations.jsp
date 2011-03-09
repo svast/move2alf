@@ -14,10 +14,10 @@
 <p>No destinations found, use the link above to create a new one</p>
 </c:if>
 
-<table>
+<table class="table-jobAndDestination">
 <c:forEach var="destination" items="${destinations}">
 		<tr>
-		<div class="table-border">
+		<td class="table-border">
 
 		<div class="link left"><c:out value="${destination.parameters.name}" /> </div>
 		<div class="link right"> <a href="<spring:url value="/destination/${destination.id}/edit" htmlEscape="true" />">edit</a></div>
@@ -36,10 +36,9 @@
 		
 		</p>
 		<br />
-		</div>
-		
+		</td>
 		</tr>
-		
+		<tr class="spacer"><td></td></tr>
 	</c:forEach>
 </table>
 

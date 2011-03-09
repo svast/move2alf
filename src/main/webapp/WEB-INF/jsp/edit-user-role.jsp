@@ -26,10 +26,7 @@
                                 }));
                         </script>
 </tr>
-</table>
-<br />
-<br />
-<table class="indent">
+
 <tr>
 <td>Role: </td>
 <td><form:select path="role">
@@ -50,7 +47,7 @@
 </tr>
 </table>
 
-<a href="<spring:url value="/users" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/users" htmlEscape="true" />';">Cancel</button>
 <input id="proceed" type="submit" value="Update role" class="right" />
 						<script type="text/javascript">
                             Spring.addDecoration(new Spring.ValidateAllDecoration({

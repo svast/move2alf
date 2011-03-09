@@ -48,12 +48,10 @@
 								widgetType : "dijit.form.DateTextBox",
 								widgetAttrs : { 
 								constraints : {
-								//	min : new Date(),
-									datePattern : "dd/MM/yyyy", 
+									datePattern : "dd/MM/yyyy"
 								},
 									value: new Date(),
-									datePattern : "dd/MM/yyyy", 
-									
+									datePattern : "dd/MM/yyyy"
 								}
 							})); 
 						</script>
@@ -63,18 +61,20 @@
 								elementId : "singleTime",
 								widgetType : "dijit.form.TimeTextBox",
 								widgetAttrs : { 
+								
 								value: new Date(),
 									constraints : {
-										timePattern : 'HH:mm',
-										clickableIncrement: 'T00:15:00',
-						                visibleIncrement: 'T00:15:00',
+										timePattern : "HH:mm",
+										clickableIncrement: "T00:15:00",
+						                visibleIncrement: "T00:15:00"
 									},			
-									timePattern : 'HH:mm',			
+									timePattern : "HH:mm"			
 								}
 							})); 
 						</script>
 
 </tr>
+
 <tr>
 <td><form:radiobutton path="runFrequency" value="Hourly" onclick="scheduleBox(1)"/>Hourly</td>
 <td id="hourly" class="hide">minutes: <form:input path="hourTime" size="2" maxlength="2" /></td>
@@ -83,14 +83,15 @@
 								elementId : "hourTime",
 								widgetType : "dijit.form.TimeTextBox",
 								widgetAttrs : { 
+													
 								value: new Date(),
-									constraints : {
+								constraints : {
 										timePattern : 'mm',
 										clickableIncrement: 'T00:05:00',
 						                visibleIncrement: 'T00:05:00',
-										visibleRange: 'T01:00:00',
+										visibleRange: 'T01:00:00'
 									},			
-									timePattern : 'mm',			
+									timePattern : 'mm'		
 								}
 							})); 
 						</script>
@@ -107,9 +108,9 @@
 									constraints : {
 										timePattern : 'HH:mm',
 										clickableIncrement: 'T00:15:00',
-						                visibleIncrement: 'T00:15:00',
+						                visibleIncrement: 'T00:15:00'
 									},		
-									timePattern : 'HH:mm',			
+									timePattern : 'HH:mm'		
 								}
 							})); 
 						</script>
@@ -149,9 +150,9 @@
 									constraints : {
 										timePattern : 'HH:mm',
 										clickableIncrement: 'T00:15:00',
-						                visibleIncrement: 'T00:15:00',
+						                visibleIncrement: 'T00:15:00'
 									},		
-									timePattern : 'HH:mm',			
+									timePattern : 'HH:mm'	
 								}
 							})); 
 						</script>
@@ -164,14 +165,16 @@
 								elementId : "cronJob",
 								widgetType : "dijit.form.ValidationTextBox",
 								widgetAttrs : { 
-								value: "0 0 * * * ?",				
+								value: "0 0 * * * ?"			
 								}
 							})); 
 						</script>
 </tr>
+
 <tr>
-<td onclick="cancelSchedule();"><span class="pointer">Cancel</span></td>
-<td onclick="confirmSchedule();addRowToSchedule();"><span class="pointer">Ok</span></td>
+<td><button type="button" class="cancelButton" onclick="cancelSchedule();"/>Cancel</button></td>
+<td><input name="cancelButton" type="button" class="cancelButton" value="Ok" onclick="confirmSchedule();addRowToSchedule(this.form);" /></td>
+
 </tr>
 </table>
 </div>

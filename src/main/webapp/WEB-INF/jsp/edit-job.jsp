@@ -8,7 +8,7 @@
 
 <div class="frame-job">
 
-<a href="<spring:url value="/job/${job.id}/delete" htmlEscape="true" />" class="right"><button type="button">Delete</button></a>
+<button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/delete" htmlEscape="true" />';">Delete</button>
 
 
 <form:form modelAttribute="job" method="post" name="editJob" onSubmit="return formValidator(this);">
@@ -201,7 +201,8 @@
                         </script>
 <br />
 
-<a href="<spring:url value="/job/dashboard" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/job/dashboard" htmlEscape="true" />';">Cancel</button>
+
 <input id="proceed" type="submit" value="Update job" class="right"/>
 						<script type="text/javascript">
                             Spring.addDecoration(new Spring.ValidateAllDecoration({

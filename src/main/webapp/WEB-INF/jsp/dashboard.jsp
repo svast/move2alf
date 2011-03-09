@@ -5,22 +5,11 @@
 
 <h2>Dashboard</h2>
 
-
-<%String roleCheck= "consumer";%>
-<c:forEach var="role" items="${roles}">
-		<c:if test='${role.role=="JOB_ADMIN" || role.role=="SYSTEM_ADMIN"}'>
-		<%roleCheck="jobOrSystemAdmin"; %>
-		</c:if>
-		<%if(roleCheck=="consumer"){ %>
-		<c:if test='${role.role=="SCHEDULE_ADMIN"}'>
-		<%roleCheck="scheduleAdmin"; %>
-		</c:if>
-		<%}%>
-</c:forEach>
-
 <div class="frame-dashboard">
 <h3 class="left">Jobs</h3>
-<%if(roleCheck=="jobOrSystemAdmin"){ %>
+
+<% //All role checks are done in the header.jsp
+if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
 <h4 class="right"><a href="<spring:url value="/job/create" htmlEscape="true" />">Create new job</a></h4>
 <%} %>
 <br class="clear">
@@ -41,20 +30,21 @@
 	pageContext.setAttribute("currentDate", currentDate);
 
 %>
-<table>
+<table class="table-jobAndDestination">
 <c:forEach var="jobInfo" items="${jobInfoList}">
 		<tr>
-		<div class="table-border">
+		<td class="table-border">
+
 		<div class="link left"><c:out value="${jobInfo.jobName}" /></div>
 		
-			<%if(roleCheck=="jobOrSystemAdmin"){ %>
-				<div class="link right"><a href="">run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">edit</a></div>
-				<br class="clear">
+			<%if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">edit</a></div>
 			<%}else if(roleCheck=="scheduleAdmin"){ %>
-				<div class="link right"><a href="">run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
-				<br class="clear">
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
 			<%}%>
-
+			
+			<br class="clear">
+			
 		<p class="reduce-bottom">
 		
 		<c:if test='${-1 == jobInfo.cycleId}'>
@@ -81,14 +71,16 @@
 		</p>
 		<br />
 
-		<div class="link"><a href="<spring:url value="/job/${jobInfo.jobId}/history" htmlEscape="true"/>" >History</a>		
+		<div class="link"><a href="<spring:url value="/job/${jobInfo.jobId}/history" htmlEscape="true"/>" >History</a>
 		<c:if test='${-1 != jobInfo.cycleId}'>
 		<a href="<spring:url value="/job/${jobInfo.jobId}/${jobInfo.cycleId}/report" htmlEscape="true" />">View last report</a>
 		</c:if>
 		</div>
 		
-		</div>
+		</td>
 		</tr>
+		<tr class="spacer"><td></td></tr>
+		
 	</c:forEach>
 
 </table>

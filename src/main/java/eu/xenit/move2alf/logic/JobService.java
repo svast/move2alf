@@ -298,4 +298,7 @@ public interface JobService {
 	 * @param cycleId
 	 */
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId);
+
+	
+	String getInstantCronJob();
 }

@@ -52,7 +52,7 @@
 
 <div class="indent"><b>List of imported documents </b></div>
 
-<a href="<spring:url value="/job/${job.id}/${cycle.id}/report/export" htmlEscape="true" />" class="right"><button type="button">export</button></a>
+<button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/${cycle.id}/report/export" htmlEscape="true" />';">export to csv</button>
 
 <table class="table-border-thin">
 <tr>

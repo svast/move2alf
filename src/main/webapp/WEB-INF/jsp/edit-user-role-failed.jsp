@@ -10,8 +10,8 @@
 <br />
 <h3 class="center">You did not enter your password correctly</h3>
 
-<a href="<spring:url value="/users" htmlEscape="true" />" class="left"><button type="button">Cancel</button></a>
-<a href="<spring:url value="/user/${user.userName}/edit/role" htmlEscape="true" />" class="right"><button type="button">Try again</button></a>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/users" htmlEscape="true" />';">Cancel</button>
+<button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/user/${user.userName}/edit/role" htmlEscape="true" />';">Try again</button>
 
 </div>
 
