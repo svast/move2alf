@@ -11,12 +11,13 @@
 <button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/delete" htmlEscape="true" />';">Delete</button>
 
 
-<form:form modelAttribute="job" method="post" name="editJob" onSubmit="return formValidator(this);">
+<form:form modelAttribute="job" method="post" name="editJob" onSubmit="return jobValidation(this);">
 <h4>General</h4>
 <table class="indent">
 <tr>
 <td>Name:</td>
 <td><form:input path="name" size="30" maxlength="30" /></td>
+<td id="nameError" class="hide error">name may not be empty.</td>
 <td><form:errors path="name" cssClass="error"/></td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -34,6 +35,7 @@
 <tr>
 <td>Description:</td>
 <td><form:textarea path="description" cols="50" rows="4"/></td>
+<td id="descriptionError" class="hide error">description may not be empty.</td>
 <td><form:errors path="description" cssClass="error"/></td>
 </tr>
 </table>
@@ -44,6 +46,7 @@
 <table class="indent">
 <tr>
 <td>Path: <form:input path="inputFolder" size="50" maxlength="50" /></td>
+<td id="inputFolderError" class="hide error">input path may not be empty.</td>
 <td><form:errors path="inputFolder" cssClass="error"/></td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -67,6 +70,7 @@
 <table class="indent">
 <tr>
 <td class="indent">Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
+<td id="destinationFolderError" class="hide error">destination path may not be empty.</td>
 <td><form:errors path="destinationFolder" cssClass="error"/></td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -204,11 +208,7 @@
 <button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/job/dashboard" htmlEscape="true" />';">Cancel</button>
 
 <input id="proceed" type="submit" value="Update job" class="right"/>
-						<script type="text/javascript">
-                            Spring.addDecoration(new Spring.ValidateAllDecoration({
-                                    elementId: "proceed",
-                                    event: "onclick" }));
-                        </script>
+
 </form:form>
 </div>	
 </div>

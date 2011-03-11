@@ -6,13 +6,14 @@
 		<script type="text/javascript" src="<c:url value="/resources/dojo/dojo.js" />"></script>
         <script type="text/javascript" src="<c:url value="/resources/spring/Spring.js" />"></script>
         <script type="text/javascript" src="<c:url value="/resources/spring/Spring-Dojo.js" />"></script>
-        <link type="text/css" rel="stylesheet" href="<c:url value="/resources/dijit/themes/tundra/tundra.css" />" /> 
+         <link type="text/css" rel="stylesheet" href="<c:url value="/resources/dijit/themes/tundra/tundra.css" />" /> 
+
 <script type="text/javascript">
 
 function putFocus(formInst, elementInst) {
     if (document.forms.length > 0) {
         try{
-      	document.forms[formInst].elements[elementInst].focus();
+      		document.forms[formInst].elements[elementInst].focus();
         }catch(e){
         }
     }
@@ -102,12 +103,12 @@ function scheduleBox(number){
 
 
 function addRowToSchedule(form){
-var date ='';
-var time = '';
-var day = '';
-var cronJob = '';
-var period='';
-var minutes='';
+	var date ='';
+	var time = '';
+	var day = '';
+	var cronJob = '';
+	var period='';
+	var minutes='';
 
 	for (var counter = 0; counter < 5; counter++)
     {
@@ -139,164 +140,68 @@ var minutes='';
 			default:
 					break;
 			}
-		}	
-	    /*
-	    try{
-			if(document.createJob.runFrequency[counter].checked==true){
-	
-				switch(counter){
-				case 0:
-						date = document.getElementById('singleDate').value;
-						time = document.getElementById('singleTime').value;
-						period = "Single run";
-						break;
-				case 1:
-						minutes = document.getElementById('hourTime').value;
-						period = "Hourly";
-						break;
-				case 2:
-						time = document.getElementById('dayTime').value;
-						period = "Daily";
-						break;
-				case 3:
-						day = document.getElementById('weekDay').value;
-						time = document.getElementById('weekTime').value;
-						period = "Weekly";
-						break;
-				case 4:
-						cronJob = document.getElementById('cronJob').value;
-						period = "Cron job";
-						break;
-				default:
-						break;
-				}
-			}	
-	    }
-	    catch(e){
-		    try{
-		    	if(document.editJob.runFrequency[counter].checked==true){
-		    		
-					switch(counter){
-					case 0:
-							date = document.getElementById('singleDate').value;
-							time = document.getElementById('singleTime').value;
-							period = "Single run";
-							break;
-					case 1:
-							minutes = document.getElementById('hourTime').value;
-							period = "Hourly";
-							break;
-					case 2:
-							time = document.getElementById('dayTime').value;
-							period = "Daily";
-							break;
-					case 3:
-							day = document.getElementById('weekDay').value;
-							time = document.getElementById('weekTime').value;
-							period = "Weekly";
-							break;
-					case 4:
-							cronJob = document.getElementById('cronJob').value;
-							period = "Cron job";
-							break;
-					default:
-							break;
-					}
-				}	
-		    }
-		    catch(e){
-				if(document.editSchedule.runFrequency[counter].checked==true){
-		    		
-					switch(counter){
-					case 0:
-							date = document.getElementById('singleDate').value;
-							time = document.getElementById('singleTime').value;
-							period = "Single run";
-							break;
-					case 1:
-							minutes = document.getElementById('hourTime').value;
-							period = "Hourly";
-							break;
-					case 2:
-							time = document.getElementById('dayTime').value;
-							period = "Daily";
-							break;
-					case 3:
-							day = document.getElementById('weekDay').value;
-							time = document.getElementById('weekTime').value;
-							period = "Weekly";
-							break;
-					case 4:
-							cronJob = document.getElementById('cronJob').value;
-							period = "Cron job";
-							break;
-					default:
-							break;
-					}
-				}	
-		    }
-	    }*/		
+		}		
     }
     
 	if(period!="Cron job"){
 		cronJob = getCronJob(time, day, date, period, minutes);
 	}
 	
-  var tbl = document.getElementById('tblSample');
-  var lastRow = tbl.rows.length;
-
-  var iteration = lastRow+1;
-  var row = tbl.insertRow(lastRow);
-  
-  var cellFirst = row.insertCell(0);
-
-  var rowNumber = document.createElement('div');
-   rowNumber.innerHTML=iteration;
-   rowNumber.id="rowNumber"+iteration;
-  
-  cellFirst.appendChild(rowNumber);
-  
-  var cellSecond = row.insertCell(1);
-  var displayString = '';
-
-  if(period=="Cron job")
-	  displayString = period;
-  else{
-	  if(period!='')
-		  displayString = period +' - ';
-	  if(day!='')
-	  	  displayString = displayString + day +' - ';
-	  if(date!='')
-		  displayString = displayString + '' + date + ' - ';
-	  if(time!='')
-		  displayString = displayString + '' + time;
-	  if(minutes!=''){
-		  if(minutes.length==1)
-		 	  displayString = displayString + '*:0' + minutes;
-		  else
-			  displayString = displayString + '*:' + minutes;
+	  var tbl = document.getElementById('tblSample');
+	  var lastRow = tbl.rows.length;
+	
+	  var iteration = lastRow+1;
+	  var row = tbl.insertRow(lastRow);
+	  
+	  var cellFirst = row.insertCell(0);
+	
+	  var rowNumber = document.createElement('div');
+	   rowNumber.innerHTML=iteration;
+	   rowNumber.id="rowNumber"+iteration;
+	  
+	  cellFirst.appendChild(rowNumber);
+	  
+	  var cellSecond = row.insertCell(1);
+	  var displayString = '';
+	
+	  if(period=="Cron job")
+		  displayString = period;
+	  else{
+		  if(period!='')
+			  displayString = period +' - ';
+		  if(day!='')
+		  	  displayString = displayString + day +' - ';
+		  if(date!='')
+			  displayString = displayString + '' + date + ' - ';
+		  if(time!='')
+			  displayString = displayString + '' + time;
+		  if(minutes!=''){
+			  if(minutes.length==1)
+			 	  displayString = displayString + '*:0' + minutes;
+			  else
+				  displayString = displayString + '*:' + minutes;
+		  }
 	  }
-  }
-  
-  dayTime = document.createTextNode(displayString);
-  cellSecond.appendChild(dayTime);  
-  
-  var cellThird = row.insertCell(2);
-  var cronJobNode = document.createTextNode(cronJob);
-  cellThird.appendChild(cronJobNode);
-
- 
-  var cellFourth = row.insertCell(3);
- 
-  var sp = document.createElement('div');
- 
-  sp.className = 'pointer';
-  sp.innerHTML='remove';
-  var id = 'remove'+iteration;
-  sp.id=id;
-  sp.setAttribute('onclick', 'removeRowFromSchedule('+iteration+')');
-  cellFourth.appendChild(sp);  
-  setCronInForm(cronJob);
+	  
+	  dayTime = document.createTextNode(displayString);
+	  cellSecond.appendChild(dayTime);  
+	  
+	  var cellThird = row.insertCell(2);
+	  var cronJobNode = document.createTextNode(cronJob);
+	  cellThird.appendChild(cronJobNode);
+	
+	 
+	  var cellFourth = row.insertCell(3);
+	 
+	  var sp = document.createElement('div');
+	 
+	  sp.className = 'pointer';
+	  sp.innerHTML='remove';
+	  var id = 'remove'+iteration;
+	  sp.id=id;
+	  sp.setAttribute('onclick', 'removeRowFromSchedule('+iteration+')');
+	  cellFourth.appendChild(sp);  
+	  setCronInForm(cronJob);
 
 }
 
@@ -439,6 +344,12 @@ function addDestination(){
 function confirmDestination(){
 	document.getElementById('destinationForm').style.display='none';
 	document.getElementById('addDestinationButton').style.display='block';
+
+	document.getElementById("destinationNameError").style.display='none';
+	document.getElementById("destinationURLError").style.display='none';
+	document.getElementById("alfUserError").style.display='none';
+	document.getElementById("alfPswdError").style.display='none';
+	document.getElementById("nbrThreadsError").style.display='none';
 }
 
 function cancelDestination(){
@@ -451,7 +362,7 @@ function addRowToDestination(form){
 	  var tbl = document.getElementById('tblDestination');
 	  var lastRow = tbl.rows.length;
 
-	  var iteration = lastRow;
+	  var iteration = lastRow+1;
 	  var row = tbl.insertRow(lastRow);
 
 	  var cellFirst = row.insertCell(0);
@@ -464,30 +375,36 @@ function addRowToDestination(form){
 				destType=form.destinationType[i].value;
 			}
 		}
-
+		
 		if(document.createJob || document.editJob){
-			var dest = document.createElement('input');
-			 var id = 'dest'+iteration;
-			 dest.id=id;
-			 dest.type='radio';
-			 dest.name='dest';
-			 dest.checked=true;
+			try{
+				var dest = document.createElement("<input type='radio' name='dest' CHECKED />");
+				 var id = 'dest'+iteration;
+				 dest.id=id;
+			}catch(e){
+				var dest = document.createElement('input');
+				 var id = 'dest'+iteration;
+				 dest.id=id;
+				 dest.type='radio';
+				 dest.name='dest';
+				 dest.checked=true;
+			}
 		}
 		else{
 			var dest = document.createElement('div');
 		}
 	 
-	var value = form.destinationName.value+"|"+form.destinationURL.value+"|"+form.alfUser.value+"|"+form.alfPswd.value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
-	 dest.value=value;
+		var value = form.destinationName.value+"|"+form.destinationURL.value+"|"+form.alfUser.value+"|"+form.alfPswd.value+"|"+document.getElementById('nbrThreads').value+"|"+destType;
+	 	dest.value=value;
 
-	 var text=document.createTextNode(document.getElementById('destinationName').value+" - "+document.getElementById('destinationURL').value);
+	 	var text=document.createTextNode(document.getElementById('destinationName').value+" - "+document.getElementById('destinationURL').value);
 	
-
-	cellFirst.appendChild(dest);
-	cellFirst.appendChild(text);
+		cellFirst.appendChild(dest);
+		cellFirst.appendChild(text);
 
 		setDestInForm(value);
-	  document.getElementById('noDestinations').style.display='none';
+
+	  	document.getElementById('noDestinations').style.display='none';
 
  }
 
@@ -500,51 +417,26 @@ function setDestInForm(value){
 	  
 	  var cellFirst = row.insertCell(0);
 
-		var fi = document.createElement('input');
-		var id = 'sourceSink'+iteration;
-		fi.id=id;
-		fi.type='checkbox';
-		fi.name='sourceSink';
-		fi.value=value;
-		fi.checked=true;
-
+	  try{
+			var fi = document.createElement("<input type='checkbox' name='sourceSink' CHECKED />");
+			var id = 'sourceSink'+iteration;
+			fi.id=id;
+			fi.value=value;
+		}catch(e){
+			var fi = document.createElement('input');
+			var id = 'sourceSink'+iteration;
+			fi.id=id;
+			fi.type='checkbox';
+			fi.name='sourceSink';
+			fi.value=value;
+			fi.checked=true;
+		}
 	  cellFirst.appendChild(fi);
 }
 
 function noDestNeeded(){
 	document.getElementById('noDestinations').style.display='none';
-}
-
-//destination validation
-function checkDestinationFields(form){
-
-	var destName = document.getElementById('destinationName').value;
-	if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
-		return false;
-	}
-
-	var destURL = document.getElementById('destinationURL').value;
-	if(null==destURL || 'undefined'==destURL || ''==destURL || 'null'==destURL){
-		return false;
-	}
-	
-	var alfUser = document.getElementById('alfUser').value;
-	if(null==alfUser || 'undefined'==alfUser || ''==alfUser || 'null'==alfUser){
-		return false;
-	}
-	
-	var alfPswd = document.getElementById('alfPswd').value;
-	if(null==alfPswd || 'undefined'==alfPswd || ''==alfPswd || 'null'==alfPswd){
-		return false;
-	}
-
-	var nbrThreads = document.getElementById('nbrThreads').value;
-	if(null==nbrThreads || 'undefined'==nbrThreads || ''==nbrThreads || 'null'==nbrThreads){
-		return false;
-	}
-
-	confirmDestination(); 
-	addRowToDestination(form);
+	document.getElementById('destError').style.display='none';
 }
 
 //password validation 
@@ -559,35 +451,155 @@ function comparePasswords(form){
 	
 }
 
-//form validation 
-function formValidator(form){
+function jobValidation(form){
+	var validated=true;
 	
-	//If it is the createDestinations form
-	if(document.createDestinations){
-		if(!form.sourceSink1){
-			return false;
-		}
+	var name=form.name.value;
+	if(""==name || null==name || "null"==name || "undefined"==name){
+		document.getElementById("nameError").style.display='block';
+		validated=false;
+	}
+	
+	var description=form.description.value;
+	if(""==description || null==description || "null"==description || "undefined"==description){
+		document.getElementById("descriptionError").style.display='block';
+		validated=false;
+	}
+	
+	var inputFolder=form.inputFolder.value;
+	if(""==inputFolder || null==inputFolder || "null"==inputFolder || "undefined"==inputFolder){
+		document.getElementById("inputFolderError").style.display='block';
+		validated=false;
+	}
+	
+	var destinationFolder=form.destinationFolder.value;
+	if(""==destinationFolder || null==destinationFolder || "null"==destinationFolder || "undefined"==destinationFolder){
+		document.getElementById("destinationFolderError").style.display='block';
+		validated=false;
 	}
 
-	//If it is the createJob form
-	if(document.createJob || document.editJob){
-		var description = form.description.value;
-		if(""==description || null==description || "null"==description || "undefined"==description){
-			return false;
-		}
-	
-		if(!form.dest1){
-			return false;
-		}
+	if(!document.getElementById('dest1')){
+		document.getElementById("destError").style.display='block';
+		validated=false;
 	}
 
-	//If it is the editSchedule form
-	if(document.editSchedule || document.createJob || document.editJob){
-		if(!document.getElementById('rowNumber1')){
-			return false;
-		}
+	if(!document.getElementById('rowNumber1')){
+		document.getElementById("cronError").style.display='block';
+		validated=false;
 	}
+		return validated;
 }
+
+function createDestinationsValidation(form){
+	var validated = true;
+
+	if(!document.getElementById('sourceSink1')){
+		document.getElementById("destError").style.display='block';
+		validated=false;
+	}
+
+	return validated;
+}
+
+function destinationValidation(form){
+	var validated=true;
+	
+	var destName = document.getElementById('destinationName').value;
+	if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
+		document.getElementById("destinationNameError").style.display='block';
+		validated=false;
+	}
+
+	var destURL = document.getElementById('destinationURL').value;
+	if(null==destURL || 'undefined'==destURL || ''==destURL || 'null'==destURL){
+		document.getElementById("destinationURLError").style.display='block';
+		validated=false;
+	}
+	
+	var alfUser = document.getElementById('alfUser').value;
+	if(null==alfUser || 'undefined'==alfUser || ''==alfUser || 'null'==alfUser){
+		document.getElementById("alfUserError").style.display='block';
+		validated=false;
+	}
+	
+	var alfPswd = document.getElementById('alfPswd').value;
+	if(null==alfPswd || 'undefined'==alfPswd || ''==alfPswd || 'null'==alfPswd){
+		document.getElementById("alfPswdError").style.display='block';
+		validated=false;
+	}
+
+	var nbrThreads = document.getElementById('nbrThreads').value;
+	if(null==nbrThreads || 'undefined'==nbrThreads || ''==nbrThreads || 'null'==nbrThreads){
+		document.getElementById("nbrThreadsError").style.display='block';
+		validated=false;
+	}
+
+	if(validated==true){
+		confirmDestination(); 
+		addRowToDestination(form);
+	}
+
+	return validated
+}
+
+function addUserValidation(form){
+	var validated=true;
+
+	var userName = form.userName.value;
+	if(null==userName || 'undefined'==userName || ''==userName || 'null'==userName){
+		document.getElementById("userNameError").style.display='block';
+		validated=false;
+	}
+
+	var password = form.password.value;
+	if(null==password || 'undefined'==password || ''==password || 'null'==password){
+		document.getElementById("passwordError").style.display='block';
+		validated=false;
+	}
+
+	return validated;
+}
+
+function editPasswordValidation(form){
+	var validated=true;
+
+	var oldPassword = form.oldPassword.value;
+	if(null==oldPassword || 'undefined'==oldPassword || ''==oldPassword || 'null'==oldPassword){
+		document.getElementById("oldPasswordError").style.display='block';
+		validated=false;
+	}
+
+	var newPassword = form.newPassword.value;
+	if(null==newPassword || 'undefined'==newPassword || ''==newPassword || 'null'==newPassword){
+		document.getElementById("newPasswordError").style.display='block';
+		validated=false;
+	}
+
+	var newPasswordRetype = form.newPasswordRetype.value;
+	if(null==newPasswordRetype || 'undefined'==newPasswordRetype || ''==newPasswordRetype || 'null'==newPasswordRetype){
+		document.getElementById("newPasswordRetypeError").style.display='block';
+		validated=false;
+	}
+
+	if(validated ==true){
+	validated=comparePasswords(form);
+	}
+	
+	return validated;
+}
+
+function editRoleValidation(form){
+	var validated=true;
+
+	var oldPassword = form.oldPassword.value;
+	if(null==oldPassword || 'undefined'==oldPassword || ''==oldPassword || 'null'==oldPassword){
+		document.getElementById("oldPasswordError").style.display='block';
+		validated=false;
+	}
+
+	return validated;
+}
+
 
 </script>
 <meta charset="utf-8">
@@ -607,31 +619,6 @@ function formValidator(form){
 <div class="container">
 <div class="span-24 last header">
 <h1>XeniT Move2Alf</h1>
- 
-<!-- 
-	<p>
-	<div>
-	<div class="left">
-	<sec:authorize access="hasRole('CONSUMER')">
-	<a href="<spring:url value="/" htmlEscape="true"/>">Home</a> 
-	</sec:authorize>
-	<sec:authorize access="hasRole('SYSTEM_ADMIN')">
-| <a href="<spring:url value="/destinations/" htmlEscape="true"/>">Manage destinations</a>
-| <a href="<spring:url value="/users/" htmlEscape="true"/>">Manage users</a>
-	</sec:authorize> 
-	<sec:authorize access="hasRole('CONSUMER')">
-| 		<a href="<spring:url value="/user/profile/" htmlEscape="true"/>">My profile</a>
-	</sec:authorize>
-</div>
-<div class="right">
-<sec:authorize access="hasRole('CONSUMER')">
-Username: <sec:authentication property="principal.username" /> 
-</sec:authorize>
-| <a href="<spring:url value="/j_spring_security_logout" htmlEscape="true"/>">Logout</a>
-</div>
-<div class="clear"></div>
-</div></p>
--->
 
 <%String roleCheck= "";%>
 <c:forEach var="role" items="${roles}">

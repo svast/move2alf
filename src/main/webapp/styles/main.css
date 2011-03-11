@@ -197,3 +197,8 @@ textarea{
 	height:1.5em;
 }
 
+.button{
+	width: auto;
+  overflow: visible;
+}
+

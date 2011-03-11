@@ -1,5 +1,5 @@
 <div><form:errors path="cron" cssClass="error"/></div>
-
+<div id="cronError" class="hide error">you must create a schedule.</div>
 <%int counter = 1; %>
 <table id="tblSample" class="indent">
  <c:if test="${empty job.cron}" >
@@ -172,8 +172,8 @@
 </tr>
 
 <tr>
-<td><button type="button" class="cancelButton" onclick="cancelSchedule();"/>Cancel</button></td>
-<td><input name="cancelButton" type="button" class="cancelButton" value="Ok" onclick="confirmSchedule();addRowToSchedule(this.form);" /></td>
+<td><button type="button" class="button" onclick="cancelSchedule();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmSchedule();addRowToSchedule(this.form);" /></td>
 
 </tr>
 </table>

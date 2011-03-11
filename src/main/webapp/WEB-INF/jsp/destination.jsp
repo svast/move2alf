@@ -1,16 +1,17 @@
 <div class="indent">
 
+<div id="destError" class="hide error">you must create a destination.</div>
 <div><form:errors path="sourceSink" cssClass="error"/></div>
+<div><form:errors path="dest" cssClass="error"/></div>
 
 <%int count=1; %>
 
+<c:if test="${empty destinations && empty destinationInfoList && empty showDestinations}" >
+<br />
+<div id="noDestinations">No existing destinations found.<br /></div>
+</c:if>
+
 <table id="tblDestination" class="indent">
-<c:if test="${empty destinations}" >
-<c:if test="${empty destinationInfoList}" >
-<p id="noDestinations">No existing destinations found.</p>
-</c:if>
-</c:if>
-<tr><td><form:errors path="dest" cssClass="error"/></td></tr>
 
 <c:forEach var="destination" items="${destinations}">
 <c:if test="${not empty destination.parameters}" >
@@ -76,6 +77,7 @@
 <tr>
 <td>Name:</td> 
 <td><form:input path="destinationName" size="15" maxlength="30" /></td>
+<td id="destinationNameError" class="hide error">destination name may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "destinationName",
@@ -99,6 +101,7 @@
 <td>URL:</td>
 
 <td><form:input path="destinationURL" size="50" maxlength="40" /></td>
+<td id="destinationURLError" class="hide error">destination url may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "destinationURL",
@@ -113,6 +116,7 @@
 <tr>
 <td>Username:</td>
 <td><form:input path="alfUser" size="30" maxlength="30" /></td>
+<td id="alfUserError" class="hide error">user may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "alfUser",
@@ -127,6 +131,7 @@
 <tr>
 <td>Password:</td>
 <td><form:input path="alfPswd" size="30" maxlength="30" /></td>
+<td id="alfPswdError" class="hide error">password may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "alfPswd",
@@ -141,6 +146,7 @@
 <tr>
 <td>Number of threads:</td>
 <td><form:input path="nbrThreads" size="10" value="5" maxlength="2"/></td>
+<td id="nbrThreadsError" class="hide error">number of threads may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "nbrThreads",
@@ -155,12 +161,10 @@
 </tr>
 
 <tr>
-<td><button type="button" class="cancelButton" onclick="cancelDestination();"/>Cancel</button></td>
-<td id="confirm"><input name="cancelButton" type="button" class="cancelButton" value="Ok" onclick="checkDestinationFields(this.form);" /></td>
-<!-- 
-<td onclick="cancelDestination();"><span class="pointer">Cancel</span></td>
-<td id="confirm" onclick="checkDestinationFields(this.form);"><span class="pointer">Ok</span></td>
--->
+<td><button type="button" class="button" onclick="cancelDestination();">Cancel</button></td>
+<td id="confirm"><input name="cancelButton" class="button" type="button" value="Ok" onclick="destinationValidation(this.form);" /></td>
+
+
 </tr>
 </table>
 

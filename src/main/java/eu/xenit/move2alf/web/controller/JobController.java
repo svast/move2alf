@@ -475,7 +475,7 @@ public class JobController {
 	public ModelAndView destinations() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("destinations", getJobService()
-				.getAllConfiguredSourceSinks());
+				.getAllDestinationConfiguredSourceSinks());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("manage-destinations");
@@ -488,6 +488,7 @@ public class JobController {
 		mav.addObject("destination", new DestinationConfig());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		mav.addObject("showDestinations","false");
 		mav.setViewName("create-destinations");
 		return mav;
 	}
@@ -527,8 +528,9 @@ public class JobController {
 			ModelAndView mav = new ModelAndView("create-destinations");
 			mav.addObject("createDestinationInfoList", destinationInfoList);
 			mav.addObject("destination",destination);
+			
 			mav.addObject("notNull", notNull);
-		
+			mav.addObject("showDestinations","false");
             return mav;
 		}
 		

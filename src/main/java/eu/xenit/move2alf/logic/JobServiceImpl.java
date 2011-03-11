@@ -308,6 +308,17 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		return (List<ConfiguredSourceSink>) configuredSourceSink;
 	}
+	
+	@Override
+	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks() {
+		@SuppressWarnings("unchecked")
+		String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
+		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
+				.getCurrentSession().createQuery("from ConfiguredSourceSink as c where c.className!=?").setString(0, fileSourceSink)
+				.list();
+
+		return (List<ConfiguredSourceSink>) configuredSourceSink;
+	}
 
 	@Override
 	public ConfiguredSourceSink getConfiguredSourceSink(int sourceSinkId) {

@@ -5,8 +5,9 @@
 
 <h2>Add User</h2>
 
-<form:form modelAttribute="user" method="post">
+<form:form modelAttribute="user" method="post" onSubmit="return addUserValidation(this);">
 <p>Username: <form:input path="userName" size="30" maxlength="30" />
+<div id="userNameError" class="hide error">username may not be empty.</div>
 <form:errors path="userName" cssClass="error"/></p>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -22,6 +23,7 @@
                         </script>
 
 <p>Password: <form:password path="password" size="30" maxlength="50" />
+<div id="passwordError" class="hide error">password may not be empty.</div>
 <form:errors path="password" cssClass="error"/></p>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -37,7 +39,8 @@
                         </script>
 <p>Role: <form:select path="role">
     		<form:options items="${roleList}" />
-		</form:select></p>
+		</form:select>
+<form:errors path="role" cssClass="error"/></p>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "role",
@@ -51,11 +54,7 @@
                                 }));
                         </script>
 <p><input id="proceed" type="submit" value="Add User"/></p>
-						<script type="text/javascript">
-                            Spring.addDecoration(new Spring.ValidateAllDecoration({
-                                    elementId: "proceed",
-                                    event: "onclick" }));
-                        </script>
+
 </form:form>
 	
 </div>

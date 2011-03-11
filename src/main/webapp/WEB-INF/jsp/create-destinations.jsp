@@ -8,7 +8,7 @@
 <h2>Create new destinations</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="destination" method="post" name="createDestinations" onSubmit="return formValidator(this);">
+<form:form modelAttribute="destination" method="post" name="createDestinations" onSubmit="return createDestinationsValidation(this);">
 
 <h4>Destination</h4>
 
@@ -19,11 +19,7 @@
 <button type="button" class="center" onclick="javascript:location.href ='<spring:url value="/destinations" htmlEscape="true" />';">Cancel</button>
 
 <input id="proceed" type="submit" value="Create new destinations" class="right"/>
-						<script type="text/javascript">
-                            Spring.addDecoration(new Spring.ValidateAllDecoration({
-                                    elementId: "proceed",
-                                    event: "onclick" }));
-                        </script>
+
 </form:form>
 </div>	
 </div>

@@ -299,6 +299,15 @@ public interface JobService {
 	 */
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId);
 
-	
-	String getInstantCronJob();
+	/**
+	 * Creates cronjob to run instantly
+	 * @return String of cronjob
+	 */
+	public String getInstantCronJob();
+
+	/** gets all configured source sink but filters out the fileSystem source sink
+	 * 
+	 * @return Lis tof configured source sinks
+	 */
+	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
 }

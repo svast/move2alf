@@ -1,6 +1,14 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 
+<%
+	String currentDate="";
+	java.util.Date currentDateTime = new java.util.Date();
+	java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd");
+	currentDate = formatter.format(currentDateTime);
+	pageContext.setAttribute("currentDate", currentDate);
+%>
+
 <div class="span-24 last main">
 
 <h2>Dashboard</h2>
@@ -8,9 +16,11 @@
 <div class="frame-dashboard">
 <h3 class="left">Jobs</h3>
 
-<% //All role checks are done in the header.jsp
-if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
-<h4 class="right"><a href="<spring:url value="/job/create" htmlEscape="true" />">Create new job</a></h4>
+<% 
+	//All role checks are done in the header.jsp
+	if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ 
+%>
+	<h4 class="right"><a href="<spring:url value="/job/create" htmlEscape="true" />">Create new job</a></h4>
 <%} %>
 <br class="clear">
 
@@ -18,18 +28,6 @@ if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
 <p>No jobs found, use the link above to create a new one</p>
 </c:if>
 
-<%
-	String currentDate="";
-
-	java.util.Date currentDateTime = new java.util.Date();
-	
-	java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd");
-
-	currentDate = formatter.format(currentDateTime);
-	
-	pageContext.setAttribute("currentDate", currentDate);
-
-%>
 <table class="table-jobAndDestination">
 <c:forEach var="jobInfo" items="${jobInfoList}">
 		<tr>
