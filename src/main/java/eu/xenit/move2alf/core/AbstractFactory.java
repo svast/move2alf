@@ -76,7 +76,12 @@ public abstract class AbstractFactory<T> {
 	}
 
 	public T getObject(String className) {
-		return objectMap.get(className);
+		T object = objectMap.get(className);
+		if (object == null) {
+			logger.error("Object for class " + className + " not found");
+			throw new IllegalArgumentException("Object for class " + className + " not found");
+		}
+		return object;
 	}
 
 	@PostConstruct

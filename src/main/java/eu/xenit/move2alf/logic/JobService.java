@@ -310,4 +310,11 @@ public interface JobService {
 	 * @return Lis tof configured source sinks
 	 */
 	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
+
+	/**
+	 * Delete a configured action with the given id.
+	 * 
+	 * @param id
+	 */
+	public void deleteAction(int id);
 }

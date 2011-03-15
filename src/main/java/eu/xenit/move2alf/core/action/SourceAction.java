@@ -5,12 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SourceAction extends Action {
+	
+	private static final Logger logger = LoggerFactory
+	.getLogger(SourceAction.class);
 
 	public static final String PARAM_PATH = "path";
 	public static final String PARAM_RECURSIVE = "recursive";
@@ -27,6 +33,7 @@ public class SourceAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink source = getSourceSinkFactory().getObject(
 				sourceConfig.getClassName());
+		logger.debug("Reading files from " + path);
 		List<File> files = source.list(sourceConfig, path, recursive);
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
 		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));

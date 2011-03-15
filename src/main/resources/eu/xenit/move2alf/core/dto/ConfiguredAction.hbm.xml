@@ -9,8 +9,8 @@
 			<generator class="identity" />
 		</id>
 		<property name="className" column="actionClassName"/>
-		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true" lazy="false" cascade="save-update"/>
-		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true" lazy="false" cascade="save-update"/>
+		<many-to-one name="appliedConfiguredActionOnSuccess" column="appliedConfiguredActionOnSuccessId" unique="true" lazy="false" cascade="all-delete-orphan"/>
+		<many-to-one name="appliedConfiguredActionOnFailure" column="appliedConfiguredActionOnFailureId" unique="true" lazy="false" cascade="all-delete-orphan"/>
     	
     	<map name="parameters" table="configuredActionParameter" lazy="false" cascade="all-delete-orphan">
     		<key column="configuredActionId"/>

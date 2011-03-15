@@ -1,3 +1,5 @@
+<%@ page import="eu.xenit.move2alf.web.dto.JobConfig" %>
+<%@ page import="eu.xenit.move2alf.core.dto.ConfiguredSourceSink" %>
 <div class="indent">
 
 <div id="destError" class="hide error">you must create a destination.</div>
@@ -19,7 +21,11 @@
 <tr>
 <td>
 <div>
-<% if (count==1){ %>
+<%
+// TODO
+JobConfig job = (JobConfig) request.getAttribute("job");
+ConfiguredSourceSink destination = (ConfiguredSourceSink) pageContext.getAttribute("destination");
+if ((job.getDest() == null || (job.getDest().equals("") && count==1)) || destination.getIdAsString().equals(job.getDest())) { %>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}" />"  checked="true"/>
 <%}else{ %>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}"/>"  />

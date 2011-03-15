@@ -34,6 +34,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
@@ -72,7 +73,7 @@ public class JobController {
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
-	
+
 	public UserService getUserService() {
 		return userService;
 	}
@@ -153,16 +154,17 @@ public class JobController {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
-			
-			if(sourceSinks!= null){
-				for(int i=0; i<sourceSinks.size(); i++){
-					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+
+			if (sourceSinks != null) {
+				for (int i = 0; i < sourceSinks.size(); i++) {
+					String[] sourceSinkElements = sourceSinks.get(i).split(
+							"\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-					
+
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-					
+
 					destinationInfoList.add(destinationInfo);
 				}
 			}
@@ -174,11 +176,10 @@ public class JobController {
 			mav.addObject("notNull", notNull);
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
-			
 
-            return mav;
+			return mav;
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
 		List<String> cronJobs = job.getCron();
 		int jobId = getJobService().createJob(job.getName(),
@@ -186,9 +187,9 @@ public class JobController {
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
-		
+
 		int destId = 0;
-		
+
 		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
 			destId = Integer.parseInt(job.getDest().substring(10));
 		}
@@ -211,19 +212,19 @@ public class JobController {
 						parameters[3]);
 				destinationParams.put(EDestinationParameter.THREADS,
 						parameters[4]);
-				ConfiguredObject dest = getJobService().createDestination(parameters[5],
-						destinationParams);
+				ConfiguredObject dest = getJobService().createDestination(
+						parameters[5], destinationParams);
 
 				if (createdSourceSink.equals(job.getDest())) {
 					destId = dest.getId();
 				}
 			}
 		}
-		
+
 		job.setId(jobId);
 		job.setDest("" + destId);
 		getPipelineAssembler().assemblePipeline(job);
-		
+
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -231,10 +232,7 @@ public class JobController {
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		JobConfig jobConfig = new JobConfig();
-		jobConfig.setId(id);
-		jobConfig.setName(getJobService().getJob(id).getName());
-		jobConfig.setDescription(getJobService().getJob(id).getDescription());
+		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(id);
 		mav.addObject("job", jobConfig);
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.addObject("destinations", getJobService()
@@ -246,39 +244,42 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editJob(@PathVariable int id, @ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
-		
+	public ModelAndView editJob(@PathVariable int id,
+			@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
+
 		List<String> sourceSinks = job.getSourceSink();
-		boolean notNull=true;
-		if(sourceSinks!= null){
-			for(int i=0; i<sourceSinks.size(); i++){
+		boolean notNull = true;
+		if (sourceSinks != null) {
+			for (int i = 0; i < sourceSinks.size(); i++) {
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
-				for(int j=0; j<sourceSinkElements.length; j++){
-					if("".equals(sourceSinkElements[j]) || null == sourceSinkElements[j])
-						notNull=false;
+				for (int j = 0; j < sourceSinkElements.length; j++) {
+					if ("".equals(sourceSinkElements[j])
+							|| null == sourceSinkElements[j])
+						notNull = false;
 				}
 			}
 		}
-		
-		if (errors.hasErrors() || notNull==false) {
-			System.out.println("THE ERRORS: "+errors.toString());
-			
+
+		if (errors.hasErrors() || notNull == false) {
+			System.out.println("THE ERRORS: " + errors.toString());
+
 			List<DestinationInfo> destinationInfoList = new ArrayList();
-			
-			if(sourceSinks!= null){
-				for(int i=0; i<sourceSinks.size(); i++){
-					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+
+			if (sourceSinks != null) {
+				for (int i = 0; i < sourceSinks.size(); i++) {
+					String[] sourceSinkElements = sourceSinks.get(i).split(
+							"\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-					
+
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-					
+
 					destinationInfoList.add(destinationInfo);
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-job");
-			mav.addObject("job",job);
+			mav.addObject("job", job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("destinations", getJobService()
 					.getAllConfiguredSourceSinks());
@@ -287,11 +288,12 @@ public class JobController {
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
 
-            return mav;
+			return mav;
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
-		Job editedJob = getJobService().editJob(id, job.getName(), job.getDescription());
+		Job editedJob = getJobService().editJob(id, job.getName(),
+				job.getDescription());
 		int jobId = editedJob.getId();
 		boolean deleteSchedule = true;
 		List<String> cronJobs = job.getCron();
@@ -335,7 +337,7 @@ public class JobController {
 		}
 
 		List<String> sourceSink = job.getSourceSink();
-		
+
 		int destId = 0;
 		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
 			destId = Integer.parseInt(job.getDest().substring(10));
@@ -358,18 +360,26 @@ public class JobController {
 						parameters[3]);
 				destinationParams.put(EDestinationParameter.THREADS,
 						parameters[4]);
-				ConfiguredObject dest = getJobService().createDestination(parameters[5],
-						destinationParams);
-				
+				ConfiguredObject dest = getJobService().createDestination(
+						parameters[5], destinationParams);
+
 				if (createdSourceSink.equals(job.getDest())) {
 					destId = dest.getId();
 				}
 			}
 		}
-		
+
+		/*
+		 * Create new action pipeline and remove old one by deleting first
+		 * action. The delete will be cascaded by Hibernate.
+		 */
+
 		job.setId(jobId);
 		job.setDest("" + destId);
 		getPipelineAssembler().assemblePipeline(job);
+		
+		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
+		getJobService().deleteAction(firstAction.getId());
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
@@ -396,17 +406,17 @@ public class JobController {
 			BindingResult errors) {
 
 		if (errors.hasErrors()) {
-			System.out.println("THE ERRORS: "+errors.toString());
-			
+			System.out.println("THE ERRORS: " + errors.toString());
+
 			ModelAndView mav = new ModelAndView("edit-schedule");
-			mav.addObject("job",job);
+			mav.addObject("job", job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
 
-            return mav;
+			return mav;
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
 
 		boolean deleteSchedule = true;
@@ -488,52 +498,56 @@ public class JobController {
 		mav.addObject("destination", new DestinationConfig());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
-		mav.addObject("showDestinations","false");
+		mav.addObject("showDestinations", "false");
 		mav.setViewName("create-destinations");
 		return mav;
 	}
 
 	@RequestMapping(value = "/destinations/create", method = RequestMethod.POST)
-	public ModelAndView createDestinations(@ModelAttribute("destination") @Valid DestinationConfig destination, BindingResult errors) {
-		
+	public ModelAndView createDestinations(
+			@ModelAttribute("destination") @Valid DestinationConfig destination,
+			BindingResult errors) {
+
 		List<String> sourceSinks = destination.getSourceSink();
-		boolean notNull=true;
-		if(sourceSinks!= null){
-			for(int i=0; i<sourceSinks.size(); i++){
+		boolean notNull = true;
+		if (sourceSinks != null) {
+			for (int i = 0; i < sourceSinks.size(); i++) {
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
-				for(int j=0; j<sourceSinkElements.length; j++){
-					if("".equals(sourceSinkElements[j]) || null == sourceSinkElements[j])
-						notNull=false;
+				for (int j = 0; j < sourceSinkElements.length; j++) {
+					if ("".equals(sourceSinkElements[j])
+							|| null == sourceSinkElements[j])
+						notNull = false;
 				}
 			}
 		}
-		
-		if (errors.hasErrors() || notNull==false) {
-			System.out.println("THE ERRORS: "+errors.toString());
-			
+
+		if (errors.hasErrors() || notNull == false) {
+			System.out.println("THE ERRORS: " + errors.toString());
+
 			List<DestinationInfo> destinationInfoList = new ArrayList();
-			
-			if(sourceSinks!= null){
-				for(int i=0; i<sourceSinks.size(); i++){
-					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
+
+			if (sourceSinks != null) {
+				for (int i = 0; i < sourceSinks.size(); i++) {
+					String[] sourceSinkElements = sourceSinks.get(i).split(
+							"\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-					
+
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-					
+
 					destinationInfoList.add(destinationInfo);
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-destinations");
 			mav.addObject("createDestinationInfoList", destinationInfoList);
-			mav.addObject("destination",destination);
-			
+			mav.addObject("destination", destination);
+
 			mav.addObject("notNull", notNull);
-			mav.addObject("showDestinations","false");
-            return mav;
+			mav.addObject("showDestinations", "false");
+			return mav;
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
 
 		List<String> sourceSink = destination.getSourceSink();
@@ -571,32 +585,38 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editDestination(@PathVariable int id, @ModelAttribute("destinations") @Valid EditDestinationConfig destinations, BindingResult errors) {
-		
+	public ModelAndView editDestination(
+			@PathVariable int id,
+			@ModelAttribute("destinations") @Valid EditDestinationConfig destinations,
+			BindingResult errors) {
+
 		if (errors.hasErrors()) {
-			System.out.println("THE ERRORS: "+errors.toString());
-			
-			
+			System.out.println("THE ERRORS: " + errors.toString());
+
 			ModelAndView mav = new ModelAndView("edit-destination");
-			mav.addObject("destinations",destinations);
+			mav.addObject("destinations", destinations);
 			mav.addObject("destination", getJobService()
 					.getConfiguredSourceSink(id));
-		
-            return mav;
+
+			return mav;
 		}
-		
+
 		ModelAndView mav = new ModelAndView();
 
-			HashMap destinationParams = new HashMap();
+		HashMap destinationParams = new HashMap();
 
-			destinationParams.put(EDestinationParameter.NAME, destinations.getDestinationName());
-			destinationParams.put(EDestinationParameter.URL, destinations.getDestinationURL());
-			destinationParams.put(EDestinationParameter.USER, destinations.getAlfUser());
-			destinationParams
-					.put(EDestinationParameter.PASSWORD, destinations.getAlfPswd());
-			destinationParams.put(EDestinationParameter.THREADS, destinations.getNbrThreads());
-			getJobService().editDestination(id, destinations.getDestinationType(),
-					destinationParams);
+		destinationParams.put(EDestinationParameter.NAME, destinations
+				.getDestinationName());
+		destinationParams.put(EDestinationParameter.URL, destinations
+				.getDestinationURL());
+		destinationParams.put(EDestinationParameter.USER, destinations
+				.getAlfUser());
+		destinationParams.put(EDestinationParameter.PASSWORD, destinations
+				.getAlfPswd());
+		destinationParams.put(EDestinationParameter.THREADS, destinations
+				.getNbrThreads());
+		getJobService().editDestination(id, destinations.getDestinationType(),
+				destinationParams);
 
 		mav.setViewName("redirect:/destinations");
 		return mav;
@@ -623,7 +643,8 @@ public class JobController {
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report")
 	public ModelAndView report(@PathVariable int jobId,
-			@PathVariable int cycleId, HttpServletRequest request, HttpServletResponse response) {
+			@PathVariable int cycleId, HttpServletRequest request,
+			HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
 		Cycle cycle = getJobService().getCycle(cycleId);
@@ -631,14 +652,16 @@ public class JobController {
 		Date endDateTime = cycle.getEndDateTime();
 		String duration = getJobService().getDuration(startDateTime,
 				endDateTime);
-		
-		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
-		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
+
+		List<ProcessedDocument> processedDocuments = getJobService()
+				.getProcessedDocuments(cycleId);
+		PagedListHolder pagedListHolder = new PagedListHolder(
+				processedDocuments);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		pagedListHolder.setPage(page);
 		int pageSize = 10;
 		pagedListHolder.setPageSize(pageSize);
-		
+
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
 		mav.addObject("pagedListHolder", pagedListHolder);
@@ -647,7 +670,7 @@ public class JobController {
 		mav.setViewName("report");
 		return mav;
 	}
-	
+
 	@RequestMapping("/job/{jobId}/{cycleId}/report/export")
 	public ModelAndView exportReport(@PathVariable int jobId,
 			@PathVariable int cycleId) {
@@ -661,7 +684,8 @@ public class JobController {
 
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
-		mav.addObject("processedDocuments", getJobService().getProcessedDocuments(cycleId));
+		mav.addObject("processedDocuments", getJobService()
+				.getProcessedDocuments(cycleId));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("export-report");
@@ -669,16 +693,17 @@ public class JobController {
 	}
 
 	@RequestMapping("/job/{jobId}/history")
-	public ModelAndView history(@PathVariable int jobId, HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView history(@PathVariable int jobId,
+			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
-		
+
 		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
 		PagedListHolder pagedListHolder = new PagedListHolder(cycles);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		pagedListHolder.setPage(page);
 		int pageSize = 10;
 		pagedListHolder.setPageSize(pageSize);
-		
+
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("pagedListHolder", pagedListHolder);
 		mav.addObject("cycles", cycles);
@@ -687,14 +712,14 @@ public class JobController {
 		mav.setViewName("history");
 		return mav;
 	}
-	
+
 	@RequestMapping("/job/{jobId}/cycle/run")
 	public ModelAndView runPoller(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
-		
+
 		String cronJob = getJobService().getInstantCronJob();
 		getJobService().createSchedule(jobId, cronJob);
-		
+
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());

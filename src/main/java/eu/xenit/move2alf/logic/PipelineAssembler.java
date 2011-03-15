@@ -123,4 +123,6 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 			return sourceSink;
 		}
 	}
+
+	public abstract JobConfig getJobConfigForJob(int id);
 }

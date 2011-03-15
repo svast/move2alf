@@ -500,4 +500,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void deleteAction(int id) {
+		Session s = getSessionFactory().getCurrentSession();
+		s.delete(s.get(ConfiguredAction.class, id));
+	}
+
 }
