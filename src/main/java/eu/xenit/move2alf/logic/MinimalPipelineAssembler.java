@@ -24,10 +24,14 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 						.sourceSink(
 								sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")),
 				action("eu.xenit.move2alf.core.action.ThreadAction"),
+				// TODO: metadata & transform
+				// TODO: Sink / Delete / List
 				action("eu.xenit.move2alf.core.action.SinkAction")
 						.param("path", jobConfig.getDestinationFolder())
+						// TODO: add param: ignore / error / overwrite / version 
 						.sourceSink(
 								sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
+				// TODO: Reporting
 	}
 	
 	@Override

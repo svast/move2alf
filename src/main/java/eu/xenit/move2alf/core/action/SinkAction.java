@@ -10,6 +10,8 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SinkAction extends Action {
 
+	private static final String PARAM_PATH = "path";
+
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
@@ -17,6 +19,8 @@ public class SinkAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
+		String path = configuredAction.getParameter(PARAM_PATH);
+		parameterMap.put("path", path);
 		sink.send(sinkConfig, parameterMap);
 	}
 

@@ -51,7 +51,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		// }
 		// } else {
 		// logger.debug("Already authenticated");
-		// }	
+		// }
 
 		WebServiceRepositoryAccess ra = null;
 		try {
@@ -63,11 +63,29 @@ public class AlfrescoSourceSink extends SourceSink {
 		RepositoryAccessSession ras = ra.createSessionAndRetry();
 		try {
 			// run(ras);
+			String basePath = getParameterWithDefault(parameterMap, "path", "/");
+			if (!basePath.endsWith("/")) {
+				basePath = basePath + "/";
+			}
+
+			String relativePath = getParameterWithDefault(parameterMap,
+					"relativePath", "");
+			if (relativePath.startsWith("/")) {
+				relativePath = relativePath.substring(1);
+			}
+
+			String mimeType = getParameterWithDefault(parameterMap, "mimetype",
+					"text/plain");
+			String namespace = getParameterWithDefault(parameterMap,
+					"namespace", "{http://www.alfresco.org/model/content/1.0}");
+			String contentType = getParameterWithDefault(parameterMap,
+					"contenttype", "content");
+			
+			Map<String, String> metadata = (Map<String, String>) parameterMap.get("metadata");
+
 			File document = (File) parameterMap.get("file");
-			ras.storeDocAndCreateParentSpaces(document, "text/plain",
-					"/cm:company_home", user,
-					"{http://www.alfresco.org/model/content/1.0}", "content",
-					null, null);
+			ras.storeDocAndCreateParentSpaces(document, mimeType, basePath
+					+ relativePath, user, namespace, contentType, metadata, null);
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
 			logger.error(e.getMessage(), e);
@@ -79,6 +97,13 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error("Fatal Exception", e);
 			System.exit(1);
 		}
+	}
+
+	private String getParameterWithDefault(Map<String, Object> parameterMap,
+			String parameter, String defaultValue) {
+		String value = (String) parameterMap.get(parameter);
+		value = (value != null) ? value : defaultValue;
+		return value;
 	}
 
 	@Override

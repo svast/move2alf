@@ -38,12 +38,13 @@ public class SourceAction extends Action {
 		List<File> files = source.list(sourceConfig, path, recursive);
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
 		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
-		parameterMap.put("path", path);
+		//parameterMap.put("path", path);
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put("file", file);
+				newParameterMap.put("relativePath", file.getParent().substring(path.length()));
 				getActionFactory().execute(nextAction, newParameterMap);
 			}
 		}
