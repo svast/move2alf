@@ -6,8 +6,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
@@ -123,6 +126,19 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			// type??
 		}
 	}
+	
+	@Override
+	public boolean checkJobExists(String jobName){
+		@SuppressWarnings("unchecked")
+		List jobs = sessionFactory.getCurrentSession().createQuery(
+		"from Job as j where j.name=?").setString(0, jobName).list();
+		
+		if(jobs.size()>0){
+			return true;
+		}
+		
+		return false;
+	}
 
 	@Override
 	public Cycle getCycle(int cycleId) {
@@ -147,7 +163,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getSessionFactory()
 				.getCurrentSession()
 				.createQuery(
-						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime desc")
+						"from Cycle as c where c.schedule.job.id=? order by c.startDateTime desc")
 				.setLong(0, jobId).list();
 	}
 
@@ -280,6 +296,22 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public ConfiguredSourceSink getDestination(int id) {
 		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession().get(ConfiguredSourceSink.class, id);
 	}
+	
+	@Override
+	public boolean checkDestinationExists(String destinationName){
+		@SuppressWarnings("unchecked")
+		List destinations = sessionFactory.getCurrentSession().createQuery(
+		"from ConfiguredSourceSink").list();
+		
+		for(int i=0; i<destinations.size(); i++){
+			String destinationParameter = ((ConfiguredObject) destinations.get(i)).getParameter("name");
+			
+			if(destinationName.equals(destinationParameter)){
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private void createSourceSink(String destinationType,
 			HashMap destinationParams, ConfiguredSourceSink sourceSink) {
@@ -333,6 +365,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			throw new Move2AlfException("ConfiguredSourceSink with id "
 					+ sourceSinkId + " not found");
 		}
+	}
+	
+	@Override
+	public ConfiguredAction getActionRelatedToConfiguredSourceSink(int sourceSinkId){
+		List<ConfiguredAction> configuredActions = sessionFactory
+		.getCurrentSession().createQuery("from ConfiguredAction").list();
+		
+		for (int i=0; i<configuredActions.size(); i++){
+			Set<ConfiguredSourceSink> configuredSourceSinkForAction = configuredActions.get(i).getConfiguredSourceSinkSet();
+			
+			for(int j=0; j<configuredSourceSinkForAction.size(); j++){
+				Iterator configuredSourceSinkIterator = configuredSourceSinkForAction.iterator();
+				
+				while(configuredSourceSinkIterator.hasNext()){
+					if(((IdObject) configuredSourceSinkIterator.next()).getId() == sourceSinkId){
+						return configuredActions.get(i);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

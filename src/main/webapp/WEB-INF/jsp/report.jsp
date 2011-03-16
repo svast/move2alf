@@ -40,11 +40,11 @@
 <tr><td><br /> </td></tr>
 <tr>
 <th class="alignRight">Status:</th><td><c:out value="${cycle.schedule.state.displayName}" /></td>
-<th>Nr. of documents:</th><td><c:out value="" /></td>
+<th>Nr. of documents:</th><td><c:out value="${documentListSize}" /></td>
 </tr>
 <tr><td><br /> </td></tr>
 <tr>
-<th class="alignRight">Docs / s:</th><td><c:out value="" /></td>
+<th class="alignRight">Docs / s:</th><td><c:out value="${docsPerSecond}" /></td>
 </tr>
 </table>
 
@@ -52,7 +52,10 @@
 
 <div class="indent"><b>List of imported documents </b></div>
 
-<button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/${cycle.id}/report/export" htmlEscape="true" />';">export to csv</button>
+<div class="right">
+<button type="button" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/${cycle.id}/report/exportcsv" htmlEscape="true" />';">export to csv</button>
+<button type="button" onclick="javascript:location.href ='<spring:url value="/job/${job.id}/${cycle.id}/report/exportpdf" htmlEscape="true" />';">export to pdf</button>
+</div>
 
 <table class="table-border-thin">
 <tr>

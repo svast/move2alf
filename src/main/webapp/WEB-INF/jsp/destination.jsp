@@ -196,3 +196,10 @@ if ((job.getDest() == null || (job.getDest().equals("") && count==1)) || destina
 </table>
 
 </div>
+
+<!-- Opens up the create destination dialog if there are no existing destinations-->
+<c:if test="${empty destinations && empty destinationInfoList}" >
+	<script type="text/javascript">
+			addDestination();
+	</script>
+</c:if>

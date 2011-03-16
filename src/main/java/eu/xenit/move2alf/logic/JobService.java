@@ -317,4 +317,26 @@ public interface JobService {
 	 * @param id
 	 */
 	public void deleteAction(int id);
+
+	/**
+	 * Get the configured action related to the configured source sink
+	 * 
+	 * @param sourceSinkId
+	 * @return
+	 */
+	public ConfiguredAction getActionRelatedToConfiguredSourceSink(int sourceSinkId);
+
+	/**
+	 * 
+	 * @param jobName
+	 * @return
+	 */
+	boolean checkJobExists(String jobName);
+
+	/**
+	 * 
+	 * @param destinationName
+	 * @return
+	 */
+	boolean checkDestinationExists(String destinationName);
 }

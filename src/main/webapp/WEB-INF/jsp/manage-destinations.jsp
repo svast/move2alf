@@ -26,7 +26,7 @@
 		<p class="reduce-bottom">
 		Type: <c:out value="${destination.className}" />
 		<br />
-		URL: <c:out value="${destination.parameters.name}" />
+		URL: <c:out value="${destination.parameters.url}" />
 		<br />
 		Username: <c:out value="${destination.parameters.user}" />
 		<br />

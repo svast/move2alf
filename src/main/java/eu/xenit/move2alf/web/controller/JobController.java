@@ -73,7 +73,7 @@ public class JobController {
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
-
+	
 	public UserService getUserService() {
 		return userService;
 	}
@@ -126,7 +126,7 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", new JobConfig());
 		mav.addObject("destinations", getJobService()
-				.getAllConfiguredSourceSinks());
+				.getAllDestinationConfiguredSourceSinks());
 		mav.setViewName("create-job");
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
@@ -160,26 +160,27 @@ public class JobController {
 					String[] sourceSinkElements = sourceSinks.get(i).split(
 							"\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-
+					
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-
+					
 					destinationInfoList.add(destinationInfo);
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-job");
 			mav.addObject("job", job);
 			mav.addObject("destinations", getJobService()
-					.getAllConfiguredSourceSinks());
+					.getAllDestinationConfiguredSourceSinks());
 			mav.addObject("destinationInfoList", destinationInfoList);
 			mav.addObject("notNull", notNull);
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
+			
 
-			return mav;
+            return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
 		List<String> cronJobs = job.getCron();
 		int jobId = getJobService().createJob(job.getName(),
@@ -187,9 +188,9 @@ public class JobController {
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
-
+		
 		int destId = 0;
-
+		
 		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
 			destId = Integer.parseInt(job.getDest().substring(10));
 		}
@@ -220,11 +221,11 @@ public class JobController {
 				}
 			}
 		}
-
+		
 		job.setId(jobId);
 		job.setDest("" + destId);
 		getPipelineAssembler().assemblePipeline(job);
-
+		
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -248,9 +249,9 @@ public class JobController {
 			@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
 
 		List<String> sourceSinks = job.getSourceSink();
-		boolean notNull = true;
-		if (sourceSinks != null) {
-			for (int i = 0; i < sourceSinks.size(); i++) {
+		boolean notNull=true;
+		if(sourceSinks!= null){
+			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
 				for (int j = 0; j < sourceSinkElements.length; j++) {
 					if ("".equals(sourceSinkElements[j])
@@ -259,27 +260,26 @@ public class JobController {
 				}
 			}
 		}
-
-		if (errors.hasErrors() || notNull == false) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
+		
+		if (errors.hasErrors() || notNull==false) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
-
-			if (sourceSinks != null) {
-				for (int i = 0; i < sourceSinks.size(); i++) {
-					String[] sourceSinkElements = sourceSinks.get(i).split(
-							"\\|");
+			
+			if(sourceSinks!= null){
+				for(int i=0; i<sourceSinks.size(); i++){
+					String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-
+					
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-
+					
 					destinationInfoList.add(destinationInfo);
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-job");
-			mav.addObject("job", job);
+			mav.addObject("job",job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("destinations", getJobService()
 					.getAllConfiguredSourceSinks());
@@ -288,12 +288,11 @@ public class JobController {
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
 
-			return mav;
+            return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
-		Job editedJob = getJobService().editJob(id, job.getName(),
-				job.getDescription());
+		Job editedJob = getJobService().editJob(id, job.getName(), job.getDescription());
 		int jobId = editedJob.getId();
 		boolean deleteSchedule = true;
 		List<String> cronJobs = job.getCron();
@@ -337,7 +336,7 @@ public class JobController {
 		}
 
 		List<String> sourceSink = job.getSourceSink();
-
+		
 		int destId = 0;
 		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
 			destId = Integer.parseInt(job.getDest().substring(10));
@@ -406,17 +405,17 @@ public class JobController {
 			BindingResult errors) {
 
 		if (errors.hasErrors()) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
+			System.out.println("THE ERRORS: "+errors.toString());
+			
 			ModelAndView mav = new ModelAndView("edit-schedule");
-			mav.addObject("job", job);
+			mav.addObject("job",job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
 
-			return mav;
+            return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
 
 		boolean deleteSchedule = true;
@@ -498,7 +497,7 @@ public class JobController {
 		mav.addObject("destination", new DestinationConfig());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
-		mav.addObject("showDestinations", "false");
+		mav.addObject("showDestinations","false");
 		mav.setViewName("create-destinations");
 		return mav;
 	}
@@ -509,9 +508,9 @@ public class JobController {
 			BindingResult errors) {
 
 		List<String> sourceSinks = destination.getSourceSink();
-		boolean notNull = true;
-		if (sourceSinks != null) {
-			for (int i = 0; i < sourceSinks.size(); i++) {
+		boolean notNull=true;
+		if(sourceSinks!= null){
+			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
 				for (int j = 0; j < sourceSinkElements.length; j++) {
 					if ("".equals(sourceSinkElements[j])
@@ -520,10 +519,10 @@ public class JobController {
 				}
 			}
 		}
-
-		if (errors.hasErrors() || notNull == false) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
+		
+		if (errors.hasErrors() || notNull==false) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
 
 			if (sourceSinks != null) {
@@ -531,23 +530,23 @@ public class JobController {
 					String[] sourceSinkElements = sourceSinks.get(i).split(
 							"\\|");
 					DestinationInfo destinationInfo = new DestinationInfo();
-
+					
 					destinationInfo.setDestinationName(sourceSinkElements[0]);
 					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
 					destinationInfo.setDestinationValue(sourceSinks.get(i));
-
+					
 					destinationInfoList.add(destinationInfo);
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-destinations");
 			mav.addObject("createDestinationInfoList", destinationInfoList);
-			mav.addObject("destination", destination);
-
+			mav.addObject("destination",destination);
+			
 			mav.addObject("notNull", notNull);
-			mav.addObject("showDestinations", "false");
-			return mav;
+			mav.addObject("showDestinations","false");
+            return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
 
 		List<String> sourceSink = destination.getSourceSink();
@@ -591,19 +590,20 @@ public class JobController {
 			BindingResult errors) {
 
 		if (errors.hasErrors()) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			
 			ModelAndView mav = new ModelAndView("edit-destination");
-			mav.addObject("destinations", destinations);
+			mav.addObject("destinations",destinations);
 			mav.addObject("destination", getJobService()
 					.getConfiguredSourceSink(id));
-
-			return mav;
+		
+            return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
 
-		HashMap destinationParams = new HashMap();
+			HashMap destinationParams = new HashMap();
 
 		destinationParams.put(EDestinationParameter.NAME, destinations
 				.getDestinationName());
@@ -625,6 +625,8 @@ public class JobController {
 	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteDestination(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
+		
+		
 		mav.addObject("destination", getJobService()
 				.getConfiguredSourceSink(id));
 		mav.addObject("roles", getUserService().getCurrentUser()
@@ -643,8 +645,7 @@ public class JobController {
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report")
 	public ModelAndView report(@PathVariable int jobId,
-			@PathVariable int cycleId, HttpServletRequest request,
-			HttpServletResponse response) {
+			@PathVariable int cycleId, HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
 		Cycle cycle = getJobService().getCycle(cycleId);
@@ -652,27 +653,43 @@ public class JobController {
 		Date endDateTime = cycle.getEndDateTime();
 		String duration = getJobService().getDuration(startDateTime,
 				endDateTime);
-
-		List<ProcessedDocument> processedDocuments = getJobService()
-				.getProcessedDocuments(cycleId);
-		PagedListHolder pagedListHolder = new PagedListHolder(
-				processedDocuments);
+		//get total seconds to calculate docs/s
+		String[] durationSplit = duration.split(":");
+		Integer hours = new Integer(durationSplit[0]).intValue();
+		Integer minutes = new Integer(durationSplit[1]).intValue();
+		Integer seconds = new Integer(durationSplit[2]).intValue();
+		int totalTimeInSeconds = hours * 60*60+minutes*60+seconds;
+		String docsPerSecond;
+		
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+		Integer documentListSize = processedDocuments.size();
+		if(processedDocuments == null || "".equals(processedDocuments)){
+			documentListSize = 0;
+		}
+		if(documentListSize==0){
+			docsPerSecond="";
+		}else{
+			docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+		}
+		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		pagedListHolder.setPage(page);
 		int pageSize = 10;
 		pagedListHolder.setPageSize(pageSize);
-
+		
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
 		mav.addObject("pagedListHolder", pagedListHolder);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		mav.addObject("documentListSize", documentListSize);
+		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.setViewName("report");
 		return mav;
 	}
-
-	@RequestMapping("/job/{jobId}/{cycleId}/report/export")
-	public ModelAndView exportReport(@PathVariable int jobId,
+	
+	@RequestMapping("/job/{jobId}/{cycleId}/report/exportcsv")
+	public ModelAndView exportReportToCSV(@PathVariable int jobId,
 			@PathVariable int cycleId) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
@@ -681,14 +698,75 @@ public class JobController {
 		Date endDateTime = cycle.getEndDateTime();
 		String duration = getJobService().getDuration(startDateTime,
 				endDateTime);
-
+		//get total seconds to calculate docs/s
+		String[] durationSplit = duration.split(":");
+		Integer hours = new Integer(durationSplit[0]).intValue();
+		Integer minutes = new Integer(durationSplit[1]).intValue();
+		Integer seconds = new Integer(durationSplit[2]).intValue();
+		int totalTimeInSeconds = hours * 60*60+minutes*60+seconds;
+		String docsPerSecond;
+		
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+		Integer documentListSize = processedDocuments.size();
+		
+		if(processedDocuments == null || "".equals(processedDocuments)){
+			documentListSize = 0;
+		}
+		if(documentListSize==0){
+			docsPerSecond="";
+		}else{
+			docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+		}
+		
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
-		mav.addObject("processedDocuments", getJobService()
-				.getProcessedDocuments(cycleId));
+		mav.addObject("processedDocuments", processedDocuments);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
-		mav.setViewName("export-report");
+		mav.addObject("documentListSize", documentListSize);
+		mav.addObject("docsPerSecond", docsPerSecond);
+		mav.setViewName("export-report-csv");
+		return mav;
+	}
+	
+	@RequestMapping("/job/{jobId}/{cycleId}/report/exportpdf")
+	public ModelAndView exportReportToPDF(@PathVariable int jobId,
+			@PathVariable int cycleId, HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(jobId));
+		Cycle cycle = getJobService().getCycle(cycleId);
+		Date startDateTime = cycle.getStartDateTime();
+		Date endDateTime = cycle.getEndDateTime();
+		String duration = getJobService().getDuration(startDateTime,
+				endDateTime);
+		//get total seconds to calculate docs/s
+		String[] durationSplit = duration.split(":");
+		Integer hours = new Integer(durationSplit[0]).intValue();
+		Integer minutes = new Integer(durationSplit[1]).intValue();
+		Integer seconds = new Integer(durationSplit[2]).intValue();
+		int totalTimeInSeconds = hours * 60*60+minutes*60+seconds;
+		String docsPerSecond;
+		
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+		Integer documentListSize = processedDocuments.size();
+		
+		if(processedDocuments == null || "".equals(processedDocuments)){
+			documentListSize = 0;
+		}
+		if(documentListSize==0){
+			docsPerSecond="";
+		}else{
+			docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+		}
+		
+		mav.addObject("cycle", cycle);
+		mav.addObject("duration", duration);
+		mav.addObject("processedDocuments", processedDocuments);
+		mav.addObject("roles", getUserService().getCurrentUser()
+				.getUserRoleSet());
+		mav.addObject("documentListSize", documentListSize);
+		mav.addObject("docsPerSecond", docsPerSecond);
+		mav.setViewName("export-report-pdf");
 		return mav;
 	}
 
@@ -696,14 +774,14 @@ public class JobController {
 	public ModelAndView history(@PathVariable int jobId,
 			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
-
+		
 		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
 		PagedListHolder pagedListHolder = new PagedListHolder(cycles);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		pagedListHolder.setPage(page);
 		int pageSize = 10;
 		pagedListHolder.setPageSize(pageSize);
-
+		
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("pagedListHolder", pagedListHolder);
 		mav.addObject("cycles", cycles);
@@ -712,14 +790,14 @@ public class JobController {
 		mav.setViewName("history");
 		return mav;
 	}
-
+	
 	@RequestMapping("/job/{jobId}/cycle/run")
 	public ModelAndView runPoller(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
-
+		
 		String cronJob = getJobService().getInstantCronJob();
 		getJobService().createSchedule(jobId, cronJob);
-
+		
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());

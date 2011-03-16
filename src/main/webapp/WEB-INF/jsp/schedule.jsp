@@ -195,3 +195,9 @@
 </c:forEach>
 </table>
 
+<!-- Opens up the create schedule dialog if there are no existing schedules for the job-->
+<c:if test="${empty schedules && empty job.cron}" >
+<script type="text/javascript">
+		addSchedule();
+</script>
+</c:if>

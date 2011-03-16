@@ -7,6 +7,17 @@
 
 <h2>Create new job</h2>
 
+<c:if test="${jobExists==true}" >
+<br />
+<h3 class="error center">A job with this name already exists</h3>
+<br />
+</c:if>
+<c:if test="${destinationExists==true}" >
+<br />
+<h3 class="error center">A destination with this name already exists</h3>
+<br />
+</c:if>
+
 <div class="frame-job">
 <form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return jobValidation(this);">
 

@@ -5,6 +5,12 @@
 
 <h2>Edit Destination</h2>
 
+<c:if test="${destinationExists==true}" >
+<br />
+<h3 class="error center">A destination with this name already exists</h3>
+<br />
+</c:if>
+
 <div class="frame-job">
 
 <button type="button" class="right" onclick="javascript:location.href ='<spring:url value="/destination/${destination.id}/delete" htmlEscape="true" />';">Delete</button>
