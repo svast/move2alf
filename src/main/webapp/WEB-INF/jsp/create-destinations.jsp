@@ -12,6 +12,11 @@
 <h3 class="error center">A destination with this name already exists</h3>
 <br />
 </c:if>
+<c:if test="${threadsIsInteger==false}" >
+<br />
+<h3 class="error center">The number of threads in the destination dialogue must contain numbers only</h3>
+<br />
+</c:if>
 
 <div class="frame-job">
 <form:form modelAttribute="destination" method="post" name="createDestinations" onSubmit="return createDestinationsValidation(this);">

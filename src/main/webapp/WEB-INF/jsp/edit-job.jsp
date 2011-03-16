@@ -11,6 +11,16 @@
 <h3 class="error center">A job with this name already exists</h3>
 <br />
 </c:if>
+<c:if test="${destinationExists==true}" >
+<br />
+<h3 class="error center">A destination with this name already exists</h3>
+<br />
+</c:if>
+<c:if test="${threadsIsInteger==false}" >
+<br />
+<h3 class="error center">The number of threads in the destination dialogue must contain numbers only</h3>
+<br />
+</c:if>
 
 <div class="frame-job">
 
@@ -100,116 +110,7 @@
 
 <br />
 
-<h4>Metadata</h4>
-<table class="indent">
-<tr><td><form:radiobutton path="metadata" value="No metadata" />No metadata</td></tr>
-<tr>
-<td><form:radiobutton path="metadata" value="Read metadata from CSV file" />Read metadata from CSV file</td>
-<td class="link small"><a href="" target="_blank">Configure</a></td>
-</tr>
-<tr><td><form:radiobutton path="metadata" value="Use dedicated parser" />Use dedicated parser</td></tr>
-</table>
-<br />
-
-<h4>Transform</h4>
-<table class="indent">
-<tr><td><form:radiobutton path="transform" value="No transformation" />No transformation</td></tr>
-<tr>
-<td><form:radiobutton path="transform" value="Convert to PDF" />Convert to PDF</td>
-<td class="link small"><a href="" target="_blank">Configure</a></td>
-</tr>
-<tr><td><form:radiobutton path="transform" value="Adept" />Adept</td></tr>
-</table>
-<br />
-
-<h4>Options</h4>
-<div class="indent">
-<p>If document already exists in destination:</p>
-<div><form:radiobutton path="docExist" value="SkipLog" />Skip document and log error</div>
-<div><form:radiobutton path="docExist" value="Skip" />Skip document silently</div>
-<div><form:radiobutton path="docExist" value="Overwrite" />Overwrite document</div>
-<div><form:radiobutton path="docExist" value="Delete" />Delete</div>
-<div><form:radiobutton path="docExist" value="Presence" />List presence</div>
-</div>
-
-<br />
-
-<div class="indent"><form:checkbox path="moveBeforeProc" value="Move before processing to" />Move before processing to</div>
-<table>
-<tr>
-<td class="double-indent">Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
-					<script type="text/javascript">
-                                Spring.addDecoration(new Spring.ElementDecoration({
-                                        elementId : "beforeProcPath",
-                                        widgetType : "dijit.form.ValidationTextBox",
-                                        widgetAttrs : {                                                   
-                                        }
-                                }));
-                        </script>
-<td></td>
-</tr>
-</table>
-<br />
-
-<div class="indent"><form:checkbox path="moveAfterLoad" value="Move loaded files to" />Move loaded files to</div>
-<table >
-<tr>
-<td class="double-indent">Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
-					<script type="text/javascript">
-                                Spring.addDecoration(new Spring.ElementDecoration({
-                                        elementId : "afterLoadPath",
-                                        widgetType : "dijit.form.ValidationTextBox",
-                                        widgetAttrs : {                                                   
-                                        }
-                                }));
-                        </script>
-<td></td>
-</tr>
-</table>
-<br />
-
-<div class="indent"><form:checkbox path="moveNotLoad" value="Move not loaded files to" />Move not loaded files to</div>
-<table>
-<tr>
-<td class="double-indent">Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
-					<script type="text/javascript">
-                                Spring.addDecoration(new Spring.ElementDecoration({
-                                        elementId : "notLoadPath",
-                                        widgetType : "dijit.form.ValidationTextBox",
-                                        widgetAttrs : {                                                   
-                                        }
-                                }));
-                        </script>
-<td></td>
-</tr>
-</table>
-<br />
-
-<div class="indent"><form:checkbox path="sendNotification" value="Send notification e-mails on errors" />Send notification e-mails on errors</div>
-<div class="double-indent">To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
-<div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
-					<script type="text/javascript">
-                                Spring.addDecoration(new Spring.ElementDecoration({
-                                        elementId : "emailAddressError",
-                                        widgetType : "dijit.form.ValidationTextBox",
-                                        widgetAttrs : {                                                   
-                                        }
-                                }));
-                        </script>
-<br />
-
-<div class="indent"><form:checkbox path="sendReport" value="Send load reports" />Send load reports</div>
-<div class="double-indent">To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
-<div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
-					<script type="text/javascript">
-                                Spring.addDecoration(new Spring.ElementDecoration({
-                                        elementId : "emailAddressRep",
-                                        widgetType : "dijit.form.ValidationTextBox",
-                                        widgetAttrs : {                                                   
-                                        }
-                                }));
-                        </script>
-<br />
+<%@ include file="/WEB-INF/jsp/job-options.jsp"%>
 
 <button type="button" class="left" onclick="javascript:location.href ='<spring:url value="/job/dashboard" htmlEscape="true" />';">Cancel</button>
 

@@ -1,5 +1,3 @@
-<%@ page import="eu.xenit.move2alf.web.dto.JobConfig" %>
-<%@ page import="eu.xenit.move2alf.core.dto.ConfiguredSourceSink" %>
 <div class="indent">
 
 <div id="destError" class="hide error">you must create a destination.</div>
@@ -21,11 +19,14 @@
 <tr>
 <td>
 <div>
+
+<c:set var="jobDest" value="${job.dest}" scope="session" />
+<c:set var="destId" value="${destination.idAsString}" scope="session" />
 <%
-// TODO
-JobConfig job = (JobConfig) request.getAttribute("job");
-ConfiguredSourceSink destination = (ConfiguredSourceSink) pageContext.getAttribute("destination");
-if ((count==1 && (job.getDest() == null || job.getDest().equals(""))) || destination.getIdAsString().equals(job.getDest())) { %>
+String jobDest = (String) session.getAttribute("jobDest");
+String destId = (String) session.getAttribute("destId");
+if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDest)) { 
+%>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}" />"  checked="true"/>
 <%}else{ %>
 <input type="radio" id="dest<%=count %>" name="dest" value="destExists<c:out value="${destination.id}"/>"  />
@@ -97,12 +98,23 @@ if ((count==1 && (job.getDest() == null || job.getDest().equals(""))) || destina
 </tr>
 <tr>
 <td>Type:</td> 
-<td><form:radiobutton path="destinationType" value="eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink" checked="true" />Alfresco</td>
+
+<%count=0; %>
+<c:forEach var="destinationOption" items="${destinationOptions}" >
+<%if(count==0){%>
+<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true" /><c:out value="${destinationOption.name}" /></td>
 </tr>
+<%}else{%>
 <tr>
-<td></td>
-<td><form:radiobutton path="destinationType" value="eu.xenit.move2alf.core.sourcesink.CmisSourceSink" />CMIS</td>
+<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
 </tr>
+<%
+}
+count ++;
+%>
+</c:forEach>
+<input type="hidden" value="" name="destinationType" />
+
 <tr>
 <td>URL:</td>
 
@@ -152,7 +164,7 @@ if ((count==1 && (job.getDest() == null || job.getDest().equals(""))) || destina
 <tr>
 <td>Number of threads:</td>
 <td><form:input path="nbrThreads" size="10" value="5" maxlength="2"/></td>
-<td id="nbrThreadsError" class="hide error">number of threads may not be empty.</td>
+<td id="nbrThreadsError" class="hide error">number of threads may not be empty and may only contain numbers.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "nbrThreads",

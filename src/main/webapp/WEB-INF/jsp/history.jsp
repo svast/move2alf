@@ -21,11 +21,11 @@
 <div class="frame-job">
 <h3><c:out value="${job.name}" /></h3>
 
-<c:if test='${empty cycles}'>
+<c:if test='${empty historyInfoList}'>
 This job has not yet run.
 </c:if>
 
-<c:if test='${not empty cycles}'>
+<c:if test='${not empty historyInfoList}'>
 <table class="table-border-thin">
 <tr class="table-border-thin">
 <th class="table-border-thin">Start time</th>
@@ -36,10 +36,10 @@ This job has not yet run.
 
 <c:forEach var="item" items="${pagedListHolder.pageList}">
 <tr>
-<td class="table-border-thin"><fmt:formatDate value="${item.startDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>
-<td class="table-border-thin"><c:out value="${item.schedule.state.displayName}"/></td>
-<td class="table-border-thin"><c:out value="" /></td>
-<td class="table-border-thin"><a href="<spring:url value="/job/${job.id}/${item.id}/report" htmlEscape="true" />">view details</a></td>
+<td class="table-border-thin"><fmt:formatDate value="${item.cycleStartDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>
+<td class="table-border-thin"><c:out value="${item.scheduleState}"/></td>
+<td class="table-border-thin"><c:out value="${item.nbrOfDocuments}" /></td>
+<td class="table-border-thin"><a href="<spring:url value="/job/${job.id}/${item.cycleId}/report" htmlEscape="true" />">view details</a></td>
 </tr>
 
 </c:forEach>

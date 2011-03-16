@@ -33,7 +33,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
@@ -46,6 +48,7 @@ import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
 import eu.xenit.move2alf.web.dto.EditDestinationConfig;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
 import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
@@ -127,18 +130,25 @@ public class JobController {
 		mav.addObject("job", new JobConfig());
 		mav.addObject("destinations", getJobService()
 				.getAllDestinationConfiguredSourceSinks());
-		mav.setViewName("create-job");
+		mav.addObject("metadataOptions", getJobService()
+				.getActionsByCategory(ConfigurableObject.CAT_METADATA));
+		mav.addObject("transformOptions", getJobService()
+				.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
+		mav.addObject("destinationOptions", getJobService()
+				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		mav.setViewName("create-job");
 		return mav;
 	}
 
 	@RequestMapping(value = "/job/create", method = RequestMethod.POST)
 	public ModelAndView createJob(@ModelAttribute("job") @Valid JobConfig job,
-			BindingResult errors) {
+			BindingResult errors){
 
 		List<String> sourceSinks = job.getSourceSink();
 		boolean notNull = true;
+		boolean threadsIsInteger = true;
 		if (sourceSinks != null) {
 			for (int i = 0; i < sourceSinks.size(); i++) {
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
@@ -147,10 +157,16 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				try{
+					Integer.parseInt(sourceSinkElements[4]);
+				}
+				catch(NumberFormatException e){
+					threadsIsInteger=false;
+				}
 			}
 		}
 
-		if (errors.hasErrors() || notNull == false) {
+		if (errors.hasErrors() || notNull == false || threadsIsInteger == false) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -172,11 +188,19 @@ public class JobController {
 			mav.addObject("job", job);
 			mav.addObject("destinations", getJobService()
 					.getAllDestinationConfiguredSourceSinks());
-			mav.addObject("destinationInfoList", destinationInfoList);
+			mav.addObject("threadsIsInteger", threadsIsInteger);
+			if(threadsIsInteger == true){
+				mav.addObject("destinationInfoList", destinationInfoList);
+			}
 			mav.addObject("notNull", notNull);
+			mav.addObject("metadataOptions", getJobService()
+					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
+			mav.addObject("transformOptions", getJobService()
+					.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
+			mav.addObject("destinationOptions", getJobService()
+					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
-			
 
             return mav;
 		}
@@ -238,6 +262,12 @@ public class JobController {
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.addObject("destinations", getJobService()
 				.getAllConfiguredSourceSinks());
+		mav.addObject("metadataOptions", getJobService()
+				.getActionsByCategory(ConfigurableObject.CAT_METADATA));
+		mav.addObject("transformOptions", getJobService()
+				.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
+		mav.addObject("destinationOptions", getJobService()
+				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("edit-job");
@@ -250,6 +280,7 @@ public class JobController {
 
 		List<String> sourceSinks = job.getSourceSink();
 		boolean notNull=true;
+		boolean threadsIsInteger=true;
 		if(sourceSinks!= null){
 			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
@@ -258,10 +289,16 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				try{
+					Integer.parseInt(sourceSinkElements[4]);
+				}
+				catch(NumberFormatException e){
+					threadsIsInteger=false;
+				}
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -283,7 +320,16 @@ public class JobController {
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("destinations", getJobService()
 					.getAllConfiguredSourceSinks());
-			mav.addObject("destinationInfoList", destinationInfoList);
+			mav.addObject("threadsIsInteger", threadsIsInteger);
+			if(threadsIsInteger == true){
+				mav.addObject("destinationInfoList", destinationInfoList);
+			}
+			mav.addObject("metadataOptions", getJobService()
+					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
+			mav.addObject("transformOptions", getJobService()
+					.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
+			mav.addObject("destinationOptions", getJobService()
+					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 			mav.addObject("notNull", notNull);
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
@@ -497,6 +543,8 @@ public class JobController {
 	public ModelAndView createDestinationsForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("destination", new DestinationConfig());
+		mav.addObject("destinationOptions", getJobService()
+				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.addObject("showDestinations","false");
@@ -511,6 +559,7 @@ public class JobController {
 
 		List<String> sourceSinks = destination.getSourceSink();
 		boolean notNull=true;
+		boolean threadsIsInteger=true;
 		if(sourceSinks!= null){
 			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
@@ -519,10 +568,16 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				try{
+					Integer.parseInt(sourceSinkElements[4]);
+				}
+				catch(NumberFormatException e){
+					threadsIsInteger=false;
+				}
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -541,9 +596,13 @@ public class JobController {
 				}
 			}
 			ModelAndView mav = new ModelAndView("create-destinations");
-			mav.addObject("createDestinationInfoList", destinationInfoList);
+			mav.addObject("threadsIsInteger", threadsIsInteger);
+			if(threadsIsInteger == true){
+				mav.addObject("createDestinationInfoList", destinationInfoList);
+			}
 			mav.addObject("destination",destination);
-			
+			mav.addObject("destinationOptions", getJobService()
+					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 			mav.addObject("notNull", notNull);
 			mav.addObject("showDestinations","false");
             return mav;
@@ -579,6 +638,8 @@ public class JobController {
 		mav.addObject("destinations", new EditDestinationConfig());
 		mav.addObject("destination", getJobService()
 				.getConfiguredSourceSink(id));
+		mav.addObject("destinationOptions", getJobService()
+				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("edit-destination");
@@ -590,16 +651,19 @@ public class JobController {
 			@PathVariable int id,
 			@ModelAttribute("destinations") @Valid EditDestinationConfig destinations,
 			BindingResult errors) {
+		
+		String nbrOfThreads = new Integer(destinations
+					.getNbrThreads()).toString();
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: "+errors.toString());
-			
 			
 			ModelAndView mav = new ModelAndView("edit-destination");
 			mav.addObject("destinations",destinations);
 			mav.addObject("destination", getJobService()
 					.getConfiguredSourceSink(id));
-		
+			mav.addObject("destinationOptions", getJobService()
+					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
             return mav;
 		}
 		
@@ -778,7 +842,30 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		
 		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
-		PagedListHolder pagedListHolder = new PagedListHolder(cycles);
+		List<HistoryInfo> historyInfoList = new ArrayList();
+		//Store info in HistoryInfo class
+		if(cycles != null){
+			for(int i=0; i<cycles.size(); i++){
+				int cycleId = cycles.get(i).getId();
+				
+				List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+				int documentListSize = processedDocuments.size();
+				
+				if(processedDocuments == null || "".equals(processedDocuments)){
+					documentListSize = 0;
+				}
+				
+				String scheduleState = getJobService()
+				.getLastCycleForJob(getJobService().getJob(jobId)).getSchedule()
+				.getState().getDisplayName();
+				
+				HistoryInfo historyInfo = new HistoryInfo(cycleId, cycles.get(i).getStartDateTime(), scheduleState, documentListSize);
+				
+				historyInfoList.add(historyInfo);
+			}
+		}
+		
+		PagedListHolder pagedListHolder = new PagedListHolder(historyInfoList);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		pagedListHolder.setPage(page);
 		int pageSize = 10;
@@ -786,7 +873,7 @@ public class JobController {
 		
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("pagedListHolder", pagedListHolder);
-		mav.addObject("cycles", cycles);
+		mav.addObject("historyInfoList", historyInfoList);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("history");

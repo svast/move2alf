@@ -10,6 +10,11 @@
 <h3 class="error center">A destination with this name already exists</h3>
 <br />
 </c:if>
+<c:if test="${threadsIsInteger==false}" >
+<br />
+<h3 class="error center">The number of threads in the destination dialogue must contain numbers only</h3>
+<br />
+</c:if>
 
 <div class="frame-job">
 
@@ -51,19 +56,39 @@
                                 }));
                         </script>
 </tr>
+
 <tr>
-<%int type=0; %>
-<c:if test="${destination.className == 'CMIS'}" >
-<%type= 1;%>
-</c:if> 
 <td>Type:</td> 
-<td><input type="radio" id="destinationType0" name="destinationType" value="AlfrescoSink" <%if(type==0){ %>checked="true" <%} %> />Alfresco</td>
-<td><form:errors path="destinationType" cssClass="error"/></td>
-</tr>
-<tr>
-<td></td>
-<td><input type="radio" id="destinationType1" name="destinationType" value="CMIS" <%if(type==1){ %>checked="true" <%} %> />CMIS</td>
-</tr>
+<c:set var="firstIteration" value="${true}" />
+<c:forEach var="destinationOption" items="${destinationOptions}" >
+	<c:set var="valueAlreadySet" value="${false}" />
+	<c:if test="${destinationOption.name == destination.className && firstIteration==true}" >
+		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
+		</tr>
+		<c:set var="firstIteration" value="${false}" />
+		<c:set var="valueAlreadySet" value="${true}" />
+	</c:if>
+	<c:if test="${destinationOption.name != destination.className && firstIteration==true && valueAlreadySet==false}" >
+		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
+		</tr>
+		<c:set var="firstIteration" value="${false}" />
+		<c:set var="valueAlreadySet" value="${true}" />
+	</c:if>
+	<c:if test="${destinationOption.name == destination.className && firstIteration==false && valueAlreadySet==false}" >
+		<td></td>
+		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
+		</tr>
+		<c:set var="valueAlreadySet" value="${true}" />
+	</c:if>
+	<c:if test="${destinationOption.name != destination.className && firstIteration==false && valueAlreadySet==false}" >
+		<tr>
+		<td></td>
+		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
+		</tr>
+	</c:if>
+</c:forEach>
+<input type="hidden" value="" name="destinationType" />
+
 <tr>
 <td>URL:</td>
 <td><form:input path="destinationURL" size="50" maxlength="40" value="${destination.parameters.url}" /></td>

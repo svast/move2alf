@@ -19,18 +19,6 @@ function putFocus(formInst, elementInst) {
     }
 }
 
-function popup(mylink, windowname)
-{
-if (! window.focus)return true;
-var href;
-if (typeof(mylink) == 'string')
-   href=mylink;
-else
-   href=mylink.href;
-window.open(href, windowname, 'width=850,height=400,scrollbars=yes');
-return false;
-}
-
 function showInput(){
 	document.getElementById('destination').style.display='inline';
 }
@@ -370,6 +358,7 @@ function addRowToDestination(form){
 
 	  var len = form.destinationType.length;
 		var destType="";
+		alert(len);
 		for(var i=0; i<len; i++){
 			if(form.destinationType[i].checked){
 				destType=form.destinationType[i].value;
@@ -404,7 +393,9 @@ function addRowToDestination(form){
 
 		setDestInForm(value);
 
-	  	document.getElementById('noDestinations').style.display='none';
+		if(document.getElementById('noDestinations')){
+	  		document.getElementById('noDestinations').style.display='none';
+		}
 
  }
 
@@ -529,7 +520,7 @@ function destinationValidation(form){
 	}
 
 	var nbrThreads = document.getElementById('nbrThreads').value;
-	if(null==nbrThreads || 'undefined'==nbrThreads || ''==nbrThreads || 'null'==nbrThreads){
+	if(null==nbrThreads || 'undefined'==nbrThreads || ''==nbrThreads || 'null'==nbrThreads || nbrThreads != parseInt(nbrThreads)){
 		document.getElementById("nbrThreadsError").style.display='block';
 		validated=false;
 	}
