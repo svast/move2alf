@@ -8,7 +8,9 @@ import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -331,12 +333,22 @@ public interface JobService {
 	 * @param jobName
 	 * @return
 	 */
-	boolean checkJobExists(String jobName);
+	public boolean checkJobExists(String jobName);
 
 	/**
 	 * 
 	 * @param destinationName
 	 * @return
 	 */
-	boolean checkDestinationExists(String destinationName);
+	public boolean checkDestinationExists(String destinationName);
+	
+	/**
+	 * @param category
+	 */
+	public List<Action> getActionsByCategory(String category);
+	
+	/**
+	 * @param category
+	 */
+	public List<SourceSink> getSourceSinksByCategory(String category);
 }

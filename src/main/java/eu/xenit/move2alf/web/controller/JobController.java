@@ -371,6 +371,8 @@ public class JobController {
 		/*
 		 * Create new action pipeline and remove old one by deleting first
 		 * action. The delete will be cascaded by Hibernate.
+		 * 
+		 * TODO: delete FileSourceSink
 		 */
 
 		job.setId(jobId);

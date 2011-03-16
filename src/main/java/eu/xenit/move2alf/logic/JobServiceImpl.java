@@ -19,8 +19,11 @@ import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.SourceSinkFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -41,6 +44,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private Scheduler scheduler;
 
 	private ActionFactory actionFactory;
+	
+	private SourceSinkFactory sourceSinkFactory;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -67,6 +72,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public ActionFactory getActionFactory() {
 		return actionFactory;
+	}
+
+	@Autowired
+	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
+		this.sourceSinkFactory = sourceSinkFactory;
+	}
+
+	public SourceSinkFactory getSourceSinkFactory() {
+		return sourceSinkFactory;
 	}
 
 	@Override
@@ -557,6 +571,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteAction(int id) {
 		Session s = getSessionFactory().getCurrentSession();
 		s.delete(s.get(ConfiguredAction.class, id));
+	}
+
+	@Override
+	public List<Action> getActionsByCategory(String category) {
+		return getActionFactory().getObjectsByCategory(category);
+	}
+
+	@Override
+	public List<SourceSink> getSourceSinksByCategory(String category) {
+		return getSourceSinkFactory().getObjectsByCategory(category);
 	}
 
 }

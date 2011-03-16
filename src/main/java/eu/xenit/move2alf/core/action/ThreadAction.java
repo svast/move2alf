@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class ThreadAction extends Action {
@@ -35,6 +36,21 @@ public class ThreadAction extends Action {
 			parameterMap.put("thread", Thread.currentThread().toString());
 			getActionFactory().execute(configuredAction, parameterMap);
 		}
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DEFAULT;
+	}
+
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
+	@Override
+	public String getName() {
+		return "Thread";
 	}
 
 }

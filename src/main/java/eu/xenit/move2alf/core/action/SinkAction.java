@@ -3,6 +3,7 @@ package eu.xenit.move2alf.core.action;
 import java.util.Map;
 
 import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -17,6 +18,21 @@ public class SinkAction extends Action {
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
 		sink.send(sinkConfig, parameterMap);
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DEFAULT;
+	}
+
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
+	@Override
+	public String getName() {
+		return "Sink";
 	}
 
 }

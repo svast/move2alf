@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class ParameterRenameAction extends Action {
@@ -14,8 +15,6 @@ public class ParameterRenameAction extends Action {
 	private static final String CP_NewParameterName = "newParameterName";
 
 	public ParameterRenameAction() {
-		name = "Parameter Rename Action";
-		description = "Action that renames the parameter name, without changing the value";
 		addConfigParameter(new ParameterDefinition(CP_OldParameterName,
 				String.class, null));
 		addConfigParameter(new ParameterDefinition(CP_NewParameterName,
@@ -65,6 +64,21 @@ public class ParameterRenameAction extends Action {
 					Object.class, null));
 		}
 		return outputParameterMap.values();
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DEFAULT;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Action that renames the parameter name, without changing the value";
+	}
+
+	@Override
+	public String getName() {
+		return "Rename Parameter";
 	}
 
 }

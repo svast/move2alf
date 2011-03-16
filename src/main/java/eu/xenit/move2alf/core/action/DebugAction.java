@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class DebugAction extends Action {
@@ -26,6 +27,21 @@ public class DebugAction extends Action {
 			logger.debug(key + "\t-\t" + parameterMap.get(key).toString());
 		}
 		logger.debug("------------------------------");
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DEFAULT;
+	}
+
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
+	@Override
+	public String getName() {
+		return "Debug";
 	}
 
 }

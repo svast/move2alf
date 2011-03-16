@@ -66,8 +66,6 @@ public class LiPolisDocAction extends Action {
 	private static final String OP_LiDocumentGroup = "liDocumentGroup";
 
 	public LiPolisDocAction() {
-		name = "Vivium Life PolisDoc Action";
-		description = "Action that parses the adept keyfile";
 		addAprioriInputParameter(new ParameterDefinition(IP_AdeptKeyFilePath,
 				String.class, ""));
 
@@ -235,5 +233,20 @@ public class LiPolisDocAction extends Action {
 //			configuredAction.getAppliedConfiguredActionOnFailure().execute(
 //					parameterMap);
 		}
+	}
+
+	@Override
+	public String getCategory() {
+		return CAT_METADATA;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Action that parses the adept keyfile";
+	}
+
+	@Override
+	public String getName() {
+		return "Vivium Life PolisDoc";
 	}
 }

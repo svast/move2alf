@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
@@ -50,7 +51,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		// }
 		// } else {
 		// logger.debug("Already authenticated");
-		// }
+		// }	
 
 		WebServiceRepositoryAccess ra = null;
 		try {
@@ -78,5 +79,20 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error("Fatal Exception", e);
 			System.exit(1);
 		}
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DESTINATION;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Alfresco using SOAP web services";
+	}
+
+	@Override
+	public String getName() {
+		return "Alfresco";
 	}
 }

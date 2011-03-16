@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
@@ -41,6 +42,21 @@ public class FileSourceSink extends SourceSink {
 	public void send(ConfiguredSourceSink configuredSourceSink,
 			Map<String, Object> parameterMap) {
 
+	}
+
+	@Override
+	public String getCategory() {
+		return ConfigurableObject.CAT_DEFAULT;
+	}
+
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
+	@Override
+	public String getName() {
+		return "Filesystem";
 	}
 
 }
