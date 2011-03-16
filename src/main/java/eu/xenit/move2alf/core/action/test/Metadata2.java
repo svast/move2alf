@@ -26,11 +26,11 @@ public class Metadata2 extends Action {
 
 	@Override
 	public String getCategory() {
-		return "Description of metadata #1 action";
+		return ConfigurableObject.CAT_METADATA;
 	}
 
 	@Override
 	public String getDescription() {
-		return ConfigurableObject.CAT_METADATA;
+		return "Description of metadata #1 action";
 	}
 }

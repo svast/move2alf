@@ -26,11 +26,11 @@ public class Transform1 extends Action {
 
 	@Override
 	public String getCategory() {
-		return "Description of transformation action";
+		return ConfigurableObject.CAT_TRANSFORM;
 	}
 
 	@Override
 	public String getDescription() {
-		return ConfigurableObject.CAT_TRANSFORM;
+		return "Description of transformation action";
 	}
 }

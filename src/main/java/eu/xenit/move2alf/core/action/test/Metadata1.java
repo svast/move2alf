@@ -22,12 +22,12 @@ public class Metadata1 extends Action {
 
 	@Override
 	public String getCategory() {
-		return "Description of transformation action";
+		return ConfigurableObject.CAT_METADATA;
 	}
 
 	@Override
 	public String getDescription() {
-		return ConfigurableObject.CAT_METADATA;
+		return "Description of transformation action";
 	}
 
 }
