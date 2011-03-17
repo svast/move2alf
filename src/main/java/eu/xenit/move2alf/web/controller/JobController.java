@@ -146,6 +146,8 @@ public class JobController {
 	public ModelAndView createJob(@ModelAttribute("job") @Valid JobConfig job,
 			BindingResult errors){
 
+		boolean jobExists=getJobService().checkJobExists(job.getName());
+		boolean destinationExists=false;
 		List<String> sourceSinks = job.getSourceSink();
 		boolean notNull = true;
 		boolean threadsIsInteger = true;
@@ -157,6 +159,7 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -166,7 +169,7 @@ public class JobController {
 			}
 		}
 
-		if (errors.hasErrors() || notNull == false || threadsIsInteger == false) {
+		if (errors.hasErrors() || notNull == false || threadsIsInteger == false || jobExists==true || destinationExists==true) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -189,9 +192,11 @@ public class JobController {
 			mav.addObject("destinations", getJobService()
 					.getAllDestinationConfiguredSourceSinks());
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true){
+			if(threadsIsInteger == true && destinationExists==false){
 				mav.addObject("destinationInfoList", destinationInfoList);
 			}
+			mav.addObject("jobExists", jobExists);
+			mav.addObject("destinationExists", destinationExists);
 			mav.addObject("notNull", notNull);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
@@ -278,8 +283,14 @@ public class JobController {
 	public ModelAndView editJob(@PathVariable int id,
 			@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
 
+		boolean jobExists = false;
+		if(!getJobService().getJob(id).getName().equals(job.getName())){
+			jobExists=getJobService().checkJobExists(job.getName());
+		}
+		
 		List<String> sourceSinks = job.getSourceSink();
 		boolean notNull=true;
+		boolean destinationExists=false;
 		boolean threadsIsInteger=true;
 		if(sourceSinks!= null){
 			for(int i=0; i<sourceSinks.size(); i++){
@@ -289,6 +300,7 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -298,7 +310,7 @@ public class JobController {
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false || threadsIsInteger == false) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false || jobExists==true || destinationExists==true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -315,15 +327,17 @@ public class JobController {
 					destinationInfoList.add(destinationInfo);
 				}
 			}
-			ModelAndView mav = new ModelAndView("create-job");
+			ModelAndView mav = new ModelAndView("edit-job");
 			mav.addObject("job",job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("destinations", getJobService()
 					.getAllConfiguredSourceSinks());
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true){
+			if(threadsIsInteger == true && destinationExists == false){
 				mav.addObject("destinationInfoList", destinationInfoList);
 			}
+			mav.addObject("jobExists", jobExists);
+			mav.addObject("destinationExists", destinationExists);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
 			mav.addObject("transformOptions", getJobService()
@@ -558,6 +572,7 @@ public class JobController {
 			BindingResult errors) {
 
 		List<String> sourceSinks = destination.getSourceSink();
+		boolean destinationExists = false;
 		boolean notNull=true;
 		boolean threadsIsInteger=true;
 		if(sourceSinks!= null){
@@ -568,6 +583,7 @@ public class JobController {
 							|| null == sourceSinkElements[j])
 						notNull = false;
 				}
+				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -577,7 +593,7 @@ public class JobController {
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false || threadsIsInteger == false) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false || destinationExists==true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -597,9 +613,10 @@ public class JobController {
 			}
 			ModelAndView mav = new ModelAndView("create-destinations");
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true){
+			if(threadsIsInteger == true && destinationExists==false){
 				mav.addObject("createDestinationInfoList", destinationInfoList);
 			}
+			mav.addObject("destinationExists",destinationExists);
 			mav.addObject("destination",destination);
 			mav.addObject("destinationOptions", getJobService()
 					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
@@ -652,16 +669,20 @@ public class JobController {
 			@ModelAttribute("destinations") @Valid EditDestinationConfig destinations,
 			BindingResult errors) {
 		
-		String nbrOfThreads = new Integer(destinations
-					.getNbrThreads()).toString();
+		boolean destinationExists = false;
+		if(!getJobService().getConfiguredSourceSink(id).getParameter("name").equals(destinations.getDestinationName())){
+			destinationExists = getJobService().checkDestinationExists(destinations.getDestinationName());
+		}
+		
 
-		if (errors.hasErrors()) {
+		if (errors.hasErrors() || destinationExists == true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			ModelAndView mav = new ModelAndView("edit-destination");
 			mav.addObject("destinations",destinations);
 			mav.addObject("destination", getJobService()
 					.getConfiguredSourceSink(id));
+			mav.addObject("destinationExists", destinationExists);
 			mav.addObject("destinationOptions", getJobService()
 					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
             return mav;

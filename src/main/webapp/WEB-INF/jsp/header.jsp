@@ -358,7 +358,6 @@ function addRowToDestination(form){
 
 	  var len = form.destinationType.length;
 		var destType="";
-		alert(len);
 		for(var i=0; i<len; i++){
 			if(form.destinationType[i].checked){
 				destType=form.destinationType[i].value;
