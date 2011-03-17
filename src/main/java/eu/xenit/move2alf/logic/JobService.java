@@ -354,7 +354,12 @@ public interface JobService {
 	public List<SourceSink> getSourceSinksByCategory(String category);
 	
 	/**
-	 * 
+	 * @param jobId
 	 */
 	public EScheduleState getJobState(int jobId);
+	
+	/**
+	 * Reset state of all schedules to NOT_RUNNING. 
+	 */
+	public void resetSchedules();
 }

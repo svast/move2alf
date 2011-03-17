@@ -63,6 +63,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	}
 
 	public void reloadSchedules() {
+		getJobService().resetSchedules();
 		logger.debug("Reloading schedules");
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();

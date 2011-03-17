@@ -44,7 +44,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private Scheduler scheduler;
 
 	private ActionFactory actionFactory;
-	
+
 	private SourceSinkFactory sourceSinkFactory;
 
 	@Autowired
@@ -140,17 +140,17 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			// type??
 		}
 	}
-	
+
 	@Override
-	public boolean checkJobExists(String jobName){
+	public boolean checkJobExists(String jobName) {
 		@SuppressWarnings("unchecked")
 		List jobs = sessionFactory.getCurrentSession().createQuery(
-		"from Job as j where j.name=?").setString(0, jobName).list();
-		
-		if(jobs.size()>0){
+				"from Job as j where j.name=?").setString(0, jobName).list();
+
+		if (jobs.size() > 0) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -297,30 +297,32 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
-			HashMap destinationParams) {
+	public ConfiguredSourceSink editDestination(int sinkId,
+			String destinationType, HashMap destinationParams) {
 		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
 		sourceSink.setClassName(destinationType);
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
 		return sourceSink;
 	}
-	
+
 	@Override
 	public ConfiguredSourceSink getDestination(int id) {
-		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession().get(ConfiguredSourceSink.class, id);
+		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession()
+				.get(ConfiguredSourceSink.class, id);
 	}
-	
+
 	@Override
-	public boolean checkDestinationExists(String destinationName){
+	public boolean checkDestinationExists(String destinationName) {
 		@SuppressWarnings("unchecked")
 		List destinations = sessionFactory.getCurrentSession().createQuery(
-		"from ConfiguredSourceSink").list();
-		
-		for(int i=0; i<destinations.size(); i++){
-			String destinationParameter = ((ConfiguredObject) destinations.get(i)).getParameter("name");
-			
-			if(destinationName.equals(destinationParameter)){
+				"from ConfiguredSourceSink").list();
+
+		for (int i = 0; i < destinations.size(); i++) {
+			String destinationParameter = ((ConfiguredObject) destinations
+					.get(i)).getParameter("name");
+
+			if (destinationName.equals(destinationParameter)) {
 				return true;
 			}
 		}
@@ -340,8 +342,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.get(EDestinationParameter.USER));
 		sourceSinkParameters.put("password", (String) destinationParams
 				.get(EDestinationParameter.PASSWORD));
-		sourceSinkParameters.put("threads", destinationParams
-				.get(EDestinationParameter.THREADS).toString());
+		sourceSinkParameters.put("threads", destinationParams.get(
+				EDestinationParameter.THREADS).toString());
 		sourceSink.setParameters(sourceSinkParameters);
 	}
 
@@ -354,14 +356,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		return (List<ConfiguredSourceSink>) configuredSourceSink;
 	}
-	
+
 	@Override
 	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks() {
 		@SuppressWarnings("unchecked")
 		String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
 		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSourceSink as c where c.className!=?").setString(0, fileSourceSink)
-				.list();
+				.getCurrentSession().createQuery(
+						"from ConfiguredSourceSink as c where c.className!=?")
+				.setString(0, fileSourceSink).list();
 
 		return (List<ConfiguredSourceSink>) configuredSourceSink;
 	}
@@ -380,20 +383,25 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					+ sourceSinkId + " not found");
 		}
 	}
-	
+
 	@Override
-	public ConfiguredAction getActionRelatedToConfiguredSourceSink(int sourceSinkId){
+	public ConfiguredAction getActionRelatedToConfiguredSourceSink(
+			int sourceSinkId) {
 		List<ConfiguredAction> configuredActions = sessionFactory
-		.getCurrentSession().createQuery("from ConfiguredAction").list();
-		
-		for (int i=0; i<configuredActions.size(); i++){
-			Set<ConfiguredSourceSink> configuredSourceSinkForAction = configuredActions.get(i).getConfiguredSourceSinkSet();
-			
-			for(int j=0; j<configuredSourceSinkForAction.size(); j++){
-				Iterator configuredSourceSinkIterator = configuredSourceSinkForAction.iterator();
-				
-				while(configuredSourceSinkIterator.hasNext()){
-					if(((IdObject) configuredSourceSinkIterator.next()).getId() == sourceSinkId){
+				.getCurrentSession().createQuery("from ConfiguredAction")
+				.list();
+
+		for (int i = 0; i < configuredActions.size(); i++) {
+			Set<ConfiguredSourceSink> configuredSourceSinkForAction = configuredActions
+					.get(i).getConfiguredSourceSinkSet();
+
+			for (int j = 0; j < configuredSourceSinkForAction.size(); j++) {
+				Iterator configuredSourceSinkIterator = configuredSourceSinkForAction
+						.iterator();
+
+				while (configuredSourceSinkIterator.hasNext()) {
+					if (((IdObject) configuredSourceSinkIterator.next())
+							.getId() == sourceSinkId) {
 						return configuredActions.get(i);
 					}
 				}
@@ -442,37 +450,37 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	public String getDuration(Date startDateTime, Date endDateTime) {
-		if(endDateTime == null){
+		if (endDateTime == null) {
 			endDateTime = new Date();
 		}
-			Long duration = endDateTime.getTime() - startDateTime.getTime();
-			Date dateDuration = new Date(duration);
-	
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(dateDuration);
-	
-			int date = cal.get(Calendar.DATE) - 1;
-			int hours = cal.get(Calendar.HOUR_OF_DAY) - 1;
-			int minutes = cal.get(Calendar.MINUTE);
-			int seconds = cal.get(Calendar.SECOND);
-	
-			if (date > 0) {
-				hours = hours + date * 24;
-			}
-	
-			String hoursString = Integer.toString(hours);
-			String minutesString = Integer.toString(minutes);
-			String secondsString = Integer.toString(seconds);
-	
-			if (hoursString.length() < 2)
-				hoursString = "0" + hours;
-			if (minutesString.length() < 2)
-				minutesString = "0" + minutes;
-			if (secondsString.length() < 2)
-				secondsString = "0" + seconds;
-	
-			String durationDateString = hoursString + ":" + minutesString + ":"
-					+ secondsString;
+		Long duration = endDateTime.getTime() - startDateTime.getTime();
+		Date dateDuration = new Date(duration);
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dateDuration);
+
+		int date = cal.get(Calendar.DATE) - 1;
+		int hours = cal.get(Calendar.HOUR_OF_DAY) - 1;
+		int minutes = cal.get(Calendar.MINUTE);
+		int seconds = cal.get(Calendar.SECOND);
+
+		if (date > 0) {
+			hours = hours + date * 24;
+		}
+
+		String hoursString = Integer.toString(hours);
+		String minutesString = Integer.toString(minutes);
+		String secondsString = Integer.toString(seconds);
+
+		if (hoursString.length() < 2)
+			hoursString = "0" + hours;
+		if (minutesString.length() < 2)
+			minutesString = "0" + minutes;
+		if (secondsString.length() < 2)
+			secondsString = "0" + seconds;
+
+		String durationDateString = hoursString + ":" + minutesString + ":"
+				+ secondsString;
 
 		return durationDateString;
 	}
@@ -495,7 +503,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void addSourceSinkToAction(ConfiguredAction action,
 			ConfiguredSourceSink sourceSink) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -514,49 +522,48 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		ss.setParameters(parameters);
 		getSessionFactory().getCurrentSession().save(ss);
 	}
-	
+
 	@Override
-	public List<ProcessedDocument> getProcessedDocuments(int cycleId){
-			return (List<ProcessedDocument>) sessionFactory
-			.getCurrentSession()
-			.createQuery(
-					"from ProcessedDocument as d where d.cycle.id=?")
-			.setLong(0, cycleId).list();
+	public List<ProcessedDocument> getProcessedDocuments(int cycleId) {
+		return (List<ProcessedDocument>) sessionFactory.getCurrentSession()
+				.createQuery("from ProcessedDocument as d where d.cycle.id=?")
+				.setLong(0, cycleId).list();
 	}
-	
+
 	@Override
-	public String getInstantCronJob(){
+	public String getInstantCronJob() {
 		Date now = new Date();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(now);
 
 		Integer y = new Integer(cal.get(Calendar.YEAR));
-		Integer mon = new Integer(cal.get(Calendar.MONTH)+1);
+		Integer mon = new Integer(cal.get(Calendar.MONTH) + 1);
 		Integer dom = new Integer(cal.get(Calendar.DAY_OF_MONTH));
 		Integer hour = new Integer(cal.get(Calendar.HOUR_OF_DAY));
 		Integer mins = new Integer(cal.get(Calendar.MINUTE));
 		Integer secs = new Integer(cal.get(Calendar.SECOND));
-		
-		secs=secs+10;
-		
-		if(secs > 59){
-			secs = secs-60;
-			mins=mins+1;
-			
-			if(mins>59){
-				mins = mins-60;
-				hour = hour+1;
+
+		secs = secs + 10;
+
+		if (secs > 59) {
+			secs = secs - 60;
+			mins = mins + 1;
+
+			if (mins > 59) {
+				mins = mins - 60;
+				hour = hour + 1;
 			}
 		}
-		
+
 		String seconds = secs.toString();
 		String minutes = mins.toString();
-		String hours=hour.toString();
-		String day = dom.toString();		
-		String month = mon.toString();		
+		String hours = hour.toString();
+		String day = dom.toString();
+		String month = mon.toString();
 		String year = y.toString();
-		
-		String cronjob = seconds+" "+minutes+" "+hours+" "+day+" "+month+" ? "+year;
+
+		String cronjob = seconds + " " + minutes + " " + hours + " " + day
+				+ " " + month + " ? " + year;
 
 		return cronjob;
 	}
@@ -582,15 +589,25 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<SourceSink> getSourceSinksByCategory(String category) {
 		return getSourceSinkFactory().getObjectsByCategory(category);
 	}
-	
+
 	public EScheduleState getJobState(int jobId) {
 		Job job = getJob(jobId);
-		for(Schedule schedule : job.getSchedules()) {
+		for (Schedule schedule : job.getSchedules()) {
 			if (schedule.getState().equals(EScheduleState.RUNNING)) {
-				return EScheduleState.RUNNING; 
+				return EScheduleState.RUNNING;
 			}
 		}
 		return EScheduleState.NOT_RUNNING;
+	}
+
+	@Override
+	public void resetSchedules() {
+		org.hibernate.classic.Session session = getSessionFactory().getCurrentSession();
+		List<Schedule> schedules = session.createQuery("from Schedule").list();
+		for(Schedule schedule : schedules) {
+			schedule.setState(EScheduleState.NOT_RUNNING);
+			session.update(schedule);
+		}
 	}
 
 }
