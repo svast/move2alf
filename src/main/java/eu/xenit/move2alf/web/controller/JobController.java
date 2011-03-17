@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -148,7 +150,9 @@ public class JobController {
 
 		boolean jobExists=getJobService().checkJobExists(job.getName());
 		boolean destinationExists=false;
+		boolean doubleNewDestination=false;
 		List<String> sourceSinks = job.getSourceSink();
+		Set<String> uniqueSourceSinks = new HashSet();
 		boolean notNull = true;
 		boolean threadsIsInteger = true;
 		if (sourceSinks != null) {
@@ -160,6 +164,12 @@ public class JobController {
 						notNull = false;
 				}
 				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
+				//check whether any of the new source sinks have the same name (should then throw error)
+				boolean testBoolean = uniqueSourceSinks.add(sourceSinkElements[0]);
+				if(testBoolean == false){
+					doubleNewDestination=true;
+				}
+				
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -169,7 +179,8 @@ public class JobController {
 			}
 		}
 
-		if (errors.hasErrors() || notNull == false || threadsIsInteger == false || jobExists==true || destinationExists==true) {
+		if (errors.hasErrors() || notNull == false || threadsIsInteger == false 
+					|| jobExists==true || destinationExists==true || doubleNewDestination==true) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -192,11 +203,12 @@ public class JobController {
 			mav.addObject("destinations", getJobService()
 					.getAllDestinationConfiguredSourceSinks());
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true && destinationExists==false){
+			if(threadsIsInteger == true && destinationExists==false && doubleNewDestination==false){
 				mav.addObject("destinationInfoList", destinationInfoList);
 			}
 			mav.addObject("jobExists", jobExists);
 			mav.addObject("destinationExists", destinationExists);
+			mav.addObject("doubleNewDestination", doubleNewDestination);
 			mav.addObject("notNull", notNull);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
@@ -289,9 +301,11 @@ public class JobController {
 		}
 		
 		List<String> sourceSinks = job.getSourceSink();
+		Set<String> uniqueSourceSinks = new HashSet();
 		boolean notNull=true;
 		boolean destinationExists=false;
 		boolean threadsIsInteger=true;
+		boolean doubleNewDestination=false;
 		if(sourceSinks!= null){
 			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
@@ -301,6 +315,13 @@ public class JobController {
 						notNull = false;
 				}
 				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
+				
+				//check whether any of the new source sinks have the same name (should then throw error)
+				boolean testBoolean = uniqueSourceSinks.add(sourceSinkElements[0]);
+				if(testBoolean == false){
+					doubleNewDestination=true;
+				}
+				
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -310,7 +331,8 @@ public class JobController {
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false || threadsIsInteger == false || jobExists==true || destinationExists==true) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false 
+					|| jobExists==true || destinationExists==true || doubleNewDestination==true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -333,11 +355,12 @@ public class JobController {
 			mav.addObject("destinations", getJobService()
 					.getAllConfiguredSourceSinks());
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true && destinationExists == false){
+			if(threadsIsInteger == true && destinationExists == false && doubleNewDestination==false){
 				mav.addObject("destinationInfoList", destinationInfoList);
 			}
 			mav.addObject("jobExists", jobExists);
 			mav.addObject("destinationExists", destinationExists);
+			mav.addObject("doubleNewDestination", doubleNewDestination);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
 			mav.addObject("transformOptions", getJobService()
@@ -572,9 +595,11 @@ public class JobController {
 			BindingResult errors) {
 
 		List<String> sourceSinks = destination.getSourceSink();
+		Set<String> uniqueSourceSinks = new HashSet();
 		boolean destinationExists = false;
 		boolean notNull=true;
 		boolean threadsIsInteger=true;
+		boolean doubleNewDestination = false;
 		if(sourceSinks!= null){
 			for(int i=0; i<sourceSinks.size(); i++){
 				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
@@ -584,6 +609,13 @@ public class JobController {
 						notNull = false;
 				}
 				destinationExists = getJobService().checkDestinationExists(sourceSinkElements[0]);
+				
+				//check whether any of the new source sinks have the same name (should then throw error)
+				boolean testBoolean = uniqueSourceSinks.add(sourceSinkElements[0]);
+				if(testBoolean == false){
+					doubleNewDestination=true;
+				}
+				
 				try{
 					Integer.parseInt(sourceSinkElements[4]);
 				}
@@ -593,7 +625,8 @@ public class JobController {
 			}
 		}
 		
-		if (errors.hasErrors() || notNull==false || threadsIsInteger == false || destinationExists==true) {
+		if (errors.hasErrors() || notNull==false || threadsIsInteger == false 
+					|| destinationExists==true || doubleNewDestination == true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -613,10 +646,11 @@ public class JobController {
 			}
 			ModelAndView mav = new ModelAndView("create-destinations");
 			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if(threadsIsInteger == true && destinationExists==false){
+			if(threadsIsInteger == true && destinationExists==false && doubleNewDestination==false){
 				mav.addObject("createDestinationInfoList", destinationInfoList);
 			}
 			mav.addObject("destinationExists",destinationExists);
+			mav.addObject("doubleNewDestination",doubleNewDestination);
 			mav.addObject("destination",destination);
 			mav.addObject("destinationOptions", getJobService()
 					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
@@ -713,6 +747,15 @@ public class JobController {
 	public ModelAndView confirmDeleteDestination(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
 		
+		//don't delete if the destination is in use by a job
+		if(getJobService().getActionRelatedToConfiguredSourceSink(id) != null){
+			mav.addObject("destination", getJobService()
+					.getConfiguredSourceSink(id));
+			mav.addObject("roles", getUserService().getCurrentUser()
+					.getUserRoleSet());
+			mav.setViewName("delete-destination-fail");
+			return mav;
+		}
 		
 		mav.addObject("destination", getJobService()
 				.getConfiguredSourceSink(id));

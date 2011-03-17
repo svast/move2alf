@@ -8,17 +8,22 @@
 
 <c:if test="${jobExists==true}" >
 <br />
-<h3 class="error center">A job with this name already exists</h3>
+<h4 class="error center">A job with this name already exists</h4>
 <br />
 </c:if>
 <c:if test="${destinationExists==true}" >
 <br />
-<h3 class="error center">A destination with this name already exists</h3>
+<h4 class="error center">A destination with this name already exists</h4>
+<br />
+</c:if>
+<c:if test="${doubleNewDestination==true}" >
+<br />
+<h4 class="error center">You may not create a destination with the same name more than once</h4>
 <br />
 </c:if>
 <c:if test="${threadsIsInteger==false}" >
 <br />
-<h3 class="error center">The number of threads in the destination dialogue must contain numbers only</h3>
+<h4 class="error center">The number of threads in the destination dialogue must contain numbers only</h4>
 <br />
 </c:if>
 
