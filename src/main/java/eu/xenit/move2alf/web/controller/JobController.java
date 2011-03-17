@@ -101,18 +101,18 @@ public class JobController {
 		if (null != jobs) {
 			for (int i = 0; i < jobs.size(); i++) {
 				JobInfo jobInfo = new JobInfo();
-				jobInfo.setJobId(jobs.get(i).getId());
-				jobInfo.setJobName(jobs.get(i).getName());
+				Job job = jobs.get(i);
+				jobInfo.setJobId(job.getId());
+				jobInfo.setJobName(job.getName());
 				try {
 					jobInfo.setCycleId(getJobService().getLastCycleForJob(
-							jobs.get(i)).getId());
+							job).getId());
 					jobInfo
 							.setCycleStartDateTime(getJobService()
-									.getLastCycleForJob(jobs.get(i))
+									.getLastCycleForJob(job)
 									.getStartDateTime());
 					jobInfo.setScheduleState(getJobService()
-							.getLastCycleForJob(jobs.get(i)).getSchedule()
-							.getState().getDisplayName());
+							.getJobState(job.getId()).getDisplayName());
 
 				} catch (Exception e) {
 				}

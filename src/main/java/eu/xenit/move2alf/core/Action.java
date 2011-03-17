@@ -58,7 +58,7 @@ public abstract class Action extends ConfigurableObject {
 
 	/*
 	 * the actual input and output parameters can depend on the config and can
-	 * be oveloaded in subclass
+	 * be overloaded in subclass
 	 */
 	public Collection<ParameterDefinition> getInputParameters(
 			ConfiguredAction configuredAction) {

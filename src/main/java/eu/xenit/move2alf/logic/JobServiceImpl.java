@@ -582,5 +582,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<SourceSink> getSourceSinksByCategory(String category) {
 		return getSourceSinkFactory().getObjectsByCategory(category);
 	}
+	
+	public EScheduleState getJobState(int jobId) {
+		Job job = getJob(jobId);
+		for(Schedule schedule : job.getSchedules()) {
+			if (schedule.getState().equals(EScheduleState.RUNNING)) {
+				return EScheduleState.RUNNING; 
+			}
+		}
+		return EScheduleState.NOT_RUNNING;
+	}
 
 }

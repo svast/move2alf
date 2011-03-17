@@ -13,6 +13,8 @@ import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.Schedule;
+import eu.xenit.move2alf.core.enums.EScheduleState;
 
 public class JobExecutor implements org.quartz.Job {
 	private static final Logger logger = LoggerFactory
@@ -27,15 +29,22 @@ public class JobExecutor implements org.quartz.Job {
 				SchedulerImpl.JOB_SERVICE);
 
 		Cycle cycle;
+		Job job;
 		try {
+			Schedule schedule = jobService.getSchedule(scheduleId);
+			job = jobService.getJob(schedule.getJob().getId());
+			if (jobService.getJobState(job.getId()).equals(
+					EScheduleState.RUNNING)) {
+				logger.warn("Job \"" + job.getName()
+						+ "\" already running, not starting second cycle");
+				return;
+			}
 			cycle = jobService.openCycleForSchedule(scheduleId);
 		} catch (Move2AlfException e) {
 			logger.error("Could not execute job with schedule ID " + scheduleId
 					+ " because schedule or job does not exist.");
 			return;
 		}
-
-		Job job = cycle.getSchedule().getJob();
 
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		ConfiguredAction action = job.getFirstConfiguredAction();

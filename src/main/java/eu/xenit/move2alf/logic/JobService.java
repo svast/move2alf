@@ -17,6 +17,7 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.Schedule;
+import eu.xenit.move2alf.core.enums.EScheduleState;
 
 @Transactional
 public interface JobService {
@@ -351,4 +352,9 @@ public interface JobService {
 	 * @param category
 	 */
 	public List<SourceSink> getSourceSinksByCategory(String category);
+	
+	/**
+	 * 
+	 */
+	public EScheduleState getJobState(int jobId);
 }
