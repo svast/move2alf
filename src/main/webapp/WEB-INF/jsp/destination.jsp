@@ -47,9 +47,12 @@ if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDe
 <tr>
 <td>
 <div>
-<input type="radio" id="dest<%=count %>" name="dest" value="<c:out value="${destinationInfo.destinationValue}" />"  />
+<%if(count==1){ %>
+<input type="radio" id="dest<%=count %>" name="dest" value="<c:out value="${destinationInfo.destinationValue}" />"  checked="true"/>
+<%}else{%>
+<input type="radio" id="dest<%=count %>" name="dest" value="<c:out value="${destinationInfo.destinationValue}" />" />
+<%} %>
 <c:out value="${destinationInfo.destinationName}" /> - <c:out value="${destinationInfo.destinationUrl}" />
-
 </div>
 </td>
 </tr>
@@ -63,7 +66,11 @@ if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDe
 <tr>
 <td>
 <div>
-<input type="hidden" id="dest<%=count %>" name="dest" value="<c:out value='${destinationInfo.destinationValue}' />"  />
+<%if(count==1){ %>
+<input type="hidden" id="dest<%=count %>" name="dest" value="<c:out value='${destinationInfo.destinationValue}' />" checked="true"/>
+<%}else{%>
+<input type="hidden" id="dest<%=count %>" name="dest" value="<c:out value='${destinationInfo.destinationValue}' />" />
+<%} %>
 <c:out value="${destinationInfo.destinationName}" /> - <c:out value="${destinationInfo.destinationUrl}" />
 
 </div>
@@ -113,7 +120,9 @@ if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDe
 count ++;
 %>
 </c:forEach>
-<input type="hidden" value="" name="destinationType" />
+<%if (count==1){ %>
+<input type="radio" class="hide" value="" name="destinationType" />
+<%} %>
 
 <tr>
 <td>URL:</td>

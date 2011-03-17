@@ -34,7 +34,7 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				.param("metadata", jobConfig.getMetadata()));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.TransformAction")
-				.param("metadata", jobConfig.getTransform()));
+				.param("transform", jobConfig.getTransform()));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
 				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
@@ -134,31 +134,68 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 		String destinationFolder = "";
 		String dest = "";
 		String documentExists = "";
+		String metadata="";
+		String transform="";
+		String moveBeforeProcessing="";
+		String moveBeforeProcessingPath="";
+		String moveAfterLoad="";
+		String moveAfterLoadPath="";
+		String moveNotLoaded="";
+		String moveNotLoadedPath="";
+		String sendNotification="";
+		String emailAddressNotification="";
+		String sendReport="";
+		String emailAddressReport="";
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 				inputFolder = action.getParameter("path");
 			} else if ("eu.xenit.move2alf.core.action.SinkAction".equals(action.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
+				documentExists = action.getParameter("documentExists");
 			}else if("eu.xenit.move2alf.core.action.DeleteAction".equals(action.getClassName())){
 				destinationFolder = action.getParameter("path");
+				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
 				documentExists = action.getParameter("documentExists");
 			}else if("eu.xenit.move2alf.core.action.ListAction".equals(action.getClassName())){
-				
+				destinationFolder = action.getParameter("path");
+				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
+				documentExists = action.getParameter("documentExists");
 			}else if("eu.xenit.move2alf.core.action.MetadataAction".equals(action.getClassName())){
-				
+				metadata = action.getParameter("metadata");
 			}else if("eu.xenit.move2alf.core.action.TransformAction".equals(action.getClassName())){
-				
+				transform = action.getParameter("transform");
 			}else if("eu.xenit.move2alf.core.action.MoveDocumentsAction".equals(action.getClassName())){
-				
-			}else if("eu.xenit.move2alf.core.action.EmailActionAction".equals(action.getClassName())){
-				
+				moveBeforeProcessing = action.getParameter("moveBeforeProcessing");
+				moveBeforeProcessingPath = action.getParameter("moveBeforeProcessingPath");
+				moveAfterLoad = action.getParameter("moveAfterLoad");
+				moveAfterLoadPath = action.getParameter("moveAfterLoadPath");
+				moveNotLoaded = action.getParameter("moveNotLoaded");
+				moveNotLoadedPath = action.getParameter("moveNotLoadedPath");
+			}else if("eu.xenit.move2alf.core.action.EmailAction".equals(action.getClassName())){
+				sendNotification = action.getParameter("sendNotification");
+				emailAddressNotification = action.getParameter("emailAddressNotification");
+				sendReport = action.getParameter("sendReport");
+				emailAddressReport = action.getParameter("emailAddressReport");
 			}
 			action = action.getAppliedConfiguredActionOnSuccess();
 		}
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);
+		jobConfig.setDocExist(documentExists);
+		jobConfig.setMetadata(metadata);
+		jobConfig.setTransform(transform);
+		jobConfig.setMoveBeforeProc(moveBeforeProcessing);
+		jobConfig.setBeforeProcPath(moveBeforeProcessingPath);
+		jobConfig.setMoveAfterLoad(moveAfterLoad);
+		jobConfig.setAfterLoadPath(moveAfterLoadPath);
+		jobConfig.setMoveNotLoad(moveNotLoaded);
+		jobConfig.setNotLoadPath(moveNotLoadedPath);
+		jobConfig.setSendNotification(sendNotification);
+		jobConfig.setEmailAddressError(emailAddressNotification);
+		jobConfig.setSendReport(sendReport);
+		jobConfig.setEmailAddressRep(emailAddressReport);
 		return jobConfig;
 	}
 }

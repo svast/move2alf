@@ -1,9 +1,9 @@
 
 <h4>Metadata</h4>
 <table class="indent">
+<%int metadataCounter=0; %>
 <c:forEach var="metadataOption" items="${metadataOptions}" >
 <tr>
-<%int metadataCounter=0; %>
 <c:set var="jobMetadata" value="${job.metadata}" scope="session" />
 <c:set var="metadataOption" value="${metadataOption.description}" scope="session" />
 <%
@@ -24,7 +24,7 @@ if(metadataCounter==0){%>
 metadataCounter++; %>
 </c:forEach>
 </table>
-<input type="hidden" value="" name="metadata" />
+<input type="radio" class="hide" value="" name="metadata" />
 <br />
 
 <h4>Transform</h4>
@@ -36,10 +36,15 @@ metadataCounter++; %>
 String jobTransform = (String) session.getAttribute("jobTransform");
 String transformOption = (String) session.getAttribute("transformOption");
 
-if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) { 
+if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) || "No transformation".equals(jobTransform)) { 
 %>
 <tr>
 <td><form:radiobutton path="transform" value="No transformation" checked="true"/>No transformation</td>
+<td><form:errors path="transform" cssClass="error"/></td>
+</tr>
+<%} else{%>
+<tr>
+<td><form:radiobutton path="transform" value="No transformation" />No transformation</td>
 <td><form:errors path="transform" cssClass="error"/></td>
 </tr>
 <%}%>
@@ -55,7 +60,7 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
 <%} %>
 </c:forEach>
 </table>
-<input type="hidden" value="" name="transform" />
+<input type="radio" class="hide" value="" name="transform" />
 <br />
 
 <h4>Options</h4>
