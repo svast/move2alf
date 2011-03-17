@@ -24,7 +24,7 @@
 		<br class="clear">
 
 		<p class="reduce-bottom">
-		Type: <c:out value="${destination.className}" />
+		Type: <c:out value="${typeNames[destination.className]}" />
 		<br />
 		URL: <c:out value="${destination.parameters.url}" />
 		<br />

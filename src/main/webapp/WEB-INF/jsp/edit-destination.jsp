@@ -62,28 +62,28 @@
 <c:set var="firstIteration" value="${true}" />
 <c:forEach var="destinationOption" items="${destinationOptions}" >
 	<c:set var="valueAlreadySet" value="${false}" />
-	<c:if test="${destinationOption.name == destination.className && firstIteration==true}" >
-		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
+	<c:if test="${destinationOption.class.name == destination.className && firstIteration==true}" >
+		<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
 		</tr>
 		<c:set var="firstIteration" value="${false}" />
 		<c:set var="valueAlreadySet" value="${true}" />
 	</c:if>
-	<c:if test="${destinationOption.name != destination.className && firstIteration==true && valueAlreadySet==false}" >
-		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
+	<c:if test="${destinationOption.class.name != destination.className && firstIteration==true && valueAlreadySet==false}" >
+		<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" /><c:out value="${destinationOption.name}" /></td>
 		</tr>
 		<c:set var="firstIteration" value="${false}" />
 		<c:set var="valueAlreadySet" value="${true}" />
 	</c:if>
-	<c:if test="${destinationOption.name == destination.className && firstIteration==false && valueAlreadySet==false}" >
+	<c:if test="${destinationOption.class.name == destination.className && firstIteration==false && valueAlreadySet==false}" >
 		<td></td>
-		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
+		<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
 		</tr>
 		<c:set var="valueAlreadySet" value="${true}" />
 	</c:if>
-	<c:if test="${destinationOption.name != destination.className && firstIteration==false && valueAlreadySet==false}" >
+	<c:if test="${destinationOption.class.name != destination.className && firstIteration==false && valueAlreadySet==false}" >
 		<tr>
 		<td></td>
-		<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
+		<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" /><c:out value="${destinationOption.name}" /></td>
 		</tr>
 	</c:if>
 </c:forEach>

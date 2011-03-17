@@ -1,9 +1,6 @@
 package eu.xenit.move2alf.web.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,31 +17,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestUtils;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.SourceSinkFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.logic.JobServiceImpl;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
@@ -64,6 +55,7 @@ public class JobController {
 	private JobService jobService;
 	private UserService userService;
 	private PipelineAssembler pipelineAssembler;
+	private SourceSinkFactory sourceSinkFactory;
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -90,6 +82,15 @@ public class JobController {
 
 	public PipelineAssembler getPipelineAssembler() {
 		return pipelineAssembler;
+	}
+
+	@Autowired
+	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
+		this.sourceSinkFactory = sourceSinkFactory;
+	}
+
+	public SourceSinkFactory getSourceSinkFactory() {
+		return sourceSinkFactory;
 	}
 
 	@RequestMapping("/job/dashboard")
@@ -568,8 +569,18 @@ public class JobController {
 	@RequestMapping("/destinations")
 	public ModelAndView destinations() {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("destinations", getJobService()
-				.getAllDestinationConfiguredSourceSinks());
+		List<ConfiguredSourceSink> destinations = getJobService()
+				.getAllDestinationConfiguredSourceSinks();
+		
+		Map<String, String> sourceSinkNames = new HashMap<String, String>();
+		
+		for (ConfiguredSourceSink destination : destinations) {
+			SourceSink sourceSink = getSourceSinkFactory().getObject(destination.getClassName());
+			sourceSinkNames.put(destination.getClassName(), sourceSink.getName());
+		}
+		
+		mav.addObject("destinations", destinations);
+		mav.addObject("typeNames", sourceSinkNames);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("manage-destinations");

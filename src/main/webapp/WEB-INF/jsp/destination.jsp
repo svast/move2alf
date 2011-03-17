@@ -102,11 +102,11 @@ if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDe
 <%count=0; %>
 <c:forEach var="destinationOption" items="${destinationOptions}" >
 <%if(count==0){%>
-<td><form:radiobutton path="destinationType" value="${destinationOption.name}" checked="true" /><c:out value="${destinationOption.name}" /></td>
+<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" checked="true" /><c:out value="${destinationOption.name}" /></td>
 </tr>
 <%}else{%>
 <tr>
-<td><form:radiobutton path="destinationType" value="${destinationOption.name}" /><c:out value="${destinationOption.name}" /></td>
+<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" /><c:out value="${destinationOption.name}" /></td>
 </tr>
 <%
 }
