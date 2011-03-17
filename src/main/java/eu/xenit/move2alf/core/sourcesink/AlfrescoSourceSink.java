@@ -74,18 +74,36 @@ public class AlfrescoSourceSink extends SourceSink {
 				relativePath = relativePath.substring(1);
 			}
 
+			// add "cm:" in front of each path component
+			String remotePath = basePath + relativePath;
+			String[] components = remotePath.split("/");
+			remotePath = "";
+			for(String component : components) {
+				if ("".equals(component)) {
+					remotePath += "/";
+				} else if (component.startsWith("cm:")) {
+					remotePath += component + "/";
+				} else {
+					remotePath += "cm:" + component + "/";
+				}
+			}
+			remotePath = remotePath.substring(0, remotePath.length() - 1);
+			
+			logger.debug("Writing to " + remotePath);
+
 			String mimeType = getParameterWithDefault(parameterMap, "mimetype",
 					"text/plain");
 			String namespace = getParameterWithDefault(parameterMap,
 					"namespace", "{http://www.alfresco.org/model/content/1.0}");
 			String contentType = getParameterWithDefault(parameterMap,
 					"contenttype", "content");
-			
-			Map<String, String> metadata = (Map<String, String>) parameterMap.get("metadata");
+
+			Map<String, String> metadata = (Map<String, String>) parameterMap
+					.get("metadata");
 
 			File document = (File) parameterMap.get("file");
-			ras.storeDocAndCreateParentSpaces(document, mimeType, basePath
-					+ relativePath, user, namespace, contentType, metadata, null);
+			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
+					user, namespace, contentType, metadata, null);
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
 			logger.error(e.getMessage(), e);
