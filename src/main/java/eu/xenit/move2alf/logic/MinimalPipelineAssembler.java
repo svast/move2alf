@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.ActionFactory;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.logic.PipelineAssembler.ActionBuilder;
@@ -14,9 +18,20 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
 public class MinimalPipelineAssembler extends PipelineAssembler {
+	
+	private ActionFactory actionFactory;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(MinimalPipelineAssembler.class);
+
+	@Autowired
+	public void setActionFactory(ActionFactory actionFactory) {
+		this.actionFactory = actionFactory;
+	}
+
+	public ActionFactory getActionFactory() {
+		return actionFactory;
+	}
 
 	@Override
 	public void assemblePipeline(JobConfig jobConfig) {
@@ -38,12 +53,10 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				.param("moveNotLoaded", "false")		//true or false (String)
 				.param("moveNotLoadedPath", "false"));
 		
-		actions.add(action("eu.xenit.move2alf.core.action.MetadataAction")
-				.param("metadata", jobConfig.getMetadata()));
+		actions.add(action(jobConfig.getMetadata()));
 		
 		if(!"No transformation".equals(jobConfig.getTransform())){
-			actions.add(action("eu.xenit.move2alf.core.action.TransformAction")
-					.param("transform", jobConfig.getTransform()));
+			actions.add(action(jobConfig.getTransform()));
 		}
 		
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
@@ -132,10 +145,6 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
 				documentExists = action.getParameter("documentExists");
-			}else if("eu.xenit.move2alf.core.action.MetadataAction".equals(action.getClassName())){
-				metadata = action.getParameter("metadata");
-			}else if("eu.xenit.move2alf.core.action.TransformAction".equals(action.getClassName())){
-				transform = action.getParameter("transform");
 			}else if("eu.xenit.move2alf.core.action.MoveDocumentsAction".equals(action.getClassName())){
 				moveBeforeProcessing = action.getParameter("moveBeforeProcessing");
 				moveBeforeProcessingPath = action.getParameter("moveBeforeProcessingPath");
@@ -148,7 +157,15 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				emailAddressNotification = action.getParameter("emailAddressNotification");
 				sendReport = action.getParameter("sendReport");
 				emailAddressReport = action.getParameter("emailAddressReport");
+			}else{
+				Action configurableAction = getActionFactory().getObject(action.getClassName());
+				if(configurableAction.getCategory()==ConfigurableObject.CAT_METADATA){
+					metadata = action.getClassName();
+				}else if(configurableAction.getCategory()==ConfigurableObject.CAT_TRANSFORM){
+					transform = action.getClassName();
+				}
 			}
+			
 			action = action.getAppliedConfiguredActionOnSuccess();
 		}
 		jobConfig.setInputFolder(inputFolder);
