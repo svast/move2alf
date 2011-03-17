@@ -593,10 +593,10 @@ function editRoleValidation(form){
 
 </script>
 <meta charset="utf-8">
-<link rel="stylesheet" href="/styles/blueprint/screen.css"
+<!-- <link rel="stylesheet" href="/styles/blueprint/screen.css"
 	type="text/css" media="screen, projection">
 <link rel="stylesheet" href="/styles/blueprint/print.css"
-	type="text/css" media="print">
+	type="text/css" media="print"> -->
 <!--[if lt IE 8]>
   <link rel="stylesheet" href="/styles/blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
@@ -608,8 +608,7 @@ function editRoleValidation(form){
 <body onLoad="putFocus(0,0);">
 <div class="container">
 <div class="span-24 last header">
-<h1>XeniT Move2Alf</h1>
-
+<img src="<spring:url value="/images/move2alf-logo.png" htmlEscape="true" />" alt="Move2Alf" width=""/>
 <%String roleCheck= "";%>
 <c:forEach var="role" items="${roles}">
 		<c:if test='${role.role=="SYSTEM_ADMIN"}'>
