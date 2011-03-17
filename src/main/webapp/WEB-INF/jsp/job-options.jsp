@@ -5,16 +5,16 @@
 <c:forEach var="metadataOption" items="${metadataOptions}" >
 <tr>
 <c:set var="jobMetadata" value="${job.metadata}" scope="session" />
-<c:set var="metadataOption" value="${metadataOption.description}" scope="session" />
+<c:set var="metadataOption" value="${metadataOption.class.name}" scope="session" />
 <%
 String jobMetadata = (String) session.getAttribute("jobMetadata");
 String metadataOption = (String) session.getAttribute("metadataOption");
 if(metadataOption!=null){
 if ((metadataCounter==0 && (jobMetadata == null || jobMetadata.equals(""))) || metadataOption.equals(jobMetadata)) { 
 %>
-<td><form:radiobutton path="metadata" value="${metadataOption.name}" checked="true" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
+<td><form:radiobutton path="metadata" value="${metadataOption.class.name}" checked="true" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
 <%}else{ %>
-<td><form:radiobutton path="metadata" value="${metadataOption.name}" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
+<td><form:radiobutton path="metadata" value="${metadataOption.class.name}" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
 <%} 
 if(metadataCounter==0){%>
 <td><form:errors path="metadata" cssClass="error"/></td>
@@ -31,7 +31,7 @@ metadataCounter++; %>
 <table class="indent">
 <%int transformCounter=0; %>
 <c:set var="jobTransform" value="${job.transform}" scope="session" />
-<c:set var="transformOption" value="${transformOption.description}" scope="session" />
+<c:set var="transformOption" value="${transformOption.class.name}" scope="session" />
 <%
 String jobTransform = (String) session.getAttribute("jobTransform");
 String transformOption = (String) session.getAttribute("transformOption");
@@ -51,11 +51,11 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 <c:forEach var="transformOption" items="${transformOptions}" >
 <%if(jobTransform != null && !jobTransform.equals("") && transformOption!=null && transformOption.equals(jobTransform)){%>
 <tr>
-<td><form:radiobutton path="transform" value="${transformOption.name}" checked="true"/><c:out value="${transformOption.description}" /></td>
+<td><form:radiobutton path="transform" value="${transformOption.class.name}" checked="true"/><c:out value="${transformOption.description}" /></td>
 </tr>
 <%}else{ %>
 <tr>
-<td><form:radiobutton path="transform" value="${transformOption.name}" /><c:out value="${transformOption.description}" /></td>
+<td><form:radiobutton path="transform" value="${transformOption.class.name}" /><c:out value="${transformOption.description}" /></td>
 </tr>
 <%} %>
 </c:forEach>

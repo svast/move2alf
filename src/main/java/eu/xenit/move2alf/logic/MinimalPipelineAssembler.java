@@ -30,19 +30,21 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 		
 		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
 		
-		actions.add(action("eu.xenit.move2alf.core.action.MetadataAction")
-				.param("metadata", jobConfig.getMetadata()));
-		
-		actions.add(action("eu.xenit.move2alf.core.action.TransformAction")
-				.param("transform", jobConfig.getTransform()));
-		
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
 				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
 				.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
-				.param("moveAfterLoad", jobConfig.getMoveAfterLoad())	//true or false (String)
-				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
-				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath()));
+				.param("moveAfterLoad", "false")	//true or false (String)
+				.param("moveAfterLoadPath", "false")
+				.param("moveNotLoaded", "false")		//true or false (String)
+				.param("moveNotLoadedPath", "false"));
+		
+		actions.add(action("eu.xenit.move2alf.core.action.MetadataAction")
+				.param("metadata", jobConfig.getMetadata()));
+		
+		if(!"No transformation".equals(jobConfig.getTransform())){
+			actions.add(action("eu.xenit.move2alf.core.action.TransformAction")
+					.param("transform", jobConfig.getTransform()));
+		}
 		
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
 				.param("sendNotification", jobConfig.getSendNotification())	//true or false (String)
@@ -77,48 +79,17 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
 		}
 		
+		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
+				.param("moveBeforeProcessing", "false") //true or false (String)
+				.param("moveBeforeProcessingPath", "false")
+				.param("moveAfterLoad", jobConfig.getMoveAfterLoad())	//true or false (String)
+				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
+				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath()));
+		
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions.toArray(new ActionBuilder[7]);
 		
-		assemble(
-				jobConfig,actionsArray
-				/*action("eu.xenit.move2alf.core.action.SourceAction")
-						.param("path", jobConfig.getInputFolder())
-						.param("recursive", "true")
-						.sourceSink(
-								sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")),
-				action("eu.xenit.move2alf.core.action.ThreadAction"),
-				action("eu.xenit.move2alf.core.action.MetadataAction")
-						.param("metadata", jobConfig.getMetadata()),
-				action("eu.xenit.move2alf.core.action.TransformAction")
-						.param("metadata", jobConfig.getTransform()),
-				action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-						.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
-						.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
-						.param("moveAfterLoad", jobConfig.getMoveAfterLoad())	//true or false (String)
-						.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
-						.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
-						.param("moveNotLoadedPath", jobConfig.getNotLoadPath()),
-				action("eu.xenit.move2alf.core.action.EmailAction")
-						.param("sendNotification", jobConfig.getSendNotification())	//true or false (String)
-						.param("emailAddressNotification", jobConfig.getEmailAddressError())
-						.param("sendReport", jobConfig.getSendReport())		//true or false (String)
-						.param("emailAddressReport", jobConfig.getEmailAddressRep()),
-				action("eu.xenit.move2alf.core.action.SinkAction")
-						.param("path", jobConfig.getDestinationFolder())
-						.param("documentExists", jobConfig.getDocExist())
-						// TODO: add param: ignore / error / overwrite / version 
-						.sourceSink(
-								sourceSinkById(Integer.parseInt(jobConfig.getDest()))),
-				action("eu.xenit.move2alf.core.action.DeleteAction")
-						.param("path", jobConfig.getDestinationFolder())
-						.param("documentExists", jobConfig.getDocExist())
-						.sourceSink(
-								sourceSinkById(Integer.parseInt(jobConfig.getDest()))),
-				action("eu.xenit.move2alf.core.action.ListAction")
-						.param("path", jobConfig.getDestinationFolder())
-						.param("documentExists", jobConfig.getDocExist())
-						.sourceSink(
-								sourceSinkById(Integer.parseInt(jobConfig.getDest())))*/);
+		assemble(jobConfig,actionsArray);
 				// TODO: Reporting
 	}
 	
