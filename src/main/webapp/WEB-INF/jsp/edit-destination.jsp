@@ -75,6 +75,7 @@
 		<c:set var="valueAlreadySet" value="${true}" />
 	</c:if>
 	<c:if test="${destinationOption.class.name == destination.className && firstIteration==false && valueAlreadySet==false}" >
+		<tr>
 		<td></td>
 		<td><form:radiobutton path="destinationType" value="${destinationOption.class.name}" checked="true"/><c:out value="${destinationOption.name}" /></td>
 		</tr>
@@ -87,7 +88,7 @@
 		</tr>
 	</c:if>
 </c:forEach>
-<input type="hidden" value="" name="destinationType" />
+<div><form:radiobutton path="destinationType" class="hide" value="" /></div>
 
 <tr>
 <td>URL:</td>

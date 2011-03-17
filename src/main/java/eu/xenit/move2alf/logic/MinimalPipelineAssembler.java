@@ -133,6 +133,7 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 		String inputFolder = "";
 		String destinationFolder = "";
 		String dest = "";
+		String documentExists = "";
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 				inputFolder = action.getParameter("path");
@@ -140,7 +141,8 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
 			}else if("eu.xenit.move2alf.core.action.DeleteAction".equals(action.getClassName())){
-				
+				destinationFolder = action.getParameter("path");
+				documentExists = action.getParameter("documentExists");
 			}else if("eu.xenit.move2alf.core.action.ListAction".equals(action.getClassName())){
 				
 			}else if("eu.xenit.move2alf.core.action.MetadataAction".equals(action.getClassName())){
