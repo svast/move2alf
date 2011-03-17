@@ -464,7 +464,9 @@ public class JobController {
 		getPipelineAssembler().assemblePipeline(job);
 		
 		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
-		getJobService().deleteAction(firstAction.getId());
+		if(firstAction!=null){
+			getJobService().deleteAction(firstAction.getId());
+		}
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;

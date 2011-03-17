@@ -47,23 +47,23 @@ public class JobConfig {
 	@NotEmpty
 	private String docExist;
 
-	private boolean moveBeforeProc = false;
+	private String moveBeforeProc = "false";
 
 	private String beforeProcPath;
 
-	private boolean moveAfterLoad = false;
+	private String moveAfterLoad = "false";
 
 	private String afterLoadPath;
 
-	private boolean moveNotLoad = false;
+	private String moveNotLoad = "false";
 
 	private String notLoadPath;
 
-	private boolean sendNotification = false;
+	private String sendNotification = "false";
 
 	private String emailAddressError;
 
-	private boolean sendReport = false;
+	private String sendReport = "false";
 
 	private String emailAddressRep;
 
@@ -224,11 +224,11 @@ public class JobConfig {
 		return docExist;
 	}
 
-	public void setMoveBeforeProc(boolean moveBeforeProc) {
+	public void setMoveBeforeProc(String moveBeforeProc) {
 		this.moveBeforeProc = moveBeforeProc;
 	}
 
-	public boolean getMoveBeforeProc() {
+	public String getMoveBeforeProc() {
 		return moveBeforeProc;
 	}
 
@@ -240,11 +240,11 @@ public class JobConfig {
 		return beforeProcPath;
 	}
 
-	public void setMoveAfterLoad(boolean moveAfterLoad) {
+	public void setMoveAfterLoad(String moveAfterLoad) {
 		this.moveAfterLoad = moveAfterLoad;
 	}
 
-	public boolean getMoveAfterLoad() {
+	public String getMoveAfterLoad() {
 		return moveAfterLoad;
 	}
 
@@ -256,11 +256,11 @@ public class JobConfig {
 		return afterLoadPath;
 	}
 
-	public void setMoveNotLoad(boolean moveNotLoad) {
+	public void setMoveNotLoad(String moveNotLoad) {
 		this.moveNotLoad = moveNotLoad;
 	}
 
-	public boolean getMoveNotLoad() {
+	public String getMoveNotLoad() {
 		return moveNotLoad;
 	}
 
@@ -272,11 +272,11 @@ public class JobConfig {
 		return notLoadPath;
 	}
 
-	public void setSendNotification(boolean sendNotification) {
+	public void setSendNotification(String sendNotification) {
 		this.sendNotification = sendNotification;
 	}
 
-	public boolean getSendNotification() {
+	public String getSendNotification() {
 		return sendNotification;
 	}
 
@@ -288,11 +288,11 @@ public class JobConfig {
 		return emailAddressError;
 	}
 
-	public void setSendReport(boolean sendReport) {
+	public void setSendReport(String sendReport) {
 		this.sendReport = sendReport;
 	}
 
-	public boolean getSendReport() {
+	public String getSendReport() {
 		return sendReport;
 	}
 

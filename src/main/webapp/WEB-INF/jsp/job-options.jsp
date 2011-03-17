@@ -62,18 +62,50 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
 <div class="indent">
 <p>If document already exists in destination:</p>
 <table class="indent">
-<tr><td><form:radiobutton path="docExist" value="SkipLog" checked="true"/>Skip document and log error</td>
-<td><form:errors path="docExist" cssClass="error"/></td></tr>
+<%int optionsCounter=0; %>
+<c:set var="jobOption" value="${job.docExist}" scope="session" />
+
+<tr>
+<c:set var="emptyList" value="false" />
+<c:if test="${job.docExist=='SkipAndLog' || empty job.docExist}" >
+<td><form:radiobutton path="docExist" value="SkipAndLog" checked="true"/>Skip document and log error</td>
+<c:set var="emptyList" value="true" />
+</c:if>
+<c:if test="${job.docExist!='SkipAndLog' && emptyList==false}" >
+<td><form:radiobutton path="docExist" value="SkipAndLog" />Skip document and log error</td>
+</c:if>
+<td><form:errors path="docExist" cssClass="error"/></td>
+</tr>
+<c:if test="${job.docExist=='Skip'}" >
+<tr><td><form:radiobutton path="docExist" value="Skip" checked="true"/>Skip document silently</td></tr>
+</c:if>
+<c:if test="${job.docExist!='Skip'}" >
 <tr><td><form:radiobutton path="docExist" value="Skip" />Skip document silently</td></tr>
+</c:if>
+<c:if test="${job.docExist=='Overwrite'}" >
+<tr><td><form:radiobutton path="docExist" value="Overwrite" checked="true"/>Overwrite document</td></tr>
+</c:if>
+<c:if test="${job.docExist!='Overwrite'}" >
 <tr><td><form:radiobutton path="docExist" value="Overwrite" />Overwrite document</td></tr>
+</c:if>
+<c:if test="${job.docExist=='Delete'}" >
+<tr><td><form:radiobutton path="docExist" value="Delete" checked="true"/>Delete</td></tr>
+</c:if>
+<c:if test="${job.docExist!='Delete'}" >
 <tr><td><form:radiobutton path="docExist" value="Delete" />Delete</td></tr>
-<tr><td><form:radiobutton path="docExist" value="Presence" />List presence</td></tr>
+</c:if>
+<c:if test="${job.docExist=='Presence'}" >
+<tr><td><form:radiobutton path="docExist" value="ListPresence" checked="true"/>List presence</td></tr>
+</c:if>
+<c:if test="${job.docExist!='Presence'}" >
+<tr><td><form:radiobutton path="docExist" value="ListPresence" />List presence</td></tr>
+</c:if>
 </table>
 </div>
 
 <br />
 
-<div class="indent"><form:checkbox path="moveBeforeProc" value="Move before processing to" />Move before processing to</div>
+<div class="indent"><form:checkbox path="moveBeforeProc" value="true" />Move before processing to</div>
 <table>
 <tr>
 <td class="double-indent">Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
@@ -90,7 +122,7 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="moveAfterLoad" value="Move loaded files to" />Move loaded files to</div>
+<div class="indent"><form:checkbox path="moveAfterLoad" value="true" />Move loaded files to</div>
 <table >
 <tr>
 <td class="double-indent">Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
@@ -106,7 +138,7 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="moveNotLoad" value="Move not loaded files to" />Move not loaded files to</div>
+<div class="indent"><form:checkbox path="moveNotLoad" value="true" />Move not loaded files to</div>
 <table>
 <tr>
 <td class="double-indent">Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
@@ -122,7 +154,7 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="sendNotification" value="Send notification e-mails on errors" />Send notification e-mails on errors</div>
+<div class="indent"><form:checkbox path="sendNotification" value="true" />Send notification e-mails on errors</div>
 <div class="double-indent">To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
 <div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
@@ -135,7 +167,7 @@ if(transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) {
                         </script>
 <br />
 
-<div class="indent"><form:checkbox path="sendReport" value="Send load reports" />Send load reports</div>
+<div class="indent"><form:checkbox path="sendReport" value="true" />Send load reports</div>
 <div class="double-indent">To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
 <div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
