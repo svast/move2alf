@@ -3,11 +3,18 @@ package eu.xenit.move2alf.core.action;
 import java.io.File;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
 
 public class MoveDocumentsAction extends Action {
+	
+	private static final Logger logger = LoggerFactory
+	.getLogger(AlfrescoSourceSink.class);
 	
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
@@ -16,83 +23,209 @@ public class MoveDocumentsAction extends Action {
 		String moveBeforeProcessing = configuredAction.getParameter("moveBeforeProcessing");
 		String moveAfterLoad = configuredAction.getParameter("moveAfterLoad");
 		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
-		String inputFolder = configuredAction.getParameter("inputFolder");
+		String stage = configuredAction.getParameter("stage");
+		String inputFolder = configuredAction.getParameter("path");
+		inputFolder = inputFolder.replaceAll("\\\\", "/");
 		
-		if("true".equals(moveBeforeProcessing)){
+		int inputFolderLength = inputFolder.length()-1;
+		int lastIndexSlash = inputFolder.lastIndexOf("/");
+		if(lastIndexSlash==inputFolderLength){
+			inputFolder=inputFolder.substring(0,inputFolderLength);
+		}
+		
+		if("true".equals(moveBeforeProcessing) && "before".equals(stage)){
 			String moveDirectory = configuredAction.getParameter("moveBeforeProcessingPath");
-
+			
+			//don't do anything if the moveDirectory is empty (not a mandatory field)
+			if(moveDirectory != null && !"".equals(moveDirectory)){
+				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
+			
 				File file = (File) parameterMap.get("file");
 				String absolutePath = file.getAbsolutePath();
 				
+				absolutePath = absolutePath.replaceAll("\\\\", "/");
+				//remove file name
+				absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+				
+				//makes sure the input folder does not end on "/"
+				int moveDirectoryLength = moveDirectory.length()-1;
+				if(moveDirectory.lastIndexOf("/")==moveDirectoryLength){
+					moveDirectory=moveDirectory.substring(0,moveDirectory.length()-1);
+				}
+			
+				//assemble full path
 				String relativePath = absolutePath.replace(inputFolder, "");
+				String fullDestinationPath = moveDirectory+""+relativePath;
 				
-				String fullDestinationPath = moveDirectory+"/"+relativePath;
+				File moveFolder = new File(fullDestinationPath);
 				
-				boolean destinationPathExists = checkParentDirExists(fullDestinationPath);
+				//check if full path exists, otherwise create path
+				boolean destinationPathExists = true;
+				boolean moveFolderExists = moveFolder.exists();
+				if(!moveFolderExists){
+					destinationPathExists = checkParentDirExists(fullDestinationPath);
+					if(destinationPathExists){
+						boolean success = (new File(fullDestinationPath)).mkdir();
+						if(success){
+						}else{
+						}
+					}
+				}
 				
+				//If path exists move document
 				if(destinationPathExists){
-					boolean success = file.renameTo(new File(moveDirectory, file.getName()));
+					String newFileName=fullDestinationPath+"/"+file.getName();
+					boolean success = file.renameTo(new File(newFileName));
+					
+					if(success){
+						File movedFile = new File(newFileName);
+						parameterMap.put("file",movedFile);
+						logger.info("Moved file to "+movedFile.getAbsolutePath());
+					}
 					
 					if(!success){
-						//not successfully moved
+						logger.debug("Could not move document "+file.getAbsolutePath());
 					}
 				}else{
-					//destination path could not be made
+					logger.debug("Move path could not be made for document "+file.getAbsolutePath());
 				}
-
+			}
 		}
 		
-		if("true".equals(moveAfterLoad)){
+		
+		if("true".equals(moveAfterLoad) && "after".equals(stage)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");
+				inputFolder = inputFolder.replace("\\", "/");
+				inputFolderLength = inputFolder.length()-1;
+				lastIndexSlash = inputFolder.lastIndexOf("/");
+				if(lastIndexSlash==inputFolderLength){
+					inputFolder=inputFolder.substring(0,inputFolderLength);
+				}
 			}
-			
 			String moveDirectory = configuredAction.getParameter("moveAfterLoadPath");
 			
-			File file = (File) parameterMap.get("file");
-			String absolutePath = file.getAbsolutePath();
+			//don't do anything if the moveDirectory is empty (not a mandatory field)
+			if(moveDirectory != null && !"".equals(moveDirectory)){
+				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
 			
-			String relativePath = absolutePath.replace(inputFolder, "");
-			
-			String fullDestinationPath = moveDirectory+"/"+relativePath;
-			
-			boolean destinationPathExists = checkParentDirExists(fullDestinationPath);
-			
-			if(destinationPathExists){
-				boolean success = file.renameTo(new File(moveDirectory, file.getName()));
+				File file = (File) parameterMap.get("file");
+				String absolutePath = file.getAbsolutePath();
 				
-				if(!success){
-					//not successfully moved
+				absolutePath = absolutePath.replaceAll("\\\\", "/");
+				//remove file name
+				absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+				
+				//makes sure the input folder does not end on "/"
+				int moveDirectoryLength = moveDirectory.length()-1;
+				if(moveDirectory.lastIndexOf("/")==moveDirectoryLength){
+					moveDirectory=moveDirectory.substring(0,moveDirectory.length()-1);
 				}
-			}else{
-				//destination path could not be made
+			
+				//assemble full path
+				String relativePath = absolutePath.replace(inputFolder, "");
+				String fullDestinationPath = moveDirectory+""+relativePath;
+				
+				File moveFolder = new File(fullDestinationPath);
+				
+				//check if full path exists, otherwise create path
+				boolean destinationPathExists = true;
+				boolean moveFolderExists = moveFolder.exists();
+				if(!moveFolderExists){
+					destinationPathExists = checkParentDirExists(fullDestinationPath);
+					if(destinationPathExists){
+						boolean success = (new File(fullDestinationPath)).mkdir();
+						if(success){
+						}else{
+						}
+					}
+				}
+				
+				//If path exists move document
+				if(destinationPathExists){
+					String newFileName=fullDestinationPath+"/"+file.getName();
+					boolean success = file.renameTo(new File(newFileName));
+					
+					if(success){
+						File movedFile = new File(newFileName);
+						parameterMap.put("file",movedFile);
+						logger.info("Moved file to "+movedFile.getAbsolutePath());
+					}
+					
+					if(!success){
+						logger.debug("Could not move document "+file.getAbsolutePath());
+					}
+				}else{
+					logger.debug("Move path could not be made for document "+file.getAbsolutePath());
+				}
 			}
 		}
 		
-		if("true".equals(moveNotLoaded)){
+		if("true".equals(moveNotLoaded) && "after".equals(stage)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");
+				inputFolder = inputFolder.replace("\\", "/");
+				inputFolderLength = inputFolder.length()-1;
+				lastIndexSlash = inputFolder.lastIndexOf("/");
+				if(lastIndexSlash==inputFolderLength){
+					inputFolder=inputFolder.substring(0,inputFolderLength);
+				}
 			}
 			
 			String moveDirectory  = configuredAction.getParameter("moveNotLoadedPath");
+			//don't do anything if the moveDirectory is empty (not a mandatory field)
+			if(moveDirectory != null && !"".equals(moveDirectory)){
+				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
 			
-			File file = (File) parameterMap.get("file");
-			String absolutePath = file.getAbsolutePath();
-			
-			String relativePath = absolutePath.replace(inputFolder, "");
-			
-			String fullDestinationPath = moveDirectory+"/"+relativePath;
-			
-			boolean destinationPathExists = checkParentDirExists(fullDestinationPath);
-			
-			if(destinationPathExists){
-				boolean success = file.renameTo(new File(moveDirectory, file.getName()));
+				File file = (File) parameterMap.get("file");
+				String absolutePath = file.getAbsolutePath();
 				
-				if(!success){
-					//not successfully moved
+				absolutePath = absolutePath.replaceAll("\\\\", "/");
+				//remove file name
+				absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+				
+				//makes sure the input folder does not end on "/"
+				int moveDirectoryLength = moveDirectory.length()-1;
+				if(moveDirectory.lastIndexOf("/")==moveDirectoryLength){
+					moveDirectory=moveDirectory.substring(0,moveDirectory.length()-1);
 				}
-			}else{
-				//destination path could not be made
+			
+				//assemble full path
+				String relativePath = absolutePath.replace(inputFolder, "");
+				String fullDestinationPath = moveDirectory+""+relativePath;
+				
+				File moveFolder = new File(fullDestinationPath);
+				
+				//check if full path exists, otherwise create path
+				boolean destinationPathExists = true;
+				boolean moveFolderExists = moveFolder.exists();
+				if(!moveFolderExists){
+					destinationPathExists = checkParentDirExists(fullDestinationPath);
+					if(destinationPathExists){
+						boolean success = (new File(fullDestinationPath)).mkdir();
+						if(success){
+						}else{
+						}
+					}
+				}
+				
+				//If path exists move document
+				if(destinationPathExists){
+					String newFileName=fullDestinationPath+"/"+file.getName();
+					boolean success = file.renameTo(new File(newFileName));
+					
+					if(success){
+						File movedFile = new File(newFileName);
+						parameterMap.put("file",movedFile);
+						logger.info("Moved file to "+movedFile.getAbsolutePath());
+					}
+					
+					if(!success){
+						logger.debug("Could not move document "+file.getAbsolutePath());
+					}
+				}else{
+					logger.debug("Move path could not be made for document "+file.getAbsolutePath());
+				}
 			}
 		}
 	}
@@ -100,8 +233,8 @@ public class MoveDocumentsAction extends Action {
 	public boolean checkParentDirExists(String path){
 		
 		int index = path.lastIndexOf("/");
-		String newPath = path.substring(0, index-1);
-		
+		String newPath = path.substring(0, index);
+		logger.debug("new path is "+newPath);
 		File parentDestination = new File(newPath);
 		boolean exists = parentDestination.exists();
 		
@@ -109,8 +242,10 @@ public class MoveDocumentsAction extends Action {
 			boolean destinationPathMade = checkParentDirExists(newPath);
 			if(destinationPathMade){
 				boolean success = (new File(newPath)).mkdir();
+				logger.debug("Directory " +newPath+" made");
 				return success;
 			}else{
+				logger.debug("Directory " +newPath+" not made");
 				return false;	
 			}
 		}

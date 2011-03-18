@@ -49,9 +49,11 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
 				.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
 				.param("moveAfterLoad", "false")	//true or false (String)
-				.param("moveAfterLoadPath", "false")
+				.param("moveAfterLoadPath", "")
 				.param("moveNotLoaded", "false")		//true or false (String)
-				.param("moveNotLoadedPath", "false"));
+				.param("moveNotLoadedPath", "")
+				.param("path", jobConfig.getInputFolder())
+				.param("stage", "before"));
 		
 		actions.add(action(jobConfig.getMetadata()));
 		
@@ -93,12 +95,14 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 		}
 		
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", "false") //true or false (String)
-				.param("moveBeforeProcessingPath", "false")
+				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
+				.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
 				.param("moveAfterLoad", jobConfig.getMoveAfterLoad())	//true or false (String)
 				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
 				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath()));
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
+				.param("path", jobConfig.getInputFolder())
+				.param("stage", "after"));
 		
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions.toArray(new ActionBuilder[7]);
 		

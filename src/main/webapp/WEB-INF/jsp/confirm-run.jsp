@@ -8,7 +8,7 @@
 <br />
 <br />
 <br />
-<h3>Cycle for job "<c:out value="${job.name}" /> will start in approximately 10 seconds"</h3>
+<h3>Cycle for job "<c:out value="${job.name}" />" will start in approximately 10 seconds</h3>
 
 <button type="button" class="center" onclick="javascript:location.href ='<spring:url value="/job/dashboard" htmlEscape="true" />';">Ok</button>
 

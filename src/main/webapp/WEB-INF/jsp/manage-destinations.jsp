@@ -30,8 +30,6 @@
 		<br />
 		Username: <c:out value="${destination.parameters.user}" />
 		<br />
-		Password: <c:out value="${destination.parameters.password}" />
-		<br />
 		Threads: <c:out value="${destination.parameters.threads}" />
 		
 		</p>
