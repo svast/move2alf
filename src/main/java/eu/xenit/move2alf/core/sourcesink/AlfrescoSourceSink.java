@@ -73,6 +73,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			if (relativePath.startsWith("/")) {
 				relativePath = relativePath.substring(1);
 			}
+			
+			relativePath.replace("\\", "/");
 
 			// add "cm:" in front of each path component
 			String remotePath = basePath + relativePath;
