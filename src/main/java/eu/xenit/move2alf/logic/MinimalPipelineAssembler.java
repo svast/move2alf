@@ -104,10 +104,11 @@ public class MinimalPipelineAssembler extends PipelineAssembler {
 				.param("path", jobConfig.getInputFolder())
 				.param("stage", "after"));
 		
+		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
+		
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions.toArray(new ActionBuilder[7]);
 		
 		assemble(jobConfig,actionsArray);
-				// TODO: Reporting
 	}
 	
 	@Override

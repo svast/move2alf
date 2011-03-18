@@ -106,12 +106,17 @@ public class AlfrescoSourceSink extends SourceSink {
 			File document = (File) parameterMap.get("file");
 			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
 					user, namespace, contentType, metadata, null);
+			parameterMap.put("status", "ok");
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
+			parameterMap.put("status", "failed");
+			parameterMap.put("errormessage", e.getMessage());
 			logger.error(e.getMessage(), e);
 		} catch (RepositoryException e) {
 			// we end up here if the request could not be handled by the
 			// repository
+			parameterMap.put("status", "failed");
+			parameterMap.put("errormessage", e.getMessage());
 			logger.error(e.getMessage(), e);
 		} catch (RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
