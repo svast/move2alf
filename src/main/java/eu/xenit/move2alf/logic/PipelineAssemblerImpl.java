@@ -17,12 +17,12 @@ import eu.xenit.move2alf.logic.PipelineAssembler.ActionBuilder;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
-public class MinimalPipelineAssembler extends PipelineAssembler {
+public class PipelineAssemblerImpl extends PipelineAssembler {
 	
 	private ActionFactory actionFactory;
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(MinimalPipelineAssembler.class);
+			.getLogger(PipelineAssemblerImpl.class);
 
 	@Autowired
 	public void setActionFactory(ActionFactory actionFactory) {
