@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.logic.JobService;
 
 public abstract class Action extends ConfigurableObject {
 	protected Map<String, ParameterDefinition> aprioriInputParameterMap = new HashMap<String, ParameterDefinition>();
@@ -14,6 +15,8 @@ public abstract class Action extends ConfigurableObject {
 	private ActionFactory actionFactory;
 	
 	private SourceSinkFactory sourceSinkFactory;
+	
+	private JobService jobService;
 
 	public void setActionFactory(ActionFactory actionFactory) {
 		this.actionFactory = actionFactory;
@@ -29,6 +32,14 @@ public abstract class Action extends ConfigurableObject {
 
 	public SourceSinkFactory getSourceSinkFactory() {
 		return sourceSinkFactory;
+	}
+	
+	public void setJobService(JobService jobService) {
+		this.jobService = jobService;
+	}
+	
+	public JobService getJobService() {
+		return jobService;
 	}
 
 	protected void addAprioriInputParameter(

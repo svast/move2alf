@@ -46,6 +46,7 @@ public class JobExecutor implements org.quartz.Job {
 		}
 
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("cycle", cycle.getId());
 		ConfiguredAction action = job.getFirstConfiguredAction();
 		jobService.executeAction(action, parameterMap);
 

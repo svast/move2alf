@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
+import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
@@ -362,4 +364,6 @@ public interface JobService {
 	 * Reset state of all schedules to NOT_RUNNING. 
 	 */
 	public void resetSchedules();
+	
+	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
 }

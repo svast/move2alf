@@ -29,8 +29,10 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
+import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
 @Service("jobService")
@@ -608,6 +610,18 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			schedule.setState(EScheduleState.NOT_RUNNING);
 			session.update(schedule);
 		}
+	}
+
+	@Override
+	public void createProcessedDocument(int cycleId, String name, Date date,
+			String state, Set<ProcessedDocumentParameter> params) {
+		ProcessedDocument doc = new ProcessedDocument();
+		doc.setCycle(getCycle(cycleId));
+		doc.setName(name);
+		doc.setProcessedDateTime(date);
+		doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
+		doc.setProcessedDocumentParameterSet(params);
+		getSessionFactory().getCurrentSession().save(doc);
 	}
 
 }

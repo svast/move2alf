@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
@@ -9,7 +9,7 @@ import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 public class ProcessedDocument extends IdObject {
 	private String name;
 	
-	private Timestamp processedDateTime;
+	private Date processedDateTime;
 	
 	private EProcessedDocumentStatus status;
 	
@@ -29,11 +29,11 @@ public class ProcessedDocument extends IdObject {
 		return name;
 	}
 
-	public void setProcessedDateTime(Timestamp processedDateTime) {
+	public void setProcessedDateTime(Date processedDateTime) {
 		this.processedDateTime = processedDateTime;
 	}
 
-	public Timestamp getProcessedDateTime() {
+	public Date getProcessedDateTime() {
 		return processedDateTime;
 	}
 
@@ -44,7 +44,6 @@ public class ProcessedDocument extends IdObject {
 	public EProcessedDocumentStatus getStatus() {
 		return status;
 	}
-
 
 	public Set<ProcessedDocumentParameter> getProcessedDocumentParameterSet() {
 		return processedDocumentParameterSet;
