@@ -1,7 +1,7 @@
 <div><form:errors path="cron" cssClass="error"/></div>
 <div id="cronError" class="hide error">you must create a schedule.</div>
 <%int counter = 1; %>
-<table id="tblSample" class="indent">
+<table id="tblSample" >
  <c:if test="${empty job.cron}" >
 <c:forEach var="schedule" items="${schedules}">
 <tr>
@@ -36,9 +36,9 @@
 </c:forEach>
 </table>
 
-<div id="addScheduleButton" class="link small indent" onclick="addSchedule();"><span class="pointer">Add Schedule</span></div>
+<div id="addScheduleButton" class="link small" onclick="addSchedule();"><span class="pointer">Add Schedule</span></div>
 <div id="scheduleForm" class="hide">
-<table class="indent">
+<table>
 <tr>
 <td><form:radiobutton path="runFrequency" value="Single run at" onclick="scheduleBox(0)" checked="true" />Single run at</td>
 <td id="sDate" >date: <form:input path="singleDate" size="8" maxlength="10" /></td>

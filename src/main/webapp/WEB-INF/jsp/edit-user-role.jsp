@@ -8,7 +8,7 @@
 <div class="frame-job">
 
 <form:form modelAttribute="userClass" method="post" name="changeRole" onSubmit='return editRoleValidation(this);'>
-<table class="indent">
+<table>
 <tr>
 <td>Please enter your password:</td>
 <td><form:password path="oldPassword" size="15" maxlength="15" /></td>

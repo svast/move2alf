@@ -36,7 +36,7 @@
 <table id="tblDestination" class="hide">
 </table>
 
-<table id="destinationForm" class="indent">
+<table id="destinationForm">
 <tr>
 <td>Name:</td> 
 

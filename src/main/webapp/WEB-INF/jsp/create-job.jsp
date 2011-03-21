@@ -32,7 +32,7 @@
 <form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return jobValidation(this);">
 
 <h4>General</h4>
-<table class="indent">
+<table>
 <tr>
 <td>Name:</td>
 <td><form:input path="name" size="30" maxlength="30" /></td>
@@ -62,7 +62,7 @@
 <br />
 
 <h4>Import from</h4>
-<table class="indent">
+<table>
 <tr>
 <td>Path: <form:input path="inputFolder" size="50" maxlength="50" /></td>
 <td id="inputFolderError" class="hide error">input path may not be empty.</td>
@@ -87,7 +87,7 @@
 
 
 <%@ include file="/WEB-INF/jsp/destination.jsp"%>
-<table class="indent">
+<table>
 <tr>
 <td>Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
 <td id="destinationFolderError" class="hide error">destination path may not be empty.</td>

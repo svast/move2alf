@@ -1,6 +1,6 @@
 
 <h4>Metadata</h4>
-<table class="indent">
+<table>
 <%int metadataCounter=0; %>
 <c:forEach var="metadataOption" items="${metadataOptions}" >
 <tr>
@@ -28,7 +28,7 @@ metadataCounter++; %>
 <br />
 
 <h4>Transform</h4>
-<table class="indent">
+<table>
 <%int transformCounter=0; %>
 <c:set var="jobTransform" value="${job.transform}" scope="session" />
 <c:set var="transformOption" value="${transformOption.class.name}" scope="session" />
@@ -66,7 +66,7 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 <h4>Options</h4>
 <div class="indent">
 <p>If document already exists in destination:</p>
-<table class="indent">
+<table>
 <%int optionsCounter=0; %>
 <c:set var="jobOption" value="${job.docExist}" scope="session" />
 
@@ -110,10 +110,10 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 
 <br />
 
-<div class="indent"><form:checkbox path="moveBeforeProc" value="true" />Move before processing to</div>
+<div><form:checkbox path="moveBeforeProc" value="true" />Move before processing to</div>
 <table>
 <tr>
-<td class="double-indent">Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
 
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -127,10 +127,10 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="moveAfterLoad" value="true" />Move loaded files to</div>
+<div><form:checkbox path="moveAfterLoad" value="true" />Move loaded files to</div>
 <table >
 <tr>
-<td class="double-indent">Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "afterLoadPath",
@@ -143,10 +143,10 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="moveNotLoad" value="true" />Move not loaded files to</div>
+<div><form:checkbox path="moveNotLoad" value="true" />Move not loaded files to</div>
 <table>
 <tr>
-<td class="double-indent">Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "notLoadPath",
@@ -159,9 +159,9 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 <br />
 
-<div class="indent"><form:checkbox path="sendNotification" value="true" />Send notification e-mails on errors</div>
-<div class="double-indent">To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
-<div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
+<div><form:checkbox path="sendNotification" value="true" />Send notification e-mails on errors</div>
+<div>To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
+<div class="smaller">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "emailAddressError",
@@ -172,9 +172,9 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
                         </script>
 <br />
 
-<div class="indent"><form:checkbox path="sendReport" value="true" />Send load reports</div>
-<div class="double-indent">To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
-<div class="smaller double-indent">Separate multiple e-mail addresses with commas</div>
+<div><form:checkbox path="sendReport" value="true" />Send load reports</div>
+<div>To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
+<div class="smaller">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "emailAddressRep",
