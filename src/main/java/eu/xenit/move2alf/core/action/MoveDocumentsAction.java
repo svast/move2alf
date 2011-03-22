@@ -47,7 +47,6 @@ public class MoveDocumentsAction extends Action {
 			}
 		}
 		
-		
 		if("true".equals(moveAfterLoad) && "after".equals(stage) && "ok".equals(documentStatus)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");
@@ -68,6 +67,7 @@ public class MoveDocumentsAction extends Action {
 			}
 		}
 		
+
 		if("true".equals(moveNotLoaded) && "after".equals(stage) && "failed".equals(documentStatus)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");

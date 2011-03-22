@@ -90,7 +90,7 @@
 <%@ include file="/WEB-INF/jsp/destination.jsp"%>
 <table>
 <tr>
-<td class="indent">Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
 <td id="destinationFolderError" class="hide error">destination path may not be empty.</td>
 <td><form:errors path="destinationFolder" cssClass="error"/></td>
 						<script type="text/javascript">

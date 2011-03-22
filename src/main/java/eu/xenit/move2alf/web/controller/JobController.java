@@ -812,7 +812,11 @@ public class JobController {
 		if(documentListSize==0){
 			docsPerSecond="";
 		}else{
-			docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+			if(totalTimeInSeconds==0){
+				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+			}else{
+				docsPerSecond = ""+documentListSize;
+			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
