@@ -80,7 +80,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			String remotePath = basePath + relativePath;
 			String[] components = remotePath.split("/");
 			remotePath = "";
-			for(String component : components) {
+			for (String component : components) {
 				if ("".equals(component)) {
 					remotePath += "/";
 				} else if (component.startsWith("cm:")) {
@@ -90,7 +90,7 @@ public class AlfrescoSourceSink extends SourceSink {
 				}
 			}
 			remotePath = remotePath.substring(0, remotePath.length() - 1);
-			
+
 			logger.debug("Writing to " + remotePath);
 
 			String mimeType = getParameterWithDefault(parameterMap, "mimetype",
@@ -104,9 +104,19 @@ public class AlfrescoSourceSink extends SourceSink {
 					.get("metadata");
 
 			File document = (File) parameterMap.get("file");
-			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
-					user, namespace, contentType, metadata, null);
-			parameterMap.put("status", "ok");
+			
+			// TODO upload mode...
+			if (!ras.doesDocExist(document.getName(), remotePath)) {
+				ras.storeDocAndCreateParentSpaces(document, mimeType,
+						remotePath, user, namespace, contentType, metadata,
+						null);
+				parameterMap.put("status", "ok");
+			} else {
+				logger.warn("Document " + document.getName() + " already exists in " + remotePath);
+				parameterMap.put("status", "failed");
+				parameterMap.put("errormessage", "Document " + document.getName() + " already exists in " + remotePath);
+			}
+
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
 			parameterMap.put("status", "failed");

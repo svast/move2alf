@@ -66,7 +66,7 @@
 </tr>
 <c:forEach items="${pagedListHolder.pageList}" var="item">
 <tr>
-<td class="table-border-thin">${item.key}</td>
+<td class="table-border-thin">${item.id}</td>
 <td class="table-border-thin">${item.name}</td>
 <td class="table-border-thin">${item.processedDateTime}</td>
 <td class="table-border-thin">${item.status}</td>

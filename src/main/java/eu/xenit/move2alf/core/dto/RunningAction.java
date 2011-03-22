@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.core.dto;
 
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.ConfiguredObject;
 
 public class RunningAction extends IdObject {
 	private Cycle cycle;

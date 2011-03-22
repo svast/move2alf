@@ -1,12 +1,12 @@
 package eu.xenit.move2alf.logic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -493,12 +493,33 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	}
 
+	private Map<Integer, List<ConfiguredAction>> runningActions = Collections
+			.synchronizedMap(new HashMap<Integer, List<ConfiguredAction>>());
+
 	@Override
-	public void executeAction(ConfiguredAction action,
+	public void executeAction(int cycleId, ConfiguredAction action,
 			Map<String, Object> parameterMap) {
 		logger.debug("Executing action: " + action.getId() + " - "
 				+ action.getClassName());
+
+		List<ConfiguredAction> runningActionsForCycle;
+		synchronized (this.runningActions) {
+			runningActionsForCycle = this.runningActions.get(cycleId);
+			if (runningActionsForCycle == null) {
+				runningActionsForCycle = new LinkedList<ConfiguredAction>();
+				this.runningActions.put(cycleId, runningActionsForCycle);
+			}
+			runningActionsForCycle.add(action);
+		}
+
 		getActionFactory().execute(action, parameterMap);
+
+		synchronized (this.runningActions) {
+			runningActionsForCycle.remove(action);
+			if (runningActionsForCycle.size() == 0) {
+				logger.info("Cycle " + cycleId + " completed.");
+			}
+		}
 	}
 
 	@Override
@@ -604,12 +625,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public void resetSchedules() {
-		org.hibernate.classic.Session session = getSessionFactory().getCurrentSession();
+		org.hibernate.classic.Session session = getSessionFactory()
+				.getCurrentSession();
 		List<Schedule> schedules = session.createQuery("from Schedule").list();
-		for(Schedule schedule : schedules) {
+		for (Schedule schedule : schedules) {
 			schedule.setState(EScheduleState.NOT_RUNNING);
 			session.update(schedule);
 		}
+
+		// TODO: remove running actions
 	}
 
 	@Override

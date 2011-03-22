@@ -60,7 +60,7 @@ public abstract class Action extends ConfigurableObject {
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
 		if (nextAction != null) {
-			getActionFactory().execute(nextAction, parameterMap);
+			getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, parameterMap);
 		}
 	}
 

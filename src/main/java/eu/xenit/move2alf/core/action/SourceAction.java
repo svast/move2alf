@@ -45,7 +45,7 @@ public class SourceAction extends Action {
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put("file", file);
 				newParameterMap.put("relativePath", file.getParent().substring(path.length()));
-				getActionFactory().execute(nextAction, newParameterMap);
+				getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, newParameterMap);
 			}
 		}
 	}

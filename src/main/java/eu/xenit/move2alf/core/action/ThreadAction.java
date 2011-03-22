@@ -34,7 +34,7 @@ public class ThreadAction extends Action {
 		
 		public void run() {
 			parameterMap.put("thread", Thread.currentThread().toString());
-			getActionFactory().execute(configuredAction, parameterMap);
+			getJobService().executeAction((Integer) parameterMap.get("cycle"), configuredAction, parameterMap);
 		}
 	}
 

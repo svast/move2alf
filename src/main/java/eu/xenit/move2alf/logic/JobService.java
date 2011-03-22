@@ -265,10 +265,11 @@ public interface JobService {
 	/**
 	 * Execute a configured action.
 	 * 
+	 * @param cycleId
 	 * @param action
 	 * @param parameterMap
 	 */
-	public void executeAction(ConfiguredAction action, Map<String, Object> parameterMap);
+	public void executeAction(int cycleId, ConfiguredAction action, Map<String, Object> parameterMap);
 	
 	/**
 	 * 
