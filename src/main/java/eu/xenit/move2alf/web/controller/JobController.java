@@ -905,9 +905,13 @@ public class JobController {
 			documentListSize = 0;
 		}
 		if(documentListSize==0){
-			docsPerSecond="";
+			docsPerSecond="0";
 		}else{
-			docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+			if(totalTimeInSeconds==0){
+				docsPerSecond = ""+documentListSize;
+			}else{
+				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+			}
 		}
 		
 		mav.addObject("cycle", cycle);
