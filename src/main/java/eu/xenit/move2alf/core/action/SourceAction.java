@@ -34,9 +34,24 @@ public class SourceAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink source = getSourceSinkFactory().getObject(
 				sourceConfig.getClassName());
+		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
+		readFromPath(path, parameterMap, recursive, sourceConfig, source,
+				nextAction);
+		
+		// TODO test auto-recovery of failed files
+		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
+		String failedPath = configuredAction.getParameter("moveNotLoadedPath");
+		if("true".equals(moveNotLoaded)) {
+			readFromPath(failedPath, parameterMap, recursive, sourceConfig, source,
+				nextAction);
+		}
+	}
+
+	private void readFromPath(String path, Map<String, Object> parameterMap,
+			boolean recursive, ConfiguredSourceSink sourceConfig,
+			SourceSink source, ConfiguredAction nextAction) {
 		logger.debug("Reading files from " + path);
 		List<File> files = source.list(sourceConfig, path, recursive);
-		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
 		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
 		//parameterMap.put("path", path);
 		if (nextAction != null) {

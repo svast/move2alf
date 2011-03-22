@@ -40,6 +40,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path", jobConfig.getInputFolder())
 				.param("recursive", "true")
+				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
 				.sourceSink(
 						sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")));
 		
