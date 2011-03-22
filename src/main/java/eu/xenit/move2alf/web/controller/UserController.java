@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.EditPassword;
 import eu.xenit.move2alf.web.dto.EditRole;
 import eu.xenit.move2alf.web.dto.User;
+import eu.xenit.move2alf.web.dto.UserInfo;
 
 @Controller
 public class UserController {
@@ -48,9 +50,53 @@ public class UserController {
 	@RequestMapping("/users")
 	public ModelAndView manageUsers() {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("users", getUserService().getAllUsers());
+		List<UserInfo> userInfoList = new ArrayList();
+		List<UserPswd> allUsers = getUserService().getAllUsers();
+	//	mav.addObject("users", getUserService().getAllUsers());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		
+		for(int i =0;i<allUsers.size(); i++){
+			UserInfo userInfo = new UserInfo();
+			String userName = allUsers.get(i).getUserName();
+			userInfo.setUserName(userName);
+			
+			Set userRole = getUserService().getUser(userName)
+					.getUserRoleSet();
+	
+			//Makes sure the correct role is already selected
+			String roleCheck="";
+			Iterator roleIterator = userRole.iterator();
+			while(roleIterator.hasNext()){
+				String currentRole = ((UserRole) roleIterator.next()).getRole();
+				if("SYSTEM_ADMIN".equals(currentRole)){
+					roleCheck="System admin";
+				}
+				if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
+					if("JOB_ADMIN".equals(currentRole)){
+						roleCheck="Job admin";
+					}
+				}
+				if(roleCheck=="Consumer" || roleCheck==""){
+					if("SCHEDULE_ADMIN".equals(currentRole)){
+						roleCheck="Schedule admin";
+					}
+				}
+				if(roleCheck==""){
+					if("CONSUMER".equals(currentRole)){
+						roleCheck="Consumer";
+					}
+				}
+			}
+			
+			userInfo.setRole(roleCheck);
+			
+			userInfoList.add(userInfo);
+			
+		}
+		
+		mav.addObject("userInfoList", userInfoList);
+		
 		mav.setViewName("manage-users");
 		return mav;
 	}
@@ -61,7 +107,7 @@ public class UserController {
 		mav.setViewName("add-user");
 		List role = new ArrayList();
 		for (ERole myEnum : ERole.values()) {
-			role.add(myEnum);
+			role.add(myEnum.getDisplayName());
 		}
 		mav.addObject("roleList", role);
 		mav.addObject("roles", getUserService().getCurrentUser()
@@ -80,7 +126,7 @@ public class UserController {
 			ModelAndView mav = new ModelAndView("add-user");
 			List role = new ArrayList();
 			for (ERole myEnum : ERole.values()) {
-				role.add(myEnum);
+				role.add(myEnum.getDisplayName());
 			}
 			mav.addObject("roleList", role);
 			mav.addObject("roles", getUserService().getCurrentUser()
@@ -92,7 +138,7 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		logger.info("adding user " + user.getUserName());
 		getUserService().createUser(user.getUserName(), user.getPassword(),
-				ERole.valueOf(user.getRole()));
+				ERole.getByDisplayName(user.getRole()));
 		mav.setViewName("redirect:/users/");
 		return mav;
 	}
@@ -252,12 +298,12 @@ public class UserController {
 			if("SYSTEM_ADMIN".equals(currentRole)){
 				roleCheck=currentRole;
 			}
-			if(roleCheck=="consumer" ||roleCheck=="scheduleAdmin" || roleCheck==""){
+			if(roleCheck=="Consumer" || roleCheck=="Schedule admin" || roleCheck==""){
 				if("JOB_ADMIN".equals(currentRole)){
 					roleCheck=currentRole;
 				}
 			}
-			if(roleCheck=="consumer" || roleCheck==""){
+			if(roleCheck=="Consumer" || roleCheck==""){
 				if("SCHEDULE_ADMIN".equals(currentRole)){
 					roleCheck=currentRole;
 				}
@@ -272,9 +318,9 @@ public class UserController {
 		List role = new ArrayList();
 		for (ERole myEnum : ERole.values()) {
 			if(myEnum.toString().equals(roleCheck)){
-				role.add(0,myEnum);
+				role.add(0,myEnum.getDisplayName());
 			}else{
-				role.add(myEnum);
+				role.add(myEnum.getDisplayName());
 			}
 		}
 		
@@ -295,9 +341,41 @@ public class UserController {
 
 			ModelAndView mav = new ModelAndView("edit-user-role");
 			mav.addObject("userClass", userClass);
+			
+			//Makes sure the correct role is already selected
+			Set userRole = getUserService().getUser(userName)
+			.getUserRoleSet();
+			String roleCheck="";
+			Iterator roleIterator = userRole.iterator();
+			while(roleIterator.hasNext()){
+				String currentRole = ((UserRole) roleIterator.next()).getRole();
+				if("SYSTEM_ADMIN".equals(currentRole)){
+					roleCheck=currentRole;
+				}
+				if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
+					if("JOB_ADMIN".equals(currentRole)){
+						roleCheck=currentRole;
+					}
+				}
+				if(roleCheck=="Consumer" || roleCheck==""){
+					if("SCHEDULE_ADMIN".equals(currentRole)){
+						roleCheck=currentRole;
+					}
+				}
+				if(roleCheck==""){
+					if("CONSUMER".equals(currentRole)){
+						roleCheck=currentRole;
+					}
+				}
+			}
+			
 			List role = new ArrayList();
 			for (ERole myEnum : ERole.values()) {
-				role.add(myEnum);
+				if(myEnum.toString().equals(roleCheck)){
+					role.add(0,myEnum.getDisplayName());
+				}else{
+					role.add(myEnum.getDisplayName());
+				}
 			}
 			mav.addObject("roleList", role);
 			mav.addObject("roles", getUserService().getCurrentUser()
@@ -315,7 +393,7 @@ public class UserController {
 
 		if (currentUserPassword.equals(currentUserPasswordEntered)) {
 			getUserService().changeRole(userName,
-					ERole.valueOf(userClass.getRole()));
+					ERole.getByDisplayName(userClass.getRole()));
 			mav.setViewName("redirect:/users");
 		} else {
 			mav.setViewName("redirect:/user/" + userName + "/edit/role/failed");

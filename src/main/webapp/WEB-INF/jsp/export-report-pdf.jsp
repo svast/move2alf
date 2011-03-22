@@ -75,12 +75,13 @@ table.addCell(cell);
 table.addCell("Name");
 table.addCell("Processed date and time");
 table.addCell("Status");
+
 %>
 
-<c:forEach var="document" items="${documents}" >
+<c:forEach var="document" items="${processedDocuments}" >
 <c:set var="docName" value="${document.name}" scope="session" />
 <c:set var="docDateTime" value="${document.processedDateTime}" scope="session" />
-<c:set var="docStatus" value="${document.status}" scope="session" />
+<c:set var="docStatus" value="${document.status.displayName}" scope="session" />
 
 <%//twelfth row
 table.addCell((String) session.getAttribute("docName"));

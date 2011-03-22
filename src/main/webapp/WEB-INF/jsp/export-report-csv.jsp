@@ -11,6 +11,6 @@ Docs / s;<c:out value="${documentsPerSecond}"/>
 List of imported documents
 
 Name;Processed date and time;Status
-<c:forEach var="document" items="${documents}" >
+<c:forEach var="document" items="${processedDocuments}" >
 <c:out value="${document.name}" />;<c:out value="${document.processedDateTime}"/>;<c:out value="${document.status}"/>
  </c:forEach> 

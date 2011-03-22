@@ -14,13 +14,12 @@
 			<th></th>
 		</tr>
 	</thead>
-	<c:forEach var="user" items="${users}">
+	<c:forEach var="user" items="${userInfoList}">
 		<tr>
 			<td><c:out value="${user.userName}" /></td>
-			<td><c:forEach var="role" items="${user.userRoleSet}">
-				<c:out value="${role.role}" />
-				<br />
-			</c:forEach></td>
+			<td>
+				<c:out value="${user.role}" />
+				</td>
 			<td><a href="<spring:url value="/user/${user.userName}/edit/password" htmlEscape="true" />">edit password</a></td>
 			<td><a href="<spring:url value="/user/${user.userName}/edit/role" htmlEscape="true" />">edit role</a></td>
 			<td><a href="<spring:url value="/user/${user.userName}/delete" htmlEscape="true" />">delete</a></td>
