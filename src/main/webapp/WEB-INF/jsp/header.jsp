@@ -41,7 +41,9 @@
 <div class="container">
 <div class="span-24 last header">
 <img src="<spring:url value="/images/move2alf-logo.png" htmlEscape="true" />" alt="Move2Alf" width=""/>
-<%String roleCheck= "";%>
+
+<%//This determines the role of the user
+String roleCheck= "";%>
 <c:forEach var="role" items="${roles}">
 		<c:if test='${role.role=="SYSTEM_ADMIN"}'>
 		<%roleCheck="systemAdmin"; %>

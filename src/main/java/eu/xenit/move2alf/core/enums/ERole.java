@@ -4,5 +4,5 @@ public enum ERole {
 	SYSTEM_ADMIN,
 	JOB_ADMIN,
 	SCHEDULE_ADMIN,
-	CONSUMER
+	CONSUMER;
 }

@@ -1,7 +1,9 @@
 package eu.xenit.move2alf.web.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.EditPassword;
@@ -237,10 +240,44 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("userClass", new EditRole());
 		mav.addObject("user", getUserService().getUser(userName));
+		
+		Set userRole = getUserService().getUser(userName)
+				.getUserRoleSet();
+		
+		//Makes sure the correct role is already selected
+		String roleCheck="";
+		Iterator roleIterator = userRole.iterator();
+		while(roleIterator.hasNext()){
+			String currentRole = ((UserRole) roleIterator.next()).getRole();
+			if("SYSTEM_ADMIN".equals(currentRole)){
+				roleCheck=currentRole;
+			}
+			if(roleCheck=="consumer" ||roleCheck=="scheduleAdmin" || roleCheck==""){
+				if("JOB_ADMIN".equals(currentRole)){
+					roleCheck=currentRole;
+				}
+			}
+			if(roleCheck=="consumer" || roleCheck==""){
+				if("SCHEDULE_ADMIN".equals(currentRole)){
+					roleCheck=currentRole;
+				}
+			}
+			if(roleCheck==""){
+				if("CONSUMER".equals(currentRole)){
+					roleCheck=currentRole;
+				}
+			}
+		}
+		
 		List role = new ArrayList();
 		for (ERole myEnum : ERole.values()) {
-			role.add(myEnum);
+			if(myEnum.toString().equals(roleCheck)){
+				role.add(0,myEnum);
+			}else{
+				role.add(myEnum);
+			}
 		}
+		
 		mav.addObject("roleList", role);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
