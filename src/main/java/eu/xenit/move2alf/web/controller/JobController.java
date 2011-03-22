@@ -813,9 +813,9 @@ public class JobController {
 			docsPerSecond="";
 		}else{
 			if(totalTimeInSeconds==0){
-				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
-			}else{
 				docsPerSecond = ""+documentListSize;
+			}else{
+				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
 			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
