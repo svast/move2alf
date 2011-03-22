@@ -97,9 +97,12 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {
-					logger.error("Scheduling job \"" + job.getName()
+					logger.warn("Scheduling job \"" + job.getName()
 							+ "\" failed");
-					schedulerException.printStackTrace();
+					// schedulerException.printStackTrace();
+					// keep
+					// "org.quartz.SchedulerException: Based on configured schedule, the given trigger will never fire."
+					// stack traces out of the logs
 				} catch (ParseException parseException) {
 					logger.error("Parsing of cron expression for job \""
 							+ job.getName() + "\" failed: " + cronExpression);

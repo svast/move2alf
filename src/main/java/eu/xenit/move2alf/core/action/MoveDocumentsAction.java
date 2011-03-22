@@ -24,7 +24,7 @@ public class MoveDocumentsAction extends Action {
 		String moveAfterLoad = configuredAction.getParameter("moveAfterLoad");
 		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
 		String stage = configuredAction.getParameter("stage");
-		String documentStatus = configuredAction.getParameter("status");
+		String documentStatus = (String) parameterMap.get("status");
 		String inputFolder = configuredAction.getParameter("path");
 		inputFolder = inputFolder.replaceAll("\\\\", "/");
 		
@@ -47,6 +47,7 @@ public class MoveDocumentsAction extends Action {
 			}
 		}
 		
+		
 		if("true".equals(moveAfterLoad) && "after".equals(stage) && "ok".equals(documentStatus)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");
@@ -67,7 +68,6 @@ public class MoveDocumentsAction extends Action {
 			}
 		}
 		
-
 		if("true".equals(moveNotLoaded) && "after".equals(stage) && "failed".equals(documentStatus)){
 			if("true".equals(moveBeforeProcessing)){
 				inputFolder = configuredAction.getParameter("moveBeforeProcessingPath");
