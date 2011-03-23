@@ -50,7 +50,6 @@ public class JobExecutor implements org.quartz.Job {
 		ConfiguredAction action = job.getFirstConfiguredAction();
 		jobService.executeAction(cycle.getId(), action, parameterMap);
 
-		jobService.closeCycle(cycle);
 	}
 
 }

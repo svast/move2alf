@@ -57,6 +57,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.param("path", jobConfig.getInputFolder())
 				.param("stage", "before"));
 		
+		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
+		
 		actions.add(action(jobConfig.getMetadata()));
 		
 		if(!"No transformation".equals(jobConfig.getTransform())){

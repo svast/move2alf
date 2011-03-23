@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +61,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		RepositoryAccessSession ras = ra.createSessionAndRetry();
 		try {
+			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			// run(ras);
 			String basePath = getParameterWithDefault(parameterMap, "path", "/");
 			if (!basePath.endsWith("/")) {
@@ -125,6 +126,10 @@ public class AlfrescoSourceSink extends SourceSink {
 		} catch (RepositoryException e) {
 			// we end up here if the request could not be handled by the
 			// repository
+			parameterMap.put("status", "failed");
+			parameterMap.put("errormessage", e.getMessage());
+			logger.error(e.getMessage(), e);
+		} catch (WebServiceException e) {
 			parameterMap.put("status", "failed");
 			parameterMap.put("errormessage", e.getMessage());
 			logger.error(e.getMessage(), e);

@@ -516,8 +516,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		synchronized (this.runningActions) {
 			runningActionsForCycle.remove(action);
-			if (runningActionsForCycle.size() == 0) {
+			if (action.getAppliedConfiguredActionOnSuccess() == null
+					&& runningActionsForCycle.size() == 0) {
+				// TODO wanneer is de cycle gedaan?...
 				logger.info("Cycle " + cycleId + " completed.");
+				closeCycle(getCycle(cycleId));
 			}
 		}
 	}
