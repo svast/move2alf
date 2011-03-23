@@ -71,7 +71,7 @@
 
 		<div class="link"><a href="<spring:url value="/job/${jobInfo.jobId}/history" htmlEscape="true"/>" >History</a>
 		<c:if test='${-1 != jobInfo.cycleId}'>
-		<a href="<spring:url value="/job/${jobInfo.jobId}/${jobInfo.cycleId}/report" htmlEscape="true" />">View last report</a>
+		<a href="<spring:url value="/job/${jobInfo.jobId}/report" htmlEscape="true" />">View last report</a>
 		</c:if>
 		</div>
 		

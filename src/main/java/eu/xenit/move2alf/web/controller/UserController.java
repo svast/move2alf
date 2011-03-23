@@ -167,6 +167,36 @@ public class UserController {
 	public ModelAndView profile() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("user", getUserService().getCurrentUser());
+		
+		Set userRole = getUserService().getCurrentUser()
+				.getUserRoleSet();
+
+		//Makes sure the correct role is already selected
+		String roleCheck="";
+		Iterator roleIterator = userRole.iterator();
+		while(roleIterator.hasNext()){
+			String currentRole = ((UserRole) roleIterator.next()).getRole();
+			if("SYSTEM_ADMIN".equals(currentRole)){
+				roleCheck="System admin";
+			}
+			if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
+				if("JOB_ADMIN".equals(currentRole)){
+					roleCheck="Job admin";
+				}
+			}
+			if(roleCheck=="Consumer" || roleCheck==""){
+				if("SCHEDULE_ADMIN".equals(currentRole)){
+					roleCheck="Schedule admin";
+				}
+			}
+			if(roleCheck==""){
+				if("CONSUMER".equals(currentRole)){
+					roleCheck="Consumer";
+				}
+			}
+		}
+		
+		mav.addObject("role", roleCheck);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("profile");
@@ -296,21 +326,21 @@ public class UserController {
 		while(roleIterator.hasNext()){
 			String currentRole = ((UserRole) roleIterator.next()).getRole();
 			if("SYSTEM_ADMIN".equals(currentRole)){
-				roleCheck=currentRole;
+				roleCheck="System admin";
 			}
 			if(roleCheck=="Consumer" || roleCheck=="Schedule admin" || roleCheck==""){
 				if("JOB_ADMIN".equals(currentRole)){
-					roleCheck=currentRole;
+					roleCheck="Job admin";
 				}
 			}
 			if(roleCheck=="Consumer" || roleCheck==""){
 				if("SCHEDULE_ADMIN".equals(currentRole)){
-					roleCheck=currentRole;
+					roleCheck="Schedule admin";
 				}
 			}
 			if(roleCheck==""){
 				if("CONSUMER".equals(currentRole)){
-					roleCheck=currentRole;
+					roleCheck="Consumer";
 				}
 			}
 		}

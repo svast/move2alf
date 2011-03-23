@@ -68,7 +68,7 @@
 <tr>
 <td class="table-border-thin">${item.id}</td>
 <td class="table-border-thin">${item.name}</td>
-<td class="table-border-thin">${item.processedDateTime}</td>
+<td class="table-border-thin"><fmt:formatDate value="${item.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>
 <td class="table-border-thin">${item.status}</td>
 </tr>
 </c:forEach>

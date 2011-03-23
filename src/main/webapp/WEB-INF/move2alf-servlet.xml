@@ -16,7 +16,7 @@
 	<tx:annotation-driven transaction-manager="txManager" />
 	
 	<mvc:annotation-driven />
-
+	
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass"

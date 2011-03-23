@@ -80,7 +80,7 @@ table.addCell("Status");
 
 <c:forEach var="document" items="${processedDocuments}" >
 <c:set var="docName" value="${document.name}" scope="session" />
-<c:set var="docDateTime" value="${document.processedDateTime}" scope="session" />
+<c:set var="docDateTime" scope="session" ><fmt:formatDate value="${document.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></c:set>
 <c:set var="docStatus" value="${document.status.displayName}" scope="session" />
 
 <%//twelfth row

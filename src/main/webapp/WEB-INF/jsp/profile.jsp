@@ -12,10 +12,9 @@
 	</tr>
 	<tr>
 		<td>Role:</td>
-		<td class="text-align:left"><c:forEach var="role" items="${user.userRoleSet}">
-			<c:out value="${role.role}" />
-			<br />
-		</c:forEach></td>
+		<td class="text-align:left">
+			<c:out value="${role}" />
+			</td>
 	</tr>
 </table>
 

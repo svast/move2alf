@@ -37,7 +37,7 @@
 	type="text/css" />
 <title>XeniT Move2Alf</title>
 </head>
-<body onLoad="putFocus(0,0);">
+<body onLoad="putFocus(0,0);" class="tundra">
 <div class="container">
 <div class="span-24 last header">
 <img src="<spring:url value="/images/move2alf-logo.png" htmlEscape="true" />" alt="Move2Alf" width=""/>

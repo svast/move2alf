@@ -786,6 +786,57 @@ public class JobController {
 		return mav;
 	}
 
+	@RequestMapping("/job/{jobId}/report")
+	public ModelAndView recentReport(@PathVariable int jobId,
+			HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("job", getJobService().getJob(jobId));
+		//Cycle cycle = getJobService().getCycle(cycleId);
+		Cycle cycle = getJobService().getLastCycleForJob(getJobService().getJob(jobId));
+		int cycleId = cycle.getId();
+		Date startDateTime = cycle.getStartDateTime();
+		Date endDateTime = cycle.getEndDateTime();
+		String duration = getJobService().getDuration(startDateTime,
+				endDateTime);
+		//get total seconds to calculate docs/s
+		String[] durationSplit = duration.split(":");
+		Integer hours = new Integer(durationSplit[0]).intValue();
+		Integer minutes = new Integer(durationSplit[1]).intValue();
+		Integer seconds = new Integer(durationSplit[2]).intValue();
+		int totalTimeInSeconds = hours * 60*60+minutes*60+seconds;
+		String docsPerSecond;
+		
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+		Integer documentListSize = processedDocuments.size();
+		if(processedDocuments == null || "".equals(processedDocuments)){
+			documentListSize = 0;
+		}
+		if(documentListSize==0){
+			docsPerSecond="";
+		}else{
+			if(totalTimeInSeconds==0){
+				docsPerSecond = ""+documentListSize;
+			}else{
+				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+			}
+		}
+		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
+		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
+		pagedListHolder.setPage(page);
+		int pageSize = 10;
+		pagedListHolder.setPageSize(pageSize);
+		
+		mav.addObject("cycle", cycle);
+		mav.addObject("duration", duration);
+		mav.addObject("pagedListHolder", pagedListHolder);
+		mav.addObject("roles", getUserService().getCurrentUser()
+				.getUserRoleSet());
+		mav.addObject("documentListSize", documentListSize);
+		mav.addObject("docsPerSecond", docsPerSecond);
+		mav.setViewName("report");
+		return mav;
+	}
+	
 	@RequestMapping("/job/{jobId}/{cycleId}/report")
 	public ModelAndView report(@PathVariable int jobId,
 			@PathVariable int cycleId, HttpServletRequest request, HttpServletResponse response) {
