@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.logic.PipelineAssembler.ActionBuilder;
@@ -71,9 +72,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.param("sendReport", jobConfig.getSendReport())		//true or false (String)
 				.param("emailAddressReport", jobConfig.getEmailAddressRep()));
 		
-		if("SkipAndLog".equals(jobConfig.getDocExist()) 
-					|| "Skip".equals(jobConfig.getDocExist()) 
-							|| "Overwrite".equals(jobConfig.getDocExist())){
+		if(SourceSink.MODE_SKIP.equals(jobConfig.getDocExist()) 
+					|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist()) 
+							|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())){
 			actions.add(action("eu.xenit.move2alf.core.action.SinkAction")
 					.param("path", jobConfig.getDestinationFolder())
 					.param("documentExists", jobConfig.getDocExist())

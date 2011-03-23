@@ -32,7 +32,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap) {
+			Map<String, Object> parameterMap, String docExistsMode) {
 		String user = configuredSourceSink.getParameter("user");
 		String password = configuredSourceSink.getParameter("password");
 		String url = configuredSourceSink.getParameter("url");
@@ -113,9 +113,19 @@ public class AlfrescoSourceSink extends SourceSink {
 						null);
 				parameterMap.put("status", "ok");
 			} else {
-				logger.warn("Document " + document.getName() + " already exists in " + remotePath);
-				parameterMap.put("status", "failed");
-				parameterMap.put("errormessage", "Document " + document.getName() + " already exists in " + remotePath);
+				if (MODE_SKIP.equals(docExistsMode)) {
+					// ignore
+					parameterMap.put("status", "ok");
+				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
+					logger.warn("Document " + document.getName() + " already exists in " + remotePath);
+					parameterMap.put("status", "failed");
+					parameterMap.put("errormessage", "Document " + document.getName() + " already exists in " + remotePath);
+				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
+					logger.info("Overwriting document " + document.getName() + " in " + remotePath);
+					ras.updateContentByDocNameAndPath(remotePath, document.getName(), document, mimeType, false);
+					ras.updateMetaDataByDocNameAndPath(remotePath, document.getName(), metadata);
+					parameterMap.put("status", "ok");
+				}
 			}
 
 		} catch (RepositoryAccessException e) {

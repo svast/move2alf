@@ -41,7 +41,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap) {
+			Map<String, Object> parameterMap, String docExistsMode) {
 
 	}
 
