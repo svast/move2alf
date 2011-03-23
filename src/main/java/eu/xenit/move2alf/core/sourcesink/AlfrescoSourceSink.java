@@ -105,7 +105,7 @@ public class AlfrescoSourceSink extends SourceSink {
 					.get("metadata");
 
 			File document = (File) parameterMap.get("file");
-			
+
 			// TODO upload mode...
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
@@ -117,13 +117,21 @@ public class AlfrescoSourceSink extends SourceSink {
 					// ignore
 					parameterMap.put("status", "ok");
 				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
-					logger.warn("Document " + document.getName() + " already exists in " + remotePath);
+					logger.warn("Document " + document.getName()
+							+ " already exists in " + remotePath);
 					parameterMap.put("status", "failed");
-					parameterMap.put("errormessage", "Document " + document.getName() + " already exists in " + remotePath);
+					parameterMap.put("errormessage", "Document "
+							+ document.getName() + " already exists in "
+							+ remotePath);
 				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
-					logger.info("Overwriting document " + document.getName() + " in " + remotePath);
-					ras.updateContentByDocNameAndPath(remotePath, document.getName(), document, mimeType, false);
-					ras.updateMetaDataByDocNameAndPath(remotePath, document.getName(), metadata);
+					logger.info("Overwriting document " + document.getName()
+							+ " in " + remotePath);
+					ras.updateContentByDocNameAndPath(remotePath, document
+							.getName(), document, mimeType, false);
+					if (metadata != null) {
+						ras.updateMetaDataByDocNameAndPath(remotePath, document
+								.getName(), metadata);
+					}
 					parameterMap.put("status", "ok");
 				}
 			}
