@@ -19,85 +19,39 @@ public class MoveDocumentsAction extends Action {
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		// TODO move file in parametermap (key "file") to paths in parameters.
-		String moveBeforeProcessing = configuredAction
-				.getParameter("moveBeforeProcessing");
-		String moveAfterLoad = configuredAction.getParameter("moveAfterLoad");
-		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
+		boolean moveBeforeProcessing = "true".equals(configuredAction
+				.getParameter("moveBeforeProcessing"));
+		boolean moveAfterLoad = "true".equals(configuredAction
+				.getParameter("moveAfterLoad"));
+		boolean moveNotLoaded = "true".equals(configuredAction
+				.getParameter("moveNotLoaded"));
 		String stage = configuredAction.getParameter("stage");
 		String documentStatus = (String) parameterMap.get("status");
-		String inputFolder = configuredAction.getParameter("path");
-		inputFolder = inputFolder.replaceAll("\\\\", "/");
 
-		int inputFolderLength = inputFolder.length() - 1;
-		int lastIndexSlash = inputFolder.lastIndexOf("/");
-		if (lastIndexSlash == inputFolderLength) {
-			inputFolder = inputFolder.substring(0, inputFolderLength);
-		}
-
-		if ("true".equals(moveBeforeProcessing) && "before".equals(stage)) {
-			String moveDirectory = configuredAction
+		String moveDirectory = null;
+		if (moveBeforeProcessing && "before".equals(stage)) {
+			moveDirectory = configuredAction
 					.getParameter("moveBeforeProcessingPath");
-
-			// don't do anything if the moveDirectory is empty (not a mandatory
-			// field)
-			if (moveDirectory != null && !"".equals(moveDirectory)) {
-				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
-
-				moveFile(inputFolder, moveDirectory, parameterMap);
-			}
 		}
-
-		if ("true".equals(moveAfterLoad) && "after".equals(stage)
+		if (moveAfterLoad && "after".equals(stage)
 				&& "ok".equals(documentStatus)) {
-			if ("true".equals(moveBeforeProcessing)) {
-				inputFolder = configuredAction
-						.getParameter("moveBeforeProcessingPath");
-				inputFolder = inputFolder.replace("\\", "/");
-				inputFolderLength = inputFolder.length() - 1;
-				lastIndexSlash = inputFolder.lastIndexOf("/");
-				if (lastIndexSlash == inputFolderLength) {
-					inputFolder = inputFolder.substring(0, inputFolderLength);
-				}
-			}
-			String moveDirectory = configuredAction
-					.getParameter("moveAfterLoadPath");
-
-			// don't do anything if the moveDirectory is empty (not a mandatory
-			// field)
-			if (moveDirectory != null && !"".equals(moveDirectory)) {
-				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
-
-				moveFile(inputFolder, moveDirectory, parameterMap);
-			}
+			moveDirectory = configuredAction.getParameter("moveAfterLoadPath");
+		}
+		if (moveNotLoaded && "after".equals(stage)
+				&& "failed".equals(documentStatus)) {
+			moveDirectory = configuredAction.getParameter("moveNotLoadedPath");
 		}
 
-		if ("true".equals(moveNotLoaded) && "after".equals(stage)
-				&& "failed".equals(documentStatus)) {
-			if ("true".equals(moveBeforeProcessing)) {
-				inputFolder = configuredAction
-						.getParameter("moveBeforeProcessingPath");
-				inputFolder = inputFolder.replace("\\", "/");
-				inputFolderLength = inputFolder.length() - 1;
-				lastIndexSlash = inputFolder.lastIndexOf("/");
-				if (lastIndexSlash == inputFolderLength) {
-					inputFolder = inputFolder.substring(0, inputFolderLength);
-				}
-			}
-
-			String moveDirectory = configuredAction
-					.getParameter("moveNotLoadedPath");
-			// don't do anything if the moveDirectory is empty (not a mandatory
-			// field)
+		if (("before".equals(stage) && moveBeforeProcessing)
+				|| ("after".equals(stage) && (moveAfterLoad || moveNotLoaded))) {
 			if (moveDirectory != null && !"".equals(moveDirectory)) {
 				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
-
-				moveFile(inputFolder, moveDirectory, parameterMap);
+				moveFile(moveDirectory, parameterMap);
 			}
 		}
 	}
 
-	public void moveFile(String inputFolder, String moveDirectory,
+	public void moveFile(String moveDirectory,
 			Map parameterMap) {
 		File file = (File) parameterMap.get("file");
 		String absolutePath = file.getAbsolutePath();
@@ -114,7 +68,8 @@ public class MoveDocumentsAction extends Action {
 		}
 
 		// assemble full path
-		String relativePath = absolutePath.replace(inputFolder, "");
+		//String relativePath = absolutePath.replace(inputFolder, "");
+		String relativePath = (String) parameterMap.get("relativePath");
 		String fullDestinationPath = moveDirectory + "" + relativePath;
 
 		File moveFolder = new File(fullDestinationPath);
@@ -154,7 +109,6 @@ public class MoveDocumentsAction extends Action {
 	}
 
 	public boolean checkParentDirExists(String path) {
-
 		int index = path.lastIndexOf("/");
 		String newPath = path.substring(0, index);
 		logger.debug("new path is " + newPath);
@@ -172,7 +126,6 @@ public class MoveDocumentsAction extends Action {
 				return false;
 			}
 		}
-
 		return true;
 	}
 
