@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,31 +36,42 @@ public class SourceAction extends Action {
 		SourceSink source = getSourceSinkFactory().getObject(
 				sourceConfig.getClassName());
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
-		readFromPath(path, parameterMap, recursive, sourceConfig, source,
-				nextAction);
-		
-		// TODO test auto-recovery of failed files
+
+		List<File> files = source.list(sourceConfig, path, recursive);
 		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
 		String failedPath = configuredAction.getParameter("moveNotLoadedPath");
 		if("true".equals(moveNotLoaded)) {
-			readFromPath(failedPath, parameterMap, recursive, sourceConfig, source,
+			files.addAll(source.list(sourceConfig, failedPath, recursive));
+		}
+		CountDownLatch counter = new CountDownLatch(files.size());
+		parameterMap.put("counter", counter);
+		readFiles(files, parameterMap, recursive, configuredAction, sourceConfig, source,
 				nextAction);
+		try {
+			counter.await();
+		} catch (InterruptedException e) {
+			logger.warn("Execution interrupted");
 		}
 	}
 
-	private void readFromPath(String path, Map<String, Object> parameterMap,
-			boolean recursive, ConfiguredSourceSink sourceConfig,
+	private void readFiles(List<File> files, Map<String, Object> parameterMap,
+			boolean recursive, ConfiguredAction action, ConfiguredSourceSink sourceConfig,
 			SourceSink source, ConfiguredAction nextAction) {
-		logger.debug("Reading files from " + path);
-		List<File> files = source.list(sourceConfig, path, recursive);
 		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
-		//parameterMap.put("path", path);
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put("file", file);
-				newParameterMap.put("relativePath", file.getParent().substring(path.length()));
+				String relativePath = file.getParent();
+				String path = action.getParameter(PARAM_PATH);
+				String pathFailed = action.getParameter("moveNotLoadedPath");
+				if (relativePath.startsWith(path)) {
+					relativePath = relativePath.substring(path.length());
+				} else if (relativePath.startsWith(pathFailed)) {
+					relativePath = relativePath.substring(pathFailed.length());
+				}
+				newParameterMap.put("relativePath", relativePath);
 				getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, newParameterMap);
 			}
 		}

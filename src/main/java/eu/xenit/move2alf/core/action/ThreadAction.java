@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.action;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import eu.xenit.move2alf.core.Action;
@@ -35,6 +36,7 @@ public class ThreadAction extends Action {
 		public void run() {
 			parameterMap.put("thread", Thread.currentThread().toString());
 			getJobService().executeAction((Integer) parameterMap.get("cycle"), configuredAction, parameterMap);
+			((CountDownLatch) parameterMap.get("counter")).countDown();
 		}
 	}
 
