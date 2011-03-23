@@ -190,8 +190,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		List<Cycle> jobCycles = new ArrayList();
 
 		Cycle lastCycle;
-
-		jobCycles = getCyclesForJob(job.getId());
+		jobCycles = getCyclesForJobDesc(job.getId());
+		
+		lastCycle = jobCycles.get(0);
+		
+	/*	jobCycles = getCyclesForJob(job.getId());
 
 		if (jobCycles.size() == 0) {
 			lastCycle = null;
@@ -201,7 +204,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			} else {
 				lastCycle = jobCycles.get(jobCycles.size() - 1);
 			}
-		}
+		}*/
 
 		return lastCycle;
 	}

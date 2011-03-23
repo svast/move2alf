@@ -995,8 +995,11 @@ public class JobController {
 					documentListSize = 0;
 				}
 				
-				String scheduleState = getJobService()
+		/*		String scheduleState = getJobService()
 				.getLastCycleForJob(getJobService().getJob(jobId)).getSchedule()
+				.getState().getDisplayName();
+				*/
+				String scheduleState = cycles.get(i).getSchedule()
 				.getState().getDisplayName();
 				
 				HistoryInfo historyInfo = new HistoryInfo(cycleId, cycles.get(i).getStartDateTime(), scheduleState, documentListSize);
