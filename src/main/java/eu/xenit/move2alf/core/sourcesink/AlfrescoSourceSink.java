@@ -10,6 +10,7 @@ import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -33,34 +34,12 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public void send(ConfiguredSourceSink configuredSourceSink,
 			Map<String, Object> parameterMap, String docExistsMode) {
-		String user = configuredSourceSink.getParameter("user");
-		String password = configuredSourceSink.getParameter("password");
-		String url = configuredSourceSink.getParameter("url");
-		if (url.endsWith("/")) {
-			url = url + "api/";
-		} else {
-			url = url + "/api/";
-		}
+		// TODO: refactoring needed: a SourceSink shouldn't know about the
+		// parameterMap and setting the status, this should be done by the
+		// appropriate action, in this case SinkAction. The current code causes
+		// a lot of duplication when implementing a new SourceSink.
 
-		// if (AuthenticationUtils.getAuthenticationDetails() == null) {
-		// try {
-		// logger.info("Starting Alfresco session for user " + user);
-		// AuthenticationUtils.startSession(user, password, url);
-		// } catch (AuthenticationFault e) {
-		// logger.error("Authentication failed");
-		// e.printStackTrace();
-		// }
-		// } else {
-		// logger.debug("Already authenticated");
-		// }
-
-		WebServiceRepositoryAccess ra = null;
-		try {
-			ra = new WebServiceRepositoryAccess(new URL(url), user, password);
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		WebServiceRepositoryAccess ra = createRepositoryAccess(configuredSourceSink);
 		try {
 			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			// run(ras);
@@ -106,10 +85,10 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			File document = (File) parameterMap.get("file");
 
-			// TODO upload mode...
+			
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
-						remotePath, user, namespace, contentType, metadata,
+						remotePath, "", namespace, contentType, metadata, // TODO: description
 						null);
 				parameterMap.put("status", "ok");
 			} else {
@@ -155,6 +134,39 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error("Fatal Exception", e);
 			System.exit(1);
 		}
+	}
+	
+	@Override
+	public boolean exists(ConfiguredSourceSink sinkConfig, String relativePath,
+			String name) {
+		WebServiceRepositoryAccess ra = createRepositoryAccess(sinkConfig);
+
+			RepositoryAccessSession ras = ra.createSessionAndRetry();
+			try {
+				return ras.doesDocExist(name, relativePath);
+			} catch (RepositoryAccessException e) {
+				throw new Move2AlfException(e.getMessage());
+			}
+	}
+
+	private WebServiceRepositoryAccess createRepositoryAccess(
+			ConfiguredSourceSink sinkConfig) {
+		String user = sinkConfig.getParameter("user");
+		String password = sinkConfig.getParameter("password");
+		String url = sinkConfig.getParameter("url");
+		if (url.endsWith("/")) {
+			url = url + "api/";
+		} else {
+			url = url + "/api/";
+		}
+		WebServiceRepositoryAccess ra = null;
+		try {
+			ra = new WebServiceRepositoryAccess(new URL(url), user, password);
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return ra;
 	}
 
 	private String getParameterWithDefault(Map<String, Object> parameterMap,

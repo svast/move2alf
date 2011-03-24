@@ -16,6 +16,9 @@ public class FilesystemMetadataAction extends Action {
 		File file = (File) parameterMap.get("file");
 		long lastModified = file.lastModified();
 		// TODO: write to metadata map
+		
+		parameterMap.put("namespace", "{http://www.alfresco.org/model/content/1.0}");
+		parameterMap.put("contenttype", "content");
 	}
 
 	@Override

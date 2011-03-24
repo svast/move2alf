@@ -1,34 +1,50 @@
 package eu.xenit.move2alf.core.action;
 
+import java.io.File;
 import java.util.Map;
 
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
-public class ListAction extends Action{
+public class ListAction extends Action {
 
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		// TODO Auto-generated method stub
-		
+		ConfiguredSourceSink sinkConfig = (ConfiguredSourceSink) configuredAction
+				.getConfiguredSourceSinkSet().toArray()[0];
+		SourceSink sink = getSourceSinkFactory().getObject(
+				sinkConfig.getClassName());
+		String relativePath = (String) parameterMap.get("relativePath");
+		String name = ((File) parameterMap.get("file")).getName();
+		try {
+			if (sink.exists(sinkConfig, relativePath, name)) {
+				parameterMap.put("status", "ok");
+			} else {
+				parameterMap.put("status", "failed");
+				parameterMap.put("errormessage", "Document not found");
+			}
+		} catch (Move2AlfException e) {
+			parameterMap.put("status", "failed");
+			parameterMap.put("errormessage", e.getMessage());
+		}
 	}
 
 	@Override
 	public String getCategory() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

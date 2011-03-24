@@ -44,6 +44,13 @@ public class FileSourceSink extends SourceSink {
 			Map<String, Object> parameterMap, String docExistsMode) {
 
 	}
+	
+	@Override
+	public boolean exists(ConfiguredSourceSink sinkConfig, String relativePath,
+			String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	@Override
 	public String getCategory() {
