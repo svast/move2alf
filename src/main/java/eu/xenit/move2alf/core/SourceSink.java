@@ -18,6 +18,6 @@ public abstract class SourceSink extends ConfigurableObject {
 			String path, boolean recursive);
 
 	public abstract boolean exists(ConfiguredSourceSink sinkConfig,
-			String relativePath, String name);
+			String remotePath, String name);
 
 }

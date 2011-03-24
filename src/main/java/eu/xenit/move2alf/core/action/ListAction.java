@@ -18,10 +18,25 @@ public class ListAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
+		
+		String basePath = configuredAction.getParameter("path");
+		if (!basePath.endsWith("/")) {
+			basePath = basePath + "/";
+		}
+
 		String relativePath = (String) parameterMap.get("relativePath");
+		relativePath = relativePath.replace("\\", "/");
+
+		if (relativePath.startsWith("/")) {
+			relativePath = relativePath.substring(1);
+		}
+
+		// add "cm:" in front of each path component
+		String remotePath = basePath + relativePath;
+		
 		String name = ((File) parameterMap.get("file")).getName();
 		try {
-			if (sink.exists(sinkConfig, relativePath, name)) {
+			if (sink.exists(sinkConfig, remotePath, name)) {
 				parameterMap.put("status", "ok");
 			} else {
 				parameterMap.put("status", "failed");

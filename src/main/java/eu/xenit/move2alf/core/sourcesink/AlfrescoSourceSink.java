@@ -137,13 +137,13 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 	
 	@Override
-	public boolean exists(ConfiguredSourceSink sinkConfig, String relativePath,
+	public boolean exists(ConfiguredSourceSink sinkConfig, String remotePath,
 			String name) {
 		WebServiceRepositoryAccess ra = createRepositoryAccess(sinkConfig);
 
 			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			try {
-				return ras.doesDocExist(name, relativePath);
+				return ras.doesDocExist(name, remotePath);
 			} catch (RepositoryAccessException e) {
 				throw new Move2AlfException(e.getMessage());
 			}
