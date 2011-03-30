@@ -7,6 +7,7 @@ import java.util.Map;
 
 //import org.alfresco.util.ISO8601DateFormat;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -16,19 +17,19 @@ public class FilesystemMetadataAction extends Action {
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		File file = (File) parameterMap.get("file");
+		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		long lastModified = file.lastModified();
 		
 		// TODO: write to metadata map
-		Map<String, String> metadata = (Map<String, String>) parameterMap.get("metadata");
+		Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
 		if (metadata == null) {
 			metadata = new HashMap<String, String>();
-			parameterMap.put("metadata", metadata);
+			parameterMap.put(Parameters.PARAM_METADATA, metadata);
 		}
 //		metadata.put("modified", ISO8601DateFormat.format(dateLastModified));
 		
-		parameterMap.put("namespace", "{http://www.alfresco.org/model/content/1.0}");
-		parameterMap.put("contenttype", "content");
+		parameterMap.put(Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
+		parameterMap.put(Parameters.PARAM_CONTENTTYPE, "content");
 	}
 
 	@Override

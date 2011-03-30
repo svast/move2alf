@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -20,30 +21,30 @@ public class MoveDocumentsAction extends Action {
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		boolean moveBeforeProcessing = "true".equals(configuredAction
-				.getParameter("moveBeforeProcessing"));
+				.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING));
 		boolean moveAfterLoad = "true".equals(configuredAction
-				.getParameter("moveAfterLoad"));
+				.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD));
 		boolean moveNotLoaded = "true".equals(configuredAction
-				.getParameter("moveNotLoaded"));
-		String stage = configuredAction.getParameter("stage");
-		String documentStatus = (String) parameterMap.get("status");
+				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED));
+		String stage = configuredAction.getParameter(Parameters.PARAM_STAGE);
+		String documentStatus = (String) parameterMap.get(Parameters.PARAM_STATUS);
 
 		String moveDirectory = null;
-		if (moveBeforeProcessing && "before".equals(stage)) {
+		if (moveBeforeProcessing && Parameters.VALUE_BEFORE.equals(stage)) {
 			moveDirectory = configuredAction
-					.getParameter("moveBeforeProcessingPath");
+					.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING_PATH);
 		}
-		if (moveAfterLoad && "after".equals(stage)
-				&& "ok".equals(documentStatus)) {
-			moveDirectory = configuredAction.getParameter("moveAfterLoadPath");
+		if (moveAfterLoad && Parameters.VALUE_AFTER.equals(stage)
+				&& Parameters.VALUE_OK.equals(documentStatus)) {
+			moveDirectory = configuredAction.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD_PATH);
 		}
-		if (moveNotLoaded && "after".equals(stage)
-				&& "failed".equals(documentStatus)) {
-			moveDirectory = configuredAction.getParameter("moveNotLoadedPath");
+		if (moveNotLoaded && Parameters.VALUE_AFTER.equals(stage)
+				&& Parameters.VALUE_FAILED.equals(documentStatus)) {
+			moveDirectory = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
 		}
 
-		if (("before".equals(stage) && moveBeforeProcessing)
-				|| ("after".equals(stage) && (moveAfterLoad || moveNotLoaded))) {
+		if ((Parameters.VALUE_BEFORE.equals(stage) && moveBeforeProcessing)
+				|| (Parameters.VALUE_AFTER.equals(stage) && (moveAfterLoad || moveNotLoaded))) {
 			if (moveDirectory != null && !"".equals(moveDirectory)) {
 				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
 				moveFile(moveDirectory, parameterMap);
@@ -53,7 +54,7 @@ public class MoveDocumentsAction extends Action {
 
 	public void moveFile(String moveDirectory,
 			Map parameterMap) {
-		File file = (File) parameterMap.get("file");
+		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		String absolutePath = file.getAbsolutePath();
 
 		absolutePath = absolutePath.replaceAll("\\\\", "/");
@@ -69,7 +70,7 @@ public class MoveDocumentsAction extends Action {
 
 		// assemble full path
 		//String relativePath = absolutePath.replace(inputFolder, "");
-		String relativePath = (String) parameterMap.get("relativePath");
+		String relativePath = (String) parameterMap.get(Parameters.PARAM_RELATIVE_PATH);
 		String fullDestinationPath = moveDirectory + "" + relativePath;
 
 		File moveFolder = new File(fullDestinationPath);
@@ -94,7 +95,7 @@ public class MoveDocumentsAction extends Action {
 
 			if (success) {
 				File movedFile = new File(newFileName);
-				parameterMap.put("file", movedFile);
+				parameterMap.put(Parameters.PARAM_FILE, movedFile);
 				logger.info("Moved file to " + movedFile.getAbsolutePath());
 			}
 

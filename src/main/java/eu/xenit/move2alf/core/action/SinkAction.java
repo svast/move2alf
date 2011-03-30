@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.action;
 
 import java.util.Map;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
@@ -10,8 +11,6 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SinkAction extends Action {
 
-	private static final String PARAM_PATH = "path";
-
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
@@ -19,9 +18,9 @@ public class SinkAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
-		String path = configuredAction.getParameter(PARAM_PATH);
+		String path = configuredAction.getParameter(Parameters.PARAM_PATH);
 		String docExistsMode = configuredAction.getParameter("documentExists");
-		parameterMap.put("path", path);
+		parameterMap.put(Parameters.PARAM_PATH, path);
 		sink.send(sinkConfig, parameterMap, docExistsMode);
 	}
 

@@ -10,6 +10,7 @@ import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
@@ -22,6 +23,10 @@ import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
 
 public class AlfrescoSourceSink extends SourceSink {
 
+	private static final String PARAM_URL = "url";
+	private static final String PARAM_PASSWORD = "password";
+	private static final String PARAM_USER = "user";
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(AlfrescoSourceSink.class);
 
@@ -43,7 +48,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		try {
 			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			// run(ras);
-			String basePath = getParameterWithDefault(parameterMap, "path", "/");
+			String basePath = getParameterWithDefault(parameterMap, Parameters.PARAM_PATH, "/");
 			if (!basePath.endsWith("/")) {
 				basePath = basePath + "/";
 			}
@@ -53,7 +58,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			}
 
 			String relativePath = getParameterWithDefault(parameterMap,
-					"relativePath", "");
+					Parameters.PARAM_RELATIVE_PATH, "");
 			relativePath = relativePath.replace("\\", "/");
 
 			if (relativePath.startsWith("/")) {
@@ -77,38 +82,50 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			logger.debug("Writing to " + remotePath);
 
-			String mimeType = getParameterWithDefault(parameterMap, "mimetype",
+			String mimeType = getParameterWithDefault(parameterMap, Parameters.PARAM_MIMETYPE,
 					"text/plain");
 			String namespace = getParameterWithDefault(parameterMap,
-					"namespace", "{http://www.alfresco.org/model/content/1.0}");
+					Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
 			String contentType = getParameterWithDefault(parameterMap,
-					"contenttype", "content");
+					Parameters.PARAM_CONTENTTYPE, "content");
 
 			String description = getParameterWithDefault(parameterMap,
-					"description", "");
+					Parameters.PARAM_DESCRIPTION, "");
 
 			Map<String, String> metadata = (Map<String, String>) parameterMap
-					.get("metadata");
+					.get(Parameters.PARAM_METADATA);
 			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
-					.get("multiValueMetadata");
-
-			File document = (File) parameterMap.get("file");
+					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
+			
+			Map<String, String> acl = (Map<String, String>) parameterMap.get(Parameters.PARAM_ACL);
+			
+			boolean inheritPermissions;
+			if (parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS) == null) {
+				inheritPermissions = false;
+			} else {
+				inheritPermissions = (Boolean) parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS);				
+			}
+			
+			File document = (File) parameterMap.get(Parameters.PARAM_FILE);
 
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
 						remotePath, description, namespace, contentType, metadata, // TODO:
 																			// description
 						multiValueMetadata);
-				parameterMap.put("status", "ok");
+				if (acl != null) {
+					ras.setAccessControlList(remotePath, inheritPermissions, acl);
+				}
+				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 			} else {
 				if (MODE_SKIP.equals(docExistsMode)) {
 					// ignore
-					parameterMap.put("status", "ok");
+					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
 					logger.warn("Document " + document.getName()
 							+ " already exists in " + remotePath);
-					parameterMap.put("status", "failed");
-					parameterMap.put("errormessage", "Document "
+					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+					parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, "Document "
 							+ document.getName() + " already exists in "
 							+ remotePath);
 				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
@@ -119,25 +136,26 @@ public class AlfrescoSourceSink extends SourceSink {
 					if (metadata != null) {
 						ras.updateMetaDataByDocNameAndPath(remotePath, document
 								.getName(), metadata);
+						// TODO: updating multivalue metadata not supported by RRA?
 					}
-					parameterMap.put("status", "ok");
+					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 				}
 			}
 
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
-			parameterMap.put("status", "failed");
-			parameterMap.put("errormessage", e.getMessage());
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
 		} catch (RepositoryException e) {
 			// we end up here if the request could not be handled by the
 			// repository
-			parameterMap.put("status", "failed");
-			parameterMap.put("errormessage", e.getMessage());
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
 		} catch (WebServiceException e) {
-			parameterMap.put("status", "failed");
-			parameterMap.put("errormessage", e.getMessage());
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
 		} catch (RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
@@ -160,9 +178,9 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private WebServiceRepositoryAccess createRepositoryAccess(
 			ConfiguredSourceSink sinkConfig) {
-		String user = sinkConfig.getParameter("user");
-		String password = sinkConfig.getParameter("password");
-		String url = sinkConfig.getParameter("url");
+		String user = sinkConfig.getParameter(PARAM_USER);
+		String password = sinkConfig.getParameter(PARAM_PASSWORD);
+		String url = sinkConfig.getParameter(PARAM_URL);
 		if (url.endsWith("/")) {
 			url = url + "api/";
 		} else {

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -13,7 +14,7 @@ public class ThreadAction extends Action {
 	@Override
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		ExecutorService threadPool = (ExecutorService) parameterMap.get("threadpool");
+		ExecutorService threadPool = (ExecutorService) parameterMap.get(Parameters.PARAM_THREADPOOL);
 		ConfiguredAction nextAction	= configuredAction.getAppliedConfiguredActionOnSuccess();
 		threadPool.execute(new ActionRunner(nextAction, parameterMap));
 	}
@@ -34,9 +35,9 @@ public class ThreadAction extends Action {
 		}
 		
 		public void run() {
-			parameterMap.put("thread", Thread.currentThread().toString());
-			getJobService().executeAction((Integer) parameterMap.get("cycle"), configuredAction, parameterMap);
-			((CountDownLatch) parameterMap.get("counter")).countDown();
+			parameterMap.put(Parameters.PARAM_THREAD, Thread.currentThread().toString());
+			getJobService().executeAction((Integer) parameterMap.get(Parameters.PARAM_CYCLE), configuredAction, parameterMap);
+			((CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER)).countDown();
 		}
 	}
 

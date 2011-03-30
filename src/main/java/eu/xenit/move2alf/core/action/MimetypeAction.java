@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -18,8 +19,8 @@ public class MimetypeAction extends Action {
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		File file = (File) parameterMap.get("file");
-		parameterMap.put("mimetype", determineMimeType(file.getName()));
+		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
+		parameterMap.put(Parameters.PARAM_MIMETYPE, determineMimeType(file.getName()));
 	}
 
 	public static String determineMimeType(String fileName) {

@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
@@ -20,16 +21,13 @@ public class SourceAction extends Action {
 	private static final Logger logger = LoggerFactory
 	.getLogger(SourceAction.class);
 
-	public static final String PARAM_PATH = "path";
-	public static final String PARAM_RECURSIVE = "recursive";
-
 	@Override
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		// TODO: filters; in separate action? in sourcesink?
-		String path = configuredAction.getParameter(PARAM_PATH);
+		String path = configuredAction.getParameter(Parameters.PARAM_PATH);
 		boolean recursive = "true".equals(configuredAction
-				.getParameter(PARAM_RECURSIVE));
+				.getParameter(Parameters.PARAM_RECURSIVE));
 
 		ConfiguredSourceSink sourceConfig = (ConfiguredSourceSink) configuredAction
 				.getConfiguredSourceSinkSet().toArray()[0];
@@ -38,13 +36,13 @@ public class SourceAction extends Action {
 		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
 
 		List<File> files = source.list(sourceConfig, path, recursive);
-		String moveNotLoaded = configuredAction.getParameter("moveNotLoaded");
-		String failedPath = configuredAction.getParameter("moveNotLoadedPath");
+		String moveNotLoaded = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED);
+		String failedPath = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
 		if("true".equals(moveNotLoaded)) {
 			files.addAll(source.list(sourceConfig, failedPath, recursive));
 		}
 		CountDownLatch counter = new CountDownLatch(files.size());
-		parameterMap.put("counter", counter);
+		parameterMap.put(Parameters.PARAM_COUNTER, counter);
 		readFiles(files, parameterMap, recursive, configuredAction, sourceConfig, source,
 				nextAction);
 		try {
@@ -57,25 +55,25 @@ public class SourceAction extends Action {
 	private void readFiles(List<File> files, Map<String, Object> parameterMap,
 			boolean recursive, ConfiguredAction action, ConfiguredSourceSink sourceConfig,
 			SourceSink source, ConfiguredAction nextAction) {
-		parameterMap.put("threadpool", getSourceSinkFactory().getThreadPool(sourceConfig));
+		parameterMap.put(Parameters.PARAM_THREADPOOL, getSourceSinkFactory().getThreadPool(sourceConfig));
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
 				newParameterMap.putAll(parameterMap);
-				newParameterMap.put("file", file);
+				newParameterMap.put(Parameters.PARAM_FILE, file);
 				String relativePath = file.getParent();
 				relativePath = relativePath.replace("\\", "/");
-				String path = action.getParameter(PARAM_PATH);
+				String path = action.getParameter(Parameters.PARAM_PATH);
 				path = path.replace("\\", "/");
-				String pathFailed = action.getParameter("moveNotLoadedPath");
+				String pathFailed = action.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
 				pathFailed = pathFailed.replace("\\", "/");
 				if (relativePath.startsWith(path)) {
 					relativePath = relativePath.substring(path.length());
 				} else if (relativePath.startsWith(pathFailed)) {
 					relativePath = relativePath.substring(pathFailed.length());
 				}
-				newParameterMap.put("relativePath", relativePath);
-				getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, newParameterMap);
+				newParameterMap.put(Parameters.PARAM_RELATIVE_PATH, relativePath);
+				getJobService().executeAction((Integer) parameterMap.get(Parameters.PARAM_CYCLE), nextAction, newParameterMap);
 			}
 		}
 	}

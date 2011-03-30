@@ -8,6 +8,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -46,7 +47,7 @@ public class JobExecutor implements org.quartz.Job {
 		}
 
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		parameterMap.put("cycle", cycle.getId());
+		parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
 		ConfiguredAction action = job.getFirstConfiguredAction();
 		jobService.executeAction(cycle.getId(), action, parameterMap);
 

@@ -3,6 +3,7 @@ package eu.xenit.move2alf.core.action;
 import java.io.File;
 import java.util.Map;
 
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.SourceSink;
@@ -19,12 +20,16 @@ public class ListAction extends Action {
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
 		
-		String basePath = configuredAction.getParameter("path");
+		String basePath = configuredAction.getParameter(Parameters.PARAM_PATH);
 		if (!basePath.endsWith("/")) {
 			basePath = basePath + "/";
 		}
+		
+		if(!basePath.startsWith("/")) {
+			basePath = "/" + basePath;
+		}
 
-		String relativePath = (String) parameterMap.get("relativePath");
+		String relativePath = (String) parameterMap.get(Parameters.PARAM_RELATIVE_PATH);
 		relativePath = relativePath.replace("\\", "/");
 
 		if (relativePath.startsWith("/")) {
@@ -34,17 +39,17 @@ public class ListAction extends Action {
 		// add "cm:" in front of each path component
 		String remotePath = basePath + relativePath;
 		
-		String name = ((File) parameterMap.get("file")).getName();
+		String name = ((File) parameterMap.get(Parameters.PARAM_FILE)).getName();
 		try {
 			if (sink.exists(sinkConfig, remotePath, name)) {
-				parameterMap.put("status", "ok");
+				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 			} else {
-				parameterMap.put("status", "failed");
-				parameterMap.put("errormessage", "Document not found");
+				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+				parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, "Document not found");
 			}
 		} catch (Move2AlfException e) {
-			parameterMap.put("status", "failed");
-			parameterMap.put("errormessage", e.getMessage());
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 		}
 	}
 
