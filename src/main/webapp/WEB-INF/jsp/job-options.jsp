@@ -99,10 +99,10 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 <c:if test="${job.docExist!='Delete'}" >
 <tr><td><form:radiobutton path="docExist" value="Delete" />Delete</td></tr>
 </c:if>
-<c:if test="${job.docExist=='Presence'}" >
+<c:if test="${job.docExist=='ListPresence'}" >
 <tr><td><form:radiobutton path="docExist" value="ListPresence" checked="true"/>List presence</td></tr>
 </c:if>
-<c:if test="${job.docExist!='Presence'}" >
+<c:if test="${job.docExist!='ListPresence'}" >
 <tr><td><form:radiobutton path="docExist" value="ListPresence" />List presence</td></tr>
 </c:if>
 </table>

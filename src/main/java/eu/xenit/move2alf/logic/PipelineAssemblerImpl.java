@@ -86,6 +86,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		if("Delete".equals(jobConfig.getDocExist())){
 			actions.add(action("eu.xenit.move2alf.core.action.DeleteAction")
 					.param("path", jobConfig.getDestinationFolder())
+					.param("documentExists", jobConfig.getDocExist())
 					.sourceSink(
 							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
 		}
@@ -93,6 +94,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		if("ListPresence".equals(jobConfig.getDocExist())){
 			actions.add(action("eu.xenit.move2alf.core.action.ListAction")
 					.param("path", jobConfig.getDestinationFolder())
+					.param("documentExists", jobConfig.getDocExist())
 					.sourceSink(
 							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
 		}
