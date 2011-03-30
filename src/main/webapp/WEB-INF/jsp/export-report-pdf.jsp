@@ -2,7 +2,9 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ page import = "com.itextpdf.text.*, com.itextpdf.text.pdf.*, java.io.*, java.util.ArrayList,java.util.List, eu.xenit.move2alf.core.dto.ProcessedDocument"%>
 <%
-response.setContentType("application/pdf");
+response.setContentType("application/x-pdf");
+response.setHeader("content-disposition", "attachment; filename=\"Report.pdf\"");
+
 Document document = new Document();
 try{
 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
