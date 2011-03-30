@@ -817,7 +817,7 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
 			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
@@ -866,7 +866,7 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
 			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
@@ -916,7 +916,7 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
 			}
 		}
 		
@@ -961,7 +961,7 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+documentListSize/totalTimeInSeconds;
+				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
 			}
 		}
 		

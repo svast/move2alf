@@ -1,5 +1,6 @@
-<%@ include file="/WEB-INF/jsp/includes.jsp" %>
-<%@ page import = "com.itextpdf.text .*, com.itextpdf.text.pdf .*, java.io. *"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ page import = "com.itextpdf.text.*, com.itextpdf.text.pdf.*, java.io.*, java.util.ArrayList,java.util.List, eu.xenit.move2alf.core.dto.ProcessedDocument"%>
 <%
 response.setContentType("application/pdf");
 Document document = new Document();
@@ -77,23 +78,29 @@ table.addCell("Processed date and time");
 table.addCell("Status");
 
 %>
-
-<c:forEach var="document" items="${processedDocuments}" >
-<c:set var="docName" value="${document.name}" scope="session" />
-<c:set var="docDateTime" scope="session" ><fmt:formatDate value="${document.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></c:set>
-<c:set var="docStatus" value="${document.status.displayName}" scope="session" />
-
-<%//twelfth row
-table.addCell((String) session.getAttribute("docName"));
-table.addCell(session.getAttribute("docDateTime").toString());
-table.addCell((String) session.getAttribute("docStatus"));
-%>
-</c:forEach> 
+<c:set var="documents" value="${processedDocuments}" />
 <%
+List<ProcessedDocument> processedDocuments = new ArrayList();
+processedDocuments = (List) pageContext.getAttribute("documents");
+if(processedDocuments != null){
+for(int i=0; i<processedDocuments.size(); i++){
+	
+table.addCell(processedDocuments.get(i).getName());
+table.addCell(processedDocuments.get(i).getProcessedDateTime().toString());
+table.addCell(processedDocuments.get(i).getStatus().getDisplayName());
+}
+}
+
 document.add(table);
+
 document.close();
 
-DataOutput dataOutput = new DataOutputStream(response.getOutputStream());
+System.out.println("Before output stream");
+ServletOutputStream outputStream = response.getOutputStream();
+System.out.println("After output stream");
+DataOutput dataOutput = new DataOutputStream(outputStream);
+
+System.out.println("After dataOutput");
 byte[] bytes = buffer.toByteArray();
 response.setContentLength(bytes.length);
 for(int i = 0; i < bytes.length; i++)
