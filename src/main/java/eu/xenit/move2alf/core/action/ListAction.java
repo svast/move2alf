@@ -38,6 +38,18 @@ public class ListAction extends Action {
 
 		// add "cm:" in front of each path component
 		String remotePath = basePath + relativePath;
+		String[] components = remotePath.split("/");
+		remotePath = "";
+		for (String component : components) {
+			if ("".equals(component)) {
+				remotePath += "/";
+			} else if (component.startsWith("cm:")) {
+				remotePath += component + "/";
+			} else {
+				remotePath += "cm:" + component + "/";
+			}
+		}
+		remotePath = remotePath.substring(0, remotePath.length() - 1);
 		
 		String name = ((File) parameterMap.get(Parameters.PARAM_FILE)).getName();
 		try {
