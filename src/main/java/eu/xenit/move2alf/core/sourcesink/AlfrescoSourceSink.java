@@ -47,6 +47,10 @@ public class AlfrescoSourceSink extends SourceSink {
 			if (!basePath.endsWith("/")) {
 				basePath = basePath + "/";
 			}
+			
+			if(!basePath.startsWith("/")) {
+				basePath = "/" + basePath;
+			}
 
 			String relativePath = getParameterWithDefault(parameterMap,
 					"relativePath", "");
@@ -80,17 +84,20 @@ public class AlfrescoSourceSink extends SourceSink {
 			String contentType = getParameterWithDefault(parameterMap,
 					"contenttype", "content");
 
+			String description = getParameterWithDefault(parameterMap,
+					"description", "");
+
 			Map<String, String> metadata = (Map<String, String>) parameterMap
 					.get("metadata");
 			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
-			.get("multiValueMetadata");
+					.get("multiValueMetadata");
 
 			File document = (File) parameterMap.get("file");
 
-			
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
-						remotePath, "", namespace, contentType, metadata, // TODO: description
+						remotePath, description, namespace, contentType, metadata, // TODO:
+																			// description
 						multiValueMetadata);
 				parameterMap.put("status", "ok");
 			} else {
@@ -137,18 +144,18 @@ public class AlfrescoSourceSink extends SourceSink {
 			System.exit(1);
 		}
 	}
-	
+
 	@Override
 	public boolean exists(ConfiguredSourceSink sinkConfig, String remotePath,
 			String name) {
 		WebServiceRepositoryAccess ra = createRepositoryAccess(sinkConfig);
 
-			RepositoryAccessSession ras = ra.createSessionAndRetry();
-			try {
-				return ras.doesDocExist(name, remotePath);
-			} catch (RepositoryAccessException e) {
-				throw new Move2AlfException(e.getMessage());
-			}
+		RepositoryAccessSession ras = ra.createSessionAndRetry();
+		try {
+			return ras.doesDocExist(name, remotePath);
+		} catch (RepositoryAccessException e) {
+			throw new Move2AlfException(e.getMessage());
+		}
 	}
 
 	private WebServiceRepositoryAccess createRepositoryAccess(
