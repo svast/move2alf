@@ -64,8 +64,11 @@ public class SourceAction extends Action {
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put("file", file);
 				String relativePath = file.getParent();
+				relativePath = relativePath.replace("\\", "/");
 				String path = action.getParameter(PARAM_PATH);
+				path = path.replace("\\", "/");
 				String pathFailed = action.getParameter("moveNotLoadedPath");
+				pathFailed = pathFailed.replace("\\", "/");
 				if (relativePath.startsWith(path)) {
 					relativePath = relativePath.substring(path.length());
 				} else if (relativePath.startsWith(pathFailed)) {

@@ -82,6 +82,8 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			Map<String, String> metadata = (Map<String, String>) parameterMap
 					.get("metadata");
+			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
+			.get("multiValueMetadata");
 
 			File document = (File) parameterMap.get("file");
 
@@ -89,7 +91,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
 						remotePath, "", namespace, contentType, metadata, // TODO: description
-						null);
+						multiValueMetadata);
 				parameterMap.put("status", "ok");
 			} else {
 				if (MODE_SKIP.equals(docExistsMode)) {

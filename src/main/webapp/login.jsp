@@ -3,7 +3,7 @@
 
 <div class="span-24 last main">
 
-<h3>Login with Username and Password</h3><form name='f' action='/move2alf-war/j_spring_security_check' method='POST'> 
+<h3>Login with Username and Password</h3><form name='f' action='<spring:url value="/j_spring_security_check" htmlEscape="true" />' method='POST'> 
  <table> 
     <tr><td>User:</td><td><input type='text' name='j_username' value=''></td></tr> 
     <tr><td>Password:</td><td><input type='password' name='j_password'/></td></tr> 
