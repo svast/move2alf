@@ -59,14 +59,12 @@
 
 <table class="table-border-thin">
 <tr>
-<th width="20px" class="table-border-thin">No.</th>
 <th class="table-border-thin">Name</th>
 <th class="table-border-thin">Processing date and time</th>
 <th class="table-border-thin">Status</th>
 </tr>
 <c:forEach items="${pagedListHolder.pageList}" var="item">
 <tr>
-<td class="table-border-thin">${item.id}</td>
 <td class="table-border-thin">${item.name}</td>
 <td class="table-border-thin"><fmt:formatDate value="${item.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>
 <td class="table-border-thin">${item.status}</td>
