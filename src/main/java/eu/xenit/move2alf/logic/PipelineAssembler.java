@@ -89,6 +89,12 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 			params.put(key, value);
 			return (T) this;
 		}
+		
+		@SuppressWarnings("unchecked")
+		T paramMap(Map<String, String> paramMap) {
+			params = paramMap;
+			return (T) this;
+		}
 
 		abstract ConfiguredObject build();
 	}

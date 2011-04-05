@@ -88,6 +88,10 @@ public class JobConfig {
 	private String parameterTransformName = "";
 	
 	private String parameterTransformValue = "";
+	
+	private List<String> paramMetadata;
+	
+	private List<String> paramTransform;
 
 	@NotEmpty
 	private String dest;
@@ -416,6 +420,22 @@ public class JobConfig {
 
 	public String getParameterTransformValue() {
 		return parameterTransformValue;
+	}
+	
+	public void setParamMetadata(List<String> paramMetadata) {
+		this.paramMetadata = paramMetadata;
+	}
+
+	public List<String> getParamMetadata() {
+		return paramMetadata;
+	}
+	
+	public void setParamTransform(List<String> paramTransform) {
+		this.paramTransform = paramTransform;
+	}
+
+	public List<String> getParamTransform() {
+		return paramTransform;
 	}
 
 

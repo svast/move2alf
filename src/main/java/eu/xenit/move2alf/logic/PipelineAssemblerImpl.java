@@ -1,7 +1,10 @@
 package eu.xenit.move2alf.logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,31 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 	public void assemblePipeline(JobConfig jobConfig) {
 		List<ActionBuilder> actions = new ArrayList();
 		
+		List<String> metadataParameterList = jobConfig.getParamMetadata();
+		Map<String,String> metadataParameterMap = new HashMap();
+		
+		if(metadataParameterList != null){
+			String[] metadataParameter = new String[2];
+			for(int i=0; i<metadataParameterList.size();i++){
+				logger.debug("metadata is "+metadataParameterList.get(i));
+				metadataParameter = metadataParameterList.get(i).split("\\|");
+				logger.debug("metadata parameter name: "+metadataParameter[0]+" and value: "+metadataParameter[1]);
+				metadataParameterMap.put(metadataParameter[0], metadataParameter[1]);
+			}
+		}
+		
+		List<String> transformParameterList = jobConfig.getParamTransform();
+		Map<String,String> transformParameterMap = new HashMap();
+		
+		if(transformParameterList != null){
+			String [] transformParameter = new String[2];
+			for(int i=0; i<transformParameterList.size();i++){
+				transformParameter = transformParameterList.get(i).split("\\|");
+				logger.debug("transform parameter name: "+transformParameter[0]+" and value: "+transformParameter[1]);
+				transformParameterMap.put(transformParameter[0], transformParameter[1]);
+			}
+		}
+
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path", jobConfig.getInputFolder())
 				.param("recursive", "true")
@@ -63,10 +91,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		
 		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 		
-		actions.add(action(jobConfig.getMetadata()));
+		actions.add(action(jobConfig.getMetadata())
+				.paramMap(metadataParameterMap));
 		
 		if(!"No transformation".equals(jobConfig.getTransform())){
-			actions.add(action(jobConfig.getTransform()));
+			actions.add(action(jobConfig.getTransform())
+					.paramMap(transformParameterMap));
 		}
 		
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
@@ -144,6 +174,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String sendReport="";
 		String emailAddressReport="";
 		String extension="";
+		Map<String,String> metadataParameterMap = new HashMap();
+		Map<String,String> transformParameterMap = new HashMap();
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 				inputFolder = action.getParameter("path");
@@ -177,8 +209,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				Action configurableAction = getActionFactory().getObject(action.getClassName());
 				if(configurableAction.getCategory()==ConfigurableObject.CAT_METADATA){
 					metadata = action.getClassName();
+					metadataParameterMap = action.getParameters();
 				}else if(configurableAction.getCategory()==ConfigurableObject.CAT_TRANSFORM){
 					transform = action.getClassName();
+					transformParameterMap = action.getParameters();
 				}
 			}
 			
@@ -201,6 +235,27 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setSendReport(sendReport);
 		jobConfig.setEmailAddressRep(emailAddressReport);
 		jobConfig.setExtension(extension);
+		
+		Iterator metadataMapIterator = metadataParameterMap.entrySet().iterator();
+		List<String> paramMetadata = new ArrayList();
+		while(metadataMapIterator.hasNext()){
+			Map.Entry nameValuePair = (Map.Entry)metadataMapIterator.next();
+			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();
+			paramMetadata.add(listValue);
+		}
+		
+		jobConfig.setParamMetadata(paramMetadata);
+		
+		Iterator transformMapIterator = transformParameterMap.entrySet().iterator();
+		List<String> paramTransform = new ArrayList();
+		while(transformMapIterator.hasNext()){
+			Map.Entry nameValuePair = (Map.Entry)transformMapIterator.next();
+			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();
+			paramTransform.add(listValue);
+		}
+		
+		jobConfig.setParamTransform(paramTransform);
+		
 		return jobConfig;
 	}
 }
