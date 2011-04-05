@@ -1,20 +1,20 @@
-function addParameter() {
-	document.getElementById('parameterForm').style.display = 'block';
-	document.getElementById('addParameterButton').style.display = 'none';
+function addParameterMetadata() {
+	document.getElementById('parameterMetadataForm').style.display = 'block';
+	document.getElementById('addParameterMetadataButton').style.display = 'none';
 }
 
-function cancelParameter() {
-	document.getElementById('parameterForm').style.display = 'none';
-	document.getElementById('addParameterButton').style.display = 'block';
+function cancelParameterMetadata() {
+	document.getElementById('parameterMetadataForm').style.display = 'none';
+	document.getElementById('addParameterMetadataButton').style.display = 'block';
 }
 
-function confirmParameter() {
-	document.getElementById('parameterForm').style.display = 'none';
-	document.getElementById('addParameterButton').style.display = 'block';
+function confirmParameterMetadata() {
+	document.getElementById('parameterMetadataForm').style.display = 'none';
+	document.getElementById('addParameterMetadataButton').style.display = 'block';
 }
 
-function addRowToParameter(form) {
-	var tbl = document.getElementById('paramTable');
+function addRowToParameterMetadata(form) {
+	var tbl = document.getElementById('paramMetadataTable');
 	var lastRow = tbl.rows.length;
 
 	var iteration = lastRow + 1;
@@ -24,13 +24,13 @@ function addRowToParameter(form) {
 
 	var rowNumber = document.createElement('div');
 	rowNumber.innerHTML = iteration;
-	rowNumber.id = "rowNumberParam" + iteration;
+	rowNumber.id = "rowNumberParamMetadata" + iteration;
 
 	cellFirst.appendChild(rowNumber);
 
 	var cellSecond = row.insertCell(1);
-	var displayString = form.parameterName.value + " = \""
-			+ form.parameterValue.value+"\"";
+	var displayString = form.parameterMetadataName.value + " = \""
+			+ form.parameterMetadataValue.value+"\"";
 	
 	var parameter = document.createTextNode(displayString);
 	cellSecond.appendChild(parameter); 
@@ -41,38 +41,38 @@ function addRowToParameter(form) {
 
 	sp.className = 'pointer';
 	sp.innerHTML = 'remove';
-	var id = 'removeParam' + iteration;
+	var id = 'removeParamMetadata' + iteration;
 	sp.id = id;
-	sp.setAttribute('onclick', 'removeRowFromParameter(' + iteration + ')');
+	sp.setAttribute('onclick', 'removeRowFromParameterMetadata(' + iteration + ')');
 	cellThird.appendChild(sp);
-	setParamInForm(form.parameterName.value, form.parameterValue.value);
+	setParamMetadataInForm(form.parameterMetadataName.value, form.parameterMetadataValue.value);
 }
 
-function removeRowFromParameter(row){
+function removeRowFromParameterMetadata(row){
 
-	  var tbl = document.getElementById('paramTable');
+	  var tbl = document.getElementById('paramMetadataTable');
 	  tbl.deleteRow(row-1);
-	  adjustRowsParams(tbl,row);
+	  adjustRowsParamsMetadata(tbl,row);
 
-	  var tblParam = document.getElementById('tblParam');
+	  var tblParam = document.getElementById('tblParamMetadata');
 	  tblParam.deleteRow(row-1);
 	  
 }
 
-function adjustRowsParams(tbl,row){
+function adjustRowsParamsMetadata(tbl,row){
 	var rowCount = tbl.rows.length;
 	for(row; row<=rowCount; row++){
 		var j=row+1;
-		document.getElementById("rowNumberParam"+j).setAttribute("id","rowNumberParam"+row);
-		document.getElementById("rowNumberParam"+row).innerHTML=row;
-		document.getElementById("removeParam"+j).setAttribute("id","removeParam"+row);
-		document.getElementById("removeParam"+row).setAttribute('onclick', 'removeRowFromParameter('+row+')');
+		document.getElementById("rowNumberParamMetadata"+j).setAttribute("id","rowNumberParamMetadata"+row);
+		document.getElementById("rowNumberParamMetadata"+row).innerHTML=row;
+		document.getElementById("removeParamMetadata"+j).setAttribute("id","removeParamMetadata"+row);
+		document.getElementById("removeParamMetadata"+row).setAttribute('onclick', 'removeRowFromParameterMetadata('+row+')');
 	}
 }
 
-function setParamInForm(name, value){
+function setParamMetadataInForm(name, value){
 	var tableValue=name+"|"+value;
-	var tblParam = document.getElementById('tblParam');
+	var tblParam = document.getElementById('tblParamMetadata');
 	
 	  var lastRow = tblParam.rows.length;
 
@@ -82,17 +82,118 @@ function setParamInForm(name, value){
 	  var cellFirst = row.insertCell(0);
 
 		try{
-			var fi=document.createElement('<input name=\"param\" type=\"checkbox\" checked>');
-			var id = 'param'+iteration;
+			var fi=document.createElement('<input name=\"paramMetadata\" type=\"checkbox\" checked>');
+			var id = 'paramMetadata'+iteration;
 			 fi.id=id;
 			 fi.value=tableValue;
 		}
 		catch(e){
 			 var fi = document.createElement('input');
-			 var id = 'param'+iteration;
+			 var id = 'paramMetadata'+iteration;
 			 fi.id=id;
 			 fi.type='checkbox';
-			 fi.name='param';
+			 fi.name='paramMetadata';
+			 fi.value=tableValue;
+			 fi.checked=true;
+		}
+	  cellFirst.appendChild(fi);
+}
+
+function addParameterTransform() {
+	document.getElementById('parameterTransformForm').style.display = 'block';
+	document.getElementById('addParameterTransformButton').style.display = 'none';
+}
+
+function cancelParameterTransform() {
+	document.getElementById('parameterTransformForm').style.display = 'none';
+	document.getElementById('addParameterTransformButton').style.display = 'block';
+}
+
+function confirmParameterTransform() {
+	document.getElementById('parameterTransformForm').style.display = 'none';
+	document.getElementById('addParameterTransformButton').style.display = 'block';
+}
+
+function addRowToParameterTransform(form) {
+	var tbl = document.getElementById('paramTransformTable');
+	var lastRow = tbl.rows.length;
+
+	var iteration = lastRow + 1;
+	var row = tbl.insertRow(lastRow);
+
+	var cellFirst = row.insertCell(0);
+
+	var rowNumber = document.createElement('div');
+	rowNumber.innerHTML = iteration;
+	rowNumber.id = "rowNumberParamTransform" + iteration;
+
+	cellFirst.appendChild(rowNumber);
+
+	var cellSecond = row.insertCell(1);
+	var displayString = form.parameterTransformName.value + " = \""
+			+ form.parameterTransformValue.value+"\"";
+	
+	var parameter = document.createTextNode(displayString);
+	cellSecond.appendChild(parameter); 
+
+	var cellThird = row.insertCell(2);
+
+	var sp = document.createElement('div');
+
+	sp.className = 'pointer';
+	sp.innerHTML = 'remove';
+	var id = 'removeParamTransform' + iteration;
+	sp.id = id;
+	sp.setAttribute('onclick', 'removeRowFromParameterTransform(' + iteration + ')');
+	cellThird.appendChild(sp);
+	setParamTransformInForm(form.parameterTransformName.value, form.parameterTransformValue.value);
+}
+
+function removeRowFromParameterTransform(row){
+
+	  var tbl = document.getElementById('paramTransformTable');
+	  tbl.deleteRow(row-1);
+	  adjustRowsParamsTransform(tbl,row);
+
+	  var tblParam = document.getElementById('tblParamTransform');
+	  tblParam.deleteRow(row-1);
+	  
+}
+
+function adjustRowsParamsTransform(tbl,row){
+	var rowCount = tbl.rows.length;
+	for(row; row<=rowCount; row++){
+		var j=row+1;
+		document.getElementById("rowNumberParamTransform"+j).setAttribute("id","rowNumberParamTransform"+row);
+		document.getElementById("rowNumberParamTransform"+row).innerHTML=row;
+		document.getElementById("removeParamTransform"+j).setAttribute("id","removeParamTransform"+row);
+		document.getElementById("removeParamTransform"+row).setAttribute('onclick', 'removeRowFromParameterTransform('+row+')');
+	}
+}
+
+function setParamTransformInForm(name, value){
+	var tableValue=name+"|"+value;
+	var tblParam = document.getElementById('tblParamTransform');
+	
+	  var lastRow = tblParam.rows.length;
+
+	  var iteration = lastRow+1;
+	  var row = tblParam.insertRow(lastRow);
+	  
+	  var cellFirst = row.insertCell(0);
+
+		try{
+			var fi=document.createElement('<input name=\"paramTransform\" type=\"checkbox\" checked>');
+			var id = 'paramTransform'+iteration;
+			 fi.id=id;
+			 fi.value=tableValue;
+		}
+		catch(e){
+			 var fi = document.createElement('input');
+			 var id = 'paramTransform'+iteration;
+			 fi.id=id;
+			 fi.type='checkbox';
+			 fi.name='paramTransform';
 			 fi.value=tableValue;
 			 fi.checked=true;
 		}

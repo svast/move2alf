@@ -81,9 +81,13 @@ public class JobConfig {
 	
 	private String extension = "*";
 	
-	private String parameterName = "";
+	private String parameterMetadataName = "";
 	
-	private String parameterValue = "";
+	private String parameterMetadataValue = "";
+	
+	private String parameterTransformName = "";
+	
+	private String parameterTransformValue = "";
 
 	@NotEmpty
 	private String dest;
@@ -382,20 +386,36 @@ public class JobConfig {
 		return extension;
 	}
 	
-	public void setParameterName(String parameterName) {
-		this.parameterName = parameterName;
+	public void setParameterMetadataName(String parameterMetadataName) {
+		this.parameterMetadataName = parameterMetadataName;
 	}
 
-	public String getParameterName() {
-		return parameterName;
+	public String getParameterMetadataName() {
+		return parameterMetadataName;
 	}
 	
-	public void setParameterValue(String parameterValue) {
-		this.parameterValue = parameterValue;
+	public void setParameterMetadataValue(String parameterMetadataValue) {
+		this.parameterMetadataValue = parameterMetadataValue;
 	}
 
-	public String getParameterValue() {
-		return parameterValue;
+	public String getParameterMetadataValue() {
+		return parameterMetadataValue;
+	}
+	
+	public void setParameterTransformName(String parameterTransformName) {
+		this.parameterTransformName = parameterTransformName;
+	}
+
+	public String getParameterTransformName() {
+		return parameterTransformName;
+	}
+	
+	public void setParameterTransformValue(String parameterTransformValue) {
+		this.parameterTransformValue = parameterTransformValue;
+	}
+
+	public String getParameterTransformValue() {
+		return parameterTransformValue;
 	}
 
 

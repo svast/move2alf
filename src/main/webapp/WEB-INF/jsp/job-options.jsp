@@ -25,6 +25,30 @@ metadataCounter++; %>
 </c:forEach>
 </table>
 <input type="radio" class="hide" value="" name="metadata" />
+
+<br />
+
+<table id="paramMetadataTable">
+
+</table>
+
+<div id="addParameterMetadataButton" class="link small" onclick="addParameterMetadata();"><span class="pointer">Add metadata parameter</span></div>
+<table id="parameterMetadataForm" class="hide">
+<tr>
+<td>Name: <form:input path="parameterMetadataName" size="30" maxlength="30"  /></td>
+<td>Value: <form:input path="parameterMetadataValue" size="30" maxlength="30"  /></td>
+</tr>
+<tr>
+<td><button type="button" class="button" onclick="cancelParameterMetadata();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameterMetadata();addRowToParameterMetadata(this.form);" /></td>
+
+</tr>
+</table>
+
+ <table id="tblParamMetadata" class="hide">
+
+</table>
+
 <br />
 
 <h4>Transform</h4>
@@ -62,31 +86,28 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 <input type="radio" class="hide" value="" name="transform" />
 
+<br />
 
-<h4>Parameters</h4>
-
-<table id="paramTable">
+<table id="paramTransformTable">
 
 </table>
 
-
-<div id="addParameterButton" class="link small" onclick="addParameter();"><span class="pointer">Add parser parameter</span></div>
-<table id="parameterForm" class="hide">
+<div id="addParameterTransformButton" class="link small" onclick="addParameterTransform();"><span class="pointer">Add transform parameter</span></div>
+<table id="parameterTransformForm" class="hide">
 <tr>
-<td>Name: <form:input path="parameterName" size="30" maxlength="30"  /></td>
-<td>Value: <form:input path="parameterValue" size="30" maxlength="30"  /></td>
+<td>Name: <form:input path="parameterTransformName" size="30" maxlength="30"  /></td>
+<td>Value: <form:input path="parameterTransformValue" size="30" maxlength="30"  /></td>
 </tr>
 <tr>
-<td><button type="button" class="button" onclick="cancelParameter();">Cancel</button></td>
-<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameter();addRowToParameter(this.form);" /></td>
+<td><button type="button" class="button" onclick="cancelParameterTransform();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameterTransform();addRowToParameterTransform(this.form);" /></td>
 
 </tr>
 </table>
 
- <table id="tblParam" class="hide">
+ <table id="tblParamTransform" class="hide">
 
 </table>
-
 
 </fieldset>
 <br />
