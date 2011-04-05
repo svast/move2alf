@@ -62,7 +62,7 @@ function createDestinationsValidation(form){
 
 function destinationValidation(form){
 	var validated=true;
-	
+
 	var destName = document.getElementById('destinationName').value;
 	if(null==destName || 'undefined'==destName || ''==destName || 'null'==destName){
 		document.getElementById("destinationNameError").style.display='block';
@@ -74,7 +74,7 @@ function destinationValidation(form){
 		document.getElementById("destinationURLError").style.display='block';
 		validated=false;
 	}
-	
+
 	var alfUser = document.getElementById('alfUser').value;
 	if(null==alfUser || 'undefined'==alfUser || ''==alfUser || 'null'==alfUser){
 		document.getElementById("alfUserError").style.display='block';
@@ -92,13 +92,15 @@ function destinationValidation(form){
 		document.getElementById("nbrThreadsError").style.display='block';
 		validated=false;
 	}
-
+	
 	if(validated==true){
 		confirmDestination(); 
-		addRowToDestination(form);
+		
+		if(!document.editDestination){
+			addRowToDestination(form);
+		}
 	}
-
-	return validated
+	return validated;
 }
 
 function addUserValidation(form){

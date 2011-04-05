@@ -1,4 +1,4 @@
-
+<fieldset>
 <h4>Metadata</h4>
 <table>
 <%int metadataCounter=0; %>
@@ -15,7 +15,7 @@ if ((metadataCounter==0 && (jobMetadata == null || jobMetadata.equals(""))) || m
 <td><form:radiobutton path="metadata" value="${metadataOption.class.name}" checked="true" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
 <%}else{ %>
 <td><form:radiobutton path="metadata" value="${metadataOption.class.name}" /><c:out value="${metadataOption.name}" /> - <c:out value="${metadataOption.description}" /></td>
-<%} 
+<%}
 if(metadataCounter==0){%>
 <td><form:errors path="metadata" cssClass="error"/></td>
 <%} %>
@@ -61,8 +61,38 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </c:forEach>
 </table>
 <input type="radio" class="hide" value="" name="transform" />
+
+
+<h4>Parameters</h4>
+
+<table id="paramTable">
+
+</table>
+
+
+<div id="addParameterButton" class="link small" onclick="addParameter();"><span class="pointer">Add parser parameter</span></div>
+<table id="parameterForm" class="hide">
+<tr>
+<td>Name: <form:input path="parameterName" size="30" maxlength="30"  /></td>
+<td>Value: <form:input path="parameterValue" size="30" maxlength="30"  /></td>
+</tr>
+<tr>
+<td><button type="button" class="button" onclick="cancelParameter();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameter();addRowToParameter(this.form);" /></td>
+
+</tr>
+</table>
+
+ <table id="tblParam" class="hide">
+
+</table>
+
+
+</fieldset>
 <br />
 
+
+<fieldset>
 <h4>Options</h4>
 <div class="indent">
 <p>If document already exists in destination:</p>
@@ -108,8 +138,12 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 </div>
 
+</fieldset>
+
 <br />
 
+<fieldset>
+<br />
 <div><form:checkbox path="moveBeforeProc" value="true" />Move before processing to</div>
 <table>
 <tr>
@@ -157,8 +191,11 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
                         </script>
 </tr>
 </table>
+</fieldset>
 <br />
 
+<fieldset>
+<br />
 <div><form:checkbox path="sendNotification" value="true" />Send notification e-mails on errors</div>
 <div>To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
 <div class="smaller">Separate multiple e-mail addresses with commas</div>
@@ -183,4 +220,5 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
                                         }
                                 }));
                         </script>
+</fieldset>
 <br />

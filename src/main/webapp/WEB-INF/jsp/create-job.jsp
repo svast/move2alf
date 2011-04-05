@@ -31,6 +31,7 @@
 <div class="frame-job">
 <form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return jobValidation(this);">
 
+<fieldset>
 <h4>General</h4>
 <table>
 <tr>
@@ -46,7 +47,7 @@
                                                 required : true,
                                                	invalidMessage : "name cannot be empty",
                                                	promptMessage : "name cannot be empty"
-                                                   	
+                                   	
                                         }
                                 }));
                         </script>
@@ -58,9 +59,10 @@
 <td><form:errors path="description" cssClass="error"/></td>
 </tr>
 </table>
-
+</fieldset>
 <br />
 
+<fieldset>
 <h4>Import from</h4>
 <table>
 <tr>
@@ -76,6 +78,17 @@
                                                	invalidMessage : "Path cannot be empty",
                                                	promptMessage : "Path cannot be empty"
                                                    	
+                                        }
+                                }));
+                        </script>
+</tr>
+<tr>
+<td class="cell-padding">Extension: <form:input path="extension" size="25" maxlength="25" value="*"/></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "extension",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                         	
                                         }
                                 }));
                         </script>
@@ -107,11 +120,16 @@
 </tr>
 </table>
 
+</fieldset>
+
 <br />
+
+<fieldset>
 <h4>Schedule</h4>
 
 <%@ include file="/WEB-INF/jsp/schedule.jsp"%>
 
+</fieldset>
 <br />
 
 <%@ include file="/WEB-INF/jsp/job-options.jsp"%>

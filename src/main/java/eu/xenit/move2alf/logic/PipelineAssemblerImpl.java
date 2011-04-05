@@ -46,6 +46,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.sourceSink(
 						sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")));
 		
+		actions.add(action("eu.xenit.move2alf.core.action.FilterAction")
+				.param("extension", jobConfig.getExtension()));
+		
 		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
@@ -140,6 +143,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String emailAddressNotification="";
 		String sendReport="";
 		String emailAddressReport="";
+		String extension="";
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 				inputFolder = action.getParameter("path");
@@ -167,6 +171,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				emailAddressNotification = action.getParameter("emailAddressNotification");
 				sendReport = action.getParameter("sendReport");
 				emailAddressReport = action.getParameter("emailAddressReport");
+			} else if("eu.xenit.move2alf.core.action.FilterAction".equals(action.getClassName())) {
+				extension = action.getParameter("extension");
 			}else{
 				Action configurableAction = getActionFactory().getObject(action.getClassName());
 				if(configurableAction.getCategory()==ConfigurableObject.CAT_METADATA){
@@ -194,6 +200,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setEmailAddressError(emailAddressNotification);
 		jobConfig.setSendReport(sendReport);
 		jobConfig.setEmailAddressRep(emailAddressReport);
+		jobConfig.setExtension(extension);
 		return jobConfig;
 	}
 }

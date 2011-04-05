@@ -8,14 +8,18 @@ function addDestination(){
 }
 
 function confirmDestination(){
-	document.getElementById('destinationForm').style.display='none';
-	document.getElementById('addDestinationButton').style.display='block';
+	
+	if(!document.editDestination){
+		document.getElementById('destinationForm').style.display='none';
+		document.getElementById('addDestinationButton').style.display='block';
+	}
 
 	document.getElementById("destinationNameError").style.display='none';
 	document.getElementById("destinationURLError").style.display='none';
 	document.getElementById("alfUserError").style.display='none';
 	document.getElementById("alfPswdError").style.display='none';
 	document.getElementById("nbrThreadsError").style.display='none';
+	
 }
 
 function cancelDestination(){

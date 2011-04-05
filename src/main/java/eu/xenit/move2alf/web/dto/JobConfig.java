@@ -78,6 +78,12 @@ public class JobConfig {
 	private String alfPswd;
 
 	private int nbrThreads = 5;
+	
+	private String extension = "*";
+	
+	private String parameterName = "";
+	
+	private String parameterValue = "";
 
 	@NotEmpty
 	private String dest;
@@ -367,5 +373,30 @@ public class JobConfig {
 	public List<String> getSourceSink() {
 		return sourceSink;
 	}
+	
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+	
+	public void setParameterName(String parameterName) {
+		this.parameterName = parameterName;
+	}
+
+	public String getParameterName() {
+		return parameterName;
+	}
+	
+	public void setParameterValue(String parameterValue) {
+		this.parameterValue = parameterValue;
+	}
+
+	public String getParameterValue() {
+		return parameterValue;
+	}
+
 
 }

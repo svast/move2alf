@@ -52,5 +52,7 @@ public class Parameters {
 	public static final String PARAM_STAGE = "stage";
 	public static final String VALUE_AFTER = "after";
 	public static final String VALUE_BEFORE = "before";
+	
+	public static final String PARAM_EXTENSION = "extension";
 
 }
