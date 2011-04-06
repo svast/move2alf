@@ -47,7 +47,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		if(metadataParameterList != null){
 			String[] metadataParameter = new String[2];
 			for(int i=0; i<metadataParameterList.size();i++){
-				logger.debug("metadata is "+metadataParameterList.get(i));
 				metadataParameter = metadataParameterList.get(i).split("\\|");
 				logger.debug("metadata parameter name: "+metadataParameter[0]+" and value: "+metadataParameter[1]);
 				metadataParameterMap.put(metadataParameter[0], metadataParameter[1]);
@@ -241,6 +240,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		while(metadataMapIterator.hasNext()){
 			Map.Entry nameValuePair = (Map.Entry)metadataMapIterator.next();
 			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();
+			logger.debug("metadata list value = "+listValue);
 			paramMetadata.add(listValue);
 		}
 		
@@ -251,6 +251,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		while(transformMapIterator.hasNext()){
 			Map.Entry nameValuePair = (Map.Entry)transformMapIterator.next();
 			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();
+			logger.debug("transform list value = "+listValue);
 			paramTransform.add(listValue);
 		}
 		

@@ -180,8 +180,35 @@ public class JobController {
 			}
 		}
 
+		List<String> metadata = job.getParamMetadata();
+		Set<String> uniqueMetadataNames = new HashSet();
+		boolean doubleMetadata = false;
+		if(metadata != null){
+			for (int i=0; i<metadata.size();i++){
+				String[] metadataElements = metadata.get(i).split("\\|");
+				boolean metadataUnique = uniqueMetadataNames.add(metadataElements[0]);
+				if(metadataUnique == false){
+					doubleMetadata=true;
+				}
+			}
+		}
+		
+		List<String> transform = job.getParamTransform();
+		Set<String> uniqueTransformNames = new HashSet();
+		boolean doubleTransform = false;
+		if(transform != null){
+			for (int i=0; i<transform.size();i++){
+				String[] transformElements = transform.get(i).split("\\|");
+				boolean transformUnique = uniqueTransformNames.add(transformElements[0]);
+				if(transformUnique == false){
+					doubleTransform=true;
+				}
+			}
+		}
+		
 		if (errors.hasErrors() || notNull == false || threadsIsInteger == false 
-					|| jobExists==true || destinationExists==true || doubleNewDestination==true) {
+					|| jobExists==true || destinationExists==true || doubleNewDestination==true 
+						|| doubleMetadata==true || doubleTransform==true) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -210,6 +237,8 @@ public class JobController {
 			mav.addObject("jobExists", jobExists);
 			mav.addObject("destinationExists", destinationExists);
 			mav.addObject("doubleNewDestination", doubleNewDestination);
+			mav.addObject("doubleMetadata", doubleMetadata);
+			mav.addObject("doubleTransform", doubleTransform);
 			mav.addObject("notNull", notNull);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));

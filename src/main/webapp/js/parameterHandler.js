@@ -99,6 +99,16 @@ function setParamMetadataInForm(name, value){
 	  cellFirst.appendChild(fi);
 }
 
+function transformBox(state){
+	if(state=="none"){
+		document.getElementById('addParameterTransformButton').style.display='none';
+		document.getElementById('paramTransformTable').style.display='none';
+	}else{
+		document.getElementById('addParameterTransformButton').style.display='block';
+		document.getElementById('paramTransformTable').style.display='block';
+	}
+}
+
 function addParameterTransform() {
 	document.getElementById('parameterTransformForm').style.display = 'block';
 	document.getElementById('addParameterTransformButton').style.display = 'none';

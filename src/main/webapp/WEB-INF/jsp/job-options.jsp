@@ -27,9 +27,31 @@ metadataCounter++; %>
 <input type="radio" class="hide" value="" name="metadata" />
 
 <br />
-
+<%int rowCounter = 1; %>
 <table id="paramMetadataTable">
-
+<c:if test="${not empty job.paramMetadata}" >
+<c:forEach var="metadataParam" items="${job.paramMetadata}">
+<c:set var="metadata" value="${metadataParam}" scope="session" />
+<%
+String metadata = (String) session.getAttribute("metadata"); 
+String[] metadataSplit = metadata.split("\\|");
+pageContext.setAttribute("metadataName", metadataSplit[0]);
+pageContext.setAttribute("metadataValue", metadataSplit[1]);
+%>
+<tr>
+<td>
+<div id="rowNumberParamMetadata<%=rowCounter%>"><%=rowCounter%></div>
+</td>
+<td>
+<c:out value="${metadataName}" /> - <c:out value="${metadataValue}" />
+</td>
+<td>
+<div class="pointer" id="removeParamMetadata<%=rowCounter%>" onclick="removeRowFromParameterMetadata(<%=rowCounter%>)">remove</div>
+</td>
+</tr>
+<%rowCounter++; %>
+</c:forEach>
+</c:if>
 </table>
 
 <div id="addParameterMetadataButton" class="link small" onclick="addParameterMetadata();"><span class="pointer">Add metadata parameter</span></div>
@@ -46,14 +68,21 @@ metadataCounter++; %>
 </table>
 
  <table id="tblParamMetadata" class="hide">
-
+<c:if test="${not empty job.paramMetadata}" >
+<c:forEach var="metadataParam" items="${job.paramMetadata}">
+<tr>
+<td><input name="paramMetadata" type="checkbox" value="<c:out value="${metadataParam}" />" checked="true" /></td>
+</tr>
+</c:forEach>
+</c:if>
 </table>
 
 <br />
 
 <h4>Transform</h4>
 <table>
-<%int transformCounter=0; %>
+<%int transformCounter=0; 
+boolean noTransformChosen=false;%>
 <c:set var="jobTransform" value="${job.transform}" scope="session" />
 <c:set var="transformOption" value="${transformOption.class.name}" scope="session" />
 <%
@@ -63,23 +92,25 @@ String transformOption = (String) session.getAttribute("transformOption");
 if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) || "No transformation".equals(jobTransform)) { 
 %>
 <tr>
-<td><form:radiobutton path="transform" value="No transformation" checked="true"/>No transformation</td>
+<td><form:radiobutton path="transform" value="No transformation" checked="true" onclick="transformBox('none')"/>No transformation</td>
 <td><form:errors path="transform" cssClass="error"/></td>
 </tr>
-<%} else{%>
+<%
+noTransformChosen = true;
+} else{%>
 <tr>
-<td><form:radiobutton path="transform" value="No transformation" />No transformation</td>
+<td><form:radiobutton path="transform" value="No transformation" onclick="transformBox('none')"/>No transformation</td>
 <td><form:errors path="transform" cssClass="error"/></td>
 </tr>
 <%}%>
 <c:forEach var="transformOption" items="${transformOptions}" >
 <%if(jobTransform != null && !jobTransform.equals("") && transformOption!=null && transformOption.equals(jobTransform)){%>
 <tr>
-<td><form:radiobutton path="transform" value="${transformOption.class.name}" checked="true"/><c:out value="${transformOption.description}" /></td>
+<td><form:radiobutton path="transform" value="${transformOption.class.name}" checked="true" onclick="transformBox(this.form)"/><c:out value="${transformOption.description}" /></td>
 </tr>
 <%}else{ %>
 <tr>
-<td><form:radiobutton path="transform" value="${transformOption.class.name}" /><c:out value="${transformOption.description}" /></td>
+<td><form:radiobutton path="transform" value="${transformOption.class.name}" onclick="transformBox(this.form)"/><c:out value="${transformOption.description}" /></td>
 </tr>
 <%} %>
 </c:forEach>
@@ -87,9 +118,31 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 <input type="radio" class="hide" value="" name="transform" />
 
 <br />
-
+<%rowCounter=1; %>
 <table id="paramTransformTable">
-
+<c:if test="${not empty job.paramTransform}" >
+<c:forEach var="transformParam" items="${job.paramTransform}">
+<c:set var="transform" value="${transformParam}" scope="session" />
+<%
+String transform = (String) session.getAttribute("transform"); 
+String[] transformSplit = transform.split("\\|");
+pageContext.setAttribute("transformName", transformSplit[0]);
+pageContext.setAttribute("transformValue", transformSplit[1]);
+%>
+<tr>
+<td>
+<div id="rowNumberParamTransform<%=rowCounter%>"><%=rowCounter%></div>
+</td>
+<td>
+<c:out value="${transformName}" /> - <c:out value="${transformValue}" />
+</td>
+<td>
+<div class="pointer" id="removeParamTransform<%=rowCounter%>" onclick="removeRowFromParameterTransform(<%=rowCounter%>)">remove</div>
+</td>
+</tr>
+<%rowCounter++; %>
+</c:forEach>
+</c:if>
 </table>
 
 <div id="addParameterTransformButton" class="link small" onclick="addParameterTransform();"><span class="pointer">Add transform parameter</span></div>
@@ -106,10 +159,25 @@ if((transformCounter==0 && (jobTransform == null || jobTransform.equals(""))) ||
 </table>
 
  <table id="tblParamTransform" class="hide">
-
+<c:if test="${not empty job.paramTransform}" >
+<c:forEach var="transformParam" items="${job.paramTransform}">
+<tr>
+<td><input name="paramTransform" type="checkbox" value="<c:out value="${transformParam}" />" checked="true" /></td>
+</tr>
+</c:forEach>
+</c:if>
 </table>
 
 </fieldset>
+
+<%
+if(noTransformChosen == true){
+%>
+<script type="text/javascript">
+	transformBox('none');
+</script>
+<%} %>
+
 <br />
 
 
