@@ -22,7 +22,7 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
-	
+
 	private ActionFactory actionFactory;
 
 	private static final Logger logger = LoggerFactory
@@ -76,78 +76,97 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action("eu.xenit.move2alf.core.action.FilterAction")
 				.param("extension", jobConfig.getExtension()));
 		
-		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
-		
-		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
-				.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
-				.param("moveAfterLoad", "false")	//true or false (String)
-				.param("moveAfterLoadPath", "")
-				.param("moveNotLoaded", "false")		//true or false (String)
-				.param("moveNotLoadedPath", "")
-				.param("path", jobConfig.getInputFolder())
-				.param("stage", "before"));
-		
-		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
-		
 		actions.add(action(jobConfig.getMetadata())
 				.paramMap(metadataParameterMap));
+
+		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
+
+		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
+				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) // true
+																				// or
+																				// false
+																				// (String)
+				.param("moveBeforeProcessingPath",
+						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
+						"false") // true or false (String)
+				.param("moveAfterLoadPath", "").param("moveNotLoaded", "false") // true
+																				// or
+																				// false
+																				// (String)
+				.param("moveNotLoadedPath", "").param("path",
+						jobConfig.getInputFolder()).param("stage", "before"));
+
+		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
+
 		
 		if(!"No transformation".equals(jobConfig.getTransform())){
+
 			actions.add(action(jobConfig.getTransform())
 					.paramMap(transformParameterMap));
 		}
-		
-		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
-				.param("sendNotification", jobConfig.getSendNotification())	//true or false (String)
-				.param("emailAddressNotification", jobConfig.getEmailAddressError())
-				.param("sendReport", jobConfig.getSendReport())		//true or false (String)
+
+		actions.add(action("eu.xenit.move2alf.core.action.EmailAction").param(
+				"sendNotification", jobConfig.getSendNotification()) // true or
+																		// false
+																		// (String)
+				.param("emailAddressNotification",
+						jobConfig.getEmailAddressError()).param("sendReport",
+						jobConfig.getSendReport()) // true or false (String)
 				.param("emailAddressReport", jobConfig.getEmailAddressRep()));
-		
-		if(SourceSink.MODE_SKIP.equals(jobConfig.getDocExist()) 
-					|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist()) 
-							|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())){
+
+		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
+				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
+				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
 			actions.add(action("eu.xenit.move2alf.core.action.SinkAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
-					// TODO: add param: ignore / error / overwrite / version 
+					.param("path", jobConfig.getDestinationFolder()).param(
+							"documentExists", jobConfig.getDocExist())
+					// TODO: add param: ignore / error / overwrite / version
 					.sourceSink(
-							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
+							sourceSinkById(Integer
+									.parseInt(jobConfig.getDest()))));
 		}
-		
-		if("Delete".equals(jobConfig.getDocExist())){
+
+		if ("Delete".equals(jobConfig.getDocExist())) {
 			actions.add(action("eu.xenit.move2alf.core.action.DeleteAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
+					.param("path", jobConfig.getDestinationFolder()).param(
+							"documentExists", jobConfig.getDocExist())
 					.sourceSink(
-							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
+							sourceSinkById(Integer
+									.parseInt(jobConfig.getDest()))));
 		}
-		
-		if("ListPresence".equals(jobConfig.getDocExist())){
+
+		if ("ListPresence".equals(jobConfig.getDocExist())) {
 			actions.add(action("eu.xenit.move2alf.core.action.ListAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
+					.param("path", jobConfig.getDestinationFolder()).param(
+							"documentExists", jobConfig.getDocExist())
 					.sourceSink(
-							sourceSinkById(Integer.parseInt(jobConfig.getDest()))));
+							sourceSinkById(Integer
+									.parseInt(jobConfig.getDest()))));
 		}
-		
+
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) //true or false (String)
-				.param("moveBeforeProcessingPath", jobConfig.getBeforeProcPath())
-				.param("moveAfterLoad", jobConfig.getMoveAfterLoad())	//true or false (String)
+				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
+				// true or false (String)
+				.param("moveBeforeProcessingPath",
+						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
+						jobConfig.getMoveAfterLoad())
+				// true or false (String)
 				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
-				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
-				.param("path", jobConfig.getInputFolder())
-				.param("stage", "after"));
-		
+				.param("moveNotLoaded", jobConfig.getMoveNotLoad()) // true or
+																	// false
+																	// (String)
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath()).param(
+						"path", jobConfig.getInputFolder()).param("stage",
+						"after"));
+
 		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
-		
-		ActionBuilder[] actionsArray = (ActionBuilder[]) actions.toArray(new ActionBuilder[7]);
-		
-		assemble(jobConfig,actionsArray);
+
+		ActionBuilder[] actionsArray = (ActionBuilder[]) actions
+				.toArray(new ActionBuilder[7]);
+
+		assemble(jobConfig, actionsArray);
 	}
-	
+
 	@Override
 	public JobConfig getJobConfigForJob(int id) {
 		Job job = getJobService().getJob(id);
@@ -160,6 +179,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String destinationFolder = "";
 		String dest = "";
 		String documentExists = "";
+
 		String metadata="";
 		String transform="";
 		String moveBeforeProcessing="";
@@ -177,44 +197,60 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		Map<String,String> transformParameterMap = new HashMap();
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
+
 				inputFolder = action.getParameter("path");
-			} else if ("eu.xenit.move2alf.core.action.SinkAction".equals(action.getClassName())) {
+			} else if ("eu.xenit.move2alf.core.action.SinkAction".equals(action
+					.getClassName())) {
 				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
+				dest = action.getConfiguredSourceSinkSet().iterator().next()
+						.getIdAsString();
 				documentExists = action.getParameter("documentExists");
-			}else if("eu.xenit.move2alf.core.action.DeleteAction".equals(action.getClassName())){
+			} else if ("eu.xenit.move2alf.core.action.DeleteAction"
+					.equals(action.getClassName())) {
 				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
+				dest = action.getConfiguredSourceSinkSet().iterator().next()
+						.getIdAsString();
 				documentExists = action.getParameter("documentExists");
-			}else if("eu.xenit.move2alf.core.action.ListAction".equals(action.getClassName())){
+			} else if ("eu.xenit.move2alf.core.action.ListAction".equals(action
+					.getClassName())) {
 				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next().getIdAsString();
+				dest = action.getConfiguredSourceSinkSet().iterator().next()
+						.getIdAsString();
 				documentExists = action.getParameter("documentExists");
-			}else if("eu.xenit.move2alf.core.action.MoveDocumentsAction".equals(action.getClassName())){
-				moveBeforeProcessing = action.getParameter("moveBeforeProcessing");
-				moveBeforeProcessingPath = action.getParameter("moveBeforeProcessingPath");
+			} else if ("eu.xenit.move2alf.core.action.MoveDocumentsAction"
+					.equals(action.getClassName())) {
+				moveBeforeProcessing = action
+						.getParameter("moveBeforeProcessing");
+				moveBeforeProcessingPath = action
+						.getParameter("moveBeforeProcessingPath");
 				moveAfterLoad = action.getParameter("moveAfterLoad");
 				moveAfterLoadPath = action.getParameter("moveAfterLoadPath");
 				moveNotLoaded = action.getParameter("moveNotLoaded");
 				moveNotLoadedPath = action.getParameter("moveNotLoadedPath");
-			}else if("eu.xenit.move2alf.core.action.EmailAction".equals(action.getClassName())){
+			} else if ("eu.xenit.move2alf.core.action.EmailAction"
+					.equals(action.getClassName())) {
 				sendNotification = action.getParameter("sendNotification");
-				emailAddressNotification = action.getParameter("emailAddressNotification");
+				emailAddressNotification = action
+						.getParameter("emailAddressNotification");
 				sendReport = action.getParameter("sendReport");
 				emailAddressReport = action.getParameter("emailAddressReport");
-			} else if("eu.xenit.move2alf.core.action.FilterAction".equals(action.getClassName())) {
+			} else if ("eu.xenit.move2alf.core.action.FilterAction"
+					.equals(action.getClassName())) {
 				extension = action.getParameter("extension");
-			}else{
-				Action configurableAction = getActionFactory().getObject(action.getClassName());
-				if(configurableAction.getCategory()==ConfigurableObject.CAT_METADATA){
+			} else {
+				Action configurableAction = getActionFactory().getObject(
+						action.getClassName());
+				if (configurableAction.getCategory() == ConfigurableObject.CAT_METADATA) {
 					metadata = action.getClassName();
+
 					metadataParameterMap = action.getParameters();
 				}else if(configurableAction.getCategory()==ConfigurableObject.CAT_TRANSFORM){
+
 					transform = action.getClassName();
 					transformParameterMap = action.getParameters();
 				}
 			}
-			
+
 			action = action.getAppliedConfiguredActionOnSuccess();
 		}
 		jobConfig.setInputFolder(inputFolder);

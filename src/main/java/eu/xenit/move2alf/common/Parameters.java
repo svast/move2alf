@@ -54,5 +54,7 @@ public class Parameters {
 	public static final String VALUE_BEFORE = "before";
 	
 	public static final String PARAM_EXTENSION = "extension";
+	
+	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
 
 }

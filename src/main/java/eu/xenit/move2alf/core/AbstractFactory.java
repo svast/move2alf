@@ -31,10 +31,15 @@ public abstract class AbstractFactory<T extends ConfigurableObject> {
 
 	public void rescan() {
 		logger.info("Scanning for objects (" + this.getClass() + ")");
+		scanForClasses("eu.xenit");
+		scanForClasses("be.pv");
+	}
+
+	private void scanForClasses(String basePackage) {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
 				false);
 		provider.addIncludeFilter(getTypeFilter());
-		Set<BeanDefinition> components = provider.findCandidateComponents("");
+		Set<BeanDefinition> components = provider.findCandidateComponents(basePackage);
 		for (BeanDefinition component : components) {
 			try {
 				logger.debug("Loading " + component.getBeanClassName());
