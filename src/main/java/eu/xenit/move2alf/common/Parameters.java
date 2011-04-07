@@ -56,5 +56,7 @@ public class Parameters {
 	public static final String PARAM_EXTENSION = "extension";
 	
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
+	
+	public static final String PARAM_COMMAND = "command";
 
 }

@@ -92,6 +92,8 @@ public class JobConfig {
 	private List<String> paramMetadata;
 	
 	private List<String> paramTransform;
+	
+	private String command;
 
 	@NotEmpty
 	private String dest;
@@ -438,5 +440,12 @@ public class JobConfig {
 		return paramTransform;
 	}
 
+	public void setCommand(String command) {
+		this.command = command;
+	}
+
+	public String getCommand() {
+		return command;
+	}
 
 }

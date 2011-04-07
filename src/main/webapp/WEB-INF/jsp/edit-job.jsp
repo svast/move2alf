@@ -21,6 +21,16 @@
 <h4 class="error center">You may not create a destination with the same name more than once</h4>
 <br />
 </c:if>
+<c:if test="${doubleMetadata==true}" >
+<br />
+<h4 class="error center">You may not create more than one metadata parameter with the same name</h4>
+<br />
+</c:if>
+<c:if test="${doubleTransform==true}" >
+<br />
+<h4 class="error center">You may not create more than one transform parameter with the same name</h4>
+<br />
+</c:if>
 <c:if test="${threadsIsInteger==false}" >
 <br />
 <h4 class="error center">The number of threads in the destination dialogue must contain numbers only</h4>

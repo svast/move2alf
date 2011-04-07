@@ -65,6 +65,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			}
 		}
 
+		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
+				.param("command", jobConfig.getCommand()));
+		
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path", jobConfig.getInputFolder())
 				.param("recursive", "true")
@@ -193,6 +196,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String sendReport="";
 		String emailAddressReport="";
 		String extension="";
+		String command="";
 		Map<String,String> metadataParameterMap = new HashMap();
 		Map<String,String> transformParameterMap = new HashMap();
 		while(action != null) {
@@ -237,6 +241,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			} else if ("eu.xenit.move2alf.core.action.FilterAction"
 					.equals(action.getClassName())) {
 				extension = action.getParameter("extension");
+			} else if ("eu.xenit.move2alf.core.action.ExecuteCommandAction"
+					.equals(action.getClassName())) {
+				command = action.getParameter("command");
 			} else {
 				Action configurableAction = getActionFactory().getObject(
 						action.getClassName());
@@ -270,6 +277,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setSendReport(sendReport);
 		jobConfig.setEmailAddressRep(emailAddressReport);
 		jobConfig.setExtension(extension);
+		jobConfig.setCommand(command);
 		
 		Iterator metadataMapIterator = metadataParameterMap.entrySet().iterator();
 		List<String> paramMetadata = new ArrayList();

@@ -1,4 +1,16 @@
 <fieldset>
+<h4>Execute command before job</h4>
+
+<div>Command: <form:input path="command" size="50" maxlength="255"/></div>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "command",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
+
 <h4>Metadata</h4>
 <table>
 <%int metadataCounter=0; %>
@@ -58,7 +70,23 @@ pageContext.setAttribute("metadataValue", metadataSplit[1]);
 <table id="parameterMetadataForm" class="hide">
 <tr>
 <td>Name: <form:input path="parameterMetadataName" size="30" maxlength="50" /></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "parameterMetadataName",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <td>Value: <form:input path="parameterMetadataValue" size="30" maxlength="255"/></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "parameterMetadataValue",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterMetadata();">Cancel</button></td>
@@ -149,7 +177,23 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 <table id="parameterTransformForm" class="hide">
 <tr>
 <td>Name: <form:input path="parameterTransformName" size="30" maxlength="50"  /></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "parameterTransformName",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 <td>Value: <form:input path="parameterTransformValue" size="30" maxlength="255"  /></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "parameterTransformValue",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterTransform();">Cancel</button></td>
