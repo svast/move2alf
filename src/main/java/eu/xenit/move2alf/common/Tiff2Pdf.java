@@ -118,8 +118,9 @@ public class Tiff2Pdf {
 					"sRGB IEC61966-2.1"));
 			outi.put(PdfName.INFO, new PdfString("sRGB IEC61966-2.1"));
 			outi.put(PdfName.S, PdfName.GTS_PDFA1);
-			ICC_Profile icc = ICC_Profile.getInstance(new FileInputStream(
-					"srgb.profile"));
+			ICC_Profile icc = ICC_Profile.getInstance(Thread.currentThread()
+					.getContextClassLoader().getResourceAsStream(
+							"/srgb.profile"));
 			PdfICCBased ib = new PdfICCBased(icc);
 			ib.remove(PdfName.ALTERNATE);
 			outi.put(PdfName.DESTOUTPUTPROFILE, writer.addToBody(ib)
