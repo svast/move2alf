@@ -160,7 +160,11 @@ public class AlfrescoSourceSink extends SourceSink {
 		} catch (RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
 			System.exit(1);
-		}
+		} catch (RuntimeException e) {
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
+			logger.error(e.getMessage(), e);
+		} 
 	}
 
 	@Override

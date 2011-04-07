@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.action;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,12 @@ public class SourceAction extends Action {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put(Parameters.PARAM_FILE, file);
+				
+				// add to list of files to transform
+				List<File> transformFiles = new ArrayList<File>();
+				transformFiles.add(file);
+				newParameterMap.put(Parameters.PARAM_TRANSFORM_FILE_LIST, transformFiles);
+				
 				String relativePath = file.getParent();
 				relativePath = relativePath.replace("\\", "/");
 				String path = action.getParameter(Parameters.PARAM_PATH);
