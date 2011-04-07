@@ -25,25 +25,18 @@ public class Tiff2PdfAction extends Action {
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		List<File> filesToTransform = null;
+		List filesToTransform = null;
 		File destination = (File) parameterMap.get(Parameters.PARAM_FILE);
 		Object fileListParamValue = parameterMap
 				.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
 		if (fileListParamValue != null) {
 			try {
-				filesToTransform = (List<File>) fileListParamValue;
+				filesToTransform = (List) parameterMap
+						.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
 			} catch (ClassCastException e) {
-				try {
-					List<String> pathsToTransform = (List<String>) fileListParamValue;
-					filesToTransform = new ArrayList<File>();
-					for (String path : pathsToTransform) {
-						filesToTransform.add(new File(path));
-					}
-				} catch (ClassCastException e2) {
-					logger
-							.warn("Files to transform should be of type List<File> or List<String>");
-					return;
-				}
+				logger
+						.warn("Files to transform should be of type List<File> or List<String>");
+				return;
 			}
 		} else {
 			logger.warn("No files to transform");
@@ -52,7 +45,7 @@ public class Tiff2PdfAction extends Action {
 		createPdf(destination, filesToTransform);
 	}
 
-	public void createPdf(File document, List<File> transformFiles) {
+	public void createPdf(File document, List transformFiles) {
 		// assume that docDescription contains a File that describes where the
 		// output should go
 		// File document = docDescription.getDocument();
@@ -62,15 +55,25 @@ public class Tiff2PdfAction extends Action {
 		Tiff2Pdf tiff2Pdf = new Tiff2Pdf();
 		// assemble tiffs into pdf and write to destination
 		tiff2Pdf.init();
-		for (File tifFile : transformFiles) {
-			String tifFilePath = tifFile.getAbsolutePath();
+		for (Object tifFile : transformFiles) {
+			String tifFilePath = null;
+			try {
+				tifFilePath = (String) tifFile;
+			} catch (ClassCastException e) {
+				try {
+					tifFilePath = ((File) tifFile).getAbsolutePath();
+				} catch (ClassCastException e2) {
+					logger.error("Tiff2Pdf expects Strings or Files");
+					return;
+				}
+			}
 			logger.debug("Adding tif {}", tifFilePath);
 			tiff2Pdf.addImage(JAI.create("fileload", tifFilePath));
 		}
 
 		String fileName = document.getName();
-		String fileNameWithoutExtension = fileName.substring(0,
-				fileName.lastIndexOf('.'));
+		String fileNameWithoutExtension = fileName.substring(0, fileName
+				.lastIndexOf('.'));
 		File singleTifFile = new File(fileNameWithoutExtension + "-single.tif");
 		logger.debug("Creating single tif {} ...", singleTifFile
 				.getAbsolutePath());
