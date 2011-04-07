@@ -67,4 +67,11 @@ public class FileSourceSink extends SourceSink {
 		return "Filesystem";
 	}
 
+	@Override
+	public void delete(ConfiguredSourceSink sinkConfig, String remotePath,
+			String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

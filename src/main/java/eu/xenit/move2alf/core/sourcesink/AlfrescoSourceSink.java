@@ -26,7 +26,9 @@ public class AlfrescoSourceSink extends SourceSink {
 	private static final String PARAM_URL = "url";
 	private static final String PARAM_PASSWORD = "password";
 	private static final String PARAM_USER = "user";
-	
+
+	private static ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(AlfrescoSourceSink.class);
 
@@ -44,16 +46,16 @@ public class AlfrescoSourceSink extends SourceSink {
 		// appropriate action, in this case SinkAction. The current code causes
 		// a lot of duplication when implementing a new SourceSink.
 
-		WebServiceRepositoryAccess ra = createRepositoryAccess(configuredSourceSink);
 		try {
-			RepositoryAccessSession ras = ra.createSessionAndRetry();
+			RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			// run(ras);
-			String basePath = getParameterWithDefault(parameterMap, Parameters.PARAM_PATH, "/");
+			String basePath = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_PATH, "/");
 			if (!basePath.endsWith("/")) {
 				basePath = basePath + "/";
 			}
-			
-			if(!basePath.startsWith("/")) {
+
+			if (!basePath.startsWith("/")) {
 				basePath = "/" + basePath;
 			}
 
@@ -82,10 +84,11 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			logger.debug("Writing to " + remotePath);
 
-			String mimeType = getParameterWithDefault(parameterMap, Parameters.PARAM_MIMETYPE,
-					"text/plain");
+			String mimeType = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_MIMETYPE, "text/plain");
 			String namespace = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
+					Parameters.PARAM_NAMESPACE,
+					"{http://www.alfresco.org/model/content/1.0}");
 			String contentType = getParameterWithDefault(parameterMap,
 					Parameters.PARAM_CONTENTTYPE, "content");
 
@@ -96,38 +99,44 @@ public class AlfrescoSourceSink extends SourceSink {
 					.get(Parameters.PARAM_METADATA);
 			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
 					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
-			
-			Map<String, String> acl = (Map<String, String>) parameterMap.get(Parameters.PARAM_ACL);
-			
+
+			Map<String, String> acl = (Map<String, String>) parameterMap
+					.get(Parameters.PARAM_ACL);
+
 			boolean inheritPermissions;
 			if (parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS) == null) {
 				inheritPermissions = false;
 			} else {
-				inheritPermissions = (Boolean) parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS);				
+				inheritPermissions = (Boolean) parameterMap
+						.get(Parameters.PARAM_INHERIT_PERMISSIONS);
 			}
-			
+
 			File document = (File) parameterMap.get(Parameters.PARAM_FILE);
 
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
-						remotePath, description, namespace, contentType, metadata, // TODO:
-																			// description
+						remotePath, description, namespace, contentType,
+						metadata, // TODO:
+						// description
 						multiValueMetadata);
 				if (acl != null) {
-					ras.setAccessControlList(remotePath, inheritPermissions, acl);
+					ras.setAccessControlList(remotePath, inheritPermissions,
+							acl);
 				}
 				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 			} else {
 				if (MODE_SKIP.equals(docExistsMode)) {
 					// ignore
-					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
+					parameterMap.put(Parameters.PARAM_STATUS,
+							Parameters.VALUE_OK);
 				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
 					logger.warn("Document " + document.getName()
 							+ " already exists in " + remotePath);
-					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-					parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, "Document "
-							+ document.getName() + " already exists in "
-							+ remotePath);
+					parameterMap.put(Parameters.PARAM_STATUS,
+							Parameters.VALUE_FAILED);
+					parameterMap.put(Parameters.PARAM_ERROR_MESSAGE,
+							"Document " + document.getName()
+									+ " already exists in " + remotePath);
 				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
@@ -136,9 +145,11 @@ public class AlfrescoSourceSink extends SourceSink {
 					if (metadata != null) {
 						ras.updateMetaDataByDocNameAndPath(remotePath, document
 								.getName(), metadata);
-						// TODO: updating multivalue metadata not supported by RRA?
+						// TODO: updating multivalue metadata not supported by
+						// RRA?
 					}
-					parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
+					parameterMap.put(Parameters.PARAM_STATUS,
+							Parameters.VALUE_OK);
 				}
 			}
 
@@ -164,40 +175,64 @@ public class AlfrescoSourceSink extends SourceSink {
 			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
-		} 
+		}
 	}
 
 	@Override
 	public boolean exists(ConfiguredSourceSink sinkConfig, String remotePath,
 			String name) {
-		WebServiceRepositoryAccess ra = createRepositoryAccess(sinkConfig);
-
-		RepositoryAccessSession ras = ra.createSessionAndRetry();
 		try {
+			RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 			return ras.doesDocExist(name, remotePath);
 		} catch (RepositoryAccessException e) {
+			throw new Move2AlfException(e.getMessage());
+		} catch (RuntimeException e) {
 			throw new Move2AlfException(e.getMessage());
 		}
 	}
 
-	private WebServiceRepositoryAccess createRepositoryAccess(
-			ConfiguredSourceSink sinkConfig) {
-		String user = sinkConfig.getParameter(PARAM_USER);
-		String password = sinkConfig.getParameter(PARAM_PASSWORD);
-		String url = sinkConfig.getParameter(PARAM_URL);
-		if (url.endsWith("/")) {
-			url = url + "api/";
-		} else {
-			url = url + "/api/";
-		}
-		WebServiceRepositoryAccess ra = null;
+	@Override
+	public void delete(ConfiguredSourceSink sinkConfig, String remotePath,
+			String name) {
 		try {
-			ra = new WebServiceRepositoryAccess(new URL(url), user, password);
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+			ras.deleteByDocNameAndSpace(remotePath, name);
+		} catch (RepositoryAccessException e) {
+			throw new Move2AlfException(e.getMessage());
+		} catch (RepositoryException e) {
+			throw new Move2AlfException(e.getMessage());
+		} catch (RuntimeException e) {
+			throw new Move2AlfException(e.getMessage());
 		}
-		return ra;
+	}
+
+	private RepositoryAccessSession createRepositoryAccessSession(
+			ConfiguredSourceSink sinkConfig) {
+		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
+		if (ras == null) {
+			logger.debug("Creating new RepositoryAccessSession for thread " + Thread.currentThread());
+			String user = sinkConfig.getParameter(PARAM_USER);
+			String password = sinkConfig.getParameter(PARAM_PASSWORD);
+			String url = sinkConfig.getParameter(PARAM_URL);
+			if (url.endsWith("/")) {
+				url = url + "api/";
+			} else {
+				url = url + "/api/";
+			}
+			WebServiceRepositoryAccess ra = null;
+			try {
+				ra = new WebServiceRepositoryAccess(new URL(url), user,
+						password);
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			ras = ra.createSessionAndRetry();
+			AlfrescoSourceSink.ras.set(ras);
+		} else {
+			logger.debug("Reusing existing RepositoryAccessSession in thread " + Thread.currentThread());
+		}
+		return AlfrescoSourceSink.ras.get();
 	}
 
 	private String getParameterWithDefault(Map<String, Object> parameterMap,

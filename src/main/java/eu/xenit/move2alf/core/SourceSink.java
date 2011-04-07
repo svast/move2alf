@@ -20,4 +20,6 @@ public abstract class SourceSink extends ConfigurableObject {
 	public abstract boolean exists(ConfiguredSourceSink sinkConfig,
 			String remotePath, String name);
 
+	public abstract void delete(ConfiguredSourceSink sinkConfig,
+			String remotePath, String name);
 }
