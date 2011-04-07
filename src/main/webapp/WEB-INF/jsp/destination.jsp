@@ -90,7 +90,7 @@ if ((count==1 && (jobDest == null || jobDest.equals(""))) || destId.equals(jobDe
 <table id="destinationForm" class="hide">
 <tr>
 <td>Name:</td> 
-<td><form:input path="destinationName" size="15" maxlength="30" /></td>
+<td><form:input path="destinationName" size="15" /></td>
 <td id="destinationNameError" class="hide error">destination name may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -127,7 +127,7 @@ count ++;
 <tr>
 <td>URL:</td>
 
-<td><form:input path="destinationURL" size="50" maxlength="50" /></td>
+<td><form:input path="destinationURL" size="50" /></td>
 <td id="destinationURLError" class="hide error">destination url may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -142,7 +142,7 @@ count ++;
 </tr>
 <tr>
 <td>Username:</td>
-<td><form:input path="alfUser" size="30" maxlength="30" /></td>
+<td><form:input path="alfUser" size="30"/></td>
 <td id="alfUserError" class="hide error">user may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -157,7 +157,7 @@ count ++;
 </tr>
 <tr>
 <td>Password:</td>
-<td><form:input path="alfPswd" size="30" maxlength="30" /></td>
+<td><form:input path="alfPswd" size="30" /></td>
 <td id="alfPswdError" class="hide error">password may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({

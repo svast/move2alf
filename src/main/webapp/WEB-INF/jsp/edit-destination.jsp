@@ -40,7 +40,7 @@
 <tr>
 <td>Name:</td> 
 
-<td><form:input path="destinationName" size="15" maxlength="30" value="${destination.parameters.name}" /> </td>
+<td><form:input path="destinationName" size="15" maxlength="255" value="${destination.parameters.name}" /> </td>
 <td id="destinationNameError" class="hide error">destination name may not be empty.</td>
 <td><form:errors path="destinationName" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -92,7 +92,7 @@
 
 <tr>
 <td>URL:</td>
-<td><form:input path="destinationURL" size="50" maxlength="40" value="${destination.parameters.url}" /></td>
+<td><form:input path="destinationURL" size="50" maxlength="255" value="${destination.parameters.url}" /></td>
 <td id="destinationURLError" class="hide error">destination url may not be empty.</td>
 <td><form:errors path="destinationURL" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -110,7 +110,7 @@
 </tr>
 <tr>
 <td>Username:</td>
-<td><form:input path="alfUser" size="30" maxlength="30" value="${destination.parameters.user}" /></td>
+<td><form:input path="alfUser" size="30" maxlength="255" value="${destination.parameters.user}" /></td>
 <td id="alfUserError" class="hide error">user may not be empty.</td>
 <td><form:errors path="alfUser" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -128,7 +128,7 @@
 </tr>
 <tr>
 <td>Password:</td>
-<td><form:input path="alfPswd" size="30" maxlength="30" value="${destination.parameters.password}" /></td>
+<td><form:input path="alfPswd" size="30" maxlength="255" value="${destination.parameters.password}" /></td>
 <td id="alfPswdError" class="hide error">password may not be empty.</td>
 <td><form:errors path="alfPswd" cssClass="error"/></td>
 						<script type="text/javascript">

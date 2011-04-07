@@ -6,7 +6,7 @@
 <h2>Add User</h2>
 
 <form:form modelAttribute="user" method="post" onSubmit="return addUserValidation(this);">
-<p>Username: <form:input path="userName" size="30" maxlength="30" />
+<p>Username: <form:input path="userName" size="30" maxlength="255"/>
 <div id="userNameError" class="hide error">username may not be empty.</div>
 <form:errors path="userName" cssClass="error"/></p>
 						<script type="text/javascript">
@@ -22,7 +22,7 @@
                                 }));
                         </script>
 
-<p>Password: <form:password path="password" size="30" maxlength="50" />
+<p>Password: <form:password path="password" size="30" maxlength="255" />
 <div id="passwordError" class="hide error">password may not be empty.</div>
 <form:errors path="password" cssClass="error"/></p>
 						<script type="text/javascript">

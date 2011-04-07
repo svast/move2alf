@@ -11,7 +11,7 @@
 <table>
 <tr>
 <td>Please enter your password:</td>
-<td><form:password path="oldPassword" size="15" maxlength="15" /></td>
+<td><form:password path="oldPassword" size="15" maxlength="255"/></td>
 <td id="oldPasswordError" class="hide error">password may not be empty.</td>
 <td><form:errors path="oldPassword" cssClass="error"/></td>
 						<script type="text/javascript">

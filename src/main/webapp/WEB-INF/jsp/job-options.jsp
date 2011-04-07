@@ -57,8 +57,8 @@ pageContext.setAttribute("metadataValue", metadataSplit[1]);
 <div id="addParameterMetadataButton" class="link small" onclick="addParameterMetadata();"><span class="pointer">Add metadata parameter</span></div>
 <table id="parameterMetadataForm" class="hide">
 <tr>
-<td>Name: <form:input path="parameterMetadataName" size="30" maxlength="30"  /></td>
-<td>Value: <form:input path="parameterMetadataValue" size="30" maxlength="30"  /></td>
+<td>Name: <form:input path="parameterMetadataName" size="30" maxlength="50" /></td>
+<td>Value: <form:input path="parameterMetadataValue" size="30" maxlength="255"/></td>
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterMetadata();">Cancel</button></td>
@@ -148,8 +148,8 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 <div id="addParameterTransformButton" class="link small" onclick="addParameterTransform();"><span class="pointer">Add transform parameter</span></div>
 <table id="parameterTransformForm" class="hide">
 <tr>
-<td>Name: <form:input path="parameterTransformName" size="30" maxlength="30"  /></td>
-<td>Value: <form:input path="parameterTransformValue" size="30" maxlength="30"  /></td>
+<td>Name: <form:input path="parameterTransformName" size="30" maxlength="50"  /></td>
+<td>Value: <form:input path="parameterTransformValue" size="30" maxlength="255"  /></td>
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterTransform();">Cancel</button></td>
@@ -236,7 +236,7 @@ if(noTransformChosen == true){
 <div><form:checkbox path="moveBeforeProc" value="true" />Move before processing to</div>
 <table>
 <tr>
-<td>Path: <form:input path="beforeProcPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="beforeProcPath" size="50" maxlength="255"/></td>
 
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -253,7 +253,7 @@ if(noTransformChosen == true){
 <div><form:checkbox path="moveAfterLoad" value="true" />Move loaded files to</div>
 <table >
 <tr>
-<td>Path: <form:input path="afterLoadPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="afterLoadPath" size="50" maxlength="255"/></td>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "afterLoadPath",
@@ -269,7 +269,7 @@ if(noTransformChosen == true){
 <div><form:checkbox path="moveNotLoad" value="true" />Move not loaded files to</div>
 <table>
 <tr>
-<td>Path: <form:input path="notLoadPath" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="notLoadPath" size="50" maxlength="255"/></td>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "notLoadPath",
@@ -286,7 +286,7 @@ if(noTransformChosen == true){
 <fieldset>
 <br />
 <div><form:checkbox path="sendNotification" value="true" />Send notification e-mails on errors</div>
-<div>To: <form:input path="emailAddressError" size="50" maxlength="50"/></div>
+<div>To: <form:input path="emailAddressError" size="50" maxlength="255"/></div>
 <div class="smaller">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
@@ -299,7 +299,7 @@ if(noTransformChosen == true){
 <br />
 
 <div><form:checkbox path="sendReport" value="true" />Send load reports</div>
-<div>To: <form:input path="emailAddressRep" size="50" maxlength="50"/></div>
+<div>To: <form:input path="emailAddressRep" size="50" maxlength="255"/></div>
 <div class="smaller">Separate multiple e-mail addresses with commas</div>
 					<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({

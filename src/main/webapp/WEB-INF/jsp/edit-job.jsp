@@ -38,7 +38,7 @@
 <table>
 <tr>
 <td>Name:</td>
-<td><form:input path="name" size="30" maxlength="30" /></td>
+<td><form:input path="name" size="30" maxlength="50"/></td>
 <td id="nameError" class="hide error">name may not be empty.</td>
 <td><form:errors path="name" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -69,7 +69,7 @@
 
 <table>
 <tr>
-<td>Path: <form:input path="inputFolder" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="inputFolder" size="50" maxlength="255"/></td>
 <td id="inputFolderError" class="hide error">input path may not be empty.</td>
 <td><form:errors path="inputFolder" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -86,7 +86,7 @@
                         </script>
 </tr>
 <tr>
-<td class="cell-padding">Extension: <form:input path="extension" size="25" maxlength="25" /></td>
+<td class="cell-padding">Extension: <form:input path="extension" size="25" maxlength="255" /></td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({
                                         elementId : "extension",
@@ -104,7 +104,7 @@
 <%@ include file="/WEB-INF/jsp/destination.jsp"%>
 <table>
 <tr>
-<td>Path: <form:input path="destinationFolder" size="50" maxlength="50" /></td>
+<td>Path: <form:input path="destinationFolder" size="50" maxlength="255"/></td>
 <td id="destinationFolderError" class="hide error">destination path may not be empty.</td>
 <td><form:errors path="destinationFolder" cssClass="error"/></td>
 						<script type="text/javascript">

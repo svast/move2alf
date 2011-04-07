@@ -11,7 +11,7 @@
 <table>
 <tr>
 <td>old password:</td>
-<td><form:password path="oldPassword" size="15" maxlength="15" /></td>
+<td><form:password path="oldPassword" size="15" maxlength="255" /></td>
 <td id="oldPasswordError" class="hide error">password may not be empty.</td>
 <td><form:errors path="oldPassword" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -28,7 +28,7 @@
 </tr>
 <tr>
 <td>new password:</td>
-<td><form:password path="newPassword" size="15" maxlength="15" /></td>
+<td><form:password path="newPassword" size="15" maxlength="255" /></td>
 <td id="newPasswordError" class="hide error">password may not be empty.</td>
 <td><form:errors path="newPassword" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -46,7 +46,7 @@
 </tr>
 <tr>
 <td>Please retype the new password:</td>
-<td><form:password path="newPasswordRetype" size="15" maxlength="15" /></td>
+<td><form:password path="newPasswordRetype" size="15" maxlength="255" /></td>
 <td id="newPasswordRetypeError" class="hide error">password may not be empty.</td>
 						<script type="text/javascript">
                                 Spring.addDecoration(new Spring.ElementDecoration({

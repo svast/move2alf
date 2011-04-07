@@ -41,7 +41,7 @@
 <table>
 <tr>
 <td><form:radiobutton path="runFrequency" value="Single run at" onclick="scheduleBox(0)" checked="true" />Single run at</td>
-<td id="sDate" >date: <form:input path="singleDate" size="8" maxlength="10" /></td>
+<td id="sDate" >date: <form:input path="singleDate" size="8" /></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "singleDate",
@@ -55,7 +55,7 @@
 								}
 							})); 
 						</script>
-<td id="sTime" >time: <form:input path="singleTime" size="5" maxlength="10"  /></td>
+<td id="sTime" >time: <form:input path="singleTime" size="5" /></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "singleTime",
@@ -77,7 +77,7 @@
 
 <tr>
 <td><form:radiobutton path="runFrequency" value="Hourly" onclick="scheduleBox(1)"/>Hourly</td>
-<td id="hourly" class="hide">minutes: <form:input path="hourTime" size="2" maxlength="2" /></td>
+<td id="hourly" class="hide">minutes: <form:input path="hourTime" size="2"/></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "hourTime",
@@ -98,7 +98,7 @@
 </tr>
 <tr>
 <td><form:radiobutton path="runFrequency" value="Daily" onclick="scheduleBox(2)"/>Daily</td>
-<td id="daily" class="hide">time: <form:input path="dayTime" size="5" maxlength="5" /></td>
+<td id="daily" class="hide">time: <form:input path="dayTime" size="5"  /></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "dayTime",
@@ -140,7 +140,7 @@
                                 }));
                         </script>
 
-<td id="weeklyTime" class="hide">time: <form:input path="weekTime" size="5" maxlength="15" value="00:00"/></td>
+<td id="weeklyTime" class="hide">time: <form:input path="weekTime" size="5"  value="00:00"/></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "weekTime",
@@ -159,7 +159,7 @@
 </tr>
 <tr>
 <td><form:radiobutton path="runFrequency" value="Advanced" onclick="scheduleBox(4)"/>Advanced</td>
-<td id="advanced" class="hide">cronjob: <form:input path="cronJob" size="15" maxlength="25" /></td>
+<td id="advanced" class="hide">cronjob: <form:input path="cronJob" size="15" maxlength="255" /></td>
 						<script type="text/javascript">
 							Spring.addDecoration(new Spring.ElementDecoration({
 								elementId : "cronJob",
