@@ -27,41 +27,43 @@ public class ExecuteCommandAction extends Action{
 		String command = configuredAction
 					.getParameter(Parameters.PARAM_COMMAND);
 
-		logger.debug("Executing command "+ command);
-		
-		ProcessBuilder pb = new ProcessBuilder(command);
-		pb.redirectErrorStream(true);
-		Process process = null;
-		try {
-			process = pb.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		InputStream is = process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
-		String line;
-		
-		try {
-			while ((line = br.readLine()) != null) {
-				logger.debug(line);
-
+		if(command != null && !"".equals(command))
+		{
+			logger.debug("Executing command "+ command);
+			
+			ProcessBuilder pb = new ProcessBuilder(command);
+			pb.redirectErrorStream(true);
+			Process process = null;
+			try {
+				process = pb.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	
+			InputStream is = process.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			String line;
+			
+			try {
+				while ((line = br.readLine()) != null) {
+					logger.debug(line);
+	
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				process.waitFor();
+			} catch (InterruptedException ie) {
+				logger.error("Problem running command");
+			}
+			
+			logger.info("Command finished");	
 		}
-		
-		try {
-			process.waitFor();
-		} catch (InterruptedException ie) {
-			logger.error("Problem running command");
-		}
-		
-		logger.info("Command finished");	
-
 	}
 	
 	@Override
