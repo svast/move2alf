@@ -32,7 +32,7 @@ public class TestAction extends Action {
 
 	@Override
 	public String getCategory() {
-		return ConfigurableObject.CAT_METADATA;
+		return ConfigurableObject.CAT_DEFAULT;
 	}
 
 	@Override
