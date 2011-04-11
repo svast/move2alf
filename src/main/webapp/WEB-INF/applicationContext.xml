@@ -38,13 +38,13 @@
 			<value>100</value>
 		</property>
 		<property name="minPoolSize">
-			<value>10</value>
+			<value>2</value>
 		</property>
 		<property name="maxPoolSize">
-			<value>50</value>
+			<value>10</value>
 		</property>
 		<property name="acquireIncrement">
-			<value>5</value>
+			<value>2</value>
 		</property>
 		<property name="maxStatements">
 			<value>0</value>
