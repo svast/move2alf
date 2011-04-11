@@ -10,20 +10,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.IdObject;
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.SourceSinkFactory;
+import eu.xenit.move2alf.core.action.MoveDocumentsAction;
+import eu.xenit.move2alf.core.action.ThreadAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -48,6 +54,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private ActionFactory actionFactory;
 
 	private SourceSinkFactory sourceSinkFactory;
+
+	private MailSender mailSender;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -83,6 +91,15 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public SourceSinkFactory getSourceSinkFactory() {
 		return sourceSinkFactory;
+	}
+
+	@Autowired
+	public void setMailSender(MailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public MailSender getMailSender() {
+		return mailSender;
 	}
 
 	@Override
@@ -191,20 +208,17 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		Cycle lastCycle;
 		jobCycles = getCyclesForJobDesc(job.getId());
-		
-		lastCycle = jobCycles.get(0);
-		
-	/*	jobCycles = getCyclesForJob(job.getId());
 
-		if (jobCycles.size() == 0) {
-			lastCycle = null;
-		} else {
-			if (jobCycles.get(0).getEndDateTime() == null) {
-				lastCycle = jobCycles.get(0);
-			} else {
-				lastCycle = jobCycles.get(jobCycles.size() - 1);
-			}
-		}*/
+		lastCycle = jobCycles.get(0);
+
+		/*
+		 * jobCycles = getCyclesForJob(job.getId());
+		 * 
+		 * if (jobCycles.size() == 0) { lastCycle = null; } else { if
+		 * (jobCycles.get(0).getEndDateTime() == null) { lastCycle =
+		 * jobCycles.get(0); } else { lastCycle = jobCycles.get(jobCycles.size()
+		 * - 1); } }
+		 */
 
 		return lastCycle;
 	}
@@ -490,12 +504,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return durationDateString;
 	}
 
-	@Override
-	public void executeJob(int scheduleId) {
-		// TODO Auto-generated method stub
-
-	}
-
 	private Map<Integer, List<ConfiguredAction>> runningActions = Collections
 			.synchronizedMap(new HashMap<Integer, List<ConfiguredAction>>());
 
@@ -515,7 +523,40 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			runningActionsForCycle.add(action);
 		}
 
-		getActionFactory().execute(action, parameterMap);
+		try {
+			getActionFactory().execute(action, parameterMap);
+		} catch (Throwable e) {
+			/*
+			 * Catch unhandled exceptions, set error message and skip to move
+			 * and report actions.
+			 */
+			logger.error("Action " + action.getClassName() + " (id = "
+					+ action.getIdAsString()
+					+ ") threw an unhandled exception: " + e);
+			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
+
+			logger.debug("Skipping to reporting");
+			ConfiguredAction nextAction = action
+					.getAppliedConfiguredActionOnSuccess();
+			while (nextAction != null) {
+				if (MoveDocumentsAction.class.getName().equals(
+						nextAction.getClassName())
+						&& Parameters.VALUE_AFTER.equals(nextAction
+								.getParameter(Parameters.PARAM_STAGE))) {
+					executeAction(cycleId, nextAction, parameterMap);
+					break;
+				} else if (ThreadAction.class.getName().equals(nextAction.getClassName())) {
+					CountDownLatch counter = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
+					counter.countDown();
+				} else {
+					logger
+							.debug("Skipping action "
+									+ nextAction.getClassName());
+				}
+				nextAction = nextAction.getAppliedConfiguredActionOnSuccess();
+			}
+		}
 
 		synchronized (this.runningActions) {
 			runningActionsForCycle.remove(action);
@@ -650,6 +691,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
 		doc.setProcessedDocumentParameterSet(params);
 		getSessionFactory().getCurrentSession().save(doc);
+	}
+
+	@Override
+	public void sendMail(SimpleMailMessage message) {
+		getMailSender().send(message);
 	}
 
 }

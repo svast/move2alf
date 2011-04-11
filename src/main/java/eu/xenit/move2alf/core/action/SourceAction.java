@@ -18,9 +18,9 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SourceAction extends Action {
-	
+
 	private static final Logger logger = LoggerFactory
-	.getLogger(SourceAction.class);
+			.getLogger(SourceAction.class);
 
 	@Override
 	public void execute(ConfiguredAction configuredAction,
@@ -34,18 +34,21 @@ public class SourceAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink source = getSourceSinkFactory().getObject(
 				sourceConfig.getClassName());
-		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
+		ConfiguredAction nextAction = configuredAction
+				.getAppliedConfiguredActionOnSuccess();
 
 		List<File> files = source.list(sourceConfig, path, recursive);
-		String moveNotLoaded = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED);
-		String failedPath = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
-		if("true".equals(moveNotLoaded)) {
+		String moveNotLoaded = configuredAction
+				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED);
+		String failedPath = configuredAction
+				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+		if ("true".equals(moveNotLoaded)) {
 			files.addAll(source.list(sourceConfig, failedPath, recursive));
 		}
 		CountDownLatch counter = new CountDownLatch(files.size());
 		parameterMap.put(Parameters.PARAM_COUNTER, counter);
-		readFiles(files, parameterMap, recursive, configuredAction, sourceConfig, source,
-				nextAction);
+		readFiles(files, parameterMap, recursive, configuredAction,
+				sourceConfig, source, nextAction);
 		try {
 			counter.await();
 		} catch (InterruptedException e) {
@@ -54,33 +57,46 @@ public class SourceAction extends Action {
 	}
 
 	private void readFiles(List<File> files, Map<String, Object> parameterMap,
-			boolean recursive, ConfiguredAction action, ConfiguredSourceSink sourceConfig,
-			SourceSink source, ConfiguredAction nextAction) {
-		parameterMap.put(Parameters.PARAM_THREADPOOL, getSourceSinkFactory().getThreadPool(sourceConfig));
+			boolean recursive, ConfiguredAction action,
+			ConfiguredSourceSink sourceConfig, SourceSink source,
+			ConfiguredAction nextAction) {
+		parameterMap.put(Parameters.PARAM_THREADPOOL, getSourceSinkFactory()
+				.getThreadPool(sourceConfig));
 		if (nextAction != null) {
 			for (File file : files) {
 				Map<String, Object> newParameterMap = new HashMap<String, Object>();
 				newParameterMap.putAll(parameterMap);
 				newParameterMap.put(Parameters.PARAM_FILE, file);
-				
+				/*
+				 * For reference. PARAM_FILE can be overwritten by metadata or
+				 * transform action. PARAM_INPUT_FILE should always contain the
+				 * original file.
+				 */
+				newParameterMap.put(Parameters.PARAM_INPUT_FILE, file);
+
 				// add to list of files to transform
 				List<File> transformFiles = new ArrayList<File>();
 				transformFiles.add(file);
-				newParameterMap.put(Parameters.PARAM_TRANSFORM_FILE_LIST, transformFiles);
-				
+				newParameterMap.put(Parameters.PARAM_TRANSFORM_FILE_LIST,
+						transformFiles);
+
 				String relativePath = file.getParent();
 				relativePath = relativePath.replace("\\", "/");
 				String path = action.getParameter(Parameters.PARAM_PATH);
 				path = path.replace("\\", "/");
-				String pathFailed = action.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+				String pathFailed = action
+						.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
 				pathFailed = pathFailed.replace("\\", "/");
 				if (relativePath.startsWith(path)) {
 					relativePath = relativePath.substring(path.length());
 				} else if (relativePath.startsWith(pathFailed)) {
 					relativePath = relativePath.substring(pathFailed.length());
 				}
-				newParameterMap.put(Parameters.PARAM_RELATIVE_PATH, relativePath);
-				getJobService().executeAction((Integer) parameterMap.get(Parameters.PARAM_CYCLE), nextAction, newParameterMap);
+				newParameterMap.put(Parameters.PARAM_RELATIVE_PATH,
+						relativePath);
+				getJobService().executeAction(
+						(Integer) parameterMap.get(Parameters.PARAM_CYCLE),
+						nextAction, newParameterMap);
 			}
 		}
 	}

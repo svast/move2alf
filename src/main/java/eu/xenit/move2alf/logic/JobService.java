@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -230,15 +231,6 @@ public interface JobService {
 	 * @return String
 	 */
 	public String getDuration(Date startDateTime, Date endDateTime);
-	
-	/**
-	 * Start execution of a job
-	 * 
-	 * @param scheduleId
-	 *            The id of the schedule to start
-	 */
-	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
-	public void executeJob(int scheduleId);
 
 	/**
 	 * deletes a configured source sink based on id.
@@ -367,4 +359,6 @@ public interface JobService {
 	public void resetSchedules();
 	
 	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
+
+	public void sendMail(SimpleMailMessage message);
 }

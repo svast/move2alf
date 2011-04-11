@@ -28,6 +28,7 @@ public class TestAction extends Action {
 		for (String key : configuredAction.getParameters().keySet()) {
 			reportFields.put(key, configuredAction.getParameter(key));
 		}
+		//throw new RuntimeException("test exception handling");
 	}
 
 	@Override

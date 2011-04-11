@@ -57,6 +57,8 @@ public class Parameters {
 	
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
 	
+	public static final String PARAM_INPUT_FILE = "inputFile";
+	
 	public static final String PARAM_REPORT_FIELDS = "reportFields";
 	
 	public static final String PARAM_COMMAND = "command";
