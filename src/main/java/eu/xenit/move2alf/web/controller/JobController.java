@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.web.controller;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -874,7 +876,9 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
+				double d = (double) documentListSize/totalTimeInSeconds;
+				NumberFormat formatter = new DecimalFormat("#.##");
+				docsPerSecond = formatter.format(d);
 			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
@@ -923,7 +927,9 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
+				double d = (double) documentListSize/totalTimeInSeconds;
+				NumberFormat formatter = new DecimalFormat("#.##");
+				docsPerSecond = formatter.format(d);
 			}
 		}
 		PagedListHolder pagedListHolder = new PagedListHolder(processedDocuments);
@@ -973,7 +979,9 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
+				double d = (double) documentListSize/totalTimeInSeconds;
+				NumberFormat formatter = new DecimalFormat("#.##");
+				docsPerSecond = formatter.format(d);
 			}
 		}
 		
@@ -1018,7 +1026,9 @@ public class JobController {
 			if(totalTimeInSeconds==0){
 				docsPerSecond = ""+documentListSize;
 			}else{
-				docsPerSecond = ""+(double)documentListSize/totalTimeInSeconds;
+				double d = (double) documentListSize/totalTimeInSeconds;
+				NumberFormat formatter = new DecimalFormat("#.##");
+				docsPerSecond = formatter.format(d);
 			}
 		}
 		

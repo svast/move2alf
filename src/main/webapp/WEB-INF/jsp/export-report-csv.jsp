@@ -6,11 +6,10 @@ End time;<c:out value="${cycle.endDateTime}"/>
 Duration;<c:out value="${duration}"/>
 Status;<c:out value="${cycle.schedule.state.displayName}" />
 Nr. of documents;<c:out value="${documentListSize}" />
-Docs / s;<c:out value="${documentsPerSecond}"/>
+Docs / s;<c:out value="${docsPerSecond}"/>
 
 List of imported documents
 
 Name;Processed date and time;Status
 <c:forEach var="document" items="${processedDocuments}" >
-<c:out value="${document.name}" />;<c:out value="${document.processedDateTime}"/>;<c:out value="${document.status}"/>
- </c:forEach> 
+<c:out value="${document.name}" />;<c:out value="${document.processedDateTime}"/>;<c:out value="${document.status}"/><c:forEach items="${document.processedDocumentParameterSet}" var="docParameter">;<c:out value="${docParameter.name}" />: <c:out value="${docParameter.value}" /></c:forEach></c:forEach> 

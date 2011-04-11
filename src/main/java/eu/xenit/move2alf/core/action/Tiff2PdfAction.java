@@ -40,7 +40,7 @@ public class Tiff2PdfAction extends Action {
 			}
 		} else {
 			logger.warn("No files to transform");
-			return;
+			return; 
 		}
 		createPdf(destination, filesToTransform);
 	}

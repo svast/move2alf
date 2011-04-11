@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@ page import = "com.itextpdf.text.*, com.itextpdf.text.pdf.*, java.io.*, java.util.ArrayList,java.util.List, eu.xenit.move2alf.core.dto.ProcessedDocument"%>
+<%@ page import = "com.itextpdf.text.*, com.itextpdf.text.pdf.*, java.io.*, java.util.*,java.util.ArrayList,java.util.List, eu.xenit.move2alf.core.dto.ProcessedDocument, eu.xenit.move2alf.core.dto.ProcessedDocumentParameter"%>
 <%
 response.setContentType("application/x-pdf");
 response.setHeader("content-disposition", "attachment; filename=\"Report.pdf\"");
@@ -18,7 +18,8 @@ document.add(new Paragraph(new Phrase("Move2Alf report", new Font(BaseFont.creat
 document.add( Chunk.NEWLINE );
 
 %>
-<c:set var="name" value="${job.name}" scope="session" />
+
+<%@page import="eu.xenit.move2alf.core.dto.ProcessedDocumentParameter"%><c:set var="name" value="${job.name}" scope="session" />
 <%
 document.add(new Paragraph("Name: "+(String) session.getAttribute("name")));
 
@@ -65,19 +66,20 @@ document.add(new Paragraph("Docs / s: "+(String) session.getAttribute("docsPerSe
 
 document.add( Chunk.NEWLINE );
 
-PdfPTable table = new PdfPTable(3);
+PdfPTable table = new PdfPTable(4);
 
 table.setHorizontalAlignment(Element.ALIGN_LEFT);
 
 //firsth row
-PdfPCell cell = new PdfPCell(new Paragraph("List of imported documents"));
-cell.setColspan(3);
+PdfPCell cell = new PdfPCell(new Paragraph(new Phrase("List of imported documents", new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, "Cp1252", false)))));
+cell.setColspan(4);
 table.addCell(cell);
 
 //second row
-table.addCell("Name");
-table.addCell("Processed date and time");
-table.addCell("Status");
+table.addCell(new Phrase("Name", new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, "Cp1252", false))));
+table.addCell(new Phrase("Processed date and time", new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, "Cp1252", false))));
+table.addCell(new Phrase("Status", new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, "Cp1252", false))));
+table.addCell(new Phrase("Parameters", new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, "Cp1252", false))));
 
 %>
 <c:set var="documents" value="${processedDocuments}" />
@@ -90,6 +92,22 @@ for(int i=0; i<processedDocuments.size(); i++){
 table.addCell(processedDocuments.get(i).getName());
 table.addCell(processedDocuments.get(i).getProcessedDateTime().toString());
 table.addCell(processedDocuments.get(i).getStatus().getDisplayName());
+
+Set docParameters = processedDocuments.get(i).getProcessedDocumentParameterSet();
+
+Iterator docParameterIterator = docParameters.iterator();
+
+	if(docParameterIterator != null){
+		String parameterString="";
+		while(docParameterIterator.hasNext()){
+			ProcessedDocumentParameter docParameter = (ProcessedDocumentParameter)docParameterIterator.next();
+			parameterString=parameterString + ""+ docParameter.getName()+": "+docParameter.getValue()+"\n";
+		}
+		table.addCell(parameterString);
+	}
+	else{
+		table.addCell("");
+	}
 }
 }
 
