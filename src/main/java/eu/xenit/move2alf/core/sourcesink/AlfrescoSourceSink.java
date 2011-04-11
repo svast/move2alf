@@ -100,7 +100,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
 					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
 
-			Map<String, String> acl = (Map<String, String>) parameterMap
+			Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
 					.get(Parameters.PARAM_ACL);
 
 			boolean inheritPermissions;
@@ -116,12 +116,12 @@ public class AlfrescoSourceSink extends SourceSink {
 			if (!ras.doesDocExist(document.getName(), remotePath)) {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
 						remotePath, description, namespace, contentType,
-						metadata, // TODO:
-						// description
-						multiValueMetadata);
+						metadata, multiValueMetadata);
 				if (acl != null) {
-					ras.setAccessControlList(remotePath, inheritPermissions,
-							acl);
+					for (String aclPath : acl.keySet()) {
+						ras.setAccessControlList(aclPath, inheritPermissions,
+								acl.get(aclPath));
+					}
 				}
 				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 			} else {
@@ -210,7 +210,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			ConfiguredSourceSink sinkConfig) {
 		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
 		if (ras == null) {
-			logger.debug("Creating new RepositoryAccessSession for thread " + Thread.currentThread());
+			logger.debug("Creating new RepositoryAccessSession for thread "
+					+ Thread.currentThread());
 			String user = sinkConfig.getParameter(PARAM_USER);
 			String password = sinkConfig.getParameter(PARAM_PASSWORD);
 			String url = sinkConfig.getParameter(PARAM_URL);
@@ -230,7 +231,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			ras = ra.createSessionAndRetry();
 			AlfrescoSourceSink.ras.set(ras);
 		} else {
-			logger.debug("Reusing existing RepositoryAccessSession in thread " + Thread.currentThread());
+			logger.debug("Reusing existing RepositoryAccessSession in thread "
+					+ Thread.currentThread());
 		}
 		return AlfrescoSourceSink.ras.get();
 	}
