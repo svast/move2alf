@@ -212,6 +212,18 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 </c:if>
 </table>
 
+<h4>Execute command after job</h4>
+
+<div>Command: <form:input path="commandAfter" size="50" maxlength="255"/></div>
+					<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "commandAfter",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                                   
+                                        }
+                                }));
+                        </script>
+
 </fieldset>
 
 <%

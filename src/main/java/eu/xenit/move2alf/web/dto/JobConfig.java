@@ -94,6 +94,8 @@ public class JobConfig {
 	private List<String> paramTransform;
 	
 	private String command;
+	
+	private String commandAfter;
 
 	@NotEmpty
 	private String dest;
@@ -446,6 +448,14 @@ public class JobConfig {
 
 	public String getCommand() {
 		return command;
+	}
+	
+	public void setCommandAfter(String commandAfter) {
+		this.commandAfter = commandAfter;
+	}
+
+	public String getCommandAfter() {
+		return commandAfter;
 	}
 
 }

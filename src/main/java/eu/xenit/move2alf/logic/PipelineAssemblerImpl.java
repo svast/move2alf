@@ -66,7 +66,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
-				.param("command", jobConfig.getCommand()));
+				.param("command", jobConfig.getCommand())
+				.param("stage", "before"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path", jobConfig.getInputFolder())
@@ -163,6 +164,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 						"after"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
+		
+		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
+				.param("command", jobConfig.getCommandAfter())
+				.param("stage", "after"));
 
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions
 				.toArray(new ActionBuilder[7]);
@@ -197,6 +202,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String emailAddressReport="";
 		String extension="";
 		String command="";
+		String commandAfter="";
 		Map<String,String> metadataParameterMap = new HashMap();
 		Map<String,String> transformParameterMap = new HashMap();
 		while(action != null) {
@@ -243,7 +249,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				extension = action.getParameter("extension");
 			} else if ("eu.xenit.move2alf.core.action.ExecuteCommandAction"
 					.equals(action.getClassName())) {
-				command = action.getParameter("command");
+				if("before".equals(action.getParameter("stage"))){
+					command = action.getParameter("command");
+				}else{
+					commandAfter = action.getParameter("command");
+				}
 			} else {
 				Action configurableAction = getActionFactory().getObject(
 						action.getClassName());
@@ -278,6 +288,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setEmailAddressRep(emailAddressReport);
 		jobConfig.setExtension(extension);
 		jobConfig.setCommand(command);
+		jobConfig.setCommandAfter(commandAfter);
 		
 		Iterator metadataMapIterator = metadataParameterMap.entrySet().iterator();
 		List<String> paramMetadata = new ArrayList();

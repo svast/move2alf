@@ -68,7 +68,7 @@
 <tr>
 <td class="table-border-thin">${item.name}</td>
 <td class="table-border-thin"><fmt:formatDate value="${item.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>
-<td class="table-border-thin">${item.status}</td>
+<td class="table-border-thin">${item.status.displayName}</td>
 <td class="table-border-thin">
 <c:forEach items="${item.processedDocumentParameterSet}" var="docParameter" >
 <b><c:out value="${docParameter.name}" />:</b> <c:out value="${docParameter.value}" />
