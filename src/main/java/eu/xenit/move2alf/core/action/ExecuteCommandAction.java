@@ -31,7 +31,7 @@ public class ExecuteCommandAction extends Action {
 		if (countDown != null)
 			logger.debug("COUNTDOWN: "+countDown.getCount());
 		
-		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 0)){
+		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
 		
 			String command = configuredAction
 					.getParameter(Parameters.PARAM_COMMAND);
