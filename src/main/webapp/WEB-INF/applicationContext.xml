@@ -85,4 +85,17 @@
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.smtp}" />
 	</bean>
+
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=Move2Alf" value-ref="move2alfJmxBean" />
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="move2alfJmxBean" class="eu.xenit.move2alf.jmx.Move2AlfJmxBean">
+		<property name="jobService" ref="jobService"/>	
+	</bean>
 </beans>

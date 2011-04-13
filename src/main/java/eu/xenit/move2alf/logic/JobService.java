@@ -29,7 +29,7 @@ public interface JobService {
 	 * 
 	 * @return
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	// @PreAuthorize("hasRole('CONSUMER')")
 	public List<Job> getAllJobs();
 
 	/**
