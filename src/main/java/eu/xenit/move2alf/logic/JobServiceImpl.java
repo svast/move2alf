@@ -26,10 +26,13 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.SourceSinkFactory;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.ThreadAction;
+import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -56,6 +59,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
+	
+	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -100,6 +105,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public MailSender getMailSender() {
 		return mailSender;
+	}
+	
+	public JobServiceImpl() {
+		registerCycleListener(new LoggingCycleListener());
+		registerCycleListener(new ReportCycleListener());
 	}
 
 	@Override
@@ -510,20 +520,23 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void executeAction(int cycleId, ConfiguredAction action,
 			Map<String, Object> parameterMap) {
-		logger.debug("Executing action: " + action.getId() + " - "
-				+ action.getClassName());
 
 		List<ConfiguredAction> runningActionsForCycle;
 		synchronized (this.runningActions) {
 			runningActionsForCycle = this.runningActions.get(cycleId);
 			if (runningActionsForCycle == null) {
+				// start of cycle
 				runningActionsForCycle = new LinkedList<ConfiguredAction>();
 				this.runningActions.put(cycleId, runningActionsForCycle);
+				
+				notifyCycleListenersStart(cycleId);
 			}
 			runningActionsForCycle.add(action);
 		}
 
 		try {
+			logger.debug("Executing action: " + action.getId() + " - "
+					+ action.getClassName());
 			getActionFactory().execute(action, parameterMap);
 		} catch (Throwable e) {
 			/*
@@ -561,9 +574,23 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		synchronized (this.runningActions) {
 			runningActionsForCycle.remove(action);
 			if (runningActionsForCycle.size() == 0) {
-				logger.info("Cycle " + cycleId + " completed.");
+				// end of cycle
 				closeCycle(getCycle(cycleId));
+				notifyCycleListenersEnd(cycleId);
 			}
+		}
+	}
+
+
+	private void notifyCycleListenersStart(int cycleId) {
+		for(CycleListener listener : this.cycleListeners) {
+			listener.cycleStart(cycleId);
+		}
+	}
+
+	private void notifyCycleListenersEnd(int cycleId) {
+		for(CycleListener listener : this.cycleListeners) {
+			listener.cycleEnd(cycleId);
 		}
 	}
 
@@ -696,6 +723,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void sendMail(SimpleMailMessage message) {
 		getMailSender().send(message);
+	}
+
+	@Override
+	public void registerCycleListener(CycleListener listener) {
+		listener.setJobService(this);
+		this.cycleListeners.add(listener);
 	}
 
 }

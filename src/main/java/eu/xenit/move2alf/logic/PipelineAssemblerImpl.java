@@ -17,7 +17,6 @@ import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.logic.PipelineAssembler.ActionBuilder;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
@@ -39,10 +38,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	@Override
 	public void assemblePipeline(JobConfig jobConfig) {
-		List<ActionBuilder> actions = new ArrayList();
+		List<ActionBuilder> actions = new ArrayList<ActionBuilder>();
 		
 		List<String> metadataParameterList = jobConfig.getParamMetadata();
-		Map<String,String> metadataParameterMap = new HashMap();
+		Map<String,String> metadataParameterMap = new HashMap<String,String>();
 		
 		if(metadataParameterList != null){
 			String[] metadataParameter = new String[2];
@@ -54,7 +53,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 		
 		List<String> transformParameterList = jobConfig.getParamTransform();
-		Map<String,String> transformParameterMap = new HashMap();
+		Map<String,String> transformParameterMap = new HashMap<String,String>();
 		
 		if(transformParameterList != null){
 			String [] transformParameter = new String[2];
@@ -203,8 +202,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String extension="";
 		String command="";
 		String commandAfter="";
-		Map<String,String> metadataParameterMap = new HashMap();
-		Map<String,String> transformParameterMap = new HashMap();
+		Map<String,String> metadataParameterMap = new HashMap<String,String>();
+		Map<String,String> transformParameterMap = new HashMap<String,String>();
+
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 
@@ -291,7 +291,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setCommandAfter(commandAfter);
 		
 		Iterator metadataMapIterator = metadataParameterMap.entrySet().iterator();
-		List<String> paramMetadata = new ArrayList();
+		List<String> paramMetadata = new ArrayList<String>();
 		while(metadataMapIterator.hasNext()){
 			Map.Entry nameValuePair = (Map.Entry)metadataMapIterator.next();
 			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();
@@ -302,7 +302,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setParamMetadata(paramMetadata);
 		
 		Iterator transformMapIterator = transformParameterMap.entrySet().iterator();
-		List<String> paramTransform = new ArrayList();
+		List<String> paramTransform = new ArrayList<String>();
 		while(transformMapIterator.hasNext()){
 			Map.Entry nameValuePair = (Map.Entry)transformMapIterator.next();
 			String listValue = nameValuePair.getKey()+"|"+nameValuePair.getValue();

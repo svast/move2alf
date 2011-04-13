@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -361,4 +362,6 @@ public interface JobService {
 	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
 
 	public void sendMail(SimpleMailMessage message);
+	
+	public void registerCycleListener(CycleListener listener);
 }
