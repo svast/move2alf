@@ -66,6 +66,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommand())
+				.param("path", jobConfig.getInputFolder())
 				.param("stage", "before"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
@@ -151,21 +152,35 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
 				// true or false (String)
 				.param("moveBeforeProcessingPath",
-						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
+						jobConfig.getBeforeProcPath())
+				.param("moveAfterLoad",
 						jobConfig.getMoveAfterLoad())
 				// true or false (String)
 				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
 				.param("moveNotLoaded", jobConfig.getMoveNotLoad()) // true or
 																	// false
 																	// (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath()).param(
-						"path", jobConfig.getInputFolder()).param("stage",
-						"after"));
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
+				.param("path", jobConfig.getInputFolder())
+				.param("stage","after"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommandAfter())
+				.param("path", jobConfig.getInputFolder())
+				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
+				// true or false (String)
+				.param("moveBeforeProcessingPath",
+						jobConfig.getBeforeProcPath())
+				.param("moveAfterLoad",
+						jobConfig.getMoveAfterLoad())
+				// true or false (String)
+				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
+				.param("moveNotLoaded", jobConfig.getMoveNotLoad()) // true or
+																	// false
+																	// (String)
+				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
 				.param("stage", "after"));
 
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions
