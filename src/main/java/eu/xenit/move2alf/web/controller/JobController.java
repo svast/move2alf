@@ -208,9 +208,21 @@ public class JobController {
 			}
 		}
 		
+		List<String> inputFolder = job.getInputFolder();
+		Set<String> uniqueInputFolders = new HashSet();
+		boolean doubleInputFolder = false;
+		if(inputFolder != null){
+			for (int i=0; i<inputFolder.size();i++){
+				boolean inputFolderUnique = uniqueInputFolders.add(inputFolder.get(i));
+				if(inputFolderUnique == false){
+					doubleInputFolder=true;
+				}
+			}
+		}
+		
 		if (errors.hasErrors() || notNull == false || threadsIsInteger == false 
 					|| jobExists==true || destinationExists==true || doubleNewDestination==true 
-						|| doubleMetadata==true || doubleTransform==true) {
+						|| doubleMetadata==true || doubleTransform==true || doubleInputFolder==true) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -241,6 +253,7 @@ public class JobController {
 			mav.addObject("doubleNewDestination", doubleNewDestination);
 			mav.addObject("doubleMetadata", doubleMetadata);
 			mav.addObject("doubleTransform", doubleTransform);
+			mav.addObject("doubleInputFolder", doubleInputFolder);
 			mav.addObject("notNull", notNull);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
@@ -389,8 +402,21 @@ public class JobController {
 			}
 		}
 		
+		List<String> inputFolder = job.getInputFolder();
+		Set<String> uniqueInputFolders = new HashSet();
+		boolean doubleInputFolder = false;
+		if(inputFolder != null){
+			for (int i=0; i<inputFolder.size();i++){
+				boolean inputFolderUnique = uniqueInputFolders.add(inputFolder.get(i));
+				if(inputFolderUnique == false){
+					doubleInputFolder=true;
+				}
+			}
+		}
+		
 		if (errors.hasErrors() || notNull==false || threadsIsInteger == false 
-					|| jobExists==true || destinationExists==true || doubleNewDestination==true || doubleMetadata==true || doubleTransform==true) {
+					|| jobExists==true || destinationExists==true || doubleNewDestination==true 
+						|| doubleMetadata==true || doubleTransform==true || doubleInputFolder==true) {
 			System.out.println("THE ERRORS: "+errors.toString());
 			
 			List<DestinationInfo> destinationInfoList = new ArrayList();
@@ -421,6 +447,7 @@ public class JobController {
 			mav.addObject("doubleMetadata", doubleMetadata);
 			mav.addObject("doubleTransform", doubleTransform);
 			mav.addObject("doubleNewDestination", doubleNewDestination);
+			mav.addObject("doubleInputFolder", doubleInputFolder);
 			mav.addObject("metadataOptions", getJobService()
 					.getActionsByCategory(ConfigurableObject.CAT_METADATA));
 			mav.addObject("transformOptions", getJobService()

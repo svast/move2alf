@@ -11,7 +11,7 @@
 <div id="noDestinations">No existing destinations found.<br /></div>
 </c:if>
 
-<table id="tblDestination" class="indent">
+<table id="tblDestination" >
 
 <c:forEach var="destination" items="${destinations}">
 <c:if test="${not empty destination.parameters}" >

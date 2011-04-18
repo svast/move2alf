@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
@@ -61,7 +62,7 @@ public class LiPolisDocAction extends Action {
 	private static final String OP_LiNameInsured = "liNameInsured";
 	private static final String OP_LiContractType = "liContractType";
 	private static final String OP_LiYear = "liYear";
-
+	
 	private static final String OP_LiSinkFolderRelativePath = "liSinkFolderRelativePath";
 	private static final String OP_LiDocumentGroup = "liDocumentGroup";
 
@@ -96,8 +97,6 @@ public class LiPolisDocAction extends Action {
 
 		addAprioriOutputParameter(new ParameterDefinition(
 				OP_LiSinkFolderRelativePath, String.class, null));
-		addAprioriOutputParameter(new ParameterDefinition(OP_LiDocumentGroup,
-				String.class, null));
 	}
 
 	@Override
@@ -206,8 +205,32 @@ public class LiPolisDocAction extends Action {
 						// not that this the relative path, it needs to be prepended with the sink path prefix in the AlfSinkAction
 						parameterMap.put(OP_LiSinkFolderRelativePath,
 								sb.toString());
-						parameterMap.put(OP_LiDocumentGroup, policyNumber);
+						
+						if(policyNumber != null || !"".equals(policyNumber)){
+							parameterMap.put(OP_LiDocumentGroup, policyNumber);
+						}else{
+							parameterMap.put(OP_LiDocumentGroup, producerNumber);
+						}
+						
+						parameterMap.put(Parameters.PARAM_NAMESPACE, "{li.model}");
 
+						if("001".equals(categoryString)||"002".equals(categoryString)
+								||"003".equals(categoryString) || "004".equals(categoryString)
+								||"005".equals(categoryString) || "006".equals(categoryString)
+								||"007".equals(categoryString) || "010".equals(categoryString)
+								||"011".equals(categoryString) || "012".equals(categoryString)
+								||"013".equals(categoryString)){
+							parameterMap.put(Parameters.PARAM_CONTENTTYPE, "PolisDoc");
+						}
+						
+						if("009".equals(categoryString)){
+							parameterMap.put(Parameters.PARAM_CONTENTTYPE, "List201");
+						}
+						
+						if("008".equals(categoryString)){
+							parameterMap.put(Parameters.PARAM_CONTENTTYPE, "ProdInfo");
+						}
+						
 						// TODO
 //						configuredAction.getAppliedConfiguredActionOnSuccess()
 //								.execute(parameterMap);

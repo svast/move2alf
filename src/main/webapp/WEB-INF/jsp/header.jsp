@@ -12,6 +12,7 @@
 		<script type="text/javascript" src="<c:url value="/js/scheduleHandler.js" />"> </script>
 		<script type="text/javascript" src="<c:url value="/js/destinationHandler.js" />"> </script>
 		<script type="text/javascript" src="<c:url value="/js/parameterHandler.js" />"> </script>
+		<script type="text/javascript" src="<c:url value="/js/inputPathHandler.js" />"> </script>
 		<script type="text/javascript">
 		
 		function putFocus(formInst, elementInst) {

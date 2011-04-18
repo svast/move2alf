@@ -25,8 +25,7 @@ function jobValidation(form){
 		validated=false;
 	}
 	
-	var inputFolder=form.inputFolder.value;
-	if(""==inputFolder || null==inputFolder || "null"==inputFolder || "undefined"==inputFolder){
+	if(!document.getElementById('inputPath1')){
 		document.getElementById("inputFolderError").style.display='block';
 		validated=false;
 	}

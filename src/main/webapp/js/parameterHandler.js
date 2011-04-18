@@ -56,6 +56,7 @@ function removeRowFromParameterMetadata(row){
 
 	  var tblParam = document.getElementById('tblParamMetadata');
 	  tblParam.deleteRow(row-1);
+	  adjustRowsParamsMeta(tblParam,row);
 	  
 }
 
@@ -67,6 +68,14 @@ function adjustRowsParamsMetadata(tbl,row){
 		document.getElementById("rowNumberParamMetadata"+row).innerHTML=row;
 		document.getElementById("removeParamMetadata"+j).setAttribute("id","removeParamMetadata"+row);
 		document.getElementById("removeParamMetadata"+row).setAttribute('onclick', 'removeRowFromParameterMetadata('+row+')');
+	}
+}
+
+function adjustRowsParamsMeta(tbl,row){
+	var rowCount = tbl.rows.length;
+	for(row; row<=rowCount; row++){
+		var j=row+1;
+		document.getElementById("paramMetadata"+j).setAttribute("id","paramMetadata"+row);
 	}
 }
 
@@ -167,6 +176,7 @@ function removeRowFromParameterTransform(row){
 
 	  var tblParam = document.getElementById('tblParamTransform');
 	  tblParam.deleteRow(row-1);
+	  adjustRowsParamsTrans(tblParam,row);
 	  
 }
 
@@ -178,6 +188,14 @@ function adjustRowsParamsTransform(tbl,row){
 		document.getElementById("rowNumberParamTransform"+row).innerHTML=row;
 		document.getElementById("removeParamTransform"+j).setAttribute("id","removeParamTransform"+row);
 		document.getElementById("removeParamTransform"+row).setAttribute('onclick', 'removeRowFromParameterTransform('+row+')');
+	}
+}
+
+function adjustRowsParamsTrans(tbl,row){
+	var rowCount = tbl.rows.length;
+	for(row; row<=rowCount; row++){
+		var j=row+1;
+		document.getElementById("paramTransform"+j).setAttribute("id","paramTransform"+row);
 	}
 }
 

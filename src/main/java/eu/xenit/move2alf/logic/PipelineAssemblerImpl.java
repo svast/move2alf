@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			}
 		}
 		
+		List<String> inputPathList = jobConfig.getInputFolder();
+		String inputPaths="";
+		if(inputPathList != null){
+			for(int i=0; i<inputPathList.size();i++){
+				if(i==0){
+					inputPaths = inputPathList.get(i);
+				}else{
+					inputPaths = inputPaths+"|"+inputPathList.get(i);
+				}
+			}
+		}
+	
 		List<String> transformParameterList = jobConfig.getParamTransform();
 		Map<String,String> transformParameterMap = new HashMap<String,String>();
 		
@@ -66,11 +79,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommand())
-				.param("path", jobConfig.getInputFolder())
+				.param("path",inputPaths)
 				.param("stage", "before"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
-				.param("path", jobConfig.getInputFolder())
+				.param("path",inputPaths)
 				.param("recursive", "true")
 				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
 				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
@@ -97,8 +110,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 																				// or
 																				// false
 																				// (String)
-				.param("moveNotLoadedPath", "").param("path",
-						jobConfig.getInputFolder()).param("stage", "before"));
+				.param("moveNotLoadedPath", "")
+				.param("path",inputPaths)
+				.param("stage", "before"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 
@@ -161,14 +175,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 																	// false
 																	// (String)
 				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
-				.param("path", jobConfig.getInputFolder())
+				.param("path",inputPaths)
 				.param("stage","after"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommandAfter())
-				.param("path", jobConfig.getInputFolder())
+				.param("path",inputPaths)
 				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
 				// true or false (String)
 				.param("moveBeforeProcessingPath",
@@ -197,7 +211,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setName(job.getName());
 		jobConfig.setDescription(job.getDescription());
 		ConfiguredAction action = job.getFirstConfiguredAction();
-		String inputFolder = "";
+		List<String> inputFolder = new ArrayList();
+		String inputPath="";
 		String destinationFolder = "";
 		String dest = "";
 		String documentExists = "";
@@ -223,7 +238,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		while(action != null) {
 			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action.getClassName())) {
 
-				inputFolder = action.getParameter("path");
+				inputPath = action.getParameter("path");
 			} else if ("eu.xenit.move2alf.core.action.SinkAction".equals(action
 					.getClassName())) {
 				destinationFolder = action.getParameter("path");
@@ -285,6 +300,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 			action = action.getAppliedConfiguredActionOnSuccess();
 		}
+		
+		if(inputPath== null){
+			inputPath="";
+		}
+		String[] inputPathArray = inputPath.split("\\|");
+		
+		inputFolder = Arrays.asList(inputPathArray);
+		
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);

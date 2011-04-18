@@ -37,6 +37,11 @@
 <h4 class="error center">The number of threads in the destination dialogue must contain numbers only</h4>
 <br />
 </c:if>
+<c:if test="${doubleInputFolder==true}" >
+<br />
+<h4 class="error center">You may not create an input folder with the same path more than once</h4>
+<br />
+</c:if>
 
 <div class="frame-job">
 <form:form modelAttribute="job" method="post" name="createJob" commandName="job" onSubmit="return jobValidation(this);">
@@ -74,9 +79,42 @@
 
 <fieldset>
 <h4>Import from</h4>
-<table>
+
+<p id="inputFolderError" class="hide error">input path may not be empty.</p>
+<p><form:errors path="inputFolder" cssClass="error"/></p>
+
+<table id="inputPathTable">
+</table>
+
+<div id="addInputPathButton" class="link small hide" onclick="addInputPath();"><span class="pointer">Add Input Path</span></div>
+<table id="inputPathForm" >
 <tr>
-<td>Path: <form:input path="inputFolder" size="50" maxlength="255" /></td>
+<td>Path: <form:input path="inputPath" size="50" maxlength="255" /></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "inputPath",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {   
+                                                                                    
+                                        }
+                                }));
+                        </script>
+
+</tr>
+<tr>
+<td><button type="button" class="button" onclick="cancelInputPath();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmInputPath();addRowToInputPath(this.form);" /></td>
+
+</tr>
+</table>
+
+ <table id="tblInputPath" class="hide">
+</table>
+
+<!-- 
+<table id="inputPathTable">
+<tr>
+<td>Path:</td><td> <form:input path="inputFolder" size="50" maxlength="255" /></td>
 <td id="inputFolderError" class="hide error">input path may not be empty.</td>
 <td><form:errors path="inputFolder" cssClass="error"/></td>
 						<script type="text/javascript">
@@ -92,6 +130,13 @@
                                 }));
                         </script>
 </tr>
+
+</table>
+
+<div id="addInputPath" class="link small" onclick="addRowToInputPath();"><span class="pointer">Add Input Path</span></div>
+-->
+
+<table>
 <tr>
 <td class="cell-padding">Extension: <form:input path="extension" size="25" value="*"/></td>
 						<script type="text/javascript">

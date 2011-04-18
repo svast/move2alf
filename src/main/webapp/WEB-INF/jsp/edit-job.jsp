@@ -36,6 +36,11 @@
 <h4 class="error center">The number of threads in the destination dialogue must contain numbers only</h4>
 <br />
 </c:if>
+<c:if test="${doubleInputFolder==true}" >
+<br />
+<h4 class="error center">You may not create an input folder with the same path more than once</h4>
+<br />
+</c:if>
 
 <div class="frame-job">
 
@@ -77,6 +82,61 @@
 <fieldset>
 <h4>Import from</h4>
 
+<p id="inputFolderError" class="hide error">input path may not be empty.</p>
+<p><form:errors path="inputFolder" cssClass="error"/></p>
+
+<%int rowInputCounter=1; %>
+<table id="inputPathTable">
+<c:if test="${not empty job.inputFolder}" >
+<c:forEach var="input" items="${job.inputFolder}">
+<tr>
+<td>
+<div id="inputPath<%=rowInputCounter%>"><%=rowInputCounter%></div>
+</td>
+<td>
+<c:out value="${input}" />
+</td>
+<td>
+<div class="pointer" id="removeInputPath<%=rowInputCounter%>" onclick="removeRowFromInputPath(<%=rowInputCounter%>)">remove</div>
+</td>
+</tr>
+<%rowInputCounter++; %>
+</c:forEach>
+</c:if>
+</table>
+
+<div id="addInputPathButton" class="link small hide" onclick="addInputPath();"><span class="pointer">Add Input Path</span></div>
+<table id="inputPathForm" >
+<tr>
+<td>Path: <form:input path="inputPath" size="50" maxlength="255" /></td>
+<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "inputPath",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {   
+                                                                                    
+                                        }
+                                }));
+                        </script>
+
+</tr>
+<tr>
+<td><button type="button" class="button" onclick="cancelInputPath();">Cancel</button></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmInputPath();addRowToInputPath(this.form);" /></td>
+
+</tr>
+</table>
+
+ <table id="tblInputPath" class="hide">
+ <c:if test="${not empty job.inputFolder}" >
+<c:forEach var="inputPathName" items="${job.inputFolder}">
+<tr>
+<td><input name="inputFolder" type="checkbox" value="<c:out value="${inputPathName}" />" checked="true" /></td>
+</tr>
+</c:forEach>
+</c:if>
+</table>
+<!-- 
 <table>
 <tr>
 <td>Path: <form:input path="inputFolder" size="50" maxlength="255"/></td>
@@ -107,6 +167,8 @@
                         </script>
 </tr>
 </table>
+
+-->
 
 <br />
 <h4>Destination</h4>

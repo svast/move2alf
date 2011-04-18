@@ -14,7 +14,7 @@ public class JobConfig {
 	private String description;
 
 	@NotEmpty
-	private String inputFolder;
+	private List<String> inputFolder;
 
 	@NotEmpty
 	private String destinationFolder;
@@ -101,6 +101,8 @@ public class JobConfig {
 	private String dest;
 
 	private List<String> sourceSink;
+	
+	private String inputPath="";
 
 	public JobConfig() {
 
@@ -130,12 +132,20 @@ public class JobConfig {
 		return description;
 	}
 
-	public void setInputFolder(String inputFolder) {
+	public void setInputFolder(List<String> inputFolder) {
 		this.inputFolder = inputFolder;
 	}
 
-	public String getInputFolder() {
+	public List<String> getInputFolder() {
 		return inputFolder;
+	}
+	
+	public void setInputPath(String inputPath) {
+		this.inputPath = inputPath;
+	}
+
+	public String getInputPath() {
+		return inputPath;
 	}
 
 	public void setDestinationFolder(String destinationFolder) {

@@ -55,7 +55,7 @@ pageContext.setAttribute("metadataValue", metadataSplit[1]);
 <div id="rowNumberParamMetadata<%=rowCounter%>"><%=rowCounter%></div>
 </td>
 <td>
-<c:out value="${metadataName}" /> - <c:out value="${metadataValue}" />
+<c:out value="${metadataName}" /> = "<c:out value="${metadataValue}" />"
 </td>
 <td>
 <div class="pointer" id="removeParamMetadata<%=rowCounter%>" onclick="removeRowFromParameterMetadata(<%=rowCounter%>)">remove</div>
@@ -162,7 +162,7 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 <div id="rowNumberParamTransform<%=rowCounter%>"><%=rowCounter%></div>
 </td>
 <td>
-<c:out value="${transformName}" /> - <c:out value="${transformValue}" />
+<c:out value="${transformName}" /> = "<c:out value="${transformValue}" />"
 </td>
 <td>
 <div class="pointer" id="removeParamTransform<%=rowCounter%>" onclick="removeRowFromParameterTransform(<%=rowCounter%>)">remove</div>

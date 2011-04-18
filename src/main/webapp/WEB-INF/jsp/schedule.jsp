@@ -1,5 +1,5 @@
 <div><form:errors path="cron" cssClass="error"/></div>
-<div id="cronError" class="hide error">you must create a schedule.</div>
+<p id="cronError" class="hide error">you must create a schedule.</p>
 <%int counter = 1; %>
 <table id="tblSample" >
  <c:if test="${empty job.cron}" >
