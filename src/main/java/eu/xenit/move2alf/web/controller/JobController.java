@@ -188,9 +188,11 @@ public class JobController {
 		if(metadata != null){
 			for (int i=0; i<metadata.size();i++){
 				String[] metadataElements = metadata.get(i).split("\\|");
-				boolean metadataUnique = uniqueMetadataNames.add(metadataElements[0]);
-				if(metadataUnique == false){
-					doubleMetadata=true;
+				if(metadataElements!=null){
+					boolean metadataUnique = uniqueMetadataNames.add(metadataElements[0]);
+					if(metadataUnique == false){
+						doubleMetadata=true;
+					}
 				}
 			}
 		}
@@ -201,9 +203,11 @@ public class JobController {
 		if(transform != null){
 			for (int i=0; i<transform.size();i++){
 				String[] transformElements = transform.get(i).split("\\|");
-				boolean transformUnique = uniqueTransformNames.add(transformElements[0]);
-				if(transformUnique == false){
-					doubleTransform=true;
+				if(transformElements != null){
+					boolean transformUnique = uniqueTransformNames.add(transformElements[0]);
+					if(transformUnique == false){
+						doubleTransform=true;
+					}
 				}
 			}
 		}

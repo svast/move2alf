@@ -47,6 +47,12 @@ metadataCounter++; %>
 <%
 String metadata = (String) session.getAttribute("metadata"); 
 String[] metadataSplit = metadata.split("\\|");
+if(metadataSplit.length==1){
+	String param = metadataSplit[0];
+	metadataSplit = new String[2];
+	metadataSplit[0] = param;
+	metadataSplit[1] = "";
+}
 pageContext.setAttribute("metadataName", metadataSplit[0]);
 pageContext.setAttribute("metadataValue", metadataSplit[1]);
 %>
@@ -67,6 +73,7 @@ pageContext.setAttribute("metadataValue", metadataSplit[1]);
 </table>
 
 <div id="addParameterMetadataButton" class="link small" onclick="addParameterMetadata();"><span class="pointer">Add metadata parameter</span></div>
+<p id=inputMetadataError class="hide error">The parameter name may not be empty</p>
 <table id="parameterMetadataForm" class="hide">
 <tr>
 <td>Name: <form:input path="parameterMetadataName" size="30" maxlength="50" /></td>
@@ -90,7 +97,7 @@ pageContext.setAttribute("metadataValue", metadataSplit[1]);
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterMetadata();">Cancel</button></td>
-<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameterMetadata();addRowToParameterMetadata(this.form);" /></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="metadataValidation(this.form);" /></td>
 
 </tr>
 </table>
@@ -154,6 +161,12 @@ noTransformChosen = true;
 <%
 String transform = (String) session.getAttribute("transform"); 
 String[] transformSplit = transform.split("\\|");
+if(transformSplit.length==1){
+	String param = transformSplit[0];
+	transformSplit = new String[2];
+	transformSplit[0] = param;
+	transformSplit[1] = "";
+}
 pageContext.setAttribute("transformName", transformSplit[0]);
 pageContext.setAttribute("transformValue", transformSplit[1]);
 %>
@@ -174,6 +187,7 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 </table>
 
 <div id="addParameterTransformButton" class="link small" onclick="addParameterTransform();"><span class="pointer">Add transform parameter</span></div>
+<p id=inputTransformError class="hide error">The parameter name may not be empty</p>
 <table id="parameterTransformForm" class="hide">
 <tr>
 <td>Name: <form:input path="parameterTransformName" size="30" maxlength="50"  /></td>
@@ -197,7 +211,7 @@ pageContext.setAttribute("transformValue", transformSplit[1]);
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelParameterTransform();">Cancel</button></td>
-<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmParameterTransform();addRowToParameterTransform(this.form);" /></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="transformValidation(this.form);" /></td>
 
 </tr>
 </table>

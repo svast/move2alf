@@ -26,8 +26,15 @@ function jobValidation(form){
 	}
 	
 	if(!document.getElementById('inputPath1')){
-		document.getElementById("inputFolderError").style.display='block';
-		validated=false;
+		var input = form.inputPath.value;
+		
+		if(""==input || null==input || "null"==input || "undefined"==input){
+			document.getElementById("inputFolderError").style.display='block';
+			validated=false;
+		}else{
+			confirmInputPath();
+			addRowToInputPath(form);
+		}
 	}
 	
 	var destinationFolder=form.destinationFolder.value;
@@ -37,13 +44,20 @@ function jobValidation(form){
 	}
 
 	if(!document.getElementById('dest1')){
-		document.getElementById("destError").style.display='block';
-		validated=false;
+		var destValidation = destinationValidation(form);
+		if(!destValidation){
+			document.getElementById("destError").style.display='block';
+			validated=false;
+		}
 	}
 
 	if(!document.getElementById('rowNumber1')){
+		confirmSchedule();
+		addRowToSchedule(form);
+		/*
 		document.getElementById("cronError").style.display='block';
 		validated=false;
+		*/
 	}
 		return validated;
 }
@@ -52,8 +66,11 @@ function createDestinationsValidation(form){
 	var validated = true;
 
 	if(!document.getElementById('sourceSink1')){
-		document.getElementById("destError").style.display='block';
-		validated=false;
+		var destValidation = destinationValidation(form);
+		if(!destValidation){
+			document.getElementById("destError").style.display='block';
+			validated=false;
+		}
 	}
 
 	return validated;
@@ -158,4 +175,53 @@ function editRoleValidation(form){
 	}
 
 	return validated;
+}
+
+function inputValidation(form){
+	var input = form.inputPath.value;
+	var validated = true; 
+	
+	if(""==input || null==input || "null"==input || "undefined"==input){
+		document.getElementById("inputFolderError").style.display='block';
+		validated=false;
+	}else{
+		confirmInputPath();
+		addRowToInputPath(form);
+	}	
+	
+	return validated;
+}
+
+function metadataValidation(form){
+	var metadataName = form.parameterMetadataName.value;
+	var metadataValue = form.parameterMetadataValue.value;
+	var validated = true;
+	
+	if(""==metadataName || null==metadataName || "null"==metadataName || "undefined"==metadataName){
+		document.getElementById("inputMetadataError").style.display='block';
+		validated=false;
+	}else{
+		if(""==metadataValue || null==metadataValue || "null"==metadataValue || "undefined"==metadataValue){
+			document.getElementById("parameterMetadataValue").value="";
+		}
+		confirmParameterMetadata();
+		addRowToParameterMetadata(form);
+	}
+}
+
+function transformValidation(form){
+	var transformName = form.parameterTransformName.value;
+	var transformValue = form.parameterTransformValue.value;
+	var validated = true;
+	
+	if(""==transformName || null==transformName || "null"==transformName || "undefined"==transformName){
+		document.getElementById("inputTransformError").style.display='block';
+		validated=false;
+	}else{
+		if(""==transformValue || null==transformValue || "null"==transformValue || "undefined"==transformValue){
+			document.getElementById("parameterTransformValue").value="";
+		}
+		confirmParameterTransform();
+		addRowToParameterTransform(form);
+	}
 }

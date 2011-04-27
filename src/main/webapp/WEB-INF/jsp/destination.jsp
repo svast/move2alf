@@ -1,4 +1,4 @@
-<div class="indent">
+
 
 <div id="destError" class="hide error">you must create a destination.</div>
 <div><form:errors path="sourceSink" cssClass="error"/></div>
@@ -215,8 +215,6 @@ count ++;
 </c:if>
 </c:if>
 </table>
-
-</div>
 
 <!-- Opens up the create destination dialog if there are no existing destinations-->
 <c:if test="${empty destinations && empty destinationInfoList}" >

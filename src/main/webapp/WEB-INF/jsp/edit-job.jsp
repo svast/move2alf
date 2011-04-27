@@ -105,8 +105,8 @@
 </c:if>
 </table>
 
-<div id="addInputPathButton" class="link small hide" onclick="addInputPath();"><span class="pointer">Add Input Path</span></div>
-<table id="inputPathForm" >
+<div id="addInputPathButton" class="link small" onclick="addInputPath();"><span class="pointer">Add Input Path</span></div>
+<table id="inputPathForm" class="hide">
 <tr>
 <td>Path: <form:input path="inputPath" size="50" maxlength="255" /></td>
 <script type="text/javascript">
@@ -122,7 +122,7 @@
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelInputPath();">Cancel</button></td>
-<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmInputPath();addRowToInputPath(this.form);" /></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="inputValidation(this.form);" /></td>
 
 </tr>
 </table>
@@ -169,6 +169,19 @@
 </table>
 
 -->
+<table>
+<tr>
+<td class="cell-padding">Extension: <form:input path="extension" size="25" maxlength="255" /></td>
+						<script type="text/javascript">
+                                Spring.addDecoration(new Spring.ElementDecoration({
+                                        elementId : "extension",
+                                        widgetType : "dijit.form.ValidationTextBox",
+                                        widgetAttrs : {                                         	
+                                        }
+                                }));
+                        </script>
+</tr>
+</table>
 
 <br />
 <h4>Destination</h4>

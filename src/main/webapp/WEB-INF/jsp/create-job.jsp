@@ -103,7 +103,7 @@
 </tr>
 <tr>
 <td><button type="button" class="button" onclick="cancelInputPath();">Cancel</button></td>
-<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="confirmInputPath();addRowToInputPath(this.form);" /></td>
+<td><input name="cancelButton" type="button" class="button" value="Ok" onclick="inputValidation(this.form);" /></td>
 
 </tr>
 </table>
