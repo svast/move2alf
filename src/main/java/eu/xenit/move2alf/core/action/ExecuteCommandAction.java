@@ -26,10 +26,9 @@ public class ExecuteCommandAction extends Action {
 
 		String stage = configuredAction
 				.getParameter(Parameters.PARAM_STAGE);
-		logger.debug("STAGE: "+stage);
+		
 		CountDownLatch countDown = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
 		if (countDown != null)
-			logger.debug("COUNTDOWN: "+countDown.getCount());
 		
 		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
 		

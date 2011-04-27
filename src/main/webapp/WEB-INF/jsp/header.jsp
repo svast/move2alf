@@ -27,6 +27,11 @@
 		</script>
 
 <meta charset="utf-8">
+
+<!--[if lt IE 7.]>
+<script defer type="text/javascript" src="<c:url value="/js/pngfix.js" />"></script>
+<![endif]-->
+
 <!-- <link rel="stylesheet" href="/styles/blueprint/screen.css"
 	type="text/css" media="screen, projection">
 <link rel="stylesheet" href="/styles/blueprint/print.css"
@@ -42,7 +47,9 @@
 <body onLoad="putFocus(0,0);" class="tundra">
 <div class="container">
 <div class="span-24 last header">
-<img src="<spring:url value="/images/move2alf-logo.png" htmlEscape="true" />" alt="Move2Alf" width=""/>
+
+<img src="<spring:url value="/images/move2alf-logo.png" htmlEscape="true" />" alt="Move2Alf" width="30%" />
+
 
 <%//This determines the role of the user
 String roleCheck= "";%>
