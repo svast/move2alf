@@ -86,17 +86,15 @@ public class Tiff2Pdf {
 			// RandomAccessFileOrArray ra = new
 			// RandomAccessFileOrArray(tempByteArray);
 			int comps = TiffImage.getNumberOfPages(ra);
-			boolean adjustSize = false;
+
 			Document document = new Document(PageSize.A4);
-			float width = PageSize.A4.getWidth() - 40;
-			float height = PageSize.A4.getHeight() - 120;
+			float width = PageSize.A4.getWidth();
+			float height = PageSize.A4.getHeight();
 			Image img = TiffImage.getTiffImage(ra, 1);
-			if (img.getDpiX() > 0 && img.getDpiY() > 0) {
-				img.scalePercent(7200f / img.getDpiX(), 7200f / img.getDpiY());
-			}
+
 			document.setPageSize(new Rectangle(img.getScaledWidth(), img
 					.getScaledHeight()));
-			adjustSize = true;
+
 			PdfWriter writer = PdfWriter.getInstance(document,
 					new FileOutputStream(pdfFile));
 
@@ -128,42 +126,15 @@ public class Tiff2Pdf {
 			writer.getExtraCatalog().put(PdfName.OUTPUTINTENTS,
 					new PdfArray(outi));
 
-			// BaseFont bf =
-			// BaseFont.createFont("c:\\windows\\fonts\\arial.ttf",
-			// BaseFont.WINANSI, true);
-			// Font f = new Font(bf, 12);
-			// doc.add(new Paragraph("hello", f));
-
 			PdfContentByte cb = writer.getDirectContent();
 			for (int c = 0; c < comps; ++c) {
 				img = TiffImage.getTiffImage(ra, c + 1);
 				if (img != null) {
-					if (img.getDpiX() > 0 && img.getDpiY() > 0) {
-						img.scalePercent(7200f / img.getDpiX(), 7200f / img
-								.getDpiY());
-					}
-					if (adjustSize) {
-						document.setPageSize(new Rectangle(
-								img.getScaledWidth(), img.getScaledHeight()));
+						document.setPageSize(PageSize.A4);
 						document.newPage();
 						img.setAbsolutePosition(0, 0);
-					} else {
-						if (img.getScaledWidth() > width
-								|| img.getScaledHeight() > height) {
-							if (img.getDpiX() > 0 && img.getDpiY() > 0) {
-								float adjx = width / img.getScaledWidth();
-								float adjy = height / img.getScaledHeight();
-								float adj = Math.min(adjx, adjy);
-								img.scalePercent(7200f / img.getDpiX() * adj,
-										7200f / img.getDpiY() * adj);
-							} else
-								img.scaleToFit(width, height);
-						}
-						img.setAbsolutePosition(20, 20);
-						document.newPage();
-						document.add(new Paragraph(singleTifFile.getName()
-								+ " - page " + (c + 1)));
-					}
+						img.scaleToFit(width, height);
+				
 					cb.addImage(img);
 					logger.debug("Finished page " + (c + 1));
 				}
