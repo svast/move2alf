@@ -104,30 +104,29 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		
 		actions.add(action("eu.xenit.move2alf.core.action.FilterAction")
 				.param("extension", jobConfig.getExtension()));
+
+		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
+				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) // true
+				// or
+				// false
+				// (String)
+				.param("moveBeforeProcessingPath",
+						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
+						"false") // true or false (String)
+						.param("moveAfterLoadPath", "").param("moveNotLoaded", "false") // true
+						// or
+						// false
+						// (String)
+						.param("moveNotLoadedPath", "")
+						.param("path",inputPaths)
+						.param("stage", "before"));
 		
 		actions.add(action(jobConfig.getMetadata())
 				.paramMap(metadataParameterMap));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
 
-		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) // true
-																				// or
-																				// false
-																				// (String)
-				.param("moveBeforeProcessingPath",
-						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
-						"false") // true or false (String)
-				.param("moveAfterLoadPath", "").param("moveNotLoaded", "false") // true
-																				// or
-																				// false
-																				// (String)
-				.param("moveNotLoadedPath", "")
-				.param("path",inputPaths)
-				.param("stage", "before"));
-
 		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
-
 		
 		if(!"No transformation".equals(jobConfig.getTransform())){
 
