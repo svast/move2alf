@@ -66,6 +66,18 @@ public abstract class Action extends ConfigurableObject {
 
 	protected abstract void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap);
+	
+	/*
+	 * TODO: set up and tear down, what input is required?
+	 * Better (or complementary?) solution: CycleContext to store state during cycle
+	public void startCycle() {
+		
+	}
+	
+	public void endCycle() {
+		
+	}
+	 */
 
 	/*
 	 * the actual input and output parameters can depend on the config and can

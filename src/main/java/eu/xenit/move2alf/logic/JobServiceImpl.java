@@ -20,6 +20,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
@@ -29,6 +30,7 @@ import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.SourceSinkFactory;
+import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.ThreadAction;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
@@ -59,7 +61,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
-	
+
 	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
 
 	@Autowired
@@ -106,7 +108,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public MailSender getMailSender() {
 		return mailSender;
 	}
-	
+
 	public JobServiceImpl() {
 		registerCycleListener(new LoggingCycleListener());
 		registerCycleListener(new ReportCycleListener());
@@ -528,7 +530,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				// start of cycle
 				runningActionsForCycle = new LinkedList<ConfiguredAction>();
 				this.runningActions.put(cycleId, runningActionsForCycle);
-				
+
 				notifyCycleListenersStart(cycleId);
 			}
 			runningActionsForCycle.add(action);
@@ -549,6 +551,25 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 
+			// send notification email
+			Map<String, String> emailParams = getActionParameters(cycleId,
+					EmailAction.class);
+			String sendNotification = emailParams.get("sendNotification");
+			String to = emailParams.get("emailAddressNotification");
+			if (to != null && !"".equals(to) && "true".equals(sendNotification)) {
+				Cycle cycle = getCycle(cycleId);
+				Job job = cycle.getSchedule().getJob();
+				String[] addresses = to.split(",");
+				SimpleMailMessage message = new SimpleMailMessage();
+				message.setFrom(Config.get("mail.from"));
+				message.setTo(addresses);
+				message.setSubject("Move2Alf error notification");
+				message.setText("Error in cycle " + cycleId + " of job " + job.getName()
+						+ ".\n" + "Message: " + e.getMessage()
+						+ "\n\nSent by Move2Alf");
+				sendMail(message);
+			}
+
 			logger.debug("Skipping to reporting");
 			ConfiguredAction nextAction = action
 					.getAppliedConfiguredActionOnSuccess();
@@ -559,8 +580,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 								.getParameter(Parameters.PARAM_STAGE))) {
 					executeAction(cycleId, nextAction, parameterMap);
 					break;
-				} else if (ThreadAction.class.getName().equals(nextAction.getClassName())) {
-					CountDownLatch counter = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
+				} else if (ThreadAction.class.getName().equals(
+						nextAction.getClassName())) {
+					CountDownLatch counter = (CountDownLatch) parameterMap
+							.get(Parameters.PARAM_COUNTER);
 					counter.countDown();
 				} else {
 					logger
@@ -581,15 +604,29 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		}
 	}
 
+	@Override
+	public Map<String, String> getActionParameters(int cycleId,
+			Class<? extends Action> clazz) {
+		Cycle cycle = getCycle(cycleId);
+		ConfiguredAction action = cycle.getSchedule().getJob()
+				.getFirstConfiguredAction();
+		while (action != null) {
+			if (clazz.getName().equals(action.getClassName())) {
+				return action.getParameters();
+			}
+			action = action.getAppliedConfiguredActionOnSuccess();
+		}
+		return null;
+	}
 
 	private void notifyCycleListenersStart(int cycleId) {
-		for(CycleListener listener : this.cycleListeners) {
+		for (CycleListener listener : this.cycleListeners) {
 			listener.cycleStart(cycleId);
 		}
 	}
 
 	private void notifyCycleListenersEnd(int cycleId) {
-		for(CycleListener listener : this.cycleListeners) {
+		for (CycleListener listener : this.cycleListeners) {
 			listener.cycleEnd(cycleId);
 		}
 	}

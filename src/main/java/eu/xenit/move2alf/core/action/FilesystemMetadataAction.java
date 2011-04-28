@@ -20,7 +20,7 @@ public class FilesystemMetadataAction extends Action {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		long lastModified = file.lastModified();
 		
-		// TODO: write to metadata map
+		// write to metadata map
 		Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
 		if (metadata == null) {
 			metadata = new HashMap<String, String>();

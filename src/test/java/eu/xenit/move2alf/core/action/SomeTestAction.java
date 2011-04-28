@@ -11,9 +11,9 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
-public class TestAction extends Action {
+public class SomeTestAction extends Action {
 	private static final Logger logger = LoggerFactory
-			.getLogger(TestAction.class);
+			.getLogger(SomeTestAction.class);
 
 	@Override
 	public void executeImpl(ConfiguredAction configuredAction,

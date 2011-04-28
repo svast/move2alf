@@ -1,5 +1,8 @@
 package eu.xenit.move2alf.core.cyclelistener;
 
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
@@ -19,11 +22,15 @@ public class ReportCycleListener extends CycleListener {
 	@Override
 	public void cycleEnd(int cycleId) {
 		// send email report
-		String to = getToAddress(cycleId);
-		if (to != null && !"".equals(to)) {
+		Map<String, String> emailParameters = getEmailActionParameter(cycleId);
+		String to = emailParameters.get("emailAddressReport");
+		String sendReport = emailParameters.get("sendReport");
+		
+		if (to != null && !"".equals(to) && "true".equals(sendReport)) {
+			String[] addresses = to.split(",");
 			SimpleMailMessage mail = new SimpleMailMessage();
 			mail.setFrom(Config.get("mail.from"));
-			mail.setTo(to);
+			mail.setTo(addresses);
 			mail.setSubject("Move2Alf report");
 			Cycle cycle = getJobService().getCycle(cycleId);
 			Job job = cycle.getSchedule().getJob();
@@ -39,18 +46,9 @@ public class ReportCycleListener extends CycleListener {
 			logger.info("No email address found, not sending report.");
 		}
 	}
-
-	private String getToAddress(int cycleId) {
-		Cycle cycle = getJobService().getCycle(cycleId);
-		ConfiguredAction action = cycle.getSchedule().getJob()
-				.getFirstConfiguredAction();
-		while (action != null) {
-			if (EmailAction.class.getName().equals(action.getClassName())) {
-				return action.getParameter("emailAddressReport");
-			}
-			action = action.getAppliedConfiguredActionOnSuccess();
-		}
-		return null;
+	
+	private Map<String, String> getEmailActionParameter(int cycleId) {
+		return getJobService().getActionParameters(cycleId, EmailAction.class);
 	}
 
 	@Override

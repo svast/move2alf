@@ -364,4 +364,6 @@ public interface JobService {
 	public void sendMail(SimpleMailMessage message);
 	
 	public void registerCycleListener(CycleListener listener);
+
+	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
 }
