@@ -92,8 +92,7 @@ public class Tiff2Pdf {
 			float height = PageSize.A4.getHeight();
 			Image img = TiffImage.getTiffImage(ra, 1);
 
-			document.setPageSize(new Rectangle(img.getScaledWidth(), img
-					.getScaledHeight()));
+			document.setPageSize(PageSize.A4);
 
 			PdfWriter writer = PdfWriter.getInstance(document,
 					new FileOutputStream(pdfFile));
