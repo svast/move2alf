@@ -13,6 +13,9 @@ import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.ProcessedDocument;
+import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 
 public class ReportCycleListener extends CycleListener {
 
@@ -25,14 +28,25 @@ public class ReportCycleListener extends CycleListener {
 		Map<String, String> emailParameters = getEmailActionParameter(cycleId);
 		String to = emailParameters.get("emailAddressReport");
 		String sendReport = emailParameters.get("sendReport");
+
+		Cycle cycle = getJobService().getCycle(cycleId);
+		// only send report on errors
+		boolean errorsOccured = false;
+		for (ProcessedDocument doc : cycle.getProcessedDocuments()) {
+			if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
+				errorsOccured = true;
+				break;
+			}
+		}
 		
-		if (to != null && !"".equals(to) && "true".equals(sendReport)) {
+		if (errorsOccured == true && to != null && !"".equals(to) && "true".equals(sendReport)) {
 			String[] addresses = to.split(",");
 			SimpleMailMessage mail = new SimpleMailMessage();
 			mail.setFrom(Config.get("mail.from"));
 			mail.setTo(addresses);
 			mail.setSubject("Move2Alf report");
-			Cycle cycle = getJobService().getCycle(cycleId);
+
+
 			Job job = cycle.getSchedule().getJob();
 			mail.setText("Cycle " + cycleId + " of job " + job.getName()
 					+ " completed.\n" + "The full report can be found on "
@@ -46,7 +60,7 @@ public class ReportCycleListener extends CycleListener {
 			logger.info("No email address found, not sending report.");
 		}
 	}
-	
+
 	private Map<String, String> getEmailActionParameter(int cycleId) {
 		return getJobService().getActionParameters(cycleId, EmailAction.class);
 	}
