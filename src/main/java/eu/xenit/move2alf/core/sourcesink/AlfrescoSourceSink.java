@@ -14,6 +14,7 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.action.SourceAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
@@ -50,7 +51,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			// run(ras);
 			String basePath = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_PATH, "/");
+					SourceAction.PARAM_PATH, "/");
 			if (!basePath.endsWith("/")) {
 				basePath = basePath + "/";
 			}

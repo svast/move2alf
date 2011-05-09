@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.core;
 
+import java.util.Map;
+
 import eu.xenit.move2alf.logic.JobService;
 
 public abstract class CycleListener {
@@ -14,5 +16,10 @@ public abstract class CycleListener {
 	}
 	
 	public abstract void cycleStart(int cycleId);
+	
+	public void cycleStart(int cycleId, Map<String, Object> parameterMap) {
+		cycleStart(cycleId);
+	}
+	
 	public abstract void cycleEnd(int cycleId);
 }

@@ -57,7 +57,7 @@ public class ReportCycleListener extends CycleListener {
 					+ to);
 			getJobService().sendMail(mail);
 		} else {
-			logger.info("No email address found, not sending report.");
+			logger.info("No email address or no errors found, not sending report.");
 		}
 	}
 

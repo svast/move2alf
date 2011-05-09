@@ -44,28 +44,28 @@ public class ExecuteCommandAction extends Action {
 				Map environmentMap = pb.environment();
 
 				environmentMap.put("MOVETOALF_INPUT_PATH", configuredAction
-						.getParameter(Parameters.PARAM_PATH));
+						.getParameter(SourceAction.PARAM_PATH));
 				
 				String moveBeforeProcessing=configuredAction
-						.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
 				String moveAfterLoad=configuredAction
-						.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD_PATH);
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH);
 				String moveNotLoaded=configuredAction
-						.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
 				
 				if("after".equals(stage)){ 
 					if("true".equals(configuredAction
-							.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING)) 
+							.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING)) 
 								&& moveBeforeProcessing != null){
 						environmentMap.put("MOVETOALF_BEFORE_LOAD", moveBeforeProcessing);
 					}
 					if("true".equals(configuredAction
-							.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD))
+							.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD))
 								&& moveAfterLoad != null){
 						environmentMap.put("MOVETOALF_AFTER_LOAD", moveAfterLoad);
 					}
 					if("true".equals(configuredAction
-							.getParameter(Parameters.PARAM_MOVE_NOT_LOADED))
+							.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED))
 								&& moveNotLoaded != null){
 						environmentMap.put("MOVETOALF_NOT_LOAD", moveNotLoaded);
 					}

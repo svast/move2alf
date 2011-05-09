@@ -20,7 +20,7 @@ public class ListAction extends Action {
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
 		
-		String basePath = configuredAction.getParameter(Parameters.PARAM_PATH);
+		String basePath = configuredAction.getParameter(SourceAction.PARAM_PATH);
 		if (!basePath.endsWith("/")) {
 			basePath = basePath + "/";
 		}

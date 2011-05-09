@@ -16,35 +16,46 @@ public class MoveDocumentsAction extends Action {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(MoveDocumentsAction.class);
+	public static final String PARAM_MOVE_NOT_LOADED_PATH = "moveNotLoadedPath";
+	public static final String PARAM_MOVE_NOT_LOADED = "moveNotLoaded";
+	public static final String PARAM_MOVE_AFTER_LOAD_PATH = "moveAfterLoadPath";
+	public static final String PARAM_MOVE_AFTER_LOAD = "moveAfterLoad";
+	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
+	public static final String PARAM_MOVE_BEFORE_PROCESSING = "moveBeforeProcessing";
 
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		boolean moveBeforeProcessing = "true".equals(configuredAction
-				.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING));
+				.getParameter(PARAM_MOVE_BEFORE_PROCESSING));
 		boolean moveAfterLoad = "true".equals(configuredAction
-				.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD));
+				.getParameter(PARAM_MOVE_AFTER_LOAD));
 		boolean moveNotLoaded = "true".equals(configuredAction
-				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED));
+				.getParameter(PARAM_MOVE_NOT_LOADED));
 		String stage = configuredAction.getParameter(Parameters.PARAM_STAGE);
-		String documentStatus = (String) parameterMap.get(Parameters.PARAM_STATUS);
+		String documentStatus = (String) parameterMap
+				.get(Parameters.PARAM_STATUS);
 
 		String moveDirectory = null;
 		if (moveBeforeProcessing && Parameters.VALUE_BEFORE.equals(stage)) {
 			moveDirectory = configuredAction
-					.getParameter(Parameters.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+					.getParameter(PARAM_MOVE_BEFORE_PROCESSING_PATH);
 		}
 		if (moveAfterLoad && Parameters.VALUE_AFTER.equals(stage)
 				&& Parameters.VALUE_OK.equals(documentStatus)) {
-			moveDirectory = configuredAction.getParameter(Parameters.PARAM_MOVE_AFTER_LOAD_PATH);
+			moveDirectory = configuredAction
+					.getParameter(PARAM_MOVE_AFTER_LOAD_PATH);
 		}
 		if (moveNotLoaded && Parameters.VALUE_AFTER.equals(stage)
 				&& Parameters.VALUE_FAILED.equals(documentStatus)) {
-			moveDirectory = configuredAction.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+			moveDirectory = configuredAction
+					.getParameter(PARAM_MOVE_NOT_LOADED_PATH);
 		}
 
-		if ((Parameters.VALUE_BEFORE.equals(stage) && moveBeforeProcessing)
-				|| (Parameters.VALUE_AFTER.equals(stage) && (moveAfterLoad || moveNotLoaded))) {
+		// Move before processing was moved to MoveCycleListener to move all
+		// files at once before starting the cycle
+		if (Parameters.VALUE_AFTER.equals(stage)
+				&& (moveAfterLoad || moveNotLoaded)) {
 			if (moveDirectory != null && !"".equals(moveDirectory)) {
 				moveDirectory = moveDirectory.replaceAll("\\\\", "/");
 				moveFile(moveDirectory, parameterMap);
@@ -52,8 +63,7 @@ public class MoveDocumentsAction extends Action {
 		}
 	}
 
-	public void moveFile(String moveDirectory,
-			Map parameterMap) {
+	public void moveFile(String moveDirectory, Map parameterMap) {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		String absolutePath = file.getAbsolutePath();
 
@@ -69,8 +79,9 @@ public class MoveDocumentsAction extends Action {
 		}
 
 		// assemble full path
-		//String relativePath = absolutePath.replace(inputFolder, "");
-		String relativePath = (String) parameterMap.get(Parameters.PARAM_RELATIVE_PATH);
+		// String relativePath = absolutePath.replace(inputFolder, "");
+		String relativePath = (String) parameterMap
+				.get(Parameters.PARAM_RELATIVE_PATH);
 		String fullDestinationPath = moveDirectory + "" + relativePath;
 
 		File moveFolder = new File(fullDestinationPath);
@@ -82,9 +93,6 @@ public class MoveDocumentsAction extends Action {
 			destinationPathExists = checkParentDirExists(fullDestinationPath);
 			if (destinationPathExists) {
 				boolean success = (new File(fullDestinationPath)).mkdir();
-				if (success) {
-				} else {
-				}
 			}
 		}
 
@@ -97,9 +105,7 @@ public class MoveDocumentsAction extends Action {
 				File movedFile = new File(newFileName);
 				parameterMap.put(Parameters.PARAM_FILE, movedFile);
 				logger.info("Moved file to " + movedFile.getAbsolutePath());
-			}
-
-			if (!success) {
+			} else {
 				logger.debug("Could not move document "
 						+ file.getAbsolutePath());
 			}
@@ -109,7 +115,7 @@ public class MoveDocumentsAction extends Action {
 		}
 	}
 
-	public boolean checkParentDirExists(String path) {
+	public static boolean checkParentDirExists(String path) {
 		int index = path.lastIndexOf("/");
 		String newPath = path.substring(0, index);
 		logger.debug("new path is " + newPath);

@@ -34,6 +34,7 @@ import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.ThreadAction;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.MoveCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -111,6 +112,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public JobServiceImpl() {
 		registerCycleListener(new LoggingCycleListener());
+		registerCycleListener(new MoveCycleListener());
 		registerCycleListener(new ReportCycleListener());
 	}
 
@@ -531,7 +533,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				runningActionsForCycle = new LinkedList<ConfiguredAction>();
 				this.runningActions.put(cycleId, runningActionsForCycle);
 
-				notifyCycleListenersStart(cycleId);
+				notifyCycleListenersStart(cycleId, parameterMap);
 			}
 			runningActionsForCycle.add(action);
 		}
@@ -619,9 +621,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return null;
 	}
 
-	private void notifyCycleListenersStart(int cycleId) {
+	private void notifyCycleListenersStart(int cycleId, Map<String, Object> parameterMap) {
 		for (CycleListener listener : this.cycleListeners) {
-			listener.cycleStart(cycleId);
+			listener.cycleStart(cycleId, parameterMap);
 		}
 	}
 

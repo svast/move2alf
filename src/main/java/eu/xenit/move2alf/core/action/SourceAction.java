@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.common.DebuggingCountDownLatch;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
@@ -18,6 +19,8 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 public class SourceAction extends Action {
+	public static final String PARAM_PATH = "path";
+	public static final String PARAM_RECURSIVE = "recursive";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SourceAction.class);
@@ -25,10 +28,9 @@ public class SourceAction extends Action {
 	@Override
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		// TODO: filters; in separate action? in sourcesink?
-		String path = configuredAction.getParameter(Parameters.PARAM_PATH);
+		String path = configuredAction.getParameter(PARAM_PATH);
 		boolean recursive = "true".equals(configuredAction
-				.getParameter(Parameters.PARAM_RECURSIVE));
+				.getParameter(PARAM_RECURSIVE));
 
 		ConfiguredSourceSink sourceConfig = (ConfiguredSourceSink) configuredAction
 				.getConfiguredSourceSinkSet().toArray()[0];
@@ -37,16 +39,33 @@ public class SourceAction extends Action {
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
 
-		List<File> files = source.list(sourceConfig, path, recursive);
+		String moveBeforeProcessing = configuredAction
+				.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
+		String moveBeforeProcessingPath = configuredAction
+				.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+
+		List<File> files;
+		if("true".equals(moveBeforeProcessing)) {
+			files = (List<File>) parameterMap.get(Parameters.PARAM_FILES_TO_LOAD);
+		} else {
+			files = source.list(sourceConfig, path, recursive);
+		}
+		
 		String moveNotLoaded = configuredAction
-				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED);
+				.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
 		String failedPath = configuredAction
-				.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+				.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
+
 		if ("true".equals(moveNotLoaded)) {
 			files.addAll(source.list(sourceConfig, failedPath, recursive));
 		}
-		CountDownLatch counter = new CountDownLatch(files.size());
+		CountDownLatch counter = new DebuggingCountDownLatch(files.size());
 		parameterMap.put(Parameters.PARAM_COUNTER, counter);
+		
+		for (File file : files) {
+			logger.debug("Reading file " + file);
+		}
+		
 		readFiles(files, parameterMap, recursive, configuredAction,
 				sourceConfig, source, nextAction);
 		try {
@@ -82,10 +101,10 @@ public class SourceAction extends Action {
 
 				String relativePath = file.getParent();
 				relativePath = relativePath.replace("\\", "/");
-				String path = action.getParameter(Parameters.PARAM_PATH);
+				String path = action.getParameter(PARAM_PATH);
 				path = path.replace("\\", "/");
 				String pathFailed = action
-						.getParameter(Parameters.PARAM_MOVE_NOT_LOADED_PATH);
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
 				pathFailed = pathFailed.replace("\\", "/");
 				if (relativePath.startsWith(path)) {
 					relativePath = relativePath.substring(path.length());

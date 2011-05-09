@@ -18,9 +18,9 @@ public class SinkAction extends Action {
 				.getConfiguredSourceSinkSet().toArray()[0];
 		SourceSink sink = getSourceSinkFactory().getObject(
 				sinkConfig.getClassName());
-		String path = configuredAction.getParameter(Parameters.PARAM_PATH);
+		String path = configuredAction.getParameter(SourceAction.PARAM_PATH);
 		String docExistsMode = configuredAction.getParameter("documentExists");
-		parameterMap.put(Parameters.PARAM_PATH, path);
+		parameterMap.put(SourceAction.PARAM_PATH, path);
 		sink.send(sinkConfig, parameterMap, docExistsMode);
 	}
 

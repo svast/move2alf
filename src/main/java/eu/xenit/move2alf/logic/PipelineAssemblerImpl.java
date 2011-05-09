@@ -16,6 +16,7 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.web.dto.JobConfig;
@@ -97,8 +98,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path",inputPaths)
 				.param("recursive", "true")
-				.param("moveNotLoaded", jobConfig.getMoveNotLoad())		//true or false (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED, jobConfig.getMoveNotLoad())		//true or false (String)
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH, jobConfig.getNotLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING, jobConfig.getMoveBeforeProc()) // true
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH, jobConfig.getBeforeProcPath())
 				.sourceSink(
 						sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")));
 		
@@ -106,18 +109,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.param("extension", jobConfig.getExtension()));
 
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc()) // true
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING, jobConfig.getMoveBeforeProc()) // true
 				// or
 				// false
 				// (String)
-				.param("moveBeforeProcessingPath",
-						jobConfig.getBeforeProcPath()).param("moveAfterLoad",
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
+						jobConfig.getBeforeProcPath()).param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
 						"false") // true or false (String)
-						.param("moveAfterLoadPath", "").param("moveNotLoaded", "false") // true
+						.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH, "").param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED, "false") // true
 						// or
 						// false
 						// (String)
-						.param("moveNotLoadedPath", "")
+						.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH, "")
 						.param("path",inputPaths)
 						.param("stage", "before"));
 		
@@ -174,18 +177,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING, jobConfig.getMoveBeforeProc())
 				// true or false (String)
-				.param("moveBeforeProcessingPath",
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
 						jobConfig.getBeforeProcPath())
-				.param("moveAfterLoad",
+				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
 						jobConfig.getMoveAfterLoad())
 				// true or false (String)
-				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
-				.param("moveNotLoaded", jobConfig.getMoveNotLoad()) // true or
+				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH, jobConfig.getAfterLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED, jobConfig.getMoveNotLoad()) // true or
 																	// false
 																	// (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH, jobConfig.getNotLoadPath())
 				.param("path",inputPaths)
 				.param("stage","after"));
 
@@ -194,18 +197,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommandAfter())
 				.param("path",inputPaths)
-				.param("moveBeforeProcessing", jobConfig.getMoveBeforeProc())
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING, jobConfig.getMoveBeforeProc())
 				// true or false (String)
-				.param("moveBeforeProcessingPath",
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
 						jobConfig.getBeforeProcPath())
-				.param("moveAfterLoad",
+				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
 						jobConfig.getMoveAfterLoad())
 				// true or false (String)
-				.param("moveAfterLoadPath", jobConfig.getAfterLoadPath())
-				.param("moveNotLoaded", jobConfig.getMoveNotLoad()) // true or
+				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH, jobConfig.getAfterLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED, jobConfig.getMoveNotLoad()) // true or
 																	// false
 																	// (String)
-				.param("moveNotLoadedPath", jobConfig.getNotLoadPath())
+				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH, jobConfig.getNotLoadPath())
 				.param("stage", "after"));
 
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions
@@ -271,13 +274,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			} else if ("eu.xenit.move2alf.core.action.MoveDocumentsAction"
 					.equals(action.getClassName())) {
 				moveBeforeProcessing = action
-						.getParameter("moveBeforeProcessing");
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
 				moveBeforeProcessingPath = action
-						.getParameter("moveBeforeProcessingPath");
-				moveAfterLoad = action.getParameter("moveAfterLoad");
-				moveAfterLoadPath = action.getParameter("moveAfterLoadPath");
-				moveNotLoaded = action.getParameter("moveNotLoaded");
-				moveNotLoadedPath = action.getParameter("moveNotLoadedPath");
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+				moveAfterLoad = action.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD);
+				moveAfterLoadPath = action.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH);
+				moveNotLoaded = action.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
+				moveNotLoadedPath = action.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
 			} else if ("eu.xenit.move2alf.core.action.EmailAction"
 					.equals(action.getClassName())) {
 				sendNotification = action.getParameter("sendNotification");
