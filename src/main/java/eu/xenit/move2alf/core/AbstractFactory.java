@@ -16,6 +16,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
+import eu.xenit.move2alf.common.Config;
+
 public abstract class AbstractFactory<T extends ConfigurableObject> {
 
 	private static final Logger logger = LoggerFactory
@@ -33,6 +35,10 @@ public abstract class AbstractFactory<T extends ConfigurableObject> {
 		logger.info("Scanning for objects (" + this.getClass() + ")");
 		scanForClasses("eu.xenit");
 		scanForClasses("be.pv");
+		String basePackage = Config.get("base.package");
+		if (basePackage != null) {
+			scanForClasses(basePackage);
+		}
 	}
 
 	private void scanForClasses(String basePackage) {
