@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.SessionFactory;
+
 import eu.xenit.move2alf.common.ParameterDefinition;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.logic.JobService;
@@ -17,6 +19,16 @@ public abstract class Action extends ConfigurableObject {
 	private SourceSinkFactory sourceSinkFactory;
 	
 	private JobService jobService;
+	
+	private SessionFactory sessionFactory;
+
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
 
 	public void setActionFactory(ActionFactory actionFactory) {
 		this.actionFactory = actionFactory;

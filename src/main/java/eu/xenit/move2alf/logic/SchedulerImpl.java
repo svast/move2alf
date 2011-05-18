@@ -37,6 +37,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	static final String JOB_SERVICE = "jobService";
 
+	static final String SESSION_FACTORY = "sessionFactory";
+
 	@Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
@@ -94,6 +96,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					JobDataMap jobData = new JobDataMap();
 					jobData.put(SCHEDULE_ID, schedule.getId());
 					jobData.put(JOB_SERVICE, getJobService());
+					jobData.put(SESSION_FACTORY, getSessionFactory());
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {

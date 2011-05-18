@@ -10,7 +10,7 @@
 		</id>
 		<property name="className" column="reportClassName" />
 		
-		<map name="parameters" table="configuredReportParameter" lazy="false">
+		<map name="parameters" table="configuredReportParameter">
 			<key column="configuredReportId" />
 			<map-key column="name" type="string" />
 			<element column="value" type="string" />

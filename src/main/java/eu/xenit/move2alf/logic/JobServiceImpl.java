@@ -742,9 +742,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		for (Schedule schedule : schedules) {
 			schedule.setState(EScheduleState.NOT_RUNNING);
 			session.update(schedule);
+			Cycle last = getLastCycleForJob(schedule.getJob());
+			if (last.getEndDateTime() == null) {
+				last.setEndDateTime(new Date());
+				session.update(last);
+			}
 		}
-
-		// TODO: remove running actions
 	}
 
 	@Override

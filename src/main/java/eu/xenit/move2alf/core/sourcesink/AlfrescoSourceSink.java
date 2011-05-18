@@ -75,7 +75,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			for (String component : components) {
 				if ("".equals(component)) {
 					remotePath += "/";
-				} else if (component.startsWith("cm:")) {
+				} else if (component.contains(":")) {
 					remotePath += component + "/";
 				} else {
 					remotePath += "cm:" + component + "/";

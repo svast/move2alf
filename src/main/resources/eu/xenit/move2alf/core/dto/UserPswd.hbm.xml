@@ -10,7 +10,7 @@
     </id>
     <property name="userName"/>
     <property name="password"/>
-    <set name="userRoleSet" table="userRole" lazy="false">
+    <set name="userRoleSet" table="userRole">
       <key column="userName" property-ref="userName"/>
       <composite-element class="eu.xenit.move2alf.core.dto.UserRole">
         <property name="role"/>

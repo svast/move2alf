@@ -16,7 +16,7 @@
 			<param name="type">12</param>
 		</type>
 	</property>
-    <set name="processedDocumentParameterSet" table="processedDocumentParameter" cascade="all-delete-orphan" lazy="false">
+    <set name="processedDocumentParameterSet" table="processedDocumentParameter" cascade="all-delete-orphan">
       <key column="processedDocumentId"/>
       <composite-element class="eu.xenit.move2alf.core.dto.ProcessedDocumentParameter">
       	<many-to-one name="configuredAction" column="configuredActionId"/>
