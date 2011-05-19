@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.cyclelistener;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
@@ -30,22 +31,32 @@ public class ReportCycleListener extends CycleListener {
 		String sendReport = emailParameters.get("sendReport");
 
 		Cycle cycle = getJobService().getCycle(cycleId);
+		if (cycle == null) {
+			logger.error("Cycle " + cycleId + " not found!");
+			return;
+		}
 		// only send report on errors
 		boolean errorsOccured = false;
-		for (ProcessedDocument doc : cycle.getProcessedDocuments()) {
-			if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
-				errorsOccured = true;
-				break;
+		Set<ProcessedDocument> processedDocuments = cycle
+				.getProcessedDocuments();
+		if (processedDocuments != null) {
+			for (ProcessedDocument doc : processedDocuments) {
+				if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
+					errorsOccured = true;
+					break;
+				}
 			}
+		} else {
+			logger.info("No processed documents found");
 		}
-		
-		if (errorsOccured == true && to != null && !"".equals(to) && "true".equals(sendReport)) {
+
+		if (errorsOccured == true && to != null && !"".equals(to)
+				&& "true".equals(sendReport)) {
 			String[] addresses = to.split(",");
 			SimpleMailMessage mail = new SimpleMailMessage();
 			mail.setFrom(Config.get("mail.from"));
 			mail.setTo(addresses);
 			mail.setSubject("Move2Alf report");
-
 
 			Job job = cycle.getSchedule().getJob();
 			mail.setText("Cycle " + cycleId + " of job " + job.getName()
@@ -57,7 +68,8 @@ public class ReportCycleListener extends CycleListener {
 					+ to);
 			getJobService().sendMail(mail);
 		} else {
-			logger.info("No email address or no errors found, not sending report.");
+			logger
+					.info("No email address or no errors found, not sending report.");
 		}
 	}
 

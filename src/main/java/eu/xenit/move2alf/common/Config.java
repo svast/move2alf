@@ -21,6 +21,9 @@ public class Config {
 		} catch (IOException e) {
 			logger.error("Could not read config file: " + e);
 			return null;
+		} catch (NullPointerException e) {
+			logger.error("Could not read config file: " + e);
+			return null;
 		}
 		return config.getProperty(key);
 	}

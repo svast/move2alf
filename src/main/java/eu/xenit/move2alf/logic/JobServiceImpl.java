@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.common.IdObject;
@@ -48,6 +49,7 @@ import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
 @Service("jobService")
+@Transactional
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
@@ -566,8 +568,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				message.setFrom(Config.get("mail.from"));
 				message.setTo(addresses);
 				message.setSubject("Move2Alf error notification");
-				message.setText("Error in cycle " + cycleId + " of job " + job.getName()
-						+ ".\n" + "Message: " + e.getMessage()
+				message.setText("Error in cycle " + cycleId + " of job "
+						+ job.getName() + ".\n" + "Message: " + e.getMessage()
 						+ "\n\nSent by Move2Alf");
 				sendMail(message);
 			}
@@ -596,14 +598,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			}
 		}
 
-		synchronized (this.runningActions) {
-			runningActionsForCycle.remove(action);
+		// synchronized (this.runningActions) {
+		runningActionsForCycle.remove(action);
+
+		logger.debug("# Running actions: " + runningActionsForCycle.size());
+		if (runningActionsForCycle.size() == 0) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // HACK, make sure no new thread was started...
 			if (runningActionsForCycle.size() == 0) {
+				logger.debug("runningActions still empty");
 				// end of cycle
 				closeCycle(getCycle(cycleId));
 				notifyCycleListenersEnd(cycleId);
+			} else {
+				logger.debug("Still running");
 			}
 		}
+		// }
 	}
 
 	@Override
@@ -621,7 +636,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return null;
 	}
 
-	private void notifyCycleListenersStart(int cycleId, Map<String, Object> parameterMap) {
+	private void notifyCycleListenersStart(int cycleId,
+			Map<String, Object> parameterMap) {
 		for (CycleListener listener : this.cycleListeners) {
 			listener.cycleStart(cycleId, parameterMap);
 		}

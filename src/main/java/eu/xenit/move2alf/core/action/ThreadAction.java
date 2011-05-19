@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.action;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import org.hibernate.FlushMode;
@@ -45,7 +46,7 @@ public class ThreadAction extends Action {
 		}
 
 		public void run() {
-			openSession(getSessionFactory());
+			//openSession(getSessionFactory());
 			
 			parameterMap.put(Parameters.PARAM_THREAD, Thread.currentThread()
 					.toString());
@@ -55,7 +56,7 @@ public class ThreadAction extends Action {
 			((CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER))
 					.countDown();
 			
-			closeSession(getSessionFactory());
+			//closeSession(getSessionFactory());
 		}
 
 		private void openSession(SessionFactory sessionFactory) {

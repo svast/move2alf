@@ -36,7 +36,7 @@ public class JobExecutor implements org.quartz.Job {
 		SessionFactory sessionFactory = (SessionFactory) context
 				.getMergedJobDataMap().get(SchedulerImpl.SESSION_FACTORY);
 
-		openSession(sessionFactory);
+		//openSession(sessionFactory);
 
 		Cycle cycle;
 		Job job;
@@ -61,7 +61,7 @@ public class JobExecutor implements org.quartz.Job {
 		ConfiguredAction action = job.getFirstConfiguredAction();
 		jobService.executeAction(cycle.getId(), action, parameterMap);
 
-		closeSession(sessionFactory);
+		//closeSession(sessionFactory);
 	}
 
 	private void openSession(SessionFactory sessionFactory) {

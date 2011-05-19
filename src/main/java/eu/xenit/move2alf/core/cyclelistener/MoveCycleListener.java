@@ -64,20 +64,21 @@ public class MoveCycleListener extends CycleListener {
 				String folderPath = absolutePath.substring(0, absolutePath
 						.lastIndexOf("/"));
 				String relativePath = folderPath.substring(basePath.length());
-				String moveFolderPath = dst.getAbsolutePath() + relativePath;
+				String moveFolderPath = dst.getAbsolutePath().replaceAll("\\\\",
+				"/") + relativePath;
 				File moveFolder = new File(moveFolderPath);
 				if (!moveFolder.exists()) {
 					moveFolder.mkdirs();
 				}
 				String newFileName = moveFolderPath + "/" + file.getName();
-				boolean success = file.renameTo(new File(newFileName));
+				File movedFile = new File(newFileName);
+				boolean success = file.renameTo(movedFile);
 				if (success) {
-					File movedFile = new File(newFileName);
 					filesToLoad.add(movedFile);
 					logger.info("Moved file to " + movedFile.getAbsolutePath());
 				} else {
 					logger.debug("Could not move document "
-							+ file.getAbsolutePath());
+							+ file.getAbsolutePath() + " to " + movedFile.getAbsolutePath());
 				}
 			}
 		}

@@ -9,7 +9,7 @@
 			<generator class="identity" />
 		</id>
 		<property name="className" column="sourceSinkClassName"/>
-    	<map name="parameters" table="configuredSourceSinkParameter">
+    	<map name="parameters" table="configuredSourceSinkParameter" lazy="false">
 			<key column="configuredSourceSinkId" />
 			<map-key column="name" type="string" />
 			<element column="value" type="string" />

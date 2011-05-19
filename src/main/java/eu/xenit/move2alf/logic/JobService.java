@@ -23,7 +23,6 @@ import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
-@Transactional
 public interface JobService {
 
 	/**
