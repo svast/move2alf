@@ -101,16 +101,27 @@ public class SourceAction extends Action {
 
 				String relativePath = file.getParent();
 				relativePath = relativePath.replace("\\", "/");
+
 				String path = action.getParameter(PARAM_PATH);
 				path = path.replace("\\", "/");
 				String pathFailed = action
 						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
+				String failed = action
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
+				String pathMovedBeforeProcessing = action
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+				String movedBeforeProcessing = action
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
 				pathFailed = pathFailed.replace("\\", "/");
+				pathMovedBeforeProcessing = pathMovedBeforeProcessing.replace("\\", "/");
 				if (relativePath.startsWith(path)) {
 					relativePath = relativePath.substring(path.length());
-				} else if (relativePath.startsWith(pathFailed)) {
+				} else if (relativePath.startsWith(pathFailed) && "true".equals(failed)) {
 					relativePath = relativePath.substring(pathFailed.length());
+				}else if (relativePath.startsWith(pathMovedBeforeProcessing) && "true".equals(movedBeforeProcessing)){
+					relativePath = relativePath.substring(pathMovedBeforeProcessing.length());
 				}
+				
 				newParameterMap.put(Parameters.PARAM_RELATIVE_PATH,
 						relativePath);
 				getJobService().executeAction(
