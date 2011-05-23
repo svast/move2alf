@@ -1,11 +1,15 @@
 package eu.xenit.move2alf.core.sourcesink;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.webservice.repository.RepositoryFault;
 import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +118,8 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			File document = (File) parameterMap.get(Parameters.PARAM_FILE);
 
-			if (!ras.doesDocExist(document.getName(), remotePath)) {
+			// if (!ras.doesDocExist(document.getName(), remotePath)) {
+			try {
 				ras.storeDocAndCreateParentSpaces(document, mimeType,
 						remotePath, description, namespace, contentType,
 						metadata, multiValueMetadata);
@@ -125,32 +130,45 @@ public class AlfrescoSourceSink extends SourceSink {
 					}
 				}
 				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-			} else {
-				if (MODE_SKIP.equals(docExistsMode)) {
-					// ignore
-					parameterMap.put(Parameters.PARAM_STATUS,
-							Parameters.VALUE_OK);
-				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
-					logger.warn("Document " + document.getName()
-							+ " already exists in " + remotePath);
-					parameterMap.put(Parameters.PARAM_STATUS,
-							Parameters.VALUE_FAILED);
-					parameterMap.put(Parameters.PARAM_ERROR_MESSAGE,
-							"Document " + document.getName()
-									+ " already exists in " + remotePath);
-				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
-					logger.info("Overwriting document " + document.getName()
-							+ " in " + remotePath);
-					ras.updateContentByDocNameAndPath(remotePath, document
-							.getName(), document, mimeType, false);
-					if (metadata != null) {
-						ras.updateMetaDataByDocNameAndPath(remotePath, document
-								.getName(), metadata);
-						// TODO: updating multivalue metadata not supported by
-						// RRA?
+				// } else {
+			} catch (RepositoryException e) {
+				Throwable cause = e.getCause();
+				logger.info("Message {}", cause.getMessage());
+				Writer result = new StringWriter();
+				PrintWriter printWriter = new PrintWriter(result);
+				cause.printStackTrace(printWriter);
+				String stackTrace = result.toString();
+				logger.debug("Stacktrace {}", stackTrace);
+				if (stackTrace.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
+					if (MODE_SKIP.equals(docExistsMode)) {
+						// ignore
+						parameterMap.put(Parameters.PARAM_STATUS,
+								Parameters.VALUE_OK);
+					} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
+						logger.warn("Document " + document.getName()
+								+ " already exists in " + remotePath);
+						parameterMap.put(Parameters.PARAM_STATUS,
+								Parameters.VALUE_FAILED);
+						parameterMap.put(Parameters.PARAM_ERROR_MESSAGE,
+								"Document " + document.getName()
+										+ " already exists in " + remotePath);
+					} else if (MODE_OVERWRITE.equals(docExistsMode)) {
+						logger.info("Overwriting document "
+								+ document.getName() + " in " + remotePath);
+						ras.updateContentByDocNameAndPath(remotePath, document
+								.getName(), document, mimeType, false);
+						if (metadata != null) {
+							ras.updateMetaDataByDocNameAndPath(remotePath,
+									document.getName(), metadata);
+							// TODO: updating multivalue metadata not supported
+							// by
+							// RRA?
+						}
+						parameterMap.put(Parameters.PARAM_STATUS,
+								Parameters.VALUE_OK);
 					}
-					parameterMap.put(Parameters.PARAM_STATUS,
-							Parameters.VALUE_OK);
+				} else {
+					throw e;
 				}
 			}
 
