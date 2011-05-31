@@ -45,6 +45,12 @@ public class MimetypeAction extends Action {
 			mimeType = "application/xml";
 		} else if (fileName.toLowerCase().endsWith("svg")) {
 			mimeType = "image/svg+xml";
+		} else if (fileName.toLowerCase().endsWith("docx")) {
+			mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+		} else if (fileName.toLowerCase().endsWith("xslx")) {
+			mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+		} else if (fileName.toLowerCase().endsWith("pptx")) {
+			mimeType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 		} else {
 			logger.warn("Mimetype is unknown");
 			mimeType = "unknown";
