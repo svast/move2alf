@@ -189,7 +189,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error(e.getMessage(), e);
 		} catch (RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
-			System.exit(1);
+			// TODO: stop job instead of stopping tomcat
+			//System.exit(1);
 		} catch (RuntimeException e) {
 			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());

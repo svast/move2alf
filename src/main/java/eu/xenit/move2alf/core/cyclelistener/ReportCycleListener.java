@@ -1,8 +1,7 @@
 package eu.xenit.move2alf.core.cyclelistener;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +10,9 @@ import org.springframework.mail.SimpleMailMessage;
 import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.action.EmailAction;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 
 public class ReportCycleListener extends CycleListener {
@@ -37,8 +34,7 @@ public class ReportCycleListener extends CycleListener {
 		}
 		// only send report on errors
 		boolean errorsOccured = false;
-		Set<ProcessedDocument> processedDocuments = cycle
-				.getProcessedDocuments();
+		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
 		if (processedDocuments != null) {
 			for (ProcessedDocument doc : processedDocuments) {
 				if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {

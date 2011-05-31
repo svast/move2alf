@@ -59,7 +59,11 @@ public class JobExecutor implements org.quartz.Job {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
 		ConfiguredAction action = job.getFirstConfiguredAction();
+		
+		jobService.initCycleStages(cycle.getId(), 2);
 		jobService.executeAction(cycle.getId(), action, parameterMap);
+		jobService.waitForCycleStagesCompletion(cycle.getId());
+		jobService.closeCycle(cycle);
 
 		//closeSession(sessionFactory);
 	}

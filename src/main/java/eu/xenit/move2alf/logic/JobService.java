@@ -365,4 +365,10 @@ public interface JobService {
 	public void registerCycleListener(CycleListener listener);
 
 	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
+
+	public void initCycleStages(int cycleId, int numStages);
+
+	public void waitForCycleStagesCompletion(int cycleId);
+
+	public void completeCycleStage(int cycleId, int stageNr);
 }

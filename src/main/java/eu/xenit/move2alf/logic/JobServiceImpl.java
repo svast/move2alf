@@ -463,6 +463,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		cycle.setEndDateTime(new Date());
 		session.update(cycle);
+
+		notifyCycleListenersEnd(cycle.getId());
 	}
 
 	@Override
@@ -602,23 +604,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		runningActionsForCycle.remove(action);
 
 		logger.debug("# Running actions: " + runningActionsForCycle.size());
+		logger.debug("Number of queued threads: {} ",
+				ThreadAction.runningThreadsForCycle.get(cycleId));
+
 		if (runningActionsForCycle.size() == 0) {
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // HACK, make sure no new thread was started...
-			if (runningActionsForCycle.size() == 0) {
-				logger.debug("runningActions still empty");
-				// end of cycle
-				closeCycle(getCycle(cycleId));
-				notifyCycleListenersEnd(cycleId);
-			} else {
-				logger.debug("Still running");
-			}
+			completeCycleStage(cycleId, 1);
 		}
-		// }
 	}
 
 	@Override
@@ -787,6 +778,54 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void registerCycleListener(CycleListener listener) {
 		listener.setJobService(this);
 		this.cycleListeners.add(listener);
+	}
+
+	/*
+	 * Cycle consists of two stages, this is used to detect the end of the
+	 * cycle: 1. No more running actions 2. No more running threads
+	 */
+	private Map<Integer, CountDownLatch> cycleStageCounters = new HashMap<Integer, CountDownLatch>();
+	/*
+	 * Used to make sure every stage is only completed once, key =
+	 * cycleId * 10 + stage
+	 * 
+	 * WARNING: fails when more than 10 stages are used
+	 */
+	private Map<Integer, Boolean> cycleStageCounterFlags = new HashMap<Integer, Boolean>();
+
+	@Override
+	public void initCycleStages(int cycleId, int stages) {
+		logger.debug("Cycle {} - {} stages", cycleId, stages);
+		cycleStageCounters.put(cycleId, new CountDownLatch(stages));
+	}
+
+	@Override
+	public void waitForCycleStagesCompletion(int cycleId) {
+		try {
+			cycleStageCounters.get(cycleId).await();
+			/* Cleanup
+			 * 
+			 * TODO/WARNING: number of stages hardcoded to 2 :(
+			 */
+			cycleStageCounters.remove(cycleId);
+			cycleStageCounterFlags.remove(10 * cycleId + 1);
+			cycleStageCounterFlags.remove(10 * cycleId + 2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			logger.error("Waiting interrupted");
+		}
+	}
+
+	@Override
+	public void completeCycleStage(int cycleId, int stageNr) {
+		logger.debug("Cycle {} - Stage completed", cycleId);
+		synchronized (cycleStageCounterFlags) {
+			int key = 10 * cycleId + stageNr;
+			if (cycleStageCounterFlags.get(key) == null) {
+				cycleStageCounters.get(cycleId).countDown();
+				cycleStageCounterFlags.put(key, true);
+			}
+		}
 	}
 
 }

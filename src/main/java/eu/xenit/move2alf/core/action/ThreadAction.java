@@ -1,13 +1,15 @@
 package eu.xenit.move2alf.core.action;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -19,6 +21,11 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class ThreadAction extends Action {
 
+	public static Map<Integer, Integer> runningThreadsForCycle = new HashMap<Integer, Integer>();
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(ThreadAction.class);
+
 	@Override
 	public void execute(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
@@ -26,6 +33,16 @@ public class ThreadAction extends Action {
 				.get(Parameters.PARAM_THREADPOOL);
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
+		int cycleId = (Integer) parameterMap.get(Parameters.PARAM_CYCLE);
+		synchronized (runningThreadsForCycle) {
+			Integer threads = runningThreadsForCycle.get(cycleId);
+			if (threads == null) {
+				threads = 1;
+			} else {
+				threads = threads + 1;
+			}
+			runningThreadsForCycle.put(cycleId, threads);
+		}
 		threadPool.execute(new ActionRunner(nextAction, parameterMap));
 	}
 
@@ -46,17 +63,29 @@ public class ThreadAction extends Action {
 		}
 
 		public void run() {
-			//openSession(getSessionFactory());
-			
+			// openSession(getSessionFactory());
+
+			int cycleId = (Integer) parameterMap.get(Parameters.PARAM_CYCLE);
+
 			parameterMap.put(Parameters.PARAM_THREAD, Thread.currentThread()
 					.toString());
-			getJobService().executeAction(
-					(Integer) parameterMap.get(Parameters.PARAM_CYCLE),
-					configuredAction, parameterMap);
+			getJobService().executeAction(cycleId, configuredAction,
+					parameterMap);
+
+			synchronized (runningThreadsForCycle) {
+				Integer threads = runningThreadsForCycle.get(cycleId);
+				threads = threads - 1;
+				runningThreadsForCycle.put(cycleId, threads);
+				if (threads == 0) {
+					logger.debug("Last thread finished");
+					getJobService().completeCycleStage(cycleId, 2);
+				}
+			}
+
 			((CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER))
 					.countDown();
-			
-			//closeSession(getSessionFactory());
+
+			// closeSession(getSessionFactory());
 		}
 
 		private void openSession(SessionFactory sessionFactory) {
