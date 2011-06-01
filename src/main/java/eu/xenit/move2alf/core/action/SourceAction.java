@@ -103,23 +103,41 @@ public class SourceAction extends Action {
 				relativePath = relativePath.replace("\\", "/");
 
 				String path = action.getParameter(PARAM_PATH);
-				path = path.replace("\\", "/");
 				String pathFailed = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
+					.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
 				String failed = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
+					.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
 				String pathMovedBeforeProcessing = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
+					.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
 				String movedBeforeProcessing = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
+					.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
+		
+				path = path.replace("\\", "/");
+				if(path.lastIndexOf("/")+1 != path.length()){
+					path = path+"/";
+				}
+				
 				pathFailed = pathFailed.replace("\\", "/");
+				if(pathFailed.lastIndexOf("/")+1 != pathFailed.length()){
+					pathFailed = pathFailed+"/";
+				}
+				
 				pathMovedBeforeProcessing = pathMovedBeforeProcessing.replace("\\", "/");
+				if(pathMovedBeforeProcessing.lastIndexOf("/")+1 != pathMovedBeforeProcessing.length()){
+					pathMovedBeforeProcessing = pathMovedBeforeProcessing+"/";
+				}
+				relativePath = relativePath+"/";
 				if (relativePath.startsWith(path)) {
-					relativePath = relativePath.substring(path.length());
-				} else if (relativePath.startsWith(pathFailed) && "true".equals(failed)) {
-					relativePath = relativePath.substring(pathFailed.length());
+					relativePath = relativePath.substring(path.length()-1);
+					logger.debug("RELATIVE PATH 1: "+relativePath);
+				}else if (relativePath.startsWith(pathFailed) && "true".equals(failed)) {
+					relativePath = relativePath.substring(pathFailed.length()-1);
+					logger.debug("RELATIVE PATH 2: "+relativePath);
 				}else if (relativePath.startsWith(pathMovedBeforeProcessing) && "true".equals(movedBeforeProcessing)){
-					relativePath = relativePath.substring(pathMovedBeforeProcessing.length());
+					relativePath = relativePath.substring(pathMovedBeforeProcessing.length()-1);
+					logger.debug("RELATIVE PATH 3: "+relativePath);
+				}else{
+					relativePath = relativePath.substring(0, relativePath.length()-1);
 				}
 				
 				newParameterMap.put(Parameters.PARAM_RELATIVE_PATH,

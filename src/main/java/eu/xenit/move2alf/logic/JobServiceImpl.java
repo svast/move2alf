@@ -225,7 +225,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		Cycle lastCycle;
 		jobCycles = getCyclesForJobDesc(job.getId());
 
-		lastCycle = jobCycles.get(0);
+		if (jobCycles.size() == 0) { 
+			lastCycle = null; 
+		} else {
+			lastCycle = jobCycles.get(0);
+		}
 
 		/*
 		 * jobCycles = getCyclesForJob(job.getId());
@@ -554,6 +558,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			logger.error("Action " + action.getClassName() + " (id = "
 					+ action.getIdAsString()
 					+ ") threw an unhandled exception: " + e);
+			e.printStackTrace();
 			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 
@@ -750,7 +755,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			schedule.setState(EScheduleState.NOT_RUNNING);
 			session.update(schedule);
 			Cycle last = getLastCycleForJob(schedule.getJob());
-			if (last.getEndDateTime() == null) {
+			if (last != null  && last.getEndDateTime() == null) {
 				last.setEndDateTime(new Date());
 				session.update(last);
 			}

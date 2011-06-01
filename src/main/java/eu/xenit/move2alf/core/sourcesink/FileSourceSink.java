@@ -22,6 +22,9 @@ public class FileSourceSink extends SourceSink {
 			boolean recursive) {
 		logger.debug("Reading files from " + path);
 		File source = new File(path);
+		if(source.exists() == false){
+			source.mkdir();
+		}
 		return listFiles(source, recursive, new ArrayList<File>());
 	}
 

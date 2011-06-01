@@ -28,13 +28,12 @@ public class ExecuteCommandAction extends Action {
 				.getParameter(Parameters.PARAM_STAGE);
 		
 		CountDownLatch countDown = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
-		if (countDown != null)
 		
 		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
 		
 			String command = configuredAction
 					.getParameter(Parameters.PARAM_COMMAND);
-	
+			logger.debug("Command: "+command);
 			if(command != null && !"".equals(command)){
 				logger.debug("Executing command "+ command);
 				
