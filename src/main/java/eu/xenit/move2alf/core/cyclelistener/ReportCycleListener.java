@@ -52,7 +52,7 @@ public class ReportCycleListener extends CycleListener {
 			SimpleMailMessage mail = new SimpleMailMessage();
 			mail.setFrom(Config.get("mail.from"));
 			mail.setTo(addresses);
-			mail.setSubject("Move2Alf report");
+			mail.setSubject("Move2Alf error report");
 
 			Job job = cycle.getSchedule().getJob();
 			mail.setText("Cycle " + cycleId + " of job " + job.getName()
