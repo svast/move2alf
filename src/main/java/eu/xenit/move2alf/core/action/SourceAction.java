@@ -66,6 +66,11 @@ public class SourceAction extends Action {
 			logger.debug("Reading file " + file);
 		}
 		
+		int cycleId = (Integer) parameterMap.get(Parameters.PARAM_CYCLE);
+		if (files.size() == 0) {
+			getJobService().completeCycleStage(cycleId, 2);
+		}
+		
 		readFiles(files, parameterMap, recursive, configuredAction,
 				sourceConfig, source, nextAction);
 		try {
