@@ -139,7 +139,8 @@ public class AlfrescoSourceSink extends SourceSink {
 				cause.printStackTrace(printWriter);
 				String stackTrace = result.toString();
 				logger.debug("Stacktrace {}", stackTrace);
-				if (stackTrace.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
+				if (stackTrace
+						.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
 					if (MODE_SKIP.equals(docExistsMode)) {
 						// ignore
 						parameterMap.put(Parameters.PARAM_STATUS,
@@ -190,7 +191,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		} catch (RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
 			// TODO: stop job instead of stopping tomcat
-			//System.exit(1);
+			// System.exit(1);
 		} catch (RuntimeException e) {
 			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
@@ -228,33 +229,34 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private RepositoryAccessSession createRepositoryAccessSession(
 			ConfiguredSourceSink sinkConfig) {
-		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
-		if (ras == null) {
-			logger.debug("Creating new RepositoryAccessSession for thread "
-					+ Thread.currentThread());
-			String user = sinkConfig.getParameter(PARAM_USER);
-			String password = sinkConfig.getParameter(PARAM_PASSWORD);
-			String url = sinkConfig.getParameter(PARAM_URL);
-			if (url.endsWith("/")) {
-				url = url + "api/";
-			} else {
-				url = url + "/api/";
-			}
-			WebServiceRepositoryAccess ra = null;
-			try {
-				ra = new WebServiceRepositoryAccess(new URL(url), user,
-						password);
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			ras = ra.createSessionAndRetry();
-			AlfrescoSourceSink.ras.set(ras);
+		RepositoryAccessSession ras;
+		// RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
+		// if (ras == null) {
+		logger.debug("Creating new RepositoryAccessSession for thread "
+				+ Thread.currentThread());
+		String user = sinkConfig.getParameter(PARAM_USER);
+		String password = sinkConfig.getParameter(PARAM_PASSWORD);
+		String url = sinkConfig.getParameter(PARAM_URL);
+		if (url.endsWith("/")) {
+			url = url + "api/";
 		} else {
-			logger.debug("Reusing existing RepositoryAccessSession in thread "
-					+ Thread.currentThread());
+			url = url + "/api/";
 		}
-		return AlfrescoSourceSink.ras.get();
+		WebServiceRepositoryAccess ra = null;
+		try {
+			ra = new WebServiceRepositoryAccess(new URL(url), user, password);
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ras = ra.createSessionAndRetry();
+		//AlfrescoSourceSink.ras.set(ras);
+		// } else {
+		// logger.debug("Reusing existing RepositoryAccessSession in thread "
+		// + Thread.currentThread());
+		// }
+		// return AlfrescoSourceSink.ras.get();
+		return ras;
 	}
 
 	private String getParameterWithDefault(Map<String, Object> parameterMap,
