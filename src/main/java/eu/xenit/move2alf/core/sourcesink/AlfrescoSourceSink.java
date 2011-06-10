@@ -125,7 +125,33 @@ public class AlfrescoSourceSink extends SourceSink {
 						metadata, multiValueMetadata);
 				if (acl != null) {
 					for (String aclPath : acl.keySet()) {
-						ras.setAccessControlList(aclPath, inheritPermissions,
+						
+						String parserAclPath = aclPath;
+						// add "cm:" in front of each path component
+						if(parserAclPath.startsWith("/")){
+							parserAclPath = parserAclPath.substring(1,parserAclPath.length());
+						}
+						if(parserAclPath.endsWith("/")){
+							parserAclPath = parserAclPath.substring(0, parserAclPath.length()-1);
+						}
+						
+						String remoteACLPath = basePath + parserAclPath;
+						String[] aclComponents = remoteACLPath.split("/");
+						remoteACLPath = "";
+						for (String aclComponent : aclComponents) {
+							if ("".equals(aclComponent)) {
+								remoteACLPath += "/";
+							} else if (aclComponent.contains(":")) {
+								remoteACLPath += aclComponent + "/";
+							} else {
+								remoteACLPath += "cm:" + aclComponent + "/";
+							}
+						}
+						remoteACLPath = remoteACLPath.substring(0, remoteACLPath.length() - 1);
+
+						logger.debug("ACL path: " + remoteACLPath);
+						
+						ras.setAccessControlList(remoteACLPath, inheritPermissions,
 								acl.get(aclPath));
 					}
 				}
