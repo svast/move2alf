@@ -14,7 +14,7 @@
 			<map-key column="name" type="string" />
 			<element column="value" type="string" />
 		</map>
-    	<set name="configuredActionSet" table="configuredActionConfiguredSourceSink" inverse="true">
+    	<set name="configuredActionSet" table="configuredActionConfiguredSourceSink" inverse="true" >
       		<key column="configuredSourceSinkId"/>
       		<many-to-many class="eu.xenit.move2alf.core.dto.ConfiguredAction" column="configuredActionId"/>
     	</set>
