@@ -1,11 +1,8 @@
 package eu.xenit.move2alf.core.action;
 
 import java.io.File;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-//import org.alfresco.util.ISO8601DateFormat;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;

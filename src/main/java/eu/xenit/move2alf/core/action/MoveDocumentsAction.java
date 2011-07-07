@@ -10,7 +10,6 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
 
 public class MoveDocumentsAction extends Action {
 

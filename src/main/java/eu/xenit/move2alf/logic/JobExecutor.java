@@ -36,8 +36,6 @@ public class JobExecutor implements org.quartz.Job {
 		SessionFactory sessionFactory = (SessionFactory) context
 				.getMergedJobDataMap().get(SchedulerImpl.SESSION_FACTORY);
 
-		//openSession(sessionFactory);
-
 		Cycle cycle;
 		Job job;
 		try {
@@ -64,39 +62,6 @@ public class JobExecutor implements org.quartz.Job {
 		jobService.executeAction(cycle.getId(), action, parameterMap);
 		jobService.waitForCycleStagesCompletion(cycle.getId());
 		jobService.closeCycle(cycle);
-
-		//closeSession(sessionFactory);
-	}
-
-	private void openSession(SessionFactory sessionFactory) {
-		Session session = null;
-		try {
-			session = SessionFactoryUtils.getSession(sessionFactory, false);
-		}
-		// If not already bound the Create and Bind it!
-		catch (java.lang.IllegalStateException ex) {
-			session = SessionFactoryUtils.getSession(sessionFactory, true);
-			TransactionSynchronizationManager.bindResource(sessionFactory,
-					new SessionHolder(session));
-		}
-		session.setFlushMode(FlushMode.AUTO);
-	}
-
-	private void closeSession(SessionFactory sessionFactory) {
-		try {
-			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager
-					.unbindResource(sessionFactory);
-			if (!FlushMode.MANUAL.equals(sessionHolder.getSession()
-					.getFlushMode())) {
-				sessionHolder.getSession().flush();
-			}
-			SessionFactoryUtils.closeSession(sessionHolder.getSession());
-			if (logger.isDebugEnabled())
-				logger
-						.debug("Hibernate Session is unbounded from Job thread and closed");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
 	}
 
 }

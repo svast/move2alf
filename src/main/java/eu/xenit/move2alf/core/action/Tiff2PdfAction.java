@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.core.action;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.common.Tiff2Pdf;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.common.Tiff2Pdf;
 
 public class Tiff2PdfAction extends Action {
 

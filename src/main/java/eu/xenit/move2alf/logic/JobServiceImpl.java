@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.logic;
 
+import static akka.actor.Actors.actorOf;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -16,11 +18,15 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.actor.UntypedActorFactory;
 import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.Parameters;
@@ -29,6 +35,7 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.CycleListener;
+import eu.xenit.move2alf.core.ReportActor;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.SourceSinkFactory;
 import eu.xenit.move2alf.core.action.EmailAction;
@@ -66,6 +73,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private MailSender mailSender;
 
 	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
+
+	private ActorRef reportActor;
 
 	@Autowired
 	public void setUserService(UserService userService) {
@@ -112,10 +121,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return mailSender;
 	}
 
+	public ActorRef getReportActor() {
+		return reportActor;
+	}
+
 	public JobServiceImpl() {
 		registerCycleListener(new LoggingCycleListener());
 		registerCycleListener(new MoveCycleListener());
 		registerCycleListener(new ReportCycleListener());
+
+		reportActor = actorOf(ReportActor.class).start();
 	}
 
 	@Override
@@ -225,8 +240,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		Cycle lastCycle;
 		jobCycles = getCyclesForJobDesc(job.getId());
 
-		if (jobCycles.size() == 0) { 
-			lastCycle = null; 
+		if (jobCycles.size() == 0) {
+			lastCycle = null;
 		} else {
 			lastCycle = jobCycles.get(0);
 		}
@@ -755,7 +770,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			schedule.setState(EScheduleState.NOT_RUNNING);
 			session.update(schedule);
 			Cycle last = getLastCycleForJob(schedule.getJob());
-			if (last != null  && last.getEndDateTime() == null) {
+			if (last != null && last.getEndDateTime() == null) {
 				last.setEndDateTime(new Date());
 				session.update(last);
 			}
@@ -765,6 +780,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void createProcessedDocument(int cycleId, String name, Date date,
 			String state, Set<ProcessedDocumentParameter> params) {
+		logger.debug("Creating processed document:" + name);
 		ProcessedDocument doc = new ProcessedDocument();
 		doc.setCycle(getCycle(cycleId));
 		doc.setName(name);
@@ -776,7 +792,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public void sendMail(SimpleMailMessage message) {
-		getMailSender().send(message);
+		try {
+			getMailSender().send(message);
+		} catch (MailException e) {
+			logger.warn("Failed to send email (" + e.getMessage() + ")");
+		}
 	}
 
 	@Override
@@ -791,8 +811,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	 */
 	private Map<Integer, CountDownLatch> cycleStageCounters = new HashMap<Integer, CountDownLatch>();
 	/*
-	 * Used to make sure every stage is only completed once, key =
-	 * cycleId * 10 + stage
+	 * Used to make sure every stage is only completed once, key = cycleId * 10
+	 * + stage
 	 * 
 	 * WARNING: fails when more than 10 stages are used
 	 */
@@ -808,7 +828,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void waitForCycleStagesCompletion(int cycleId) {
 		try {
 			cycleStageCounters.get(cycleId).await();
-			/* Cleanup
+			/*
+			 * Cleanup
 			 * 
 			 * TODO/WARNING: number of stages hardcoded to 2 :(
 			 */

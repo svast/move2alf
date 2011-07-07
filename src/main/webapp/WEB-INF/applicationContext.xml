@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:akka="http://akka.io/schema/akka" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-    http://www.springframework.org/schema/context
-         http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
 	<tx:annotation-driven transaction-manager="txManager" />
 
@@ -94,8 +93,11 @@
 			</map>
 		</property>
 	</bean>
-	
+
 	<bean id="move2alfJmxBean" class="eu.xenit.move2alf.jmx.Move2AlfJmxBean">
-		<property name="jobService" ref="jobService"/>	
+		<property name="jobService" ref="jobService" />
+	</bean>
+	
+	<bean id="applicationCtxProvider" class="eu.xenit.move2alf.core.ApplicationContextProvider" lazy-init="false">
 	</bean>
 </beans>

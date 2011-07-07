@@ -10,6 +10,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import akka.actor.ActorRef;
+
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.CycleListener;
@@ -371,4 +373,6 @@ public interface JobService {
 	public void waitForCycleStagesCompletion(int cycleId);
 
 	public void completeCycleStage(int cycleId, int stageNr);
+	
+	public ActorRef getReportActor();
 }
