@@ -24,6 +24,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
 
 public interface JobService {
 
@@ -375,4 +376,6 @@ public interface JobService {
 	public void completeCycleStage(int cycleId, int stageNr);
 	
 	public ActorRef getReportActor();
+
+	public List<HistoryInfo> getHistory(int jobId);
 }

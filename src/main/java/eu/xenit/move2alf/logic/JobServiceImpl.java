@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,7 @@ import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
 
 @Service("jobService")
 @Transactional
@@ -707,7 +710,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		secs = secs + 10;
 
 		if (secs > 59) {
-			secs = secs - 60;
+			secs = secs - 60; 
 			mins = mins + 1;
 
 			if (mins > 59) {
@@ -852,6 +855,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				cycleStageCounterFlags.put(key, true);
 			}
 		}
+	}
+
+	@Override
+	public List<HistoryInfo> getHistory(int jobId) {
+		List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();;
+		Session s = getSessionFactory().getCurrentSession();
+		List<Object[]> history =
+			s.createSQLQuery(String.format("select cycle.id as id, count(processedDocument.id) as count,"
+				+ " cycle.startDateTime as startDateTime, schedule.state as state" 
+				+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId join schedule on schedule.id=cycle.scheduleId"
+				+ " where schedule.jobId=%d group by cycle.id order by cycle.startDateTime desc;", jobId))
+				.addScalar("id", StandardBasicTypes.INTEGER)
+				.addScalar("count", StandardBasicTypes.INTEGER)
+				.addScalar("startDateTime", StandardBasicTypes.TIMESTAMP)
+				.addScalar("state", StandardBasicTypes.STRING)
+				.list();
+		for(Object[] cycle : history) {
+			historyList.add(new HistoryInfo((Integer) cycle[0], (Date) cycle[2], (String) cycle[3], (Integer) cycle[1]));
+		}
+		
+		return historyList;
 	}
 
 }

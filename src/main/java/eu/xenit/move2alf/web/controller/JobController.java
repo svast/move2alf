@@ -1079,32 +1079,35 @@ public class JobController {
 			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
 		
-		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
+//		List<Cycle> cycles = getJobService().getCyclesForJobDesc(jobId);
+//		//Store info in HistoryInfo class
+//		if(cycles != null){
+//			for(int i=0; i<cycles.size(); i++){
+//				int cycleId = cycles.get(i).getId();
+//				
+//				List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
+//				int documentListSize = processedDocuments.size();
+//				
+//				if(processedDocuments == null || "".equals(processedDocuments)){
+//					documentListSize = 0;
+//				}
+//				
+//		/*		String scheduleState = getJobService()
+//				.getLastCycleForJob(getJobService().getJob(jobId)).getSchedule()
+//				.getState().getDisplayName();
+//				*/
+//				String scheduleState = cycles.get(i).getSchedule()
+//				.getState().getDisplayName();
+//				
+//				HistoryInfo historyInfo = new HistoryInfo(cycleId, cycles.get(i).getStartDateTime(), scheduleState, documentListSize);
+//				
+//				historyInfoList.add(historyInfo);
+//			}
+//		}
+		
 		List<HistoryInfo> historyInfoList = new ArrayList();
-		//Store info in HistoryInfo class
-		if(cycles != null){
-			for(int i=0; i<cycles.size(); i++){
-				int cycleId = cycles.get(i).getId();
-				
-				List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
-				int documentListSize = processedDocuments.size();
-				
-				if(processedDocuments == null || "".equals(processedDocuments)){
-					documentListSize = 0;
-				}
-				
-		/*		String scheduleState = getJobService()
-				.getLastCycleForJob(getJobService().getJob(jobId)).getSchedule()
-				.getState().getDisplayName();
-				*/
-				String scheduleState = cycles.get(i).getSchedule()
-				.getState().getDisplayName();
-				
-				HistoryInfo historyInfo = new HistoryInfo(cycleId, cycles.get(i).getStartDateTime(), scheduleState, documentListSize);
-				
-				historyInfoList.add(historyInfo);
-			}
-		}
+		historyInfoList = getJobService().getHistory(jobId);
+		
 		
 		PagedListHolder pagedListHolder = new PagedListHolder(historyInfoList);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
