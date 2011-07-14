@@ -218,6 +218,8 @@ CREATE TABLE `cycle` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE INDEX `cycleScheduleIdIdx` ON `cycle` (`scheduleId`);
+
 --
 -- Dumping data for table `cycle`
 --
@@ -273,6 +275,8 @@ CREATE TABLE `processedDocument` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE INDEX `processedDocumentCycleIdIdx` ON `processedDocument` (`cycleId`);
+
 --
 -- Dumping data for table `processedDocument`
 --
@@ -296,6 +300,8 @@ CREATE TABLE `processedDocumentParameter` (
   `value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+CREATE INDEX `processedDocumentIdIdx` ON `processedDocumentParameter` (`processedDocumentId`);
 
 --
 -- Dumping data for table `processedDocumentParameter`
