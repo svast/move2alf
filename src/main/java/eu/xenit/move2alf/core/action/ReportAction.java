@@ -44,7 +44,7 @@ public class ReportAction extends Action {
 			reportFields.put("Error message", errorMsg);
 		}
 		
-		procDocParameters = mapToSet(reportFields, configuredAction);
+		procDocParameters = createProcessedDocumentParameterSet(reportFields, configuredAction);
 		
 		getJobService().getReportActor().sendOneWay(new ReportMessage(cycleId, name, new Date(), state, procDocParameters));
 		
@@ -53,13 +53,17 @@ public class ReportAction extends Action {
 		//		state, procDocParameters);
 	}
 
-	private Set<ProcessedDocumentParameter> mapToSet(
+	private Set<ProcessedDocumentParameter> createProcessedDocumentParameterSet(
 			Map<String, String> reportFields, ConfiguredAction configuredAction) {
 		Set<ProcessedDocumentParameter> procDocParameters = new HashSet<ProcessedDocumentParameter>();
 		for (String key : reportFields.keySet()) {
 			ProcessedDocumentParameter procDocParameter = new ProcessedDocumentParameter();
 			procDocParameter.setName(key);
-			procDocParameter.setValue(reportFields.get(key));
+			String value = reportFields.get(key);
+			if (value.length() > 255) {
+				value = value.substring(0, 255);
+			}
+			procDocParameter.setValue(value);
 			procDocParameter.setConfiguredAction(configuredAction);
 			procDocParameters.add(procDocParameter);
 		}
