@@ -859,7 +859,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public List<HistoryInfo> getHistory(int jobId) {
-		List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();;
+		List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
 		Session s = getSessionFactory().getCurrentSession();
 		List<Object[]> history =
 			s.createSQLQuery(String.format("select cycle.id as id, count(processedDocument.id) as count,"
