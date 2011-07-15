@@ -52,12 +52,13 @@ public class ExecuteCommandAction extends Action {
 				String moveNotLoaded=configuredAction
 						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
 				
+				if("true".equals(configuredAction
+						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING)) 
+							&& moveBeforeProcessing != null){
+					environmentMap.put("MOVETOALF_BEFORE_LOAD", moveBeforeProcessing);
+				}
+				
 				if("after".equals(stage)){ 
-					if("true".equals(configuredAction
-							.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING)) 
-								&& moveBeforeProcessing != null){
-						environmentMap.put("MOVETOALF_BEFORE_LOAD", moveBeforeProcessing);
-					}
 					if("true".equals(configuredAction
 							.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD))
 								&& moveAfterLoad != null){
