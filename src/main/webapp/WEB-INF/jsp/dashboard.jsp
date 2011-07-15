@@ -36,9 +36,9 @@
 		<div class="link left"><c:out value="${jobInfo.jobName}" /></div>
 		
 			<%if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
-				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">edit</a></div>
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run job</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">edit</a></div>
 			<%}else if(roleCheck=="scheduleAdmin"){ %>
-				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run poller</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run job</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
 			<%}%>
 			
 			<br class="clear">
