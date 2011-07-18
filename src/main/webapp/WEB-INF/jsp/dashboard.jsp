@@ -11,10 +11,8 @@
 
 <div class="span-24 last main">
 
-<h2>Dashboard</h2>
-
 <div class="frame-dashboard">
-<h3 class="left">Jobs</h3>
+<h2 class="left">Jobs</h2>
 
 <% 
 	//All role checks are done in the header.jsp
@@ -33,22 +31,20 @@
 		<tr>
 		<td class="table-border">
 
-		<div class="link left"><c:out value="${jobInfo.jobName}" /></div>
+		<h4 class="link left jobname"><c:out value="${jobInfo.jobName}" /></h4>
 		
 			<%if(roleCheck=="jobAdmin" || roleCheck=="systemAdmin"){ %>
-				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run job</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">edit</a></div>
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >Run</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit" htmlEscape="true" />">Edit</a></div>
 			<%}else if(roleCheck=="scheduleAdmin"){ %>
-				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >run job</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">edit schedule</a></div>
+				<div class="link right"><a href="<spring:url value="/job/${jobInfo.jobId}/cycle/run" htmlEscape="true" />" >Run</a>	<a href="<spring:url value="/job/${jobInfo.jobId}/edit/schedule" htmlEscape="true" />">Edit schedule</a></div>
 			<%}%>
 			
 			<br class="clear">
 			
-		<p class="reduce-bottom">
-		
+		<div class="properties">
 		<c:if test='${-1 == jobInfo.cycleId}'>
-		Last run: None
-		<br />
-		Status: Not running
+		<div class="labelcontainer"><span class="left label">Last run:</span> None</div>
+		<div class="labelcontainer"><span class="left label">Status:</span> Not running</div>
 		</c:if>
 		<c:if test='${-1 != jobInfo.cycleId}'>
 		
@@ -57,17 +53,14 @@
 			</div>
 			
 			<c:if test='${date == currentDate}'>
-				Last run: today <fmt:formatDate value="${jobInfo.cycleStartDateTime}" pattern="HH:mm" type="both"/>
+				<div class="labelcontainer"><span class="left label">Last run:</span> today <fmt:formatDate value="${jobInfo.cycleStartDateTime}" pattern="HH:mm" type="both"/></div>
 			</c:if>
 			<c:if test='${date != currentDate}'>
-				Last run: <fmt:formatDate value="${jobInfo.cycleStartDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/>
+				<div class="labelcontainer"><span class="left label">Last run:</span> <fmt:formatDate value="${jobInfo.cycleStartDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/></div>
 			</c:if>
-			<br />
-			Status: <c:out value="${jobInfo.scheduleState}" />
-		<br />
+			<div class="labelcontainer"><span class="left label">Status:</span> <c:out value="${jobInfo.scheduleState}" /></div>
 		</c:if>
-		</p>
-		<br />
+		</div>
 
 		<div class="link"><a href="<spring:url value="/job/${jobInfo.jobId}/history" htmlEscape="true"/>" >History</a>
 		<c:if test='${-1 != jobInfo.cycleId}'>

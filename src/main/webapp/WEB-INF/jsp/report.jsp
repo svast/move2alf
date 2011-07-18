@@ -15,10 +15,13 @@
 
 <div class="span-24 last main">
 
-<h2>Report</h2>
-<br />
 
 <div class="frame-job">
+
+<h2 class="left">Report</h2>
+<h4 class="right"><a href="<spring:url value="/job/${job.id }/history" htmlEscape="true" />">History</a></h4>
+<br class="clear"/>
+
 <h3><c:out value="${job.name}" /> - <fmt:formatDate value="${cycle.startDateTime}" pattern="yyyy-MM-dd HH:mm" type="both"/></h3>
 
 <table>
