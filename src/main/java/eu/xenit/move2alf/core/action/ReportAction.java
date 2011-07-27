@@ -47,10 +47,6 @@ public class ReportAction extends Action {
 		procDocParameters = createProcessedDocumentParameterSet(reportFields, configuredAction);
 		
 		getJobService().getReportActor().sendOneWay(new ReportMessage(cycleId, name, new Date(), state, procDocParameters));
-		
-		// Writing reporting data to DB is handled by ReportActor
-		//getJobService().createProcessedDocument(cycleId, name, new Date(),
-		//		state, procDocParameters);
 	}
 
 	private Set<ProcessedDocumentParameter> createProcessedDocumentParameterSet(
