@@ -299,17 +299,22 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					commandAfter = action.getParameter("command");
 				}
 			} else {
-				Action configurableAction = getActionFactory().getObject(
-						action.getClassName());
-				if (configurableAction.getCategory() == ConfigurableObject.CAT_METADATA) {
-					metadata = action.getClassName();
+                Action configurableAction = null;
+                try {
+                    configurableAction = getActionFactory().getObject(
+                            action.getClassName());
+                    if (configurableAction.getCategory() == ConfigurableObject.CAT_METADATA) {
+                        metadata = action.getClassName();
 
-					metadataParameterMap = action.getParameters();
-				}else if(configurableAction.getCategory()==ConfigurableObject.CAT_TRANSFORM){
+                        metadataParameterMap = action.getParameters();
+                    }else if(configurableAction.getCategory()==ConfigurableObject.CAT_TRANSFORM){
 
-					transform = action.getClassName();
-					transformParameterMap = action.getParameters();
-				}
+                        transform = action.getClassName();
+                        transformParameterMap = action.getParameters();
+                    }
+                } catch (IllegalArgumentException e) {
+                   logger.error ("Action class not found: " + action.getClassName()); 
+                }
 			}
 
 			action = action.getAppliedConfiguredActionOnSuccess();
