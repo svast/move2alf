@@ -614,6 +614,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					CountDownLatch counter = (CountDownLatch) parameterMap
 							.get(Parameters.PARAM_COUNTER);
 					counter.countDown();
+                    synchronized (ThreadAction.runningThreadsForCycle) {
+                        Integer threadCount = ThreadAction.runningThreadsForCycle.get(cycleId);
+                        if (threadCount == null) {
+                            ThreadAction.runningThreadsForCycle.put(cycleId, 0);
+                        }
+                    }
 				} else {
 					logger
 							.debug("Skipping action "
@@ -784,13 +790,17 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void createProcessedDocument(int cycleId, String name, Date date,
 			String state, Set<ProcessedDocumentParameter> params) {
 		logger.debug("Creating processed document:" + name);
-		ProcessedDocument doc = new ProcessedDocument();
-		doc.setCycle(getCycle(cycleId));
-		doc.setName(name);
-		doc.setProcessedDateTime(date);
-		doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
-		doc.setProcessedDocumentParameterSet(params);
-		getSessionFactory().getCurrentSession().save(doc);
+        try {
+            ProcessedDocument doc = new ProcessedDocument();
+            doc.setCycle(getCycle(cycleId));
+            doc.setName(name);
+            doc.setProcessedDateTime(date);
+            doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
+            doc.setProcessedDocumentParameterSet(params);
+            getSessionFactory().getCurrentSession().save(doc);
+        } catch (Exception e) {
+            logger.error("Failed to write " + name + " to report.", e);
+        }
 	}
 
 	@Override
