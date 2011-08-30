@@ -23,10 +23,14 @@ public class MoveDocumentsAction extends Action {
 	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
 	public static final String PARAM_MOVE_BEFORE_PROCESSING = "moveBeforeProcessing";
 
+	boolean moveBeforeProcessing;
+	String moveBeforeProcessingPath;
+	String inputPath;
+	
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
-		boolean moveBeforeProcessing = "true".equals(configuredAction
+		moveBeforeProcessing = "true".equals(configuredAction
 				.getParameter(PARAM_MOVE_BEFORE_PROCESSING));
 		boolean moveAfterLoad = "true".equals(configuredAction
 				.getParameter(PARAM_MOVE_AFTER_LOAD));
@@ -36,6 +40,11 @@ public class MoveDocumentsAction extends Action {
 		String documentStatus = (String) parameterMap
 				.get(Parameters.PARAM_STATUS);
 
+		inputPath = configuredAction
+		.getParameter(SourceAction.PARAM_PATH).replaceAll("\\\\", "/");
+		moveBeforeProcessingPath = configuredAction
+		.getParameter(PARAM_MOVE_BEFORE_PROCESSING_PATH).replaceAll("\\\\", "/");
+		
 		String moveDirectory = null;
 		if (moveBeforeProcessing && Parameters.VALUE_BEFORE.equals(stage)) {
 			moveDirectory = configuredAction
@@ -78,12 +87,26 @@ public class MoveDocumentsAction extends Action {
 					moveDirectory.length() - 1);
 		}
 
+		
 		// assemble full path
-		// String relativePath = absolutePath.replace(inputFolder, "");
-		String relativePath = (String) parameterMap
-				.get(Parameters.PARAM_RELATIVE_PATH);
+		String relativePath="";
+		logger.debug("ABSOLUTE PATH: "+absolutePath);
+		if(moveBeforeProcessing == false){
+			logger.debug("INPUT PATH: "+inputPath);
+			logger.debug("Get relative path from input folder");
+			relativePath = absolutePath.replace(inputPath, "");
+		}else{
+			logger.debug("AUTOMOVE PATH: "+moveBeforeProcessingPath);
+			logger.debug("Get relative path from automove folder");
+			relativePath = absolutePath.replace(moveBeforeProcessingPath, "");
+		}
+
+//		String relativePath = ((String) parameterMap
+//				.get(Parameters.PARAM_RELATIVE_PATH)).replaceAll("\\\\", "/");
 		String fullDestinationPath = moveDirectory + "" + relativePath;
 
+
+		
 		File moveFolder = new File(fullDestinationPath);
 
 		// check if full path exists, otherwise create path
@@ -99,6 +122,19 @@ public class MoveDocumentsAction extends Action {
 		// If path exists move document
 		if (destinationPathExists) {
 			String newFileName = fullDestinationPath + "/" + file.getName();
+			
+			File newFile = new File(newFileName);
+			boolean fileExists = newFile.exists();
+			
+			if(fileExists == true){
+				try{
+				newFile.delete();
+				}
+				catch(Exception e){
+					
+				}
+			}
+			
 			boolean success = file.renameTo(new File(newFileName));
 
 			if (success) {

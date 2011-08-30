@@ -16,6 +16,10 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class ExecuteCommandAction extends Action {
 
+	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
+	public static final String PARAM_MOVE_BEFORE_PROCESSING = "moveBeforeProcessing";
+	public static final String COMMAND = "command";
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(ExecuteCommandAction.class);
 
@@ -29,7 +33,8 @@ public class ExecuteCommandAction extends Action {
 		
 		CountDownLatch countDown = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
 		
-		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
+//		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
+		if("after".equals(stage) && countDown.getCount() == 1){
 		
 			String command = configuredAction
 					.getParameter(Parameters.PARAM_COMMAND);

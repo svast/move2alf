@@ -93,7 +93,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommand())
 				.param("path",inputPaths)
-				.param("stage", "before"));
+				.param("stage", "before")
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING, jobConfig.getMoveBeforeProc())
+				// true or false (String)
+				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
+						jobConfig.getBeforeProcPath()));
 		
 		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
 				.param("path",inputPaths)

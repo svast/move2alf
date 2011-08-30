@@ -44,6 +44,7 @@ import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.ThreadAction;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.MoveCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -130,6 +131,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public JobServiceImpl() {
 		registerCycleListener(new LoggingCycleListener());
+		registerCycleListener(new CommandCycleListener());
 		registerCycleListener(new MoveCycleListener());
 		registerCycleListener(new ReportCycleListener());
 

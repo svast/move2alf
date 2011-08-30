@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 
@@ -29,24 +28,25 @@ public class ReportAction extends Action {
 		String name = ((File) parameterMap.get(Parameters.PARAM_FILE))
 				.getName();
 		String state = (String) parameterMap.get(Parameters.PARAM_STATUS);
-		
 		Map<String, String> reportFields = (Map<String, String>) parameterMap
 				.get(Parameters.PARAM_REPORT_FIELDS);
-		
 		Set<ProcessedDocumentParameter> procDocParameters;
 		if (reportFields == null) {
 			reportFields = new HashMap<String, String>();
 		}
-		
 		String errorMsg = (String) parameterMap
 				.get(Parameters.PARAM_ERROR_MESSAGE);
 		if (errorMsg != null) {
 			reportFields.put("Error message", errorMsg);
 		}
-		
 		procDocParameters = createProcessedDocumentParameterSet(reportFields, configuredAction);
+
+		getJobService().createProcessedDocument(cycleId, name, new Date(),
+				state, procDocParameters);
+
 		
-		getJobService().getReportActor().sendOneWay(new ReportMessage(cycleId, name, new Date(), state, procDocParameters));
+//		getJobService().getReportActor().sendOneWay(new ReportMessage(cycleId, name, new Date(), state, procDocParameters));
+
 	}
 
 	private Set<ProcessedDocumentParameter> createProcessedDocumentParameterSet(

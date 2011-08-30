@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.core.cyclelistener;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -34,39 +35,77 @@ public class ReportCycleListener extends CycleListener {
 		}
 		// only send report on errors
 		boolean errorsOccured = false;
+		int counter = 0;
+		int amountFailed = 0;
+		Date firstDocDateTime=null;
 		List<ProcessedDocument> processedDocuments = getJobService().getProcessedDocuments(cycleId);
 		if (processedDocuments != null) {
 			for (ProcessedDocument doc : processedDocuments) {
+				if(counter == 0){
+					firstDocDateTime = doc.getProcessedDateTime();
+				}
+				
 				if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
 					errorsOccured = true;
-					break;
+					amountFailed+=1;
 				}
+				counter+=1;
 			}
 		} else {
 			logger.info("No processed documents found");
 		}
 
+		//Get cycle information
+		Date startDateTime = cycle.getStartDateTime();
+		Date endDateTime = cycle.getEndDateTime();
+		String duration = getJobService().getDuration(startDateTime,
+				endDateTime);
+		
+		String[] addresses = null;
 		if (errorsOccured == true && to != null && !"".equals(to)
 				&& "true".equals(sendReport)) {
-			String[] addresses = to.split(",");
+			String[] address = to.split(",");
+			int numberAddresses = address.length+1;
+			addresses = new String[numberAddresses];
+			for(int i =0; i<numberAddresses; i++){
+				try{
+					addresses[i] = address[i];
+				}
+				catch(Exception e){
+					addresses[i] = "move2alf_support@xenit.eu";
+
+				}
+			}
+		}else{
+			addresses = new String[1];
+			addresses[0] = "move2alf_support@xenit.eu";
+		}
+			
+			
 			SimpleMailMessage mail = new SimpleMailMessage();
 			mail.setFrom(Config.get("mail.from"));
 			mail.setTo(addresses);
 			mail.setSubject("Move2Alf error report");
 
 			Job job = cycle.getSchedule().getJob();
+//			mail.setText("Cycle " + cycleId + " of job " + job.getName()
+//					+ " completed.\n" + "The full report can be found on "
+//					+ Config.get("url") + "/job/" + job.getId() + "/" + cycleId
+//					+ "/report" + "\n\nSent by Move2Alf");
+			
 			mail.setText("Cycle " + cycleId + " of job " + job.getName()
 					+ " completed.\n" + "The full report can be found on "
 					+ Config.get("url") + "/job/" + job.getId() + "/" + cycleId
-					+ "/report" + "\n\nSent by Move2Alf");
+					+ "/report" +"\n\nStatistics:" + "\nNr of files: " + processedDocuments.size()
+					+ "\nNr of failed: " + amountFailed + "\n\nTime to process: " 
+					+ duration + "\nStart date/time: " + startDateTime
+					+ "\nTime first document loaded: " + firstDocDateTime 
+					+ "\n\nSent by Move2Alf");
 
 			logger.debug("Sending email report for cycle " + cycleId + " to "
 					+ to);
 			getJobService().sendMail(mail);
-		} else {
-			logger
-					.info("No email address or no errors found, not sending report.");
-		}
+
 	}
 
 	private Map<String, String> getEmailActionParameter(int cycleId) {
