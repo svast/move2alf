@@ -4,7 +4,6 @@ import java.text.ParseException;
 
 import javax.annotation.PostConstruct;
 
-import org.hibernate.SessionFactory;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
 
@@ -28,16 +26,16 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			.getLogger(SchedulerImpl.class);
 
 	private JobService jobService;
-
-	private SessionFactory sessionFactory;
+	
+	private JobExecutionService jobExecutionService;
 
 	private org.quartz.Scheduler scheduler;
 
 	static final String SCHEDULE_ID = "jobId";
-
+	
 	static final String JOB_SERVICE = "jobService";
 
-	static final String SESSION_FACTORY = "sessionFactory";
+	static final String JOB_EXECUTION_SERVICE = "jobExecutionService";
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -49,12 +47,12 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	}
 
 	@Autowired
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	public void setJobExecutionService(JobExecutionService jobExecutionService) {
+		this.jobExecutionService = jobExecutionService;
 	}
 
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+	public JobExecutionService getJobExecutionService() {
+		return jobExecutionService;
 	}
 
 	@PostConstruct
@@ -96,7 +94,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					JobDataMap jobData = new JobDataMap();
 					jobData.put(SCHEDULE_ID, schedule.getId());
 					jobData.put(JOB_SERVICE, getJobService());
-					jobData.put(SESSION_FACTORY, getSessionFactory());
+					jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {

@@ -1,31 +1,20 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
-import org.springframework.orm.hibernate3.SessionHolder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 
 public class JobExecutor implements org.quartz.Job {
-	private static final Logger logger = LoggerFactory
-			.getLogger(JobExecutor.class);
 
+	private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
+	
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
@@ -33,70 +22,32 @@ public class JobExecutor implements org.quartz.Job {
 				SchedulerImpl.SCHEDULE_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
-		SessionFactory sessionFactory = (SessionFactory) context
-				.getMergedJobDataMap().get(SchedulerImpl.SESSION_FACTORY);
-
-		//openSession(sessionFactory);
-
-		Cycle cycle;
+		JobExecutionService jobExecutionService = (JobExecutionService) context.getMergedJobDataMap().get(
+				SchedulerImpl.JOB_EXECUTION_SERVICE);
+		
+		Schedule schedule;
 		Job job;
+		Cycle cycle;
+
 		try {
-			Schedule schedule = jobService.getSchedule(scheduleId);
-			job = jobService.getJob(schedule.getJob().getId());
-			if (jobService.getJobState(job.getId()).equals(
-					EScheduleState.RUNNING)) {
-				logger.warn("Job \"" + job.getName()
-						+ "\" already running, not starting second cycle");
-				return;
-			}
-			cycle = jobService.openCycleForSchedule(scheduleId);
+			schedule = jobService.getSchedule(scheduleId);
+			job = schedule.getJob();
 		} catch (Move2AlfException e) {
 			logger.error("Could not execute job with schedule ID " + scheduleId
 					+ " because schedule or job does not exist.");
 			return;
 		}
 
-		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
-		ConfiguredAction action = job.getFirstConfiguredAction();
-		
-		jobService.initCycleStages(cycle.getId(), 2);
-		jobService.executeAction(cycle.getId(), action, parameterMap);
-		jobService.waitForCycleStagesCompletion(cycle.getId());
-		jobService.closeCycle(cycle);
-
-		//closeSession(sessionFactory);
-	}
-
-	private void openSession(SessionFactory sessionFactory) {
-		Session session = null;
-		try {
-			session = SessionFactoryUtils.getSession(sessionFactory, false);
+		if (jobService.getJobState(job.getId()).equals(
+				EScheduleState.RUNNING)) {
+			logger.warn("Job \"" + job.getName()
+					+ "\" already running, not starting second cycle");
+			return;
 		}
-		// If not already bound the Create and Bind it!
-		catch (java.lang.IllegalStateException ex) {
-			session = SessionFactoryUtils.getSession(sessionFactory, true);
-			TransactionSynchronizationManager.bindResource(sessionFactory,
-					new SessionHolder(session));
-		}
-		session.setFlushMode(FlushMode.AUTO);
-	}
 
-	private void closeSession(SessionFactory sessionFactory) {
-		try {
-			SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager
-					.unbindResource(sessionFactory);
-			if (!FlushMode.MANUAL.equals(sessionHolder.getSession()
-					.getFlushMode())) {
-				sessionHolder.getSession().flush();
-			}
-			SessionFactoryUtils.closeSession(sessionHolder.getSession());
-			if (logger.isDebugEnabled())
-				logger
-						.debug("Hibernate Session is unbounded from Job thread and closed");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		cycle = jobExecutionService.openCycleForSchedule(scheduleId);
+		jobExecutionService.executeJobSteps(job, cycle);
+		jobExecutionService.closeCycle(cycle);
 	}
 
 }

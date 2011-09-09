@@ -8,10 +8,8 @@ import java.util.Set;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
-
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.CycleListener;
@@ -241,28 +239,9 @@ public interface JobService {
 	 * @param id
 	 */
 	public void deleteDestination(int id);
-
-	/**
-	 * Start a new cycle for a job. This is the first step when executing a job.
-	 * 
-	 * @param scheduleId The id of the schedule that's starting the job.
-	 * @return The new cycle
-	 */
-	public Cycle openCycleForSchedule(Integer scheduleId);
-
-	/**
-	 * Stop/close a cycle after executing the job.
-	 * 
-	 * @param cycleId The cycle to close
-	 */
-	public void closeCycle(Cycle cycle);
 	
 	/**
-	 * Execute a configured action.
-	 * 
-	 * @param cycleId
-	 * @param action
-	 * @param parameterMap
+	 * @deprecated Use JobExecutionService
 	 */
 	public void executeAction(int cycleId, ConfiguredAction action, Map<String, Object> parameterMap);
 	
@@ -364,8 +343,6 @@ public interface JobService {
 	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
 
 	public void sendMail(SimpleMailMessage message);
-	
-	public void registerCycleListener(CycleListener listener);
 
 	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
 

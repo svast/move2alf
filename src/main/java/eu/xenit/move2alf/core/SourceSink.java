@@ -12,7 +12,7 @@ public abstract class SourceSink extends ConfigurableObject {
 	public static final String MODE_OVERWRITE = "Overwrite";
 
 	public abstract void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap, String docExistsMode);
+			Map<String, Object> parameterMap, String path, String docExistsMode);
 
 	public abstract List<File> list(ConfiguredSourceSink sourceConfig,
 			String path, boolean recursive);

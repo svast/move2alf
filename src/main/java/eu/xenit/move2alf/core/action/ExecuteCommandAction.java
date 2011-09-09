@@ -33,7 +33,6 @@ public class ExecuteCommandAction extends Action {
 		
 		CountDownLatch countDown = (CountDownLatch) parameterMap.get(Parameters.PARAM_COUNTER);
 		
-//		if("before".equals(stage) || ("after".equals(stage) && countDown.getCount() == 1)){
 		if("after".equals(stage) && countDown.getCount() == 1){
 		
 			String command = configuredAction

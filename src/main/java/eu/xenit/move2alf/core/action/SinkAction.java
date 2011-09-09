@@ -20,8 +20,7 @@ public class SinkAction extends Action {
 				sinkConfig.getClassName());
 		String path = configuredAction.getParameter(SourceAction.PARAM_PATH);
 		String docExistsMode = configuredAction.getParameter("documentExists");
-		parameterMap.put(SourceAction.PARAM_PATH, path);
-		sink.send(sinkConfig, parameterMap, docExistsMode);
+		sink.send(sinkConfig, parameterMap, path, docExistsMode);
 	}
 
 	@Override

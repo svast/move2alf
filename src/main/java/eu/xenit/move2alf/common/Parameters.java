@@ -34,6 +34,12 @@ public class Parameters {
 	 * structure). Type: String
 	 */
 	public static final String PARAM_RELATIVE_PATH = "relativePath";
+	
+	/**
+	 * Relative path of file to upload in destination (used to create folder
+	 * structure). Type: String
+	 */
+	public static final String PARAM_INPUT_PATH = "inputPath";
 
 	/**
 	 * Map with metadata of file. The key is the property name without
@@ -87,8 +93,6 @@ public class Parameters {
 	public static final String PARAM_STAGE = "stage";
 	public static final String VALUE_AFTER = "after";
 	public static final String VALUE_BEFORE = "before";
-
-	public static final String PARAM_EXTENSION = "extension";
 
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
 

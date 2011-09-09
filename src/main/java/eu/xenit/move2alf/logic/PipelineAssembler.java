@@ -15,6 +15,9 @@ import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.simpleaction.SimpleAction;
+import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
+import eu.xenit.move2alf.core.simpleaction.execution.SingleThreadExecutor;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Transactional
@@ -25,7 +28,44 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 
 	private JobService jobService;
 
+	/**
+	 * @deprecated
+	 */
 	public abstract void assemblePipeline(JobConfig jobConfig);
+	
+	public abstract List<PipelineStep> getPipeline(JobConfig jobConfig);
+	
+	public class PipelineStep {
+		private SimpleAction action;
+		private Map<String, String> config;
+		private ActionExecutor executor;
+		
+		public PipelineStep(SimpleAction action) {
+			this(action, null, new SingleThreadExecutor());
+		}
+		
+		public PipelineStep(SimpleAction action, Map<String, String> config) {
+			this(action, config, new SingleThreadExecutor());
+		}
+		
+		public PipelineStep(SimpleAction action, Map<String, String> config, ActionExecutor executor) {
+			this.action = action;
+			this.config = config;
+			this.executor = executor;
+		}
+
+		public SimpleAction getAction() {
+			return action;
+		}
+		
+		public Map<String, String> getConfig() {
+			return config;
+		}
+		
+		public ActionExecutor getExecutor() {
+			return executor;
+		}
+	}
 
 	protected void assemble(JobConfig jobConfig,
 			ActionBuilder... actionBuilders) {

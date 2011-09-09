@@ -45,7 +45,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap, String docExistsMode) {
+			Map<String, Object> parameterMap, String path, String docExistsMode) {
 		// TODO: refactoring needed: a SourceSink shouldn't know about the
 		// parameterMap and setting the status, this should be done by the
 		// appropriate action, in this case SinkAction. The current code causes
@@ -54,8 +54,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		try {
 			RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			// run(ras);
-			String basePath = getParameterWithDefault(parameterMap,
-					SourceAction.PARAM_PATH, "/");
+			String basePath = (path == null) ? "/" : path;
 			if (!basePath.endsWith("/")) {
 				basePath = basePath + "/";
 			}

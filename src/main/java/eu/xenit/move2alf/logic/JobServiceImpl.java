@@ -8,13 +8,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
@@ -27,11 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.actor.UntypedActorFactory;
-import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
@@ -40,11 +34,8 @@ import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.ReportActor;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.SourceSinkFactory;
-import eu.xenit.move2alf.core.action.EmailAction;
-import eu.xenit.move2alf.core.action.MoveDocumentsAction;
-import eu.xenit.move2alf.core.action.ThreadAction;
-import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.MoveCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -75,8 +66,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
-
-	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
 
 	private ActorRef reportActor;
 
@@ -130,11 +119,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	public JobServiceImpl() {
-		registerCycleListener(new LoggingCycleListener());
-		registerCycleListener(new CommandCycleListener());
-		registerCycleListener(new MoveCycleListener());
-		registerCycleListener(new ReportCycleListener());
-
 		reportActor = actorOf(ReportActor.class).start();
 	}
 
@@ -477,39 +461,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		sessionFactory.getCurrentSession().delete(destination);
 	}
 
-	@Override
-	public void closeCycle(Cycle cycle) {
-		Session session = getSessionFactory().getCurrentSession();
-
-		Schedule schedule = cycle.getSchedule();
-		schedule.setState(EScheduleState.NOT_RUNNING);
-		session.update(schedule);
-
-		cycle.setEndDateTime(new Date());
-		session.update(cycle);
-
-		notifyCycleListenersEnd(cycle.getId());
-	}
-
-	@Override
-	public Cycle openCycleForSchedule(Integer scheduleId) {
-		Session session = getSessionFactory().getCurrentSession();
-
-		Schedule schedule = getSchedule(scheduleId);
-		Job job = schedule.getJob();
-		logger.debug("Executing job \"" + job.getName() + "\"");
-
-		Cycle cycle = new Cycle();
-		cycle.setSchedule(schedule);
-		cycle.setStartDateTime(new Date());
-		session.save(cycle);
-
-		schedule.setState(EScheduleState.RUNNING);
-		session.update(schedule);
-
-		return cycle;
-	}
-
 	public String getDuration(Date startDateTime, Date endDateTime) {
 		if (endDateTime == null) {
 			endDateTime = new Date();
@@ -552,95 +503,96 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void executeAction(int cycleId, ConfiguredAction action,
 			Map<String, Object> parameterMap) {
-
-		List<ConfiguredAction> runningActionsForCycle;
-		synchronized (this.runningActions) {
-			runningActionsForCycle = this.runningActions.get(cycleId);
-			if (runningActionsForCycle == null) {
-				// start of cycle
-				runningActionsForCycle = new LinkedList<ConfiguredAction>();
-				this.runningActions.put(cycleId, runningActionsForCycle);
-
-				notifyCycleListenersStart(cycleId, parameterMap);
-			}
-			runningActionsForCycle.add(action);
-		}
-
-		try {
-			logger.debug("Executing action: " + action.getId() + " - "
-					+ action.getClassName());
-			getActionFactory().execute(action, parameterMap);
-		} catch (Throwable e) {
-			/*
-			 * Catch unhandled exceptions, set error message and skip to move
-			 * and report actions.
-			 */
-			logger.error("Action " + action.getClassName() + " (id = "
-					+ action.getIdAsString()
-					+ ") threw an unhandled exception: " + e);
-			e.printStackTrace();
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
-
-			// send notification email
-			Map<String, String> emailParams = getActionParameters(cycleId,
-					EmailAction.class);
-			String sendNotification = emailParams.get("sendNotification");
-			String to = emailParams.get("emailAddressNotification");
-			if (to != null && !"".equals(to) && "true".equals(sendNotification)) {
-				Cycle cycle = getCycle(cycleId);
-				Job job = cycle.getSchedule().getJob();
-				String[] addresses = to.split(",");
-				SimpleMailMessage message = new SimpleMailMessage();
-				message.setFrom(Config.get("mail.from"));
-				message.setTo(addresses);
-				message.setSubject("Move2Alf error notification");
-				message.setText("Error in cycle " + cycleId + " of job "
-						+ job.getName() + ".\n" + "Message: " + e.getMessage()
-						+ "\n\nSent by Move2Alf");
-				sendMail(message);
-			}
-
-			logger.debug("Skipping to reporting");
-			ConfiguredAction nextAction = action
-					.getAppliedConfiguredActionOnSuccess();
-			while (nextAction != null) {
-				if (MoveDocumentsAction.class.getName().equals(
-						nextAction.getClassName())
-						&& Parameters.VALUE_AFTER.equals(nextAction
-								.getParameter(Parameters.PARAM_STAGE))) {
-					executeAction(cycleId, nextAction, parameterMap);
-					break;
-				} else if (ThreadAction.class.getName().equals(
-						nextAction.getClassName())) {
-					CountDownLatch counter = (CountDownLatch) parameterMap
-							.get(Parameters.PARAM_COUNTER);
-					counter.countDown();
-                    synchronized (ThreadAction.runningThreadsForCycle) {
-                        Integer threadCount = ThreadAction.runningThreadsForCycle.get(cycleId);
-                        if (threadCount == null) {
-                            ThreadAction.runningThreadsForCycle.put(cycleId, 0);
-                        }
-                    }
-				} else {
-					logger
-							.debug("Skipping action "
-									+ nextAction.getClassName());
-				}
-				nextAction = nextAction.getAppliedConfiguredActionOnSuccess();
-			}
-		}
-
-		// synchronized (this.runningActions) {
-		runningActionsForCycle.remove(action);
-
-		logger.debug("# Running actions: " + runningActionsForCycle.size());
-		logger.debug("Number of queued threads: {} ",
-				ThreadAction.runningThreadsForCycle.get(cycleId));
-
-		if (runningActionsForCycle.size() == 0) {
-			completeCycleStage(cycleId, 1);
-		}
+//
+//		List<ConfiguredAction> runningActionsForCycle;
+//		synchronized (this.runningActions) {
+//			runningActionsForCycle = this.runningActions.get(cycleId);
+//			if (runningActionsForCycle == null) {
+//				// start of cycle
+//				runningActionsForCycle = new LinkedList<ConfiguredAction>();
+//				this.runningActions.put(cycleId, runningActionsForCycle);
+//
+//				notifyCycleListenersStart(cycleId, parameterMap);
+//			}
+//			runningActionsForCycle.add(action);
+//		}
+//
+//		try {
+//			logger.debug("Executing action: " + action.getId() + " - "
+//					+ action.getClassName());
+//			getActionFactory().execute(action, parameterMap);
+//		} catch (Throwable e) {
+//			/*
+//			 * Catch unhandled exceptions, set error message and skip to move
+//			 * and report actions.
+//			 */
+//			logger.error("Action " + action.getClassName() + " (id = "
+//					+ action.getIdAsString()
+//					+ ") threw an unhandled exception: " + e);
+//			e.printStackTrace();
+//			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+//			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
+//
+//			// send notification email
+//			Map<String, String> emailParams = getActionParameters(cycleId,
+//					EmailAction.class);
+//			String sendNotification = emailParams.get("sendNotification");
+//			String to = emailParams.get("emailAddressNotification");
+//			if (to != null && !"".equals(to) && "true".equals(sendNotification)) {
+//				Cycle cycle = getCycle(cycleId);
+//				Job job = cycle.getSchedule().getJob();
+//				String[] addresses = to.split(",");
+//				SimpleMailMessage message = new SimpleMailMessage();
+//				message.setFrom(Config.get("mail.from"));
+//				message.setTo(addresses);
+//				message.setSubject("Move2Alf error notification");
+//				message.setText("Error in cycle " + cycleId + " of job "
+//						+ job.getName() + ".\n" + "Message: " + e.getMessage()
+//						+ "\n\nSent by Move2Alf");
+//				sendMail(message);
+//			}
+//
+//			logger.debug("Skipping to reporting");
+//			ConfiguredAction nextAction = action
+//					.getAppliedConfiguredActionOnSuccess();
+//			while (nextAction != null) {
+//				if (MoveDocumentsAction.class.getName().equals(
+//						nextAction.getClassName())
+//						&& Parameters.VALUE_AFTER.equals(nextAction
+//								.getParameter(Parameters.PARAM_STAGE))) {
+//					executeAction(cycleId, nextAction, parameterMap);
+//					break;
+//				} else if (ThreadAction.class.getName().equals(
+//						nextAction.getClassName())) {
+//					CountDownLatch counter = (CountDownLatch) parameterMap
+//							.get(Parameters.PARAM_COUNTER);
+//					counter.countDown();
+//					synchronized (ThreadAction.runningThreadsForCycle) {
+//						Integer threadCount = ThreadAction.runningThreadsForCycle
+//								.get(cycleId);
+//						if (threadCount == null) {
+//							ThreadAction.runningThreadsForCycle.put(cycleId, 0);
+//						}
+//					}
+//				} else {
+//					logger
+//							.debug("Skipping action "
+//									+ nextAction.getClassName());
+//				}
+//				nextAction = nextAction.getAppliedConfiguredActionOnSuccess();
+//			}
+//		}
+//
+//		// synchronized (this.runningActions) {
+//		runningActionsForCycle.remove(action);
+//
+//		logger.debug("# Running actions: " + runningActionsForCycle.size());
+//		logger.debug("Number of queued threads: {} ",
+//				ThreadAction.runningThreadsForCycle.get(cycleId));
+//
+//		if (runningActionsForCycle.size() == 0) {
+//			completeCycleStage(cycleId, 1);
+//		}
 	}
 
 	@Override
@@ -656,19 +608,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			action = action.getAppliedConfiguredActionOnSuccess();
 		}
 		return null;
-	}
-
-	private void notifyCycleListenersStart(int cycleId,
-			Map<String, Object> parameterMap) {
-		for (CycleListener listener : this.cycleListeners) {
-			listener.cycleStart(cycleId, parameterMap);
-		}
-	}
-
-	private void notifyCycleListenersEnd(int cycleId) {
-		for (CycleListener listener : this.cycleListeners) {
-			listener.cycleEnd(cycleId);
-		}
 	}
 
 	@Override
@@ -718,7 +657,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		secs = secs + 10;
 
 		if (secs > 59) {
-			secs = secs - 60; 
+			secs = secs - 60;
 			mins = mins + 1;
 
 			if (mins > 59) {
@@ -792,17 +731,19 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void createProcessedDocument(int cycleId, String name, Date date,
 			String state, Set<ProcessedDocumentParameter> params) {
 		logger.debug("Creating processed document:" + name);
-        try {
-            ProcessedDocument doc = new ProcessedDocument();
-            doc.setCycle(getCycle(cycleId));
-            doc.setName(name);
-            doc.setProcessedDateTime(date);
-            doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
-            doc.setProcessedDocumentParameterSet(params);
-            getSessionFactory().getCurrentSession().save(doc);
-        } catch (Exception e) {
-            logger.error("Failed to write " + name + " to report.", e);
-        }
+		try {
+			ProcessedDocument doc = new ProcessedDocument();
+			doc.setCycle(getCycle(cycleId));
+			doc.setName(name);
+			doc.setProcessedDateTime(date);
+			doc
+					.setStatus(EProcessedDocumentStatus.valueOf(state
+							.toUpperCase()));
+			doc.setProcessedDocumentParameterSet(params);
+			getSessionFactory().getCurrentSession().save(doc);
+		} catch (Exception e) {
+			logger.error("Failed to write " + name + " to report.", e);
+		}
 	}
 
 	@Override
@@ -812,12 +753,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		} catch (MailException e) {
 			logger.warn("Failed to send email (" + e.getMessage() + ")");
 		}
-	}
-
-	@Override
-	public void registerCycleListener(CycleListener listener) {
-		listener.setJobService(this);
-		this.cycleListeners.add(listener);
 	}
 
 	/*
@@ -873,20 +808,24 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<HistoryInfo> getHistory(int jobId) {
 		List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
 		Session s = getSessionFactory().getCurrentSession();
-		List<Object[]> history =
-			s.createSQLQuery(String.format("select cycle.id as id, count(processedDocument.id) as count,"
-				+ " cycle.startDateTime as startDateTime, schedule.state as state" 
-				+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId join schedule on schedule.id=cycle.scheduleId"
-				+ " where schedule.jobId=%d group by cycle.id order by cycle.startDateTime desc;", jobId))
-				.addScalar("id", StandardBasicTypes.INTEGER)
-				.addScalar("count", StandardBasicTypes.INTEGER)
-				.addScalar("startDateTime", StandardBasicTypes.TIMESTAMP)
-				.addScalar("state", StandardBasicTypes.STRING)
-				.list();
-		for(Object[] cycle : history) {
-			historyList.add(new HistoryInfo((Integer) cycle[0], (Date) cycle[2], (String) cycle[3], (Integer) cycle[1]));
+		List<Object[]> history = s
+				.createSQLQuery(
+						String
+								.format(
+										"select cycle.id as id, count(processedDocument.id) as count,"
+												+ " cycle.startDateTime as startDateTime, schedule.state as state"
+												+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId join schedule on schedule.id=cycle.scheduleId"
+												+ " where schedule.jobId=%d group by cycle.id order by cycle.startDateTime desc;",
+										jobId)).addScalar("id",
+						StandardBasicTypes.INTEGER).addScalar("count",
+						StandardBasicTypes.INTEGER).addScalar("startDateTime",
+						StandardBasicTypes.TIMESTAMP).addScalar("state",
+						StandardBasicTypes.STRING).list();
+		for (Object[] cycle : history) {
+			historyList.add(new HistoryInfo((Integer) cycle[0],
+					(Date) cycle[2], (String) cycle[3], (Integer) cycle[1]));
 		}
-		
+
 		return historyList;
 	}
 
