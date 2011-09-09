@@ -30,6 +30,7 @@ import eu.xenit.move2alf.core.simpleaction.SASource;
 import eu.xenit.move2alf.core.simpleaction.SAUpload;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.SimpleActionWrapper;
+import eu.xenit.move2alf.core.simpleaction.execution.ThreadedExecutor;
 import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
@@ -471,7 +472,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			SimpleAction transformAction = new SimpleActionWrapper(
 					getActionFactory().getObject(jobConfig.getMetadata()));
 			Map<String, String> transformConfig = transformParameters(jobConfig);
-			pipeline.add(new PipelineStep(transformAction, transformConfig));
+			pipeline.add(new PipelineStep(transformAction, transformConfig, new ThreadedExecutor()));
 		}
 
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
@@ -484,7 +485,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			Map<String, String> uploadConfig = new HashMap<String, String>();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
 		}
 		if ("Delete".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
@@ -494,7 +495,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			Map<String, String> uploadConfig = new HashMap<String, String>();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
 		}
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
@@ -504,7 +505,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			Map<String, String> uploadConfig = new HashMap<String, String>();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
 		}
 		
 		pipeline.add(new PipelineStep(new SAConvertFailsToException()));
