@@ -5,7 +5,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,4 +123,54 @@ public class Util {
 			}
 		}
 	}
+	
+    public static String ISO8601format(Date isoDate)
+    {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(isoDate);
+        
+        StringBuilder formatted = new StringBuilder(28);
+        padInt(formatted, calendar.get(Calendar.YEAR), 4);
+        formatted.append('-');
+        padInt(formatted, calendar.get(Calendar.MONTH) + 1, 2);
+        formatted.append('-');
+        padInt(formatted, calendar.get(Calendar.DAY_OF_MONTH), 2);
+        formatted.append('T');
+        padInt(formatted, calendar.get(Calendar.HOUR_OF_DAY), 2);
+        formatted.append(':');
+        padInt(formatted, calendar.get(Calendar.MINUTE), 2);
+        formatted.append(':');
+        padInt(formatted, calendar.get(Calendar.SECOND), 2);
+        formatted.append('.');
+        padInt(formatted, calendar.get(Calendar.MILLISECOND), 3);
+        
+        TimeZone tz = calendar.getTimeZone();
+        int offset = tz.getOffset(calendar.getTimeInMillis());
+        if (offset != 0)
+        {
+            int hours = Math.abs((offset / (60 * 1000)) / 60);
+            int minutes = Math.abs((offset / (60 * 1000)) % 60);
+            formatted.append(offset < 0 ? '-' : '+');
+            padInt(formatted, hours, 2);
+            formatted.append(':');
+            padInt(formatted, minutes, 2);
+        } 
+        else
+        {
+            formatted.append('Z');
+        }
+        
+        return formatted.toString();
+    }
+
+
+    private static void padInt(StringBuilder buffer, int value, int length)
+    {
+        String strValue = Integer.toString(value);
+        for (int i = length - strValue.length(); i > 0; i--)
+        {
+            buffer.append('0');
+        }
+        buffer.append(strValue);
+    }
 }
