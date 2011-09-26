@@ -21,28 +21,30 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class FilesystemMetadataAction extends Action {
 
-	private static final Logger logger = LoggerFactory.getLogger(FilesystemMetadataAction.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(FilesystemMetadataAction.class);
+
 	private final static String fsPropCreationDate = "creationDate";
 	private final static String fsPropCreator = "creator";
 	private final static String fsPropModifyDate = "modifyDate";
-	
-	
+
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,
 			Map<String, Object> parameterMap) {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-		
+
 		// write to metadata map
-		Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
+		Map<String, String> metadata = (Map<String, String>) parameterMap
+				.get(Parameters.PARAM_METADATA);
 		if (metadata == null) {
 			metadata = new HashMap<String, String>();
 			parameterMap.put(Parameters.PARAM_METADATA, metadata);
 		}
 		Map<String, String> fileSystemPropertyMap = getFileSystemProperties(file);
 		metadata.putAll(fileSystemPropertyMap);
-		
-		parameterMap.put(Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
+
+		parameterMap.put(Parameters.PARAM_NAMESPACE,
+				"{http://www.alfresco.org/model/content/1.0}");
 		parameterMap.put(Parameters.PARAM_CONTENTTYPE, "content");
 	}
 
@@ -60,14 +62,14 @@ public class FilesystemMetadataAction extends Action {
 	public String getName() {
 		return "Filesystem metadata";
 	}
-	
+
 	private Map<String, String> getFileSystemProperties(File file) {
 		Map<String, String> fileSystemPropertyMap = new HashMap<String, String>();
 		String os = System.getProperty("os.name");
-		logger.info("OS {}", os);
+		logger.debug("OS {}", os);
 		boolean windows = os.contains("Windows");
-		try{
-		if (windows) {
+		try {
+			if (windows) {
 				// the program extractWindowsFileSystemProperties outputs:
 				// line 0: owner
 				// line 1: creationDate
@@ -77,88 +79,57 @@ public class FilesystemMetadataAction extends Action {
 				String programPath = "lib/extractWindowsFileSystemProperties";
 				String[] commandArray = { programPath, filePath };
 
-				// old non streamGobbler code
-//				ProcessBuilder pb = new ProcessBuilder(commandArray);
-//				pb.redirectErrorStream(true);
-//				java.lang.Process process = pb.start();
-//
-//				InputStream is = process.getInputStream();
-//				InputStreamReader isr = new InputStreamReader(is);
-//				BufferedReader br = new BufferedReader(isr);
-//				String line;
-//                List<String> ouputLineList = new ArrayList<String>();
-//				while ((line = br.readLine()) != null) {
-//					logger.debug(line);
-//					ouputLineList.add(line);
-//				}
-//				try {
-//					process.waitFor();
-//				} catch (InterruptedException ie) {
-//					throw new IOException(
-//							"Problem running Extract_Owner, InterruptedException: "
-//									+ ie);
-//				}
-				
 				java.lang.Process p = Runtime.getRuntime().exec(commandArray);
 				StringBuffer errorBuffer = new StringBuffer();
-				try{
-				String output = StreamGobbler.executeCommand(p);
-				String[] lines = output.split("\n");
-				logger.info("ExtractWindowsFileSystemProperties execution ok");
-				if(lines.length>0){
-					fileSystemPropertyMap.put(fsPropCreator, lines[0]);
-				}
-				if(lines.length>1){
-					fileSystemPropertyMap.put(fsPropCreationDate, lines[1]);
-				}
-				if(lines.length>2){
-					fileSystemPropertyMap.put(fsPropModifyDate, lines[2]);
+				try {
+					String output = StreamGobbler.executeCommand(p);
+					String[] lines = output.split("\n");
+					logger
+							.debug("ExtractWindowsFileSystemProperties execution ok");
+					if (lines.length > 0) {
+						fileSystemPropertyMap.put(fsPropCreator, lines[0]);
+					}
+					if (lines.length > 1) {
+						fileSystemPropertyMap.put(fsPropCreationDate, lines[1]);
+					}
+					if (lines.length > 2) {
+						fileSystemPropertyMap.put(fsPropModifyDate, lines[2]);
+					}
+
+				} catch (ProcessErrorException e) {
+					logger
+							.error(
+									"Error while running ExtractWindowsFileSystemProperties {}",
+									errorBuffer.toString());
 				}
 
-				}catch(ProcessErrorException e){
-					logger.error("Error while running ExtractWindowsFileSystemProperties {}",errorBuffer.toString());
-				}
-				
-		} else {
-				String[] commandArray = { "/bin/ls", "-l", file.getAbsolutePath() };
-				
-				// old non streamGobbler code
-//				java.lang.Process q = Runtime.getRuntime().exec(commandArray);
-//				InputStreamReader isr = new InputStreamReader(q
-//						.getInputStream());
-//				BufferedReader br = new BufferedReader(isr);
-//
-//				String line = null;
-//				while ((line = br.readLine()) != null) {
-//
-//					String[] lineSplit = line.split(" ");
-//					owner = lineSplit[2];
-//				}
-//
-//				br.close();
-//				isr.close();
-				
+			} else {
+				// UNIX: get creator with ls command
+				String[] commandArray = { "/bin/ls", "-l",
+						file.getAbsolutePath() };
+
 				java.lang.Process p = Runtime.getRuntime().exec(commandArray);
-				try{
-				   String output = StreamGobbler.executeCommand(p);
+				try {
+					String output = StreamGobbler.executeCommand(p);
 					String[] lines = output.split("\n");
-					if(lines.length>0){
+					if (lines.length > 0) {
 						String[] lineSplit = lines[0].split(" ");
 						fileSystemPropertyMap.put(fsPropCreator, lineSplit[2]);
 					}
-				}catch(ProcessErrorException e){
+				} catch (ProcessErrorException e) {
 
-					logger.error("Error while running /bin/ls {}",e.getMessage());					
+					logger.error("Error while running /bin/ls {}", e
+							.getMessage());
 				}
-				 // Getting the date
-				 // On linux with filesystems ETX1,2,3 there is no creation date
-				 // For this case we set creation date to modify date
+				// Getting the date
+				// On linux with filesystems ETX1,2,3 there is no creation date
+				// For this case we set creation date to modify date
 				// For ETX4 a creation date will be present
-				 Date dateLastModified = new Date(file.lastModified());
-				 String lastModifyDate = Util.ISO8601format(dateLastModified);
-				 fileSystemPropertyMap.put(fsPropCreationDate, lastModifyDate);
-				 fileSystemPropertyMap.put(fsPropModifyDate, lastModifyDate);
-		}
+				Date dateLastModified = new Date(file.lastModified());
+				String lastModifyDate = Util.ISO8601format(dateLastModified);
+				fileSystemPropertyMap.put(fsPropCreationDate, lastModifyDate);
+				fileSystemPropertyMap.put(fsPropModifyDate, lastModifyDate);
+			}
 		} catch (IOException e) {
 			logger.error("", e);
 		}
@@ -166,4 +137,3 @@ public class FilesystemMetadataAction extends Action {
 		return fileSystemPropertyMap;
 	}
 }
-

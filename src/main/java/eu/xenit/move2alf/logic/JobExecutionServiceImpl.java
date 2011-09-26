@@ -36,6 +36,7 @@ import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
+import eu.xenit.move2alf.core.simpleaction.execution.SingleThreadExecutor;
 import eu.xenit.move2alf.core.simpleaction.execution.ThreadedExecutor;
 import eu.xenit.move2alf.logic.PipelineAssembler.PipelineStep;
 import eu.xenit.move2alf.web.dto.JobConfig;
@@ -53,6 +54,8 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	private PipelineAssembler pipelineAssembler;
 
 	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
+
+	private ErrorHandler errorHandler = new ErrorHandler();
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -111,7 +114,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		}
 
 		for (PipelineStep step : pipeline) {
-			input = executeJobStep(step, input, jobConfig, cycle);
+			input = executePipelineStep(step, input, jobConfig, cycle);
 		}
 
 		for (Map<String, Object> successFullFile : input) {
@@ -120,7 +123,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	}
 
 	// TODO: make multithreaded by passing executor ...
-	private List<Map<String, Object>> executeJobStep(PipelineStep step,
+	private List<Map<String, Object>> executePipelineStep(PipelineStep step,
 			List<Map<String, Object>> input, JobConfig jobConfig, Cycle cycle) {
 		SimpleAction action = step.getAction();
 		Map<String, String> config = step.getConfig();
@@ -128,60 +131,40 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 		logger.debug("STEP: " + action.getClass().toString());
 		logger.debug(" * INPUT: " + input.size() + " files");
-		List<Map<String, Object>> output = new ArrayList<Map<String, Object>>();
-		// if (executor instanceof ThreadedExecutor) {
-		// CountDownLatch counter = new CountDownLatch(input.size());
-		//	
-		// try {
-		// counter.await();
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// } else {
-		for (Map<String, Object> parameterMap : input) {
-			try {
-				List<Map<String, Object>> result = action.execute(parameterMap,
-						config);
-				if (result != null) {
-					output.addAll(result);
-				}
-			} catch (Exception e) {
-				handleError(parameterMap, jobConfig, cycle, e);
-			}
-		}
-		// }
+
+		List<Map<String, Object>> output = executor.execute(input, jobConfig, cycle, action, config, errorHandler);
+
 		logger.debug(" * OUTPUT: " + output.size() + " files");
 		return output;
 	}
 
-	class ActionThread extends Thread {
+	public class ErrorHandler {
+		public void handleError(Map<String, Object> parameterMap, JobConfig jobConfig,
+				Cycle cycle, Exception e) {
+			// TODO: handle cleaner?
+			File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 
-	}
+			// reporting
+			Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
+			ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+			msg.setName(Parameters.PARAM_ERROR_MESSAGE);
+			msg.setValue(e.getClass().getName() + ": " + e.getMessage());
+			// Report everything using the first (deprecated) ConfiguredAction
+			// of
+			// the job.
+			msg.setConfiguredAction(cycle.getSchedule().getJob()
+					.getFirstConfiguredAction());
+			params.add(msg);
+			getJobService().getReportActor().sendOneWay(
+					new ReportMessage(cycle.getId(), file.getName(),
+							new Date(), Parameters.VALUE_FAILED, params));
 
-	private void handleError(Map<String, Object> parameterMap,
-			JobConfig jobConfig, Cycle cycle, Exception e) {
-		// TODO: handle cleaner?
-		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-
-		// reporting
-		Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
-		ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
-		msg.setName(Parameters.PARAM_ERROR_MESSAGE);
-		msg.setValue(e.getClass().getName() + ": " + e.getMessage());
-		// Report everything using the first (deprecated) ConfiguredAction of
-		// the job.
-		msg.setConfiguredAction(cycle.getSchedule().getJob()
-				.getFirstConfiguredAction());
-		params.add(msg);
-		getJobService().getReportActor().sendOneWay(
-				new ReportMessage(cycle.getId(), file.getName(), new Date(),
-						Parameters.VALUE_FAILED, params));
-
-		// move
-		if ("true".equals(jobConfig.getMoveNotLoad())) {
-			String inputFolder = (String) parameterMap
-					.get(Parameters.PARAM_INPUT_PATH);
-			Util.moveFile(inputFolder, jobConfig.getNotLoadPath(), file);
+			// move
+			if ("true".equals(jobConfig.getMoveNotLoad())) {
+				String inputFolder = (String) parameterMap
+						.get(Parameters.PARAM_INPUT_PATH);
+				Util.moveFile(inputFolder, jobConfig.getNotLoadPath(), file);
+			}
 		}
 	}
 
@@ -196,7 +179,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 						.getSchedule().getJob().getFirstConfiguredAction());
 		getJobService().getReportActor().sendOneWay(
 				new ReportMessage(cycle.getId(), file.getName(), new Date(),
-					Parameters.VALUE_OK, params));
+						Parameters.VALUE_OK, params));
 
 		// move
 		if ("true".equals(jobConfig.getMoveAfterLoad())) {

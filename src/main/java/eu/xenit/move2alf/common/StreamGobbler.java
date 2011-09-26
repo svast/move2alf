@@ -29,7 +29,7 @@ public class StreamGobbler extends Thread {
 	String type;
 
 	String result = null;
-	
+
 	boolean ready = false;
 
 	public StreamGobbler(InputStream is, String type) {
@@ -45,7 +45,7 @@ public class StreamGobbler extends Thread {
 		try {
 			StringBuffer buffer = new StringBuffer();
 			while ((line = br.readLine()) != null) {
-				   buffer.append(line).append("\n");
+				buffer.append(line).append("\n");
 				logger.debug(line);
 			}
 			result = buffer.toString();
@@ -55,12 +55,11 @@ public class StreamGobbler extends Thread {
 			isr.close();
 		} catch (IOException ioe) {
 			logger.error("IOException in StreamGobbler", ioe);
-			ready=true;
+			ready = true;
 		}
 		logger.debug("********************************************");
 	}
 
-	
 	public String getResult() {
 		return result;
 	}
@@ -85,20 +84,19 @@ public class StreamGobbler extends Thread {
 
 		try {
 			int returnCode = p.waitFor();
-			while(!outputGobbler.isReady()){
+			while (!outputGobbler.isReady()) {
 				Thread.sleep(10);
-				logger.info("Waiting on Output Thread");
+				logger.debug("Waiting on Output Thread");
 			}
 			String output = outputGobbler.getResult();
-			while(!errorGobbler.isReady()){
+			while (!errorGobbler.isReady()) {
 				Thread.sleep(10);
-				logger.info("Waiting on Error Thread");
+				logger.debug("Waiting on Error Thread");
 			}
 			String error = errorGobbler.getResult();
-			
-			logger.info(error);
-			logger.info(output);
-			
+
+			logger.debug(error);
+			logger.debug(output);
 
 			if (error.length() > 0) {
 				logger.warn(error);
