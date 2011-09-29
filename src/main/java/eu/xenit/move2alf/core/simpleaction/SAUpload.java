@@ -1,12 +1,13 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 
@@ -22,10 +23,11 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	}
 
 	@Override
-	public List<Map<String, Object>> execute(Map<String, Object> parameterMap,
-			Map<String, String> config) {
-		List<Map<String, Object>> output = new ArrayList<Map<String, Object>>();
-		Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
+	public List<FileInfo> execute(FileInfo parameterMap,
+			ActionConfig config) {
+		List<FileInfo> output = new ArrayList<FileInfo>();
+		FileInfo newParameterMap = new FileInfo();
+		newParameterMap.putAll(parameterMap);
 		getSink().send(getSinkConfig(), newParameterMap, config.get(PARAM_PATH),
 				config.get(PARAM_DOCUMENT_EXISTS));
 		output.add(newParameterMap);

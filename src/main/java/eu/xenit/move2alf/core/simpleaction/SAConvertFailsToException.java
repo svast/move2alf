@@ -1,15 +1,16 @@
 package eu.xenit.move2alf.core.simpleaction;
 
-import java.util.Map;
-
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionSingleResult;
 
 public class SAConvertFailsToException extends SimpleActionSingleResult {
 
 	@Override
-	public Map<String, Object> executeSingleResult(
-			Map<String, Object> parameterMap, Map<String, String> config) {
+	public FileInfo executeSingleResult(
+			FileInfo parameterMap, ActionConfig config) {
 		String status = "";
 		String message = "";
 		try {

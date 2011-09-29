@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.SourceSinkFactory;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -29,15 +31,16 @@ import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
 import eu.xenit.move2alf.core.simpleaction.SASource;
 import eu.xenit.move2alf.core.simpleaction.SAUpload;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
-import eu.xenit.move2alf.core.simpleaction.SimpleActionWrapper;
-import eu.xenit.move2alf.core.simpleaction.execution.ThreadedExecutor;
-import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
+import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	private ActionFactory actionFactory;
+	private SourceSinkFactory sourceSinkFactory;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PipelineAssemblerImpl.class);
@@ -49,6 +52,15 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	public ActionFactory getActionFactory() {
 		return actionFactory;
+	}
+
+	@Autowired
+	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
+		this.sourceSinkFactory = sourceSinkFactory;
+	}
+
+	public SourceSinkFactory getSourceSinkFactory() {
+		return sourceSinkFactory;
 	}
 
 	@Override
@@ -231,9 +243,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		assemble(jobConfig, actionsArray);
 	}
 
-	private Map<String, String> transformParameters(JobConfig jobConfig) {
+	private ActionConfig transformParameters(JobConfig jobConfig) {
 		List<String> transformParameterList = jobConfig.getParamTransform();
-		Map<String, String> transformParameterMap = new HashMap<String, String>();
+		ActionConfig transformParameterMap = new ActionConfig();
 
 		if (transformParameterList != null) {
 			String[] transformParameter = new String[2];
@@ -255,9 +267,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		return transformParameterMap;
 	}
 
-	private Map<String, String> metadataParameters(JobConfig jobConfig) {
+	private ActionConfig metadataParameters(JobConfig jobConfig) {
 		List<String> metadataParameterList = jobConfig.getParamMetadata();
-		Map<String, String> metadataParameterMap = new HashMap<String, String>();
+		ActionConfig metadataParameterMap = new ActionConfig();
 
 		if (metadataParameterList != null) {
 			String[] metadataParameter = new String[2];
@@ -450,7 +462,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		pipeline.add(new PipelineStep(new SASource()));
 
 		if ("true".equals(jobConfig.getMoveBeforeProc())) {
-			Map<String, String> moveBeforeConfig = new HashMap<String, String>();
+			ActionConfig moveBeforeConfig = new ActionConfig();
 			moveBeforeConfig.put(
 					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
 					jobConfig.getBeforeProcPath());
@@ -458,21 +470,26 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					moveBeforeConfig));
 		}
 
-		Map<String, String> filterConfig = new HashMap<String, String>();
+		ActionConfig filterConfig = new ActionConfig();
 		filterConfig.put(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
 		pipeline.add(new PipelineStep(new SAFilter(), filterConfig));
 		pipeline.add(new PipelineStep(new SAMimeType()));
 
 		SimpleAction metadataAction = new SimpleActionWrapper(
 				getActionFactory().getObject(jobConfig.getMetadata()));
-		Map<String, String> metadataConfig = metadataParameters(jobConfig);
+		ActionConfig metadataConfig = metadataParameters(jobConfig);
 		pipeline.add(new PipelineStep(metadataAction, metadataConfig));
 
-		if (!"No transformation".equals(jobConfig.getTransform())) {
+		if (!("No transformation".equals(jobConfig.getTransform()) || "".equals(jobConfig.getTransform()))) {
+			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
 			SimpleAction transformAction = new SimpleActionWrapper(
-					getActionFactory().getObject(jobConfig.getMetadata()));
-			Map<String, String> transformConfig = transformParameters(jobConfig);
-			pipeline.add(new PipelineStep(transformAction, transformConfig, new ThreadedExecutor()));
+					getActionFactory().getObject(jobConfig.getTransform()));
+			ActionConfig transformConfig = transformParameters(jobConfig);
+			// TODO: configure number of transformer threads differently from number of Alfresco threads
+			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
+					Integer.parseInt(jobConfig.getDest()));
+			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
+			pipeline.add(new PipelineStep(transformAction, transformConfig, new ActionExecutor(executorService)));
 		}
 
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
@@ -480,32 +497,35 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
 					Integer.parseInt(jobConfig.getDest()));
-			SourceSink sink = new AlfrescoSourceSink();
+			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
+			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SAUpload(sink, sinkConfig);
-			Map<String, String> uploadConfig = new HashMap<String, String>();
+			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
 		}
 		if ("Delete".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
 					Integer.parseInt(jobConfig.getDest()));
-			SourceSink sink = new AlfrescoSourceSink();
+			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
+			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SADelete(sink, sinkConfig);
-			Map<String, String> uploadConfig = new HashMap<String, String>();
+			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
 		}
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
 					Integer.parseInt(jobConfig.getDest()));
-			SourceSink sink = new AlfrescoSourceSink();
+			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
+			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SAList(sink, sinkConfig);
-			Map<String, String> uploadConfig = new HashMap<String, String>();
+			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ThreadedExecutor()));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
 		}
 		
 		pipeline.add(new PipelineStep(new SAConvertFailsToException()));

@@ -20,7 +20,7 @@ public class FileSourceSink extends SourceSink {
 	@Override
 	public List<File> list(ConfiguredSourceSink sourceConfig, String path,
 			boolean recursive) {
-		logger.debug("Reading files from " + path);
+		logger.info("Reading files from " + path);
 		File source = new File(path);
 		if(source.exists() == false){
 			source.mkdir();

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 public class SAMoveBeforeProcessing extends SimpleAction {
 
@@ -20,10 +22,10 @@ public class SAMoveBeforeProcessing extends SimpleAction {
 	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
 
 	@Override
-	public List<Map<String, Object>> execute(
-			final Map<String, Object> parameterMap,
-			final Map<String, String> config) {
-		List<Map<String, Object>> output = new ArrayList<Map<String, Object>>();
+	public List<FileInfo> execute(
+			final FileInfo parameterMap,
+			final ActionConfig config) {
+		List<FileInfo> output = new ArrayList<FileInfo>();
 		String destination = config.get(PARAM_MOVE_BEFORE_PROCESSING_PATH);
 		String source = (String) parameterMap.get(Parameters.PARAM_INPUT_PATH);
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);

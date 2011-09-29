@@ -3,12 +3,13 @@ package eu.xenit.move2alf.core.simpleaction;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 public class SAFilter extends SimpleAction {
 
@@ -18,9 +19,9 @@ public class SAFilter extends SimpleAction {
 			.getLogger(SAFilter.class);
 
 	@Override
-	public List<Map<String, Object>> execute(
-			final Map<String, Object> parameterMap,
-			final Map<String, String> config) {
+	public List<FileInfo> execute(
+			final FileInfo parameterMap,
+			final ActionConfig config) {
 		String extension =  config.get(PARAM_EXTENSION);
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		
@@ -28,7 +29,7 @@ public class SAFilter extends SimpleAction {
 			extension = extension.substring(1);
 		}
 
-		List<Map<String, Object>> output = new ArrayList<Map<String, Object>>();
+		List<FileInfo> output = new ArrayList<FileInfo>();
 		if ("".equals(extension)
 				|| extension == null
 				|| file.getPath().toLowerCase().endsWith(

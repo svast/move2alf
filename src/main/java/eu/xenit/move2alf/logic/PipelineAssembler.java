@@ -16,8 +16,8 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
-import eu.xenit.move2alf.core.simpleaction.execution.SingleThreadExecutor;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Transactional
@@ -36,19 +36,20 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 	public abstract List<PipelineStep> getPipeline(JobConfig jobConfig);
 	
 	public class PipelineStep {
+		
 		private SimpleAction action;
-		private Map<String, String> config;
+		private ActionConfig config;
 		private ActionExecutor executor;
 		
 		public PipelineStep(SimpleAction action) {
-			this(action, null, new SingleThreadExecutor());
+			this(action, null, new ActionExecutor());
 		}
 		
-		public PipelineStep(SimpleAction action, Map<String, String> config) {
-			this(action, config, new SingleThreadExecutor());
+		public PipelineStep(SimpleAction action, ActionConfig config) {
+			this(action, config, new ActionExecutor());
 		}
 		
-		public PipelineStep(SimpleAction action, Map<String, String> config, ActionExecutor executor) {
+		public PipelineStep(SimpleAction action, ActionConfig config, ActionExecutor executor) {
 			this.action = action;
 			this.config = config;
 			this.executor = executor;
@@ -58,7 +59,7 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 			return action;
 		}
 		
-		public Map<String, String> getConfig() {
+		public ActionConfig getConfig() {
 			return config;
 		}
 		

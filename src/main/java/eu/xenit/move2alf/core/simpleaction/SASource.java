@@ -2,28 +2,28 @@ package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.FileSourceSink;
 
 public class SASource extends SimpleAction {
 
 	@Override
-	public List<Map<String, Object>> execute(
-			final Map<String, Object> parameterMap,
-			final Map<String, String> config) {
+	public List<FileInfo> execute(
+			final FileInfo parameterMap,
+			final ActionConfig config) {
 		FileSourceSink source = new FileSourceSink();
 		File inputFile = (File) parameterMap.get(Parameters.PARAM_FILE);
 		String inputPath = Util.normalizePath(inputFile.getAbsolutePath());
 
 		List<File> files = source.list(null, inputFile.getAbsolutePath(), true);
-		List<Map<String, Object>> output = new ArrayList<Map<String, Object>>();
+		List<FileInfo> output = new ArrayList<FileInfo>();
 		for (File file : files) {
-			Map<String, Object> fileMap = new HashMap<String, Object>();
+			FileInfo fileMap = new FileInfo();
 			fileMap.put(Parameters.PARAM_FILE, file);
 			fileMap.put(Parameters.PARAM_INPUT_FILE, file);
 			List<File> transformFiles = new ArrayList<File>();

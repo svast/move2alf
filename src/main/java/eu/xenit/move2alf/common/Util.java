@@ -61,7 +61,6 @@ public class Util {
 	}
 
 	public static String relativePath(final String inputPath, final File file) {
-		logger.debug("RELATIVE PATH: " + inputPath + " - " + file.getAbsolutePath());
 		String filePath = normalizePath(file.getAbsolutePath());
 		String relativePath = filePath;
 		if (filePath.contains("/")) {
@@ -161,6 +160,24 @@ public class Util {
         }
         
         return formatted.toString();
+    }
+    
+    /*
+     * Based on "Java Concurrency in Practice"
+     * 
+     * Used to convert Throwable to RuntimeException. This is useful when
+     * rethrowing the cause of an Exception (for example the ExecutionException
+     * when using java.util.concurrent) since getCause returns a Throwable
+     * which is not practical to use.
+     */
+    public static RuntimeException launderThrowable(Throwable t) {
+    	if (t instanceof RuntimeException) {
+    		return (RuntimeException) t;
+    	} else if (t instanceof Error) {
+    		throw (Error) t;
+    	} else {
+    		throw new IllegalStateException("Not unchecked", t);
+    	}
     }
 
 

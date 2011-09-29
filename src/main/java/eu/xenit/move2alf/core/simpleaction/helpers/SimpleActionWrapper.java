@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core.simpleaction;
+package eu.xenit.move2alf.core.simpleaction.helpers;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,15 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.simpleaction.SimpleAction;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 
 public class SimpleActionWrapper extends SimpleAction {
 
-	private List<Map<String, Object>> output;
+	private List<FileInfo> output;
 	private final Action action;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SimpleActionWrapper.class);
@@ -40,12 +44,16 @@ public class SimpleActionWrapper extends SimpleAction {
 	}
 
 	@Override
-	public List<Map<String, Object>> execute(
-			final Map<String, Object> parameterMap,
-			final Map<String, String> config) {
-		output = new ArrayList<Map<String, Object>>();
+	public List<FileInfo> execute(
+			final FileInfo parameterMap,
+			final ActionConfig config) {
+		logger.debug("Wrapping action {} ({})", action.getName(), action.getClass().getName());
+		
+		output = new ArrayList<FileInfo>();
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
 		parameterMap.put(Parameters.PARAM_CYCLE, 0); // hack
+		parameterMap.put(Parameters.PARAM_COUNTER, new CountDownLatch(0));
+		// some old actions except PARAM_COUNTER to be present, it's added here to prevent NPEs
 		
 		ConfiguredAction configuredAction = new ConfiguredAction();
 		configuredAction.setParameters(config);
@@ -62,7 +70,9 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public void executeAction(int cycleId, ConfiguredAction action,
 				Map<String, Object> parameterMap) {
-			output.add(parameterMap);
+			FileInfo fileInfo = new FileInfo();
+			fileInfo.putAll(parameterMap);
+			output.add(fileInfo);
 		}
 
 		// //////////////////////////////////////////////////////////////

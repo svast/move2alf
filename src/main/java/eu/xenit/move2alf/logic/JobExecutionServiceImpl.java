@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.PostConstruct;
 
@@ -33,11 +32,10 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
-import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
+import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
-import eu.xenit.move2alf.core.simpleaction.execution.SingleThreadExecutor;
-import eu.xenit.move2alf.core.simpleaction.execution.ThreadedExecutor;
 import eu.xenit.move2alf.logic.PipelineAssembler.PipelineStep;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
@@ -100,14 +98,14 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 		// execute job...
 		List<String> inputFolders = jobConfig.getInputFolder();
-		List<Map<String, Object>> input = new ArrayList<Map<String, Object>>();
+		List<FileInfo> input = new ArrayList<FileInfo>();
 		for (String inputFolder : inputFolders) {
-			Map<String, Object> inputMap = new HashMap<String, Object>();
+			FileInfo inputMap = new FileInfo();
 			inputMap.put(Parameters.PARAM_FILE, new File(inputFolder));
 			input.add(inputMap);
 		}
 		if ("true".equals(jobConfig.getMoveNotLoad())) {
-			Map<String, Object> inputMap = new HashMap<String, Object>();
+			FileInfo inputMap = new FileInfo();
 			inputMap.put(Parameters.PARAM_FILE, new File(jobConfig
 					.getNotLoadPath()));
 			input.add(inputMap);
@@ -117,29 +115,33 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 			input = executePipelineStep(step, input, jobConfig, cycle);
 		}
 
-		for (Map<String, Object> successFullFile : input) {
+		for (FileInfo successFullFile : input) {
 			handleSuccess(successFullFile, jobConfig, cycle);
 		}
 	}
 
 	// TODO: make multithreaded by passing executor ...
-	private List<Map<String, Object>> executePipelineStep(PipelineStep step,
-			List<Map<String, Object>> input, JobConfig jobConfig, Cycle cycle) {
+	private List<FileInfo> executePipelineStep(PipelineStep step,
+			List<FileInfo> input, JobConfig jobConfig, Cycle cycle) {
 		SimpleAction action = step.getAction();
-		Map<String, String> config = step.getConfig();
+		ActionConfig config = step.getConfig();
 		ActionExecutor executor = step.getExecutor();
+		
+		Date start = new Date();
+		int numberOfInputFiles = input.size();
+		logger.info("STEP: " + action.getClass().toString());
+		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
-		logger.debug("STEP: " + action.getClass().toString());
-		logger.debug(" * INPUT: " + input.size() + " files");
+		List<FileInfo> output = executor.execute(input, jobConfig, cycle, action, config, errorHandler);
 
-		List<Map<String, Object>> output = executor.execute(input, jobConfig, cycle, action, config, errorHandler);
-
-		logger.debug(" * OUTPUT: " + output.size() + " files");
+		Date stop = new Date();
+		long time = stop.getTime() - start.getTime();
+		logger.info(" * OUTPUT: " + output.size() + " files in " + time + " ms - " + new Float(numberOfInputFiles) / time * 1000 + " input files / sec");
 		return output;
 	}
 
 	public class ErrorHandler {
-		public void handleError(Map<String, Object> parameterMap, JobConfig jobConfig,
+		public void handleError(FileInfo parameterMap, JobConfig jobConfig,
 				Cycle cycle, Exception e) {
 			// TODO: handle cleaner?
 			File file = (File) parameterMap.get(Parameters.PARAM_FILE);
@@ -168,7 +170,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		}
 	}
 
-	private void handleSuccess(Map<String, Object> parameterMap,
+	private void handleSuccess(FileInfo parameterMap,
 			JobConfig jobConfig, Cycle cycle) {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 
