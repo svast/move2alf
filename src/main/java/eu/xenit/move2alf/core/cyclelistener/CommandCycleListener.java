@@ -15,35 +15,35 @@ import eu.xenit.move2alf.core.action.ExecuteCommandAction;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.SourceAction;
 
-public class CommandCycleListener extends CycleListener{
+public class CommandCycleListener extends CycleListener {
 
 	private static final Logger logger = LoggerFactory
-	.getLogger(CommandCycleListener.class);
+			.getLogger(CommandCycleListener.class);
 
 	@Override
 	public void cycleEnd(int cycleId) {
-	
+
 	}
 
 	@Override
 	public void cycleStart(int cycleId, Map<String, Object> parameterMap) {
-		
+
 		Map<String, String> commandParameters = getCommandActionParameter(cycleId);
-		// TODO Auto-generated method stub
-		String command = commandParameters
-		.get(ExecuteCommandAction.COMMAND);
-			
-		logger.debug("Command: "+command);
-		if(command != null && !"".equals(command)){
-			logger.debug("Executing command "+ command);
-			
+		String command = commandParameters.get(ExecuteCommandAction.COMMAND);
+
+		logger.debug("Command: " + command);
+		if (command != null && !"".equals(command)) {
+			logger.debug("Executing command " + command);
+
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.redirectErrorStream(true);
-			
+
 			Map environmentMap = pb.environment();
-		
-			environmentMap.put("MOVETOALF_INPUT_PATH", getJobService().getActionParameters(cycleId, SourceAction.class).get(SourceAction.PARAM_PATH));
-		
+
+			environmentMap.put("MOVETOALF_INPUT_PATH", getJobService()
+					.getActionParameters(cycleId, SourceAction.class).get(
+							SourceAction.PARAM_PATH));
+
 			Process process = null;
 			try {
 				process = pb.start();
@@ -52,38 +52,38 @@ public class CommandCycleListener extends CycleListener{
 				e.printStackTrace();
 				return;
 			}
-			
+
 			try {
 				InputStream is = process.getInputStream();
 				InputStreamReader isr = new InputStreamReader(is);
 				BufferedReader br = new BufferedReader(isr);
 				String line;
-				
+
 				while ((line = br.readLine()) != null) {
 					logger.debug(line);
-			
+
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			try {
 				process.waitFor();
 			} catch (InterruptedException ie) {
 				logger.error("Problem running command");
 			}
-			
-			logger.info("Command finished");	
+
+			logger.info("Command finished");
 		}
 	}
 
 	@Override
 	public void cycleStart(int cycleId) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	private Map<String, String> getCommandActionParameter(int cycleId) {
 		return getJobService().getActionParameters(cycleId,
 				ExecuteCommandAction.class);

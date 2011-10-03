@@ -265,25 +265,12 @@ public interface JobService {
 	 * @param sourceSink
 	 */
 	public void addSourceSinkToAction(ConfiguredAction action, ConfiguredSourceSink sourceSink);
-	
-	/**
-	 * 
-	 * @param action
-	 * @param nextAction
-	 */
-	public void setNextAction(ConfiguredAction action, ConfiguredAction nextAction);
 
 	/**
 	 * 
 	 * @param cycleId
 	 */
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId);
-
-	/**
-	 * Creates cronjob to run instantly
-	 * @return String of cronjob
-	 */
-	public String getInstantCronJob();
 
 	/** gets all configured source sink but filters out the fileSystem source sink
 	 * 
@@ -345,12 +332,6 @@ public interface JobService {
 	public void sendMail(SimpleMailMessage message);
 
 	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
-
-	public void initCycleStages(int cycleId, int numStages);
-
-	public void waitForCycleStagesCompletion(int cycleId);
-
-	public void completeCycleStage(int cycleId, int stageNr);
 	
 	public ActorRef getReportActor();
 

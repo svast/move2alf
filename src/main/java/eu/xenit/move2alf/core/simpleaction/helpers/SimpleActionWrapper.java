@@ -47,8 +47,6 @@ public class SimpleActionWrapper extends SimpleAction {
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config) {
-		logger.debug("Wrapping action {} ({})", action.getName(), action.getClass().getName());
-		
 		output = new ArrayList<FileInfo>();
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
 		parameterMap.put(Parameters.PARAM_CYCLE, 0); // hack
@@ -93,10 +91,6 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public boolean checkJobExists(String jobName) {
 			return false;
-		}
-
-		@Override
-		public void completeCycleStage(int cycleId, int stageNr) {
 		}
 
 		@Override
@@ -230,11 +224,6 @@ public class SimpleActionWrapper extends SimpleAction {
 		}
 
 		@Override
-		public String getInstantCronJob() {
-			return null;
-		}
-
-		@Override
 		public Job getJob(int id) {
 			return null;
 		}
@@ -280,25 +269,11 @@ public class SimpleActionWrapper extends SimpleAction {
 		}
 
 		@Override
-		public void initCycleStages(int cycleId, int numStages) {
-		}
-
-		@Override
 		public void resetSchedules() {
 		}
 
 		@Override
 		public void sendMail(SimpleMailMessage message) {
 		}
-
-		@Override
-		public void setNextAction(ConfiguredAction action,
-				ConfiguredAction nextAction) {
-		}
-
-		@Override
-		public void waitForCycleStagesCompletion(int cycleId) {
-		}
-
 	}
 }

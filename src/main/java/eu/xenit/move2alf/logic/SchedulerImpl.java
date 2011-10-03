@@ -69,8 +69,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 			if (scheduler.isStarted()) {
 				// stop previous scheduler and get new one
-				scheduler.shutdown(true); // TODO: will this block creating new
-				// schedules when jobs are running?
+				scheduler.shutdown();
 				scheduler = StdSchedulerFactory.getDefaultScheduler();
 			}
 			scheduler.start();
@@ -81,13 +80,11 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		}
 		for (Job job : getJobService().getAllJobs()) {
 			logger.debug("Scheduling job: " + job.getName());
+			JobDetail jobDetail = new JobDetail("Job-" + job.getId(), JobExecutor.class);
 			for (Schedule schedule : job.getSchedules()) {
 				String cronExpression = schedule.getQuartzScheduling();
 				logger.debug("Adding schedule " + cronExpression);
 				try {
-					JobDetail jobDetail = new JobDetail("Schedule-"
-							+ job.getName() + "-" + job.getId() + "-"
-							+ schedule.getId(), JobExecutor.class);
 					Trigger trigger = new CronTrigger("Trigger-"
 							+ schedule.getId(), "JobScheduleGroup",
 							cronExpression);

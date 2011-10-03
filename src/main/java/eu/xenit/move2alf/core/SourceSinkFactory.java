@@ -32,6 +32,7 @@ public class SourceSinkFactory extends AbstractFactory<SourceSink> {
 		// no initialization required for SourceSink objects
 	}
 
+	// TODO: synchronize
 	public ExecutorService getThreadPool(ConfiguredSourceSink sourceSink) {
 		ExecutorService threadPool = threadPools.get(sourceSink.getId());
 		if (threadPool != null) {

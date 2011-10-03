@@ -3,6 +3,7 @@ package eu.xenit.move2alf.web.controller;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1128,7 +1129,7 @@ public class JobController {
 	public ModelAndView runPoller(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
 		
-		String cronJob = getJobService().getInstantCronJob();
+		String cronJob = getInstantCronJob();
 		getJobService().createSchedule(jobId, cronJob);
 		
 		mav.addObject("job", getJobService().getJob(jobId));
@@ -1136,6 +1137,43 @@ public class JobController {
 				.getUserRoleSet());
 		mav.setViewName("confirm-run");
 		return mav;
+	}
+	
+	private String getInstantCronJob() {
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+
+		Integer y = new Integer(cal.get(Calendar.YEAR));
+		Integer mon = new Integer(cal.get(Calendar.MONTH) + 1);
+		Integer dom = new Integer(cal.get(Calendar.DAY_OF_MONTH));
+		Integer hour = new Integer(cal.get(Calendar.HOUR_OF_DAY));
+		Integer mins = new Integer(cal.get(Calendar.MINUTE));
+		Integer secs = new Integer(cal.get(Calendar.SECOND));
+
+		secs = secs + 10;
+
+		if (secs > 59) {
+			secs = secs - 60;
+			mins = mins + 1;
+
+			if (mins > 59) {
+				mins = mins - 60;
+				hour = hour + 1;
+			}
+		}
+
+		String seconds = secs.toString();
+		String minutes = mins.toString();
+		String hours = hour.toString();
+		String day = dom.toString();
+		String month = mon.toString();
+		String year = y.toString();
+
+		String cronjob = seconds + " " + minutes + " " + hours + " " + day
+				+ " " + month + " ? " + year;
+
+		return cronjob;
 	}
 
 }

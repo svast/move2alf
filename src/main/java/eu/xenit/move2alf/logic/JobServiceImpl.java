@@ -155,7 +155,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteJob(int id) {
 		Job job = getJob(id);
 		sessionFactory.getCurrentSession().delete(job);
-
 		logger.debug("Reloading scheduler");
 		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
@@ -169,9 +168,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		if (jobs.size() == 1) {
 			return (Job) jobs.get(0);
 		} else {
-			throw new Move2AlfException("Job with id " + id + " not found."); // TODO:
-			// exception
-			// type??
+			throw new Move2AlfException("Job with id " + id + " not found.");
 		}
 	}
 
@@ -180,12 +177,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		@SuppressWarnings("unchecked")
 		List jobs = sessionFactory.getCurrentSession().createQuery(
 				"from Job as j where j.name=?").setString(0, jobName).list();
-
-		if (jobs.size() > 0) {
-			return true;
-		}
-
-		return false;
+		return (jobs.size() > 0);
 	}
 
 	@Override
@@ -193,7 +185,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		List<Cycle> cycles = getSessionFactory().getCurrentSession()
 				.createQuery("from Cycle as c where c.id=?")
 				.setLong(0, cycleId).list();
-
 		return cycles.get(0);
 	}
 
@@ -301,10 +292,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getSessionFactory().getCurrentSession().save(schedule);
 
 		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job); // job object is
-		// still in cache
-		// with old
-		// schedules
+		getSessionFactory().getCurrentSession().evict(job);
+		// job object is still in cache with old schedules
 		getScheduler().reloadSchedules();
 
 		return schedule;
@@ -317,10 +306,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		sessionFactory.getCurrentSession().delete(schedule);
 
 		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job); // job object is
-		// still in cache
-		// with old
-		// schedules
+		getSessionFactory().getCurrentSession().evict(job);
+		// job object is still in cache with old schedules
 		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
 	}
@@ -498,96 +485,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void executeAction(int cycleId, ConfiguredAction action,
 			Map<String, Object> parameterMap) {
-//
-//		List<ConfiguredAction> runningActionsForCycle;
-//		synchronized (this.runningActions) {
-//			runningActionsForCycle = this.runningActions.get(cycleId);
-//			if (runningActionsForCycle == null) {
-//				// start of cycle
-//				runningActionsForCycle = new LinkedList<ConfiguredAction>();
-//				this.runningActions.put(cycleId, runningActionsForCycle);
-//
-//				notifyCycleListenersStart(cycleId, parameterMap);
-//			}
-//			runningActionsForCycle.add(action);
-//		}
-//
-//		try {
-//			logger.debug("Executing action: " + action.getId() + " - "
-//					+ action.getClassName());
-//			getActionFactory().execute(action, parameterMap);
-//		} catch (Throwable e) {
-//			/*
-//			 * Catch unhandled exceptions, set error message and skip to move
-//			 * and report actions.
-//			 */
-//			logger.error("Action " + action.getClassName() + " (id = "
-//					+ action.getIdAsString()
-//					+ ") threw an unhandled exception: " + e);
-//			e.printStackTrace();
-//			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-//			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
-//
-//			// send notification email
-//			Map<String, String> emailParams = getActionParameters(cycleId,
-//					EmailAction.class);
-//			String sendNotification = emailParams.get("sendNotification");
-//			String to = emailParams.get("emailAddressNotification");
-//			if (to != null && !"".equals(to) && "true".equals(sendNotification)) {
-//				Cycle cycle = getCycle(cycleId);
-//				Job job = cycle.getSchedule().getJob();
-//				String[] addresses = to.split(",");
-//				SimpleMailMessage message = new SimpleMailMessage();
-//				message.setFrom(Config.get("mail.from"));
-//				message.setTo(addresses);
-//				message.setSubject("Move2Alf error notification");
-//				message.setText("Error in cycle " + cycleId + " of job "
-//						+ job.getName() + ".\n" + "Message: " + e.getMessage()
-//						+ "\n\nSent by Move2Alf");
-//				sendMail(message);
-//			}
-//
-//			logger.debug("Skipping to reporting");
-//			ConfiguredAction nextAction = action
-//					.getAppliedConfiguredActionOnSuccess();
-//			while (nextAction != null) {
-//				if (MoveDocumentsAction.class.getName().equals(
-//						nextAction.getClassName())
-//						&& Parameters.VALUE_AFTER.equals(nextAction
-//								.getParameter(Parameters.PARAM_STAGE))) {
-//					executeAction(cycleId, nextAction, parameterMap);
-//					break;
-//				} else if (ThreadAction.class.getName().equals(
-//						nextAction.getClassName())) {
-//					CountDownLatch counter = (CountDownLatch) parameterMap
-//							.get(Parameters.PARAM_COUNTER);
-//					counter.countDown();
-//					synchronized (ThreadAction.runningThreadsForCycle) {
-//						Integer threadCount = ThreadAction.runningThreadsForCycle
-//								.get(cycleId);
-//						if (threadCount == null) {
-//							ThreadAction.runningThreadsForCycle.put(cycleId, 0);
-//						}
-//					}
-//				} else {
-//					logger
-//							.debug("Skipping action "
-//									+ nextAction.getClassName());
-//				}
-//				nextAction = nextAction.getAppliedConfiguredActionOnSuccess();
-//			}
-//		}
-//
-//		// synchronized (this.runningActions) {
-//		runningActionsForCycle.remove(action);
-//
-//		logger.debug("# Running actions: " + runningActionsForCycle.size());
-//		logger.debug("Number of queued threads: {} ",
-//				ThreadAction.runningThreadsForCycle.get(cycleId));
-//
-//		if (runningActionsForCycle.size() == 0) {
-//			completeCycleStage(cycleId, 1);
-//		}
+		throw new UnsupportedOperationException("Use JobExecutionService instead");
 	}
 
 	@Override
@@ -634,50 +532,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return (List<ProcessedDocument>) sessionFactory.getCurrentSession()
 				.createQuery("from ProcessedDocument as d where d.cycle.id=?")
 				.setLong(0, cycleId).list();
-	}
-
-	@Override
-	public String getInstantCronJob() {
-		Date now = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(now);
-
-		Integer y = new Integer(cal.get(Calendar.YEAR));
-		Integer mon = new Integer(cal.get(Calendar.MONTH) + 1);
-		Integer dom = new Integer(cal.get(Calendar.DAY_OF_MONTH));
-		Integer hour = new Integer(cal.get(Calendar.HOUR_OF_DAY));
-		Integer mins = new Integer(cal.get(Calendar.MINUTE));
-		Integer secs = new Integer(cal.get(Calendar.SECOND));
-
-		secs = secs + 10;
-
-		if (secs > 59) {
-			secs = secs - 60;
-			mins = mins + 1;
-
-			if (mins > 59) {
-				mins = mins - 60;
-				hour = hour + 1;
-			}
-		}
-
-		String seconds = secs.toString();
-		String minutes = mins.toString();
-		String hours = hour.toString();
-		String day = dom.toString();
-		String month = mon.toString();
-		String year = y.toString();
-
-		String cronjob = seconds + " " + minutes + " " + hours + " " + day
-				+ " " + month + " ? " + year;
-
-		return cronjob;
-	}
-
-	@Override
-	public void setNextAction(ConfiguredAction action,
-			ConfiguredAction nextAction) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -750,54 +604,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		}
 	}
 
-	/*
-	 * Cycle consists of two stages, this is used to detect the end of the
-	 * cycle: 1. No more running actions 2. No more running threads
-	 */
-	private Map<Integer, CountDownLatch> cycleStageCounters = new HashMap<Integer, CountDownLatch>();
-	/*
-	 * Used to make sure every stage is only completed once, key = cycleId * 10
-	 * + stage
-	 * 
-	 * WARNING: fails when more than 10 stages are used
-	 */
-	private Map<Integer, Boolean> cycleStageCounterFlags = new HashMap<Integer, Boolean>();
-
-	@Override
-	public void initCycleStages(int cycleId, int stages) {
-		logger.debug("Cycle {} - {} stages", cycleId, stages);
-		cycleStageCounters.put(cycleId, new CountDownLatch(stages));
-	}
-
-	@Override
-	public void waitForCycleStagesCompletion(int cycleId) {
-		try {
-			cycleStageCounters.get(cycleId).await();
-			/*
-			 * Cleanup
-			 * 
-			 * TODO/WARNING: number of stages hardcoded to 2 :(
-			 */
-			cycleStageCounters.remove(cycleId);
-			cycleStageCounterFlags.remove(10 * cycleId + 1);
-			cycleStageCounterFlags.remove(10 * cycleId + 2);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			logger.error("Waiting interrupted");
-		}
-	}
-
-	@Override
-	public void completeCycleStage(int cycleId, int stageNr) {
-		logger.debug("Cycle {} - Stage completed", cycleId);
-		synchronized (cycleStageCounterFlags) {
-			int key = 10 * cycleId + stageNr;
-			if (cycleStageCounterFlags.get(key) == null) {
-				cycleStageCounters.get(cycleId).countDown();
-				cycleStageCounterFlags.put(key, true);
-			}
-		}
-	}
 
 	@Override
 	public List<HistoryInfo> getHistory(int jobId) {
