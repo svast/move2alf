@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -588,6 +589,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			doc
 					.setStatus(EProcessedDocumentStatus.valueOf(state
 							.toUpperCase()));
+			for(ProcessedDocumentParameter param : params) {
+				if (param.getValue().length() > 255) {
+					param.setValue(param.getValue().substring(0, 255));
+				}
+			}
 			doc.setProcessedDocumentParameterSet(params);
 			getSessionFactory().getCurrentSession().save(doc);
 		} catch (Exception e) {

@@ -122,16 +122,18 @@ public class AlfrescoSourceSink extends SourceSink {
 						metadata, multiValueMetadata);
 				if (acl != null) {
 					for (String aclPath : acl.keySet()) {
-						
+
 						String parserAclPath = aclPath;
 						// add "cm:" in front of each path component
-						if(parserAclPath.startsWith("/")){
-							parserAclPath = parserAclPath.substring(1,parserAclPath.length());
+						if (parserAclPath.startsWith("/")) {
+							parserAclPath = parserAclPath.substring(1,
+									parserAclPath.length());
 						}
-						if(parserAclPath.endsWith("/")){
-							parserAclPath = parserAclPath.substring(0, parserAclPath.length()-1);
+						if (parserAclPath.endsWith("/")) {
+							parserAclPath = parserAclPath.substring(0,
+									parserAclPath.length() - 1);
 						}
-						
+
 						String remoteACLPath = basePath + parserAclPath;
 						String[] aclComponents = remoteACLPath.split("/");
 						remoteACLPath = "";
@@ -144,18 +146,22 @@ public class AlfrescoSourceSink extends SourceSink {
 								remoteACLPath += "cm:" + aclComponent + "/";
 							}
 						}
-						remoteACLPath = remoteACLPath.substring(0, remoteACLPath.length() - 1);
+						remoteACLPath = remoteACLPath.substring(0,
+								remoteACLPath.length() - 1);
 
 						logger.debug("ACL path: " + remoteACLPath);
-						
-						ras.setAccessControlList(remoteACLPath, inheritPermissions,
-								acl.get(aclPath));
+
+						ras.setAccessControlList(remoteACLPath,
+								inheritPermissions, acl.get(aclPath));
 					}
 				}
 				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
 				// } else {
 			} catch (RepositoryException e) {
 				Throwable cause = e.getCause();
+				if (cause == null) {
+					cause = e;
+				} 
 				logger.info("Message {}", cause.getMessage());
 				Writer result = new StringWriter();
 				PrintWriter printWriter = new PrintWriter(result);
@@ -254,34 +260,35 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private RepositoryAccessSession createRepositoryAccessSession(
 			ConfiguredSourceSink sinkConfig) {
-		RepositoryAccessSession ras;
-		// RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
-		// if (ras == null) {
-		logger.debug("Creating new RepositoryAccessSession for thread "
-				+ Thread.currentThread());
-		String user = sinkConfig.getParameter(PARAM_USER);
-		String password = sinkConfig.getParameter(PARAM_PASSWORD);
-		String url = sinkConfig.getParameter(PARAM_URL);
-		if (url.endsWith("/")) {
-			url = url + "api/";
+		//RepositoryAccessSession ras;
+		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
+		if (ras == null) {
+			logger.debug("Creating new RepositoryAccessSession for thread "
+					+ Thread.currentThread());
+			String user = sinkConfig.getParameter(PARAM_USER);
+			String password = sinkConfig.getParameter(PARAM_PASSWORD);
+			String url = sinkConfig.getParameter(PARAM_URL);
+			if (url.endsWith("/")) {
+				url = url + "api/";
+			} else {
+				url = url + "/api/";
+			}
+			WebServiceRepositoryAccess ra = null;
+			try {
+				ra = new WebServiceRepositoryAccess(new URL(url), user,
+						password);
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			ras = ra.createSessionAndRetry();
+			AlfrescoSourceSink.ras.set(ras);
 		} else {
-			url = url + "/api/";
+			logger.debug("Reusing existing RepositoryAccessSession in thread "
+					+ Thread.currentThread());
 		}
-		WebServiceRepositoryAccess ra = null;
-		try {
-			ra = new WebServiceRepositoryAccess(new URL(url), user, password);
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		ras = ra.createSessionAndRetry();
-		//AlfrescoSourceSink.ras.set(ras);
-		// } else {
-		// logger.debug("Reusing existing RepositoryAccessSession in thread "
-		// + Thread.currentThread());
-		// }
-		// return AlfrescoSourceSink.ras.get();
-		return ras;
+		return AlfrescoSourceSink.ras.get();
+		//return ras;
 	}
 
 	private String getParameterWithDefault(Map<String, Object> parameterMap,

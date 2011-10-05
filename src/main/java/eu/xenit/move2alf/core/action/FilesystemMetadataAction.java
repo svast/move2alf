@@ -24,9 +24,9 @@ public class FilesystemMetadataAction extends Action {
 	private static final Logger logger = LoggerFactory
 			.getLogger(FilesystemMetadataAction.class);
 
-	private final static String fsPropCreationDate = "creationDate";
+	private final static String fsPropCreationDate = "created";
 	private final static String fsPropCreator = "creator";
-	private final static String fsPropModifyDate = "modifyDate";
+	private final static String fsPropModifyDate = "modified";
 
 	@Override
 	protected void executeImpl(ConfiguredAction configuredAction,

@@ -53,6 +53,8 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
 
+	private SuccessHandler successHandler = new SuccessHandler();
+	
 	private ErrorHandler errorHandler = new ErrorHandler();
 
 	@Autowired
@@ -116,7 +118,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		}
 
 		for (FileInfo successFullFile : input) {
-			handleSuccess(successFullFile, jobConfig, cycle);
+			successHandler.handleSuccess(successFullFile, jobConfig, cycle);
 		}
 	}
 
@@ -126,18 +128,44 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		SimpleAction action = step.getAction();
 		ActionConfig config = step.getConfig();
 		ActionExecutor executor = step.getExecutor();
-		
+
 		Date start = new Date();
 		int numberOfInputFiles = input.size();
 		logger.info("STEP: " + action.getClass().toString());
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
-		List<FileInfo> output = executor.execute(input, jobConfig, cycle, action, config, errorHandler);
+		List<FileInfo> output = executor.execute(input, jobConfig, cycle,
+				action, config, errorHandler);
 
 		Date stop = new Date();
 		long time = stop.getTime() - start.getTime();
-		logger.info(" * OUTPUT: " + output.size() + " files in " + time + " ms - " + new Float(numberOfInputFiles) / time * 1000 + " input files / sec");
+		logger.info(" * OUTPUT: " + output.size() + " files in " + time
+				+ " ms - " + new Float(numberOfInputFiles) / time * 1000
+				+ " input files / sec");
 		return output;
+	}
+
+	public class SuccessHandler {
+		public void handleSuccess(FileInfo parameterMap, JobConfig jobConfig,
+				Cycle cycle) {
+			File file = (File) parameterMap.get(Parameters.PARAM_FILE);
+
+			// reporting
+			Set<ProcessedDocumentParameter> params = createProcessedDocumentParameterSet(
+					(Map<String, String>) parameterMap
+							.get(Parameters.PARAM_REPORT_FIELDS), cycle
+							.getSchedule().getJob().getFirstConfiguredAction());
+			getJobService().getReportActor().sendOneWay(
+					new ReportMessage(cycle.getId(), file.getName(),
+							new Date(), Parameters.VALUE_OK, params));
+
+			// move
+			if ("true".equals(jobConfig.getMoveAfterLoad())) {
+				String inputFolder = (String) parameterMap
+						.get(Parameters.PARAM_INPUT_PATH);
+				Util.moveFile(inputFolder, jobConfig.getAfterLoadPath(), file);
+			}
+		}
 	}
 
 	public class ErrorHandler {
@@ -167,27 +195,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 						.get(Parameters.PARAM_INPUT_PATH);
 				Util.moveFile(inputFolder, jobConfig.getNotLoadPath(), file);
 			}
-		}
-	}
-
-	private void handleSuccess(FileInfo parameterMap,
-			JobConfig jobConfig, Cycle cycle) {
-		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-
-		// reporting
-		Set<ProcessedDocumentParameter> params = createProcessedDocumentParameterSet(
-				(Map<String, String>) parameterMap
-						.get(Parameters.PARAM_REPORT_FIELDS), cycle
-						.getSchedule().getJob().getFirstConfiguredAction());
-		getJobService().getReportActor().sendOneWay(
-				new ReportMessage(cycle.getId(), file.getName(), new Date(),
-						Parameters.VALUE_OK, params));
-
-		// move
-		if ("true".equals(jobConfig.getMoveAfterLoad())) {
-			String inputFolder = (String) parameterMap
-					.get(Parameters.PARAM_INPUT_PATH);
-			Util.moveFile(inputFolder, jobConfig.getAfterLoadPath(), file);
 		}
 	}
 
