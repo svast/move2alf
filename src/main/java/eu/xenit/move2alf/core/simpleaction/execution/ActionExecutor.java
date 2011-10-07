@@ -54,6 +54,11 @@ public class ActionExecutor {
 
 		for (int i = 0; i < input.size(); i++) {
 			try {
+				if ((i + 1) % 100 == 0) {
+					logger.info("Processed " + (i + 1) + " files out of "
+							+ input.size() + " (" + 100 * (float) (i + 1)
+							/ (float) input.size() + "%)");
+				}
 				Future<List<FileInfo>> futureOutput = completionService.take();
 				List<FileInfo> fileInfos = futureOutput.get();
 				output.addAll(fileInfos);
