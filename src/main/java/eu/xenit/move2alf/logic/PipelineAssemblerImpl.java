@@ -22,7 +22,6 @@ import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.simpleaction.SAConvertFailsToException;
 import eu.xenit.move2alf.core.simpleaction.SADelete;
 import eu.xenit.move2alf.core.simpleaction.SAFilter;
 import eu.xenit.move2alf.core.simpleaction.SAList;
@@ -458,8 +457,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	@Override
 	public List<PipelineStep> getPipeline(JobConfig jobConfig) {
+		SuccessHandler successHandler = new SuccessHandler(getJobService());
+		ErrorHandler errorHandler = new ErrorHandler(getJobService());
+		
 		List<PipelineStep> pipeline = new ArrayList<PipelineStep>();
-		pipeline.add(new PipelineStep(new SASource()));
+		pipeline.add(new PipelineStep(new SASource(), null, null, errorHandler));
 
 		if ("true".equals(jobConfig.getMoveBeforeProc())) {
 			ActionConfig moveBeforeConfig = new ActionConfig();
@@ -467,18 +469,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
 					jobConfig.getBeforeProcPath());
 			pipeline.add(new PipelineStep(new SAMoveBeforeProcessing(),
-					moveBeforeConfig));
+					moveBeforeConfig, null, errorHandler));
 		}
 
 		ActionConfig filterConfig = new ActionConfig();
 		filterConfig.put(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
-		pipeline.add(new PipelineStep(new SAFilter(), filterConfig));
-		pipeline.add(new PipelineStep(new SAMimeType()));
+		pipeline.add(new PipelineStep(new SAFilter(), filterConfig, null, errorHandler));
+		pipeline.add(new PipelineStep(new SAMimeType(), null, null, errorHandler));
 
 		SimpleAction metadataAction = new SimpleActionWrapper(
 				getActionFactory().getObject(jobConfig.getMetadata()));
 		ActionConfig metadataConfig = metadataParameters(jobConfig);
-		pipeline.add(new PipelineStep(metadataAction, metadataConfig));
+		pipeline.add(new PipelineStep(metadataAction, metadataConfig, null, errorHandler));
 
 		if (!("No transformation".equals(jobConfig.getTransform()) || "".equals(jobConfig.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
@@ -489,7 +491,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
 					Integer.parseInt(jobConfig.getDest()));
 			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
-			pipeline.add(new PipelineStep(transformAction, transformConfig, new ActionExecutor(executorService)));
+			pipeline.add(new PipelineStep(transformAction, transformConfig, null, errorHandler, new ActionExecutor(executorService)));
 		}
 
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
@@ -503,7 +505,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, successHandler, errorHandler, new ActionExecutor(executorService)));
 		}
 		if ("Delete".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
@@ -514,7 +516,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, successHandler, errorHandler, new ActionExecutor(executorService)));
 		}
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
@@ -525,11 +527,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS, jobConfig.getDocExist());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig, new ActionExecutor(executorService)));
+			pipeline.add(new PipelineStep(uploadAction, uploadConfig, successHandler, errorHandler, new ActionExecutor(executorService)));
 		}
-		
-		pipeline.add(new PipelineStep(new SAConvertFailsToException()));
-		
 
 		return pipeline;
 	}

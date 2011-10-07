@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.CycleListener;
-import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
@@ -52,10 +50,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	private PipelineAssembler pipelineAssembler;
 
 	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
-
-	private SuccessHandler successHandler = new SuccessHandler();
-	
-	private ErrorHandler errorHandler = new ErrorHandler();
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -116,10 +110,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		for (PipelineStep step : pipeline) {
 			input = executePipelineStep(step, input, jobConfig, cycle);
 		}
-
-		for (FileInfo successFullFile : input) {
-			successHandler.handleSuccess(successFullFile, jobConfig, cycle);
-		}
 	}
 
 	// TODO: make multithreaded by passing executor ...
@@ -128,6 +118,9 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		SimpleAction action = step.getAction();
 		ActionConfig config = step.getConfig();
 		ActionExecutor executor = step.getExecutor();
+		
+		SuccessHandler successHandler = step.getSuccessHandler();
+		ErrorHandler errorHandler = step.getErrorHandler();
 
 		Date start = new Date();
 		int numberOfInputFiles = input.size();
@@ -135,7 +128,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
 		List<FileInfo> output = executor.execute(input, jobConfig, cycle,
-				action, config, errorHandler);
+				action, config, successHandler, errorHandler);
 
 		Date stop = new Date();
 		long time = stop.getTime() - start.getTime();
@@ -143,78 +136,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 				+ " ms - " + new Float(numberOfInputFiles) / time * 1000
 				+ " input files / sec");
 		return output;
-	}
-
-	public class SuccessHandler {
-		public void handleSuccess(FileInfo parameterMap, JobConfig jobConfig,
-				Cycle cycle) {
-			File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-
-			// reporting
-			Set<ProcessedDocumentParameter> params = createProcessedDocumentParameterSet(
-					(Map<String, String>) parameterMap
-							.get(Parameters.PARAM_REPORT_FIELDS), cycle
-							.getSchedule().getJob().getFirstConfiguredAction());
-			getJobService().getReportActor().sendOneWay(
-					new ReportMessage(cycle.getId(), file.getName(),
-							new Date(), Parameters.VALUE_OK, params));
-
-			// move
-			if ("true".equals(jobConfig.getMoveAfterLoad())) {
-				String inputFolder = (String) parameterMap
-						.get(Parameters.PARAM_INPUT_PATH);
-				Util.moveFile(inputFolder, jobConfig.getAfterLoadPath(), file);
-			}
-		}
-	}
-
-	public class ErrorHandler {
-		public void handleError(FileInfo parameterMap, JobConfig jobConfig,
-				Cycle cycle, Exception e) {
-			// TODO: handle cleaner?
-			File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-
-			// reporting
-			Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
-			ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
-			msg.setName(Parameters.PARAM_ERROR_MESSAGE);
-			msg.setValue(e.getClass().getName() + ": " + e.getMessage());
-			// Report everything using the first (deprecated) ConfiguredAction
-			// of
-			// the job.
-			msg.setConfiguredAction(cycle.getSchedule().getJob()
-					.getFirstConfiguredAction());
-			params.add(msg);
-			getJobService().getReportActor().sendOneWay(
-					new ReportMessage(cycle.getId(), file.getName(),
-							new Date(), Parameters.VALUE_FAILED, params));
-
-			// move
-			if ("true".equals(jobConfig.getMoveNotLoad())) {
-				String inputFolder = (String) parameterMap
-						.get(Parameters.PARAM_INPUT_PATH);
-				Util.moveFile(inputFolder, jobConfig.getNotLoadPath(), file);
-			}
-		}
-	}
-
-	private Set<ProcessedDocumentParameter> createProcessedDocumentParameterSet(
-			Map<String, String> reportFields, ConfiguredAction configuredAction) {
-		Set<ProcessedDocumentParameter> procDocParameters = new HashSet<ProcessedDocumentParameter>();
-		if (reportFields != null) {
-			for (String key : reportFields.keySet()) {
-				ProcessedDocumentParameter procDocParameter = new ProcessedDocumentParameter();
-				procDocParameter.setName(key);
-				String value = reportFields.get(key);
-				if (value.length() > 255) {
-					value = value.substring(0, 255);
-				}
-				procDocParameter.setValue(value);
-				procDocParameter.setConfiguredAction(configuredAction);
-				procDocParameters.add(procDocParameter);
-			}
-		}
-		return procDocParameters;
 	}
 
 	@Override

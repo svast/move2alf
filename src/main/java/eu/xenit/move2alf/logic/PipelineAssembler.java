@@ -32,45 +32,57 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 	 * @deprecated
 	 */
 	public abstract void assemblePipeline(JobConfig jobConfig);
-	
+
 	public abstract List<PipelineStep> getPipeline(JobConfig jobConfig);
-	
+
 	public class PipelineStep {
-		
-		private SimpleAction action;
-		private ActionConfig config;
-		private ActionExecutor executor;
-		
-		public PipelineStep(SimpleAction action) {
-			this(action, null, new ActionExecutor());
+
+		private final SimpleAction action;
+		private final ActionConfig config;
+		private final ActionExecutor executor;
+		private final SuccessHandler successHandler;
+		private final ErrorHandler errorHandler;
+
+		public PipelineStep(SimpleAction action, ActionConfig config, SuccessHandler successHandler,
+				ErrorHandler errorHandler) {
+			this(action, config, successHandler, errorHandler, new ActionExecutor());
 		}
 		
-		public PipelineStep(SimpleAction action, ActionConfig config) {
-			this(action, config, new ActionExecutor());
-		}
-		
-		public PipelineStep(SimpleAction action, ActionConfig config, ActionExecutor executor) {
+		public PipelineStep(SimpleAction action, ActionConfig config, SuccessHandler successHandler,
+				ErrorHandler errorHandler,
+				ActionExecutor executor) {
 			this.action = action;
 			this.config = config;
 			this.executor = executor;
+			this.successHandler = successHandler;
+			this.errorHandler = errorHandler;
 		}
 
 		public SimpleAction getAction() {
 			return action;
 		}
-		
+
 		public ActionConfig getConfig() {
 			return config;
 		}
-		
+
 		public ActionExecutor getExecutor() {
 			return executor;
+		}
+		
+		public SuccessHandler getSuccessHandler() {
+			return successHandler;
+		}
+		
+		public ErrorHandler getErrorHandler() {
+			return errorHandler;
 		}
 	}
 
 	protected void assemble(JobConfig jobConfig,
 			ActionBuilder... actionBuilders) {
-		logger.debug("Assembling pipeline: " + actionBuilders.length + " actions");
+		logger.debug("Assembling pipeline: " + actionBuilders.length
+				+ " actions");
 		ConfiguredAction firstAction = null;
 		ConfiguredAction prevAction = null;
 		for (ActionBuilder actionBuilder : actionBuilders) {
@@ -79,7 +91,9 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 				firstAction = action;
 			}
 			if (prevAction != null) {
-				logger.debug("\tSetting configured action on success: " + prevAction.getClassName() + " -> " + action.getClassName());
+				logger.debug("\tSetting configured action on success: "
+						+ prevAction.getClassName() + " -> "
+						+ action.getClassName());
 				prevAction.setAppliedConfiguredActionOnSuccess(action);
 			}
 			prevAction = action;
@@ -97,7 +111,7 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 	protected SourceSinkBuilder sourceSink(String className) {
 		return new SourceSinkBuilder().setClassName(className);
 	}
-	
+
 	protected SourceSinkBuilder sourceSinkById(final int id) {
 		return new SourceSinkBuilder() {
 			@Override
@@ -131,7 +145,7 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 			params.put(key, value);
 			return (T) this;
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		T paramMap(Map<String, String> paramMap) {
 			params = paramMap;

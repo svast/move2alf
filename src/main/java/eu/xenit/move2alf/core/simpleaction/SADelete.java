@@ -21,8 +21,7 @@ public class SADelete extends SimpleActionWithSourceSink {
 	}
 
 	@Override
-	public List<FileInfo> execute(FileInfo parameterMap,
-			ActionConfig config) {
+	public List<FileInfo> execute(FileInfo parameterMap, ActionConfig config) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		FileInfo newParameterMap = new FileInfo();
 		newParameterMap.putAll(parameterMap);
@@ -64,13 +63,8 @@ public class SADelete extends SimpleActionWithSourceSink {
 
 		String name = ((File) newParameterMap.get(Parameters.PARAM_FILE))
 				.getName();
-		try {
-			sink.delete(sinkConfig, remotePath, name);
-			newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-		} catch (Move2AlfException e) {
-			newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
-		}
+
+		sink.delete(sinkConfig, remotePath, name);
 
 		output.add(newParameterMap);
 		return output;

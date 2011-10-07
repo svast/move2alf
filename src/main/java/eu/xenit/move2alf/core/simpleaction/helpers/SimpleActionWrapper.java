@@ -14,7 +14,8 @@ import org.springframework.mail.SimpleMailMessage;
 
 import akka.actor.ActorRef;
 
-import eu.xenit.move2alf.common.Parameters;
+import static eu.xenit.move2alf.common.Parameters.*;
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.SourceSink;
@@ -32,6 +33,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 
+@SuppressWarnings("deprecation")
 public class SimpleActionWrapper extends SimpleAction {
 
 	private List<FileInfo> output;
@@ -49,8 +51,8 @@ public class SimpleActionWrapper extends SimpleAction {
 			final ActionConfig config) {
 		output = new ArrayList<FileInfo>();
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
-		parameterMap.put(Parameters.PARAM_CYCLE, 0); // hack
-		parameterMap.put(Parameters.PARAM_COUNTER, new CountDownLatch(0));
+		parameterMap.put(PARAM_CYCLE, 0); // hack
+		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));
 		// some old actions except PARAM_COUNTER to be present, it's added here to prevent NPEs
 		
 		ConfiguredAction configuredAction = new ConfiguredAction();
@@ -70,7 +72,11 @@ public class SimpleActionWrapper extends SimpleAction {
 				Map<String, Object> parameterMap) {
 			FileInfo fileInfo = new FileInfo();
 			fileInfo.putAll(parameterMap);
-			output.add(fileInfo);
+			if (VALUE_FAILED.equals(fileInfo.get(PARAM_STATUS))) {
+				throw new Move2AlfException((String) fileInfo.get(PARAM_ERROR_MESSAGE));
+			} else {
+				output.add(fileInfo);
+			}
 		}
 
 		// //////////////////////////////////////////////////////////////

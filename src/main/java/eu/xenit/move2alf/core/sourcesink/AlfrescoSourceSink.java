@@ -155,8 +155,6 @@ public class AlfrescoSourceSink extends SourceSink {
 								inheritPermissions, acl.get(aclPath));
 					}
 				}
-				parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-				// } else {
 			} catch (RepositoryException e) {
 				Throwable cause = e.getCause();
 				if (cause == null) {
@@ -172,15 +170,10 @@ public class AlfrescoSourceSink extends SourceSink {
 						.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
 					if (MODE_SKIP.equals(docExistsMode)) {
 						// ignore
-						parameterMap.put(Parameters.PARAM_STATUS,
-								Parameters.VALUE_OK);
 					} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
 						logger.warn("Document " + document.getName()
 								+ " already exists in " + remotePath);
-						parameterMap.put(Parameters.PARAM_STATUS,
-								Parameters.VALUE_FAILED);
-						parameterMap.put(Parameters.PARAM_ERROR_MESSAGE,
-								"Document " + document.getName()
+						throw new Move2AlfException("Document " + document.getName()
 										+ " already exists in " + remotePath);
 					} else if (MODE_OVERWRITE.equals(docExistsMode)) {
 						logger.info("Overwriting document "
@@ -194,8 +187,6 @@ public class AlfrescoSourceSink extends SourceSink {
 							// by
 							// RRA?
 						}
-						parameterMap.put(Parameters.PARAM_STATUS,
-								Parameters.VALUE_OK);
 					}
 				} else {
 					throw e;
@@ -204,29 +195,23 @@ public class AlfrescoSourceSink extends SourceSink {
 
 		} catch (RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage());
 		} catch (RepositoryException e) {
 			// we end up here if the request could not be handled by the
 			// repository
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage());
 		} catch (WebServiceException e) {
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage());
 		} catch (RepositoryFatalException e) {
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error("Fatal Exception", e);
 			// TODO: stop job instead of stopping tomcat
 			// System.exit(1);
 		} catch (RuntimeException e) {
-			parameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			parameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
 			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage());
 		}
 	}
 

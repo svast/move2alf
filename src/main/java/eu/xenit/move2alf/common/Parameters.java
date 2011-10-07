@@ -5,26 +5,6 @@ package eu.xenit.move2alf.common;
  */
 public class Parameters {
 	/**
-	 * Counter with number of files to load. Type: CountDownLatch
-	 */
-	public static final String PARAM_COUNTER = "counter";
-
-	/*
-	 * INTERNAL Id of the current cycle Type: Integer
-	 */
-	public static final String PARAM_CYCLE = "cycle";
-
-	/*
-	 * INTERNAL
-	 */
-	public static final String PARAM_THREADPOOL = "threadpool";
-
-	/*
-	 * INTERNAL
-	 */
-	public static final String PARAM_THREAD = "thread";
-
-	/**
 	 * File to upload. Type: File
 	 */
 	public static final String PARAM_FILE = "file";
@@ -83,13 +63,22 @@ public class Parameters {
 	public static final String PARAM_ACL = "acl";
 
 	public static final String PARAM_INHERIT_PERMISSIONS = "inheritPermissions";
-
-	public static final String PARAM_STATUS = "status";
-	public static final String VALUE_FAILED = "failed";
-	public static final String VALUE_OK = "ok";
-
-	public static final String PARAM_ERROR_MESSAGE = "errormessage";
-
+	
+	/**
+	 * Fields to add to the report for the current file. Type: Map<String,
+	 * String>
+	 */
+	public static final String PARAM_REPORT_FIELDS = "reportFields";
+	
+	
+	
+	
+	
+	/************************************************************************************
+	 * TO CHECK
+	 ************************************************************************************/
+	
+	
 	public static final String PARAM_STAGE = "stage";
 	public static final String VALUE_AFTER = "after";
 	public static final String VALUE_BEFORE = "before";
@@ -98,17 +87,55 @@ public class Parameters {
 
 	public static final String PARAM_INPUT_FILE = "inputFile";
 
-	/**
-	 * Fields to add to the report for the current file. Type: Map<String,
-	 * String>
-	 */
-	public static final String PARAM_REPORT_FIELDS = "reportFields";
-
 	public static final String PARAM_COMMAND = "command";
+	
+	
+	
+	
+	
+	/************************************************************************************
+	 * DEPRECATED
+	 ************************************************************************************/
 
-	/*
-	 * INTERNAL MoveCycleListener uses this to pass the moved files to the
-	 * SourceAction. Type: List<File>
+	/**
+	 * Counter with number of files to load. Type: CountDownLatch
+	 * @deprecated
 	 */
-	public static final String PARAM_FILES_TO_LOAD = "filesToLoad";
+	public static final String PARAM_COUNTER = "counter";
+
+	/**
+	 * INTERNAL Id of the current cycle Type: Integer
+	 * @deprecated
+	 */
+	public static final String PARAM_CYCLE = "cycle";
+
+	/**
+	 * INTERNAL
+	 * @deprecated
+	 */
+	public static final String PARAM_THREADPOOL = "threadpool";
+
+	/**
+	 * INTERNAL
+	 * @deprecated
+	 */
+	public static final String PARAM_THREAD = "thread";
+	
+	/**
+	 * @deprecated
+	 */
+	public static final String PARAM_STATUS = "status";
+	/**
+	 * @deprecated Throw Move2AlfException instead.
+	 */
+	public static final String VALUE_FAILED = "failed";
+	/**
+	 * @deprecated
+	 */
+	public static final String VALUE_OK = "ok";
+	/**
+	 * @deprecated Throw Move2AlfException instead.
+	 */
+	public static final String PARAM_ERROR_MESSAGE = "errormessage";
+
 }

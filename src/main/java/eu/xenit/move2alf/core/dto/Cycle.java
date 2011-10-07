@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.core.dto;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Set;
 

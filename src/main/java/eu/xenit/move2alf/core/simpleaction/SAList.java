@@ -15,7 +15,7 @@ import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 public class SAList extends SimpleActionWithSourceSink {
 
 	public static final String PARAM_PATH = "path";
-	
+
 	public SAList(SourceSink sink, ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
 	}
@@ -26,7 +26,7 @@ public class SAList extends SimpleActionWithSourceSink {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		FileInfo newParameterMap = new FileInfo();
 		newParameterMap.putAll(parameterMap);
-		
+
 		ConfiguredSourceSink sinkConfig = getSinkConfig();
 		SourceSink sink = getSink();
 
@@ -64,20 +64,11 @@ public class SAList extends SimpleActionWithSourceSink {
 
 		String name = ((File) newParameterMap.get(Parameters.PARAM_FILE))
 				.getName();
-		try {
-			if (sink.exists(sinkConfig, remotePath, name)) {
-				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-			} else {
-				newParameterMap.put(Parameters.PARAM_STATUS,
-						Parameters.VALUE_FAILED);
-				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE,
-						"Document not found");
-			}
-		} catch (Move2AlfException e) {
-			newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-			newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, e.getMessage());
+
+		if (!sink.exists(sinkConfig, remotePath, name)) {
+			throw new Move2AlfException("Document not found");
 		}
-		
+
 		output.add(newParameterMap);
 		return output;
 	}
