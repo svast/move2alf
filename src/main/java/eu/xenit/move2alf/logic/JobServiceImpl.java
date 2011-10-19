@@ -3,6 +3,7 @@ package eu.xenit.move2alf.logic;
 import static akka.actor.Actors.actorOf;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -603,6 +604,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void sendMail(SimpleMailMessage message) {
 		try {
+			logger.debug("Sending email \"" + message.getSubject() + "\" to "
+					+ Arrays.asList(message.getTo()));
 			getMailSender().send(message);
 		} catch (MailException e) {
 			logger.warn("Failed to send email (" + e.getMessage() + ")");

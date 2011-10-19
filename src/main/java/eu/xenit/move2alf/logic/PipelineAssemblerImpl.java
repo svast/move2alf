@@ -494,6 +494,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			pipeline.add(new PipelineStep(transformAction, transformConfig, null, errorHandler, new ActionExecutor(executorService)));
 		}
 
+		logger.debug("getDocExist = " + jobConfig.getDocExist());
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
 				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
 				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
