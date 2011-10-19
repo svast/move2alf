@@ -1,9 +1,10 @@
 <div><form:errors path="cron" cssClass="error"/></div>
 <p id="cronError" class="hide error">you must create a schedule.</p>
-<%int counter = 1; %>
+<%int counter = 1;%>
 <table id="tblSample" >
  <c:if test="${empty job.cron}" >
 <c:forEach var="schedule" items="${schedules}">
+<c:if test="${schedule.quartzScheduling ne defaultSchedule}" >
 <tr>
 <td>
 <div id="rowNumber<%=counter%>"><%=counter%></div>
@@ -17,9 +18,11 @@
 </td>
 </tr>
 <%counter++; %>
+</c:if>
 </c:forEach>
 </c:if>
 <c:forEach var="cronjob" items="${job.cron}">
+<c:if test="${cronjob ne defaultSchedule}" >
 <tr>
 <td>
 <div id="rowNumber<%=counter%>"><%=counter%></div>
@@ -33,6 +36,7 @@
 </td>
 </tr>
 <%counter++; %>
+</c:if>
 </c:forEach>
 </table>
 
@@ -183,15 +187,19 @@
  <table id="tblCron" class="hide">
  <c:if test="${empty job.cron}" >
 <c:forEach var="schedule" items="${schedules}">
+<c:if test="${schedule.quartzScheduling ne defaultSchedule}" >
 <tr>
 <td><input name="cron" type="checkbox" value="<c:out value="${schedule.quartzScheduling}" />" checked /></td>
 </tr>
+</c:if>
 </c:forEach>
 </c:if>
 <c:forEach var="cronjob" items="${job.cron}">
+<c:if test="${cronjob ne defaultSchedule}" >
 <tr>
 <td><input name="cron" type="checkbox" value="<c:out value="${cronjob}" />" checked /></td>
 </tr>
+</c:if>
 </c:forEach>
 </table>
 

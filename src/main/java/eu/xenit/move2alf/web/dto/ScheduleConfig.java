@@ -22,7 +22,6 @@ public class ScheduleConfig {
 
 	private String cronJob;
 
-	@NotEmpty
 	private List<String> cron;
 
 	public void setRunFrequency(String runFrequency) {

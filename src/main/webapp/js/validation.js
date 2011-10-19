@@ -51,14 +51,16 @@ function jobValidation(form){
 		}
 	}
 
+	/*
 	if(!document.getElementById('rowNumber1')){
 		confirmSchedule();
 		addRowToSchedule(form);
 		/*
 		document.getElementById("cronError").style.display='block';
 		validated=false;
-		*/
+		
 	}
+	*/
 		return validated;
 }
 

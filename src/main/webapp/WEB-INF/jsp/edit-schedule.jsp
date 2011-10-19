@@ -8,7 +8,7 @@
 <h2>Edit schedule</h2>
 
 <div class="frame-job">
-<form:form modelAttribute="job" method="post" name="editSchedule" onSubmit="return formValidator(this);">
+<form:form modelAttribute="job" method="post" name="editSchedule">
 
 <h3>
 <table>

@@ -15,6 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.quartz.JobExecutionContext;
+import org.quartz.Trigger;
+import org.quartz.TriggerUtils;
+import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +44,10 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.logic.JobExecutor;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
+import eu.xenit.move2alf.logic.SchedulerImpl;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
@@ -59,6 +67,7 @@ public class JobController {
 	private UserService userService;
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
+	
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -276,6 +285,8 @@ public class JobController {
 		List<String> cronJobs = job.getCron();
 		int jobId = getJobService().createJob(job.getName(),
 				job.getDescription()).getId();
+		
+	
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
@@ -337,6 +348,7 @@ public class JobController {
 				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 		mav.setViewName("edit-job");
 		return mav;
 	}
@@ -469,46 +481,9 @@ public class JobController {
 		ModelAndView mav = new ModelAndView();
 		Job editedJob = getJobService().editJob(id, job.getName(), job.getDescription());
 		int jobId = editedJob.getId();
-		boolean deleteSchedule = true;
-		List<String> cronJobs = job.getCron();
-
-		List<String> existingCronJobs = getJobService().getCronjobsForJob(id);
-
-		int listSize;
-
-		try {
-			listSize = cronJobs.size();
-		} catch (Exception e) {
-			listSize = 0;
-		}
-		boolean removeEntry = false;
-
-		for (int i = 0; i < existingCronJobs.size(); i++) {
-			for (int j = 0; j < listSize; j++) {
-				if (removeEntry == true) {
-					removeEntry = false;
-				}
-
-				if (existingCronJobs.get(i).equals(cronJobs.get(j))) {
-					cronJobs.remove(j);
-					j--;
-					listSize--;
-					deleteSchedule = false;
-					removeEntry = true;
-				}
-
-			}
-			if (deleteSchedule == true) {
-				int scheduleId = getJobService().getScheduleId(id,
-						existingCronJobs.get(i));
-				getJobService().deleteSchedule(scheduleId);
-			}
-			deleteSchedule = true;
-		}
-
-		for (int i = 0; i < listSize; i++) {
-			getJobService().createSchedule(id, cronJobs.get(i));
-		}
+		
+		
+		handleSchedule(id, job.getCron());
 
 		List<String> sourceSink = job.getSourceSink();
 		
@@ -563,44 +538,20 @@ public class JobController {
 		return mav;
 	}
 
-	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.GET)
-	public ModelAndView editScheduleForm(@PathVariable int id) {
-		ModelAndView mav = new ModelAndView();
-		JobConfig jobConfig = new JobConfig();
-		jobConfig.setId(id);
-		jobConfig.setName(getJobService().getJob(id).getName());
-		mav.addObject("jobConfig", jobConfig);
-		mav.addObject("job", new ScheduleConfig());
-		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		mav.setViewName("edit-schedule");
-		return mav;
-	}
-
-	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.POST)
-	public ModelAndView editSchedule(@PathVariable int id,
-			@ModelAttribute("job") @Valid ScheduleConfig job,
-			BindingResult errors) {
-
-		if (errors.hasErrors()) {
-			System.out.println("THE ERRORS: "+errors.toString());
-			
-			ModelAndView mav = new ModelAndView("edit-schedule");
-			mav.addObject("job",job);
-			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
-
-            return mav;
-		}
-		
-		ModelAndView mav = new ModelAndView();
-
+	private void handleSchedule(int id, List<String> cronJobs) {
 		boolean deleteSchedule = true;
-		List<String> cronJobs = job.getCron();
-
+		
 		List<String> existingCronJobs = getJobService().getCronjobsForJob(id);
+		
+		logger.debug("Existing cronjobs: " + existingCronJobs);
+		logger.debug("Cronjobs given in form: " + cronJobs);
+		
+		CollectionUtils.filter(existingCronJobs, new Predicate(){
+			@Override
+			public boolean evaluate(Object arg0) {
+				return !arg0.equals(SchedulerImpl.DEFAULT_SCHEDULE);
+			}
+		});
 
 		int listSize;
 
@@ -629,6 +580,7 @@ public class JobController {
 			if (deleteSchedule == true) {
 				int scheduleId = getJobService().getScheduleId(id,
 						existingCronJobs.get(i));
+				logger.debug("removing cronJob: " + getJobService().getSchedule(scheduleId).getQuartzScheduling());
 				getJobService().deleteSchedule(scheduleId);
 			}
 			deleteSchedule = true;
@@ -637,6 +589,45 @@ public class JobController {
 		for (int i = 0; i < listSize; i++) {
 			getJobService().createSchedule(id, cronJobs.get(i));
 		}
+	}
+
+	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.GET)
+	public ModelAndView editScheduleForm(@PathVariable int id) {
+		ModelAndView mav = new ModelAndView();
+		JobConfig jobConfig = new JobConfig();
+		jobConfig.setId(id);
+		jobConfig.setName(getJobService().getJob(id).getName());
+		mav.addObject("jobConfig", jobConfig);
+		mav.addObject("job", new ScheduleConfig());
+		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+		mav.addObject("roles", getUserService().getCurrentUser()
+				.getUserRoleSet());
+		mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
+		mav.setViewName("edit-schedule");
+		return mav;
+	}
+
+	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.POST)
+	public ModelAndView editSchedule(@PathVariable int id,
+			@ModelAttribute("job") @Valid ScheduleConfig job,
+			BindingResult errors) {
+
+		if (errors.hasErrors()) {
+			System.out.println("THE ERRORS: "+errors.toString());
+			
+			ModelAndView mav = new ModelAndView("edit-schedule");
+			mav.addObject("job",job);
+			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
+			mav.addObject("roles", getUserService().getCurrentUser()
+					.getUserRoleSet());
+			mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
+            return mav;
+		}
+		
+		ModelAndView mav = new ModelAndView();
+
+		List<String> cronJobs = job.getCron();
+		handleSchedule(id, cronJobs);
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
@@ -1129,51 +1120,10 @@ public class JobController {
 	public ModelAndView runPoller(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
 		
-		String cronJob = getInstantCronJob();
-		getJobService().createSchedule(jobId, cronJob);
+		getJobService().scheduleNow(jobId, getJobService().getDefaultScheduleIdForJob(jobId));
 		
-		mav.addObject("job", getJobService().getJob(jobId));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		mav.setViewName("confirm-run");
+		mav.setViewName("redirect:/job/dashboard");
 		return mav;
-	}
-	
-	private String getInstantCronJob() {
-		Date now = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(now);
-
-		Integer y = new Integer(cal.get(Calendar.YEAR));
-		Integer mon = new Integer(cal.get(Calendar.MONTH) + 1);
-		Integer dom = new Integer(cal.get(Calendar.DAY_OF_MONTH));
-		Integer hour = new Integer(cal.get(Calendar.HOUR_OF_DAY));
-		Integer mins = new Integer(cal.get(Calendar.MINUTE));
-		Integer secs = new Integer(cal.get(Calendar.SECOND));
-
-		secs = secs + 10;
-
-		if (secs > 59) {
-			secs = secs - 60;
-			mins = mins + 1;
-
-			if (mins > 59) {
-				mins = mins - 60;
-				hour = hour + 1;
-			}
-		}
-
-		String seconds = secs.toString();
-		String minutes = mins.toString();
-		String hours = hour.toString();
-		String day = dom.toString();
-		String month = mon.toString();
-		String year = y.toString();
-
-		String cronjob = seconds + " " + minutes + " " + hours + " " + day
-				+ " " + month + " ? " + year;
-
-		return cronjob;
 	}
 
 }

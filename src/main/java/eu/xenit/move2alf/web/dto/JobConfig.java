@@ -35,7 +35,6 @@ public class JobConfig {
 
 	private String cronJob;
 
-	@NotEmpty
 	private List<String> cron;
 
 	@NotEmpty

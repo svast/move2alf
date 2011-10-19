@@ -21,6 +21,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
@@ -45,7 +46,6 @@ import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 
 @Service("jobService")
-@Transactional
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
@@ -255,6 +255,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	@Transactional(noRollbackFor = IndexOutOfBoundsException.class)
 	public int getScheduleId(int jobId, String cronJob) {
 		@SuppressWarnings("unchecked")
 		List schedule = sessionFactory.getCurrentSession().createQuery(
@@ -632,6 +633,26 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		}
 
 		return historyList;
+	}
+
+	/**
+	 * Execute job with jobId as soon as possible
+	 */
+	@Override
+	public void scheduleNow(int jobId, int scheduleId) {
+		getScheduler().immediately(getJob(jobId), scheduleId);
+	}
+	
+	
+	@Override
+	public int getDefaultScheduleIdForJob(int jobId) {
+		int scheduleId;
+		try{
+			scheduleId = getScheduleId(jobId, SchedulerImpl.DEFAULT_SCHEDULE);
+		} catch (IndexOutOfBoundsException e){ //first manual run
+			scheduleId = createSchedule(jobId, SchedulerImpl.DEFAULT_SCHEDULE).getId();;	
+		}
+		return scheduleId;
 	}
 
 }

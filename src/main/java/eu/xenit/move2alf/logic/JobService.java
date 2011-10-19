@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
 import eu.xenit.move2alf.core.Action;
@@ -24,6 +26,7 @@ import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 
+@Transactional
 public interface JobService {
 
 	/**
@@ -336,4 +339,11 @@ public interface JobService {
 	public ActorRef getReportActor();
 
 	public List<HistoryInfo> getHistory(int jobId);
+
+	public void scheduleNow(int jobId, int scheduleId);
+
+	@Transactional(
+			propagation = Propagation.REQUIRES_NEW
+			)
+	public int getDefaultScheduleIdForJob(int jobId);
 }

@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 
+@Ignore
 public class TypesTest {
 	class Foo extends ArrayList<String> {
 

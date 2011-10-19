@@ -281,5 +281,14 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public void sendMail(SimpleMailMessage message) {
 		}
+
+		@Override
+		public void scheduleNow(int jobId, int scheduleId) {			
+		}
+
+		@Override
+		public int getDefaultScheduleIdForJob(int jobId) {
+			return 0;
+		}
 	}
 }

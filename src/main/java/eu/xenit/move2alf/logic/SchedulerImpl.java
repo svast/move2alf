@@ -9,11 +9,15 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
@@ -36,6 +40,9 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	static final String JOB_SERVICE = "jobService";
 
 	static final String JOB_EXECUTION_SERVICE = "jobExecutionService";
+
+	public static final String DEFAULT_SCHEDULE = "0 0 0 1 1 ? 1";
+
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -107,6 +114,34 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					parseException.printStackTrace();
 				}
 			}
+		}
+	}
+
+	@Override
+	public void immediately(Job job, int scheduleId) {
+		logger.debug("Scheduling immediate job: " + job.getName());
+		
+		JobDetail jobDetail = new JobDetail("Schedule-"
+				+ job.getName() + "-" + job.getId() + "-"
+				+ scheduleId, JobExecutor.class);
+		//Trigger fires as quick as possible
+		//first argument 0 : no repeats
+		//second argument is the interval between repeats, but irrelevant here
+		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1000);
+		trigger.setName("Immediate trigger");
+		trigger.setGroup("JobScheduleGroup");
+		JobDataMap jobData = new JobDataMap();
+		jobData.put(SCHEDULE_ID, scheduleId);
+		jobData.put(JOB_SERVICE, getJobService());
+		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
+		trigger.setJobDataMap(jobData);
+		try {
+			scheduler.scheduleJob(jobDetail, trigger);
+			logger.debug("Trigger for schedule " + scheduleId + " fired!");
+		} catch (SchedulerException e) {
+			logger.error("Scheduling immediate job \"" + job.getName()
+					+ "\" failed");
+			e.printStackTrace();
 		}
 	}
 }

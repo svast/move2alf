@@ -30,11 +30,14 @@ public class JobExecutor implements org.quartz.Job {
 		Cycle cycle;
 
 		try {
+			logger.debug("looking for schedule");
 			schedule = jobService.getSchedule(scheduleId);
+			logger.debug("The schedule exists");
 			job = schedule.getJob();
 		} catch (Move2AlfException e) {
 			logger.error("Could not execute job with schedule ID " + scheduleId
 					+ " because schedule or job does not exist.");
+			e.printStackTrace();
 			return;
 		}
 
