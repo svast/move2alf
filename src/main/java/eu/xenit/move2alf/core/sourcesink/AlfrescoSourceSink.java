@@ -120,6 +120,24 @@ public class AlfrescoSourceSink extends SourceSink {
 				uploadFile(docExistsMode, ras, basePath, remotePath, mimeType,
 						namespace, contentType, description, metadata,
 						multiValueMetadata, acl, inheritPermissions, document);
+			} catch (RepositoryAccessException e) {
+				if (!(e.getMessage() == null)
+						&& (e.getMessage()
+								.indexOf("security processing failed") != -1)) {
+					// retry
+					logger.debug("Authentication failure? Creating new RAS");
+					destroyRepositoryAccessSession();
+					ras = createRepositoryAccessSession(configuredSourceSink);
+
+					logger.debug("Retrying file " + document.getName());
+					uploadFile(docExistsMode, ras, basePath, remotePath,
+							mimeType, namespace, contentType, description,
+							metadata, multiValueMetadata, acl,
+							inheritPermissions, document);
+				} else {
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
+				}
 			} catch (RuntimeException e) {
 				if ("Error writing content to repository server".equals(e
 						.getMessage())) {
@@ -127,16 +145,13 @@ public class AlfrescoSourceSink extends SourceSink {
 					logger.debug("Authentication failure? Creating new RAS");
 					destroyRepositoryAccessSession();
 					ras = createRepositoryAccessSession(configuredSourceSink);
-					try {
-						logger.debug("Retrying file " + document.getName());
-						uploadFile(docExistsMode, ras, basePath, remotePath,
-								mimeType, namespace, contentType, description,
-								metadata, multiValueMetadata, acl,
-								inheritPermissions, document);
-					} catch (RuntimeException e2) {
-						logger.error(e2.getMessage(), e2);
-						throw new Move2AlfException(e2.getMessage(), e2);
-					}
+
+					logger.debug("Retrying file " + document.getName());
+					uploadFile(docExistsMode, ras, basePath, remotePath,
+							mimeType, namespace, contentType, description,
+							metadata, multiValueMetadata, acl,
+							inheritPermissions, document);
+
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -159,17 +174,21 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error("Fatal Exception", e);
 			// TODO: stop job instead of stopping tomcat
 			// System.exit(1);
+		} catch (RuntimeException e2) {
+			logger.error(e2.getMessage(), e2);
+			throw new Move2AlfException(e2.getMessage(), e2);
 		}
 	}
 
-	private void uploadFile(final String docExistsMode, final RepositoryAccessSession ras,
-			final String basePath, final String remotePath, final String mimeType,
-			final String namespace, final String contentType, final String description,
-			final Map<String, String> metadata,
+	private void uploadFile(final String docExistsMode,
+			final RepositoryAccessSession ras, final String basePath,
+			final String remotePath, final String mimeType,
+			final String namespace, final String contentType,
+			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final Map<String, Map<String, String>> acl, final boolean inheritPermissions,
-			final File document) throws RepositoryAccessException,
-			RepositoryException {
+			final Map<String, Map<String, String>> acl,
+			final boolean inheritPermissions, final File document)
+			throws RepositoryAccessException, RepositoryException {
 		try {
 			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
 					description, namespace, contentType, metadata,
@@ -219,7 +238,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			PrintWriter printWriter = new PrintWriter(result);
 			cause.printStackTrace(printWriter);
 			String stackTrace = result.toString();
-			//logger.debug("Stacktrace {}", stackTrace);
+			// logger.debug("Stacktrace {}", stackTrace);
 			if (stackTrace
 					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
 				if (MODE_SKIP.equals(docExistsMode)) {
@@ -258,7 +277,9 @@ public class AlfrescoSourceSink extends SourceSink {
 				RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 				return ras.doesDocExist(name, remotePath);
 			} catch (RepositoryAccessException e) {
-				if (!(e.getMessage() == null) && (e.getMessage().indexOf("security processing failed") != -1)) { 
+				if (!(e.getMessage() == null)
+						&& (e.getMessage()
+								.indexOf("security processing failed") != -1)) {
 					// retry
 					destroyRepositoryAccessSession();
 					RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
@@ -287,7 +308,9 @@ public class AlfrescoSourceSink extends SourceSink {
 				RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 				ras.deleteByDocNameAndSpace(remotePath, name);
 			} catch (RepositoryAccessException e) {
-				if (!(e.getMessage() == null) && (e.getMessage().indexOf("security processing failed") != -1)) { 
+				if (!(e.getMessage() == null)
+						&& (e.getMessage()
+								.indexOf("security processing failed") != -1)) {
 					// retry
 					destroyRepositoryAccessSession();
 					RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
