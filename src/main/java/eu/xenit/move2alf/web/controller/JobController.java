@@ -286,7 +286,6 @@ public class JobController {
 		int jobId = getJobService().createJob(job.getName(),
 				job.getDescription()).getId();
 		
-	
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}

@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.web.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -35,7 +36,7 @@ public class JobConfig {
 
 	private String cronJob;
 
-	private List<String> cron;
+	private List<String> cron = new ArrayList<String>();
 
 	@NotEmpty
 	private String metadata;
@@ -220,7 +221,10 @@ public class JobConfig {
 	}
 
 	public void setCron(List<String> cron) {
-		this.cron = cron;
+		if(cron != null)
+			this.cron = cron;
+		else
+			this.cron = new ArrayList<String>();
 	}
 
 	public List<String> getCron() {
