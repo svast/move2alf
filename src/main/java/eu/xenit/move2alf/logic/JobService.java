@@ -228,15 +228,6 @@ public interface JobService {
 	public ConfiguredObject getConfiguredSourceSink(int sourceSinkId);
 
 	/**
-	 * gets the duration of the cycle based on startDateTime and EndDateTime
-	 * 
-	 * @param startDateTime
-	 * @param endDateTime
-	 * @return String
-	 */
-	public String getDuration(Date startDateTime, Date endDateTime);
-
-	/**
 	 * deletes a configured source sink based on id.
 	 * 
 	 * @param id

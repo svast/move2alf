@@ -444,42 +444,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		sessionFactory.getCurrentSession().delete(destination);
 	}
 
-	public String getDuration(Date startDateTime, Date endDateTime) {
-		if (endDateTime == null) {
-			endDateTime = new Date();
-		}
-		Long duration = endDateTime.getTime() - startDateTime.getTime();
-		Date dateDuration = new Date(duration);
-
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(dateDuration);
-
-		int date = cal.get(Calendar.DATE) - 1;
-		int hours = cal.get(Calendar.HOUR_OF_DAY) - 1;
-		int minutes = cal.get(Calendar.MINUTE);
-		int seconds = cal.get(Calendar.SECOND);
-
-		if (date > 0) {
-			hours = hours + date * 24;
-		}
-
-		String hoursString = Integer.toString(hours);
-		String minutesString = Integer.toString(minutes);
-		String secondsString = Integer.toString(seconds);
-
-		if (hoursString.length() < 2)
-			hoursString = "0" + hours;
-		if (minutesString.length() < 2)
-			minutesString = "0" + minutes;
-		if (secondsString.length() < 2)
-			secondsString = "0" + seconds;
-
-		String durationDateString = hoursString + ":" + minutesString + ":"
-				+ secondsString;
-
-		return durationDateString;
-	}
-
 	private Map<Integer, List<ConfiguredAction>> runningActions = Collections
 			.synchronizedMap(new HashMap<Integer, List<ConfiguredAction>>());
 

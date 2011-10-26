@@ -55,6 +55,9 @@ public class SimpleActionWrapper extends SimpleAction {
 		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));
 		// some old actions except PARAM_COUNTER to be present, it's added here to prevent NPEs
 		
+		String relativePath = parameterMap.get(PARAM_RELATIVE_PATH) + "/";
+		parameterMap.put(PARAM_RELATIVE_PATH, relativePath);
+		
 		ConfiguredAction configuredAction = new ConfiguredAction();
 		configuredAction.setParameters(config);
 		// trick the action so it thinks there is a next action to execute
@@ -216,11 +219,6 @@ public class SimpleActionWrapper extends SimpleAction {
 
 		@Override
 		public ConfiguredSourceSink getDestination(int sinkId) {
-			return null;
-		}
-
-		@Override
-		public String getDuration(Date startDateTime, Date endDateTime) {
 			return null;
 		}
 

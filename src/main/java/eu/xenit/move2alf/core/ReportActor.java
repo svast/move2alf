@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.mail.SimpleMailMessage;
 
 import eu.xenit.move2alf.common.Config;
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
@@ -64,10 +65,10 @@ public class ReportActor extends UntypedActor {
 			}
 
 			// Get cycle information
-			Date startDateTime = cycle.getStartDateTime();
-			Date endDateTime = cycle.getEndDateTime();
-			String duration = getJobService().getDuration(startDateTime,
-					endDateTime);
+			long startDateTime = cycle.getStartDateTime().getTime();
+			long endDateTime = cycle.getEndDateTime().getTime();
+			long durationInSeconds = (endDateTime - startDateTime) / 1000;
+			String duration = Util.formatDuration(durationInSeconds);
 
 			String[] addresses = null;
 			if (errorsOccured == true && to != null && !"".equals(to)
