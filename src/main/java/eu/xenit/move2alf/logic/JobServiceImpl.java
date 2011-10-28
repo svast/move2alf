@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
@@ -450,7 +451,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void executeAction(int cycleId, ConfiguredAction action,
 			Map<String, Object> parameterMap) {
-		throw new UnsupportedOperationException("Use JobExecutionService instead");
+		throw new UnsupportedOperationException(
+				"Use JobExecutionService instead");
 	}
 
 	@Override
@@ -494,9 +496,28 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId) {
-		return (List<ProcessedDocument>) sessionFactory.getCurrentSession()
-				.createQuery("from ProcessedDocument as d where d.cycle.id=?")
-				.setLong(0, cycleId).list();
+		return getProcessedDocuments(cycleId, 0, 0);
+	}
+
+	@Override
+	public List<ProcessedDocument> getProcessedDocuments(int cycleId,
+			int first, int count) {
+		Query query = sessionFactory.getCurrentSession().createQuery(
+				"from ProcessedDocument as d where d.cycle.id=?").setLong(0,
+				cycleId).setFirstResult(first);
+		if (count > 0) {
+			query.setMaxResults(count);
+		}
+
+		return (List<ProcessedDocument>) query.list();
+	}
+
+	@Override
+	public long countProcessedDocuments(int cycleId) {
+		Query query = sessionFactory.getCurrentSession().createQuery(
+				"select count(*) from ProcessedDocument as d where d.cycle.id=?").setLong(0,
+				cycleId);
+		return (Long) query.uniqueResult();
 	}
 
 	@Override
@@ -553,7 +574,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			doc
 					.setStatus(EProcessedDocumentStatus.valueOf(state
 							.toUpperCase()));
-			for(ProcessedDocumentParameter param : params) {
+			for (ProcessedDocumentParameter param : params) {
 				if (param.getValue().length() > 255) {
 					param.setValue(param.getValue().substring(0, 255));
 				}
@@ -575,7 +596,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			logger.warn("Failed to send email (" + e.getMessage() + ")");
 		}
 	}
-
 
 	@Override
 	public List<HistoryInfo> getHistory(int jobId) {
@@ -609,15 +629,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void scheduleNow(int jobId, int scheduleId) {
 		getScheduler().immediately(getJob(jobId), scheduleId);
 	}
-	
-	
+
 	@Override
 	public int getDefaultScheduleIdForJob(int jobId) {
 		int scheduleId;
-		try{
+		try {
 			scheduleId = getScheduleId(jobId, SchedulerImpl.DEFAULT_SCHEDULE);
-		} catch (IndexOutOfBoundsException e){ //first manual run
-			scheduleId = createSchedule(jobId, SchedulerImpl.DEFAULT_SCHEDULE).getId();;	
+		} catch (IndexOutOfBoundsException e) { // first manual run
+			scheduleId = createSchedule(jobId, SchedulerImpl.DEFAULT_SCHEDULE)
+					.getId();
+			;
 		}
 		return scheduleId;
 	}

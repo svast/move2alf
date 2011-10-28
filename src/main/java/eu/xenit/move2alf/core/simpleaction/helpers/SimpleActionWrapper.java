@@ -288,5 +288,16 @@ public class SimpleActionWrapper extends SimpleAction {
 		public int getDefaultScheduleIdForJob(int jobId) {
 			return 0;
 		}
+
+		@Override
+		public List<ProcessedDocument> getProcessedDocuments(int cycleId,
+				int first, int count) {
+			return null;
+		}
+
+		@Override
+		public long countProcessedDocuments(int cycleId) {
+			return 0;
+		}
 	}
 }

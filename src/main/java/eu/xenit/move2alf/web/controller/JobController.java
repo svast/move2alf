@@ -4,10 +4,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -903,69 +906,28 @@ public class JobController {
 	public ModelAndView report(@PathVariable int jobId,
 			@PathVariable int cycleId, HttpServletRequest request,
 			HttpServletResponse response) {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("job", getJobService().getJob(jobId));
-		Cycle cycle = getJobService().getCycle(cycleId);
-		Date startDateTime = cycle.getStartDateTime();
-		Date endDateTime = cycle.getEndDateTime();
-		if (endDateTime == null) {
-			endDateTime = new Date();
-		}
-
-		long totalTimeInSeconds = (endDateTime.getTime() - startDateTime
-				.getTime()) / 1000;
-		String docsPerSecond;
-		String duration = Util.formatDuration(totalTimeInSeconds);
-		List<ProcessedDocument> processedDocuments = getJobService()
-				.getProcessedDocuments(cycleId);
-		Integer documentListSize = processedDocuments.size();
-		if (processedDocuments == null || "".equals(processedDocuments)) {
-			documentListSize = 0;
-		}
-		if (documentListSize == 0) {
-			docsPerSecond = "";
-		} else {
-			if (totalTimeInSeconds == 0) {
-				docsPerSecond = "" + documentListSize;
-			} else {
-				double d = (double) documentListSize / totalTimeInSeconds;
-				NumberFormat formatter = new DecimalFormat("#.##");
-				docsPerSecond = formatter.format(d);
-			}
-		}
-		PagedListHolder pagedListHolder = new PagedListHolder(
-				processedDocuments);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
-		pagedListHolder.setPage(page);
-		int pageSize = 10;
-		pagedListHolder.setPageSize(pageSize);
-
-		mav.addObject("cycle", cycle);
-		mav.addObject("duration", duration);
-		mav.addObject("pagedListHolder", pagedListHolder);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		mav.addObject("documentListSize", documentListSize);
-		mav.addObject("docsPerSecond", docsPerSecond);
-		mav.setViewName("report");
-		
-		return mav;
+		int pageSize = ServletRequestUtils
+				.getIntParameter(request, "count", 10);
+		return reportWithView(jobId, cycleId, page * pageSize, pageSize,
+				"report");
 	}
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report/exportcsv")
 	public ModelAndView exportReportToCSV(@PathVariable int jobId,
 			@PathVariable int cycleId) {
-		return exportReport(jobId, cycleId, "export-report-csv");
+		return reportWithView(jobId, cycleId, 0, 0, "export-report-csv");
 	}
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report/exportpdf")
 	public ModelAndView exportReportToPDF(@PathVariable int jobId,
 			@PathVariable int cycleId, HttpServletRequest request,
 			HttpServletResponse response) {
-		return exportReport(jobId, cycleId, "export-report-pdf");
+		return reportWithView(jobId, cycleId, 0, 0, "export-report-pdf");
 	}
 
-	private ModelAndView exportReport(int jobId, int cycleId, String viewName) {
+	private ModelAndView reportWithView(final int jobId, final int cycleId,
+			final int start, final int count, final String viewName) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("job", getJobService().getJob(jobId));
 		Cycle cycle = getJobService().getCycle(cycleId);
@@ -980,14 +942,12 @@ public class JobController {
 		String docsPerSecond;
 		String duration = Util.formatDuration(totalTimeInSeconds);
 
+		final Long documentListSize = getJobService().countProcessedDocuments(
+				cycleId);
 		List<ProcessedDocument> processedDocuments = getJobService()
-				.getProcessedDocuments(cycleId);
-		Integer documentListSize = processedDocuments.size();
+				.getProcessedDocuments(cycleId, start, count);
 
-		if (processedDocuments == null || "".equals(processedDocuments)) {
-			documentListSize = 0;
-		}
-		if (documentListSize == 0) {
+		if (documentListSize == 0L) {
 			docsPerSecond = "0";
 		} else {
 			if (totalTimeInSeconds == 0) {
@@ -999,9 +959,38 @@ public class JobController {
 			}
 		}
 
+		// easiest way to keep the pagination links, not the cleanest
+		PagedListHolder<ProcessedDocument> pagedListHolder = new PagedListHolder<ProcessedDocument>() {
+			@Override
+			public int getPageCount() {
+				return (int) (documentListSize / count);
+			}
+			
+			@Override
+			public boolean isFirstPage() {
+				return (start == 0);
+			}
+			
+			@Override
+			public boolean isLastPage() {
+				return (start >= documentListSize - count);
+			}
+
+			@Override
+			public int getFirstLinkedPage() {
+				return 1;
+			}
+			
+			@Override
+			public int getLastLinkedPage() {
+				return getPageCount();
+			}
+		};
+
 		mav.addObject("cycle", cycle);
 		mav.addObject("duration", duration);
 		mav.addObject("processedDocuments", processedDocuments);
+		mav.addObject("pagedListHolder", pagedListHolder);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.addObject("documentListSize", documentListSize);
@@ -1043,5 +1032,4 @@ public class JobController {
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
-
 }

@@ -2,9 +2,8 @@
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 <%@ taglib prefix="tg" tagdir="/WEB-INF/tags" %>
 
+<jsp:useBean id="pagedListHolder" scope="request" type="org.springframework.beans.support.PagedListHolder"/>
 
-<jsp:useBean id="pagedListHolder" scope="request" 
-   type="org.springframework.beans.support.PagedListHolder"/>
 <%-- // create link for pages, "~" will be replaced 
    later on with the proper page number --%>
 <c:url value="/job/${job.id}/${cycle.id}/report" var="pagedLink">
@@ -67,7 +66,7 @@
 <th class="table-border-thin">Status</th>
 <th class="table-border-thin">Parameters</th>
 </tr>
-<c:forEach items="${pagedListHolder.pageList}" var="item">
+<c:forEach items="${processedDocuments}" var="item">
 <tr>
 <td class="table-border-thin">${item.name}</td>
 <td class="table-border-thin"><fmt:formatDate value="${item.processedDateTime}" pattern="yyyy-MM-dd HH:mm:ss" type="both"/></td>

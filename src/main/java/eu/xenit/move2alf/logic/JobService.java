@@ -265,10 +265,25 @@ public interface JobService {
 	 * @param cycleId
 	 */
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId);
+	
+	/**
+	 * 
+	 * @param cycleId
+	 * @param first First ProcessedDocument to return (sorted by id). Starts at 0.
+	 * @param count Number of ProcessedDocuments to return. 0 means return all.
+	 */
+	public List<ProcessedDocument> getProcessedDocuments(int cycleId, int first, int count);
+	
+	/**
+	 * Return the number of ProcessedDocuments for a given cycle.
+	 * 
+	 * @param cycleId
+	 */
+	public long countProcessedDocuments(int cycleId);
 
 	/** gets all configured source sink but filters out the fileSystem source sink
 	 * 
-	 * @return Lis tof configured source sinks
+	 * @return List of configured source sinks
 	 */
 	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
 
