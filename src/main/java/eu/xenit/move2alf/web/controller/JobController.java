@@ -3,14 +3,10 @@ package eu.xenit.move2alf.web.controller;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,10 +16,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.quartz.JobExecutionContext;
-import org.quartz.Trigger;
-import org.quartz.TriggerUtils;
-import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -962,8 +954,13 @@ public class JobController {
 		// easiest way to keep the pagination links, not the cleanest
 		PagedListHolder<ProcessedDocument> pagedListHolder = new PagedListHolder<ProcessedDocument>() {
 			@Override
+			public int getPage() {
+				return start / count;
+			}
+			
+			@Override
 			public int getPageCount() {
-				return (int) (documentListSize / count);
+				return (int) ((documentListSize - 1) / count + 1);
 			}
 			
 			@Override
@@ -984,7 +981,7 @@ public class JobController {
 			
 			@Override
 			public int getLastLinkedPage() {
-				return getPageCount();
+				return getPageCount() - 1;
 			}
 		};
 
