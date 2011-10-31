@@ -6,7 +6,7 @@
 <c:if test="${pagedListHolder.pageCount > 1}">
 <c:if test="${!pagedListHolder.firstPage}">
 <span class="pagingItem"><a href="<%= StringUtils.replace(pagedLink, 
-   "~", String.valueOf(pagedListHolder.getPage()-1)) %>"><</a></span>
+   "~", String.valueOf(pagedListHolder.getPage()-1)) %>">&lt;</a></span>
 </c:if>
 <c:if test="${pagedListHolder.firstLinkedPage > 0}">
 <span class="pagingItem"><a href="<%= StringUtils.replace(pagedLink, "~", "0") %>">1</a></span>
@@ -34,6 +34,6 @@
 </c:if>
 <c:if test="${!pagedListHolder.lastPage}">
 <span class="pagingItem"><a href="<%= StringUtils.replace(pagedLink, 
-   "~", String.valueOf(pagedListHolder.getPage()+1)) %>">></a></span>
+   "~", String.valueOf(pagedListHolder.getPage()+1)) %>">&gt;</a></span>
 </c:if>
 </c:if>

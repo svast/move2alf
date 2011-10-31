@@ -973,12 +973,13 @@ public class JobController {
 			
 			@Override
 			public boolean isLastPage() {
+
 				return (start >= documentListSize - count);
 			}
 
 			@Override
 			public int getFirstLinkedPage() {
-				return 1;
+				return 0;
 			}
 			
 			@Override
