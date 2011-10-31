@@ -983,6 +983,11 @@ public class JobController {
 			public int getLastLinkedPage() {
 				return getPageCount() - 1;
 			}
+			
+			@Override
+			public int getMaxLinkedPages() {
+				return 10;
+			}
 		};
 
 		mav.addObject("cycle", cycle);
