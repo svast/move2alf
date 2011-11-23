@@ -35,8 +35,7 @@ import eu.xenit.move2alf.web.dto.HistoryInfo;
 
 @SuppressWarnings("deprecation")
 public class SimpleActionWrapper extends SimpleAction {
-
-	private List<FileInfo> output;
+	
 	private final Action action;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SimpleActionWrapper.class);
@@ -49,7 +48,7 @@ public class SimpleActionWrapper extends SimpleAction {
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config) {
-		output = new ArrayList<FileInfo>();
+		List<FileInfo> output = new ArrayList<FileInfo>();
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
 		parameterMap.put(PARAM_CYCLE, 0); // hack
 		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));
@@ -63,12 +62,24 @@ public class SimpleActionWrapper extends SimpleAction {
 		// trick the action so it thinks there is a next action to execute
 		configuredAction.setAppliedConfiguredActionOnSuccess(new ConfiguredAction());
 
-		action.setJobService(new CollectingJobService());
+		CollectingJobService cjs = new CollectingJobService(output);
+		
+		action.setJobService(cjs);
 		action.execute(configuredAction, parameterMap);
-		return output;
+		return cjs.getResults();
 	}
 
 	class CollectingJobService implements JobService {
+		private List<FileInfo> results;
+		
+		public CollectingJobService(List<FileInfo> results) {
+			this.results = results;
+		}
+		
+		public List<FileInfo> getResults() {
+			return this.results;
+		}
+		
 		// Collect calls to executeAction and add to output
 		@Override
 		public void executeAction(int cycleId, ConfiguredAction action,
@@ -78,7 +89,7 @@ public class SimpleActionWrapper extends SimpleAction {
 			if (VALUE_FAILED.equals(fileInfo.get(PARAM_STATUS))) {
 				throw new Move2AlfException((String) fileInfo.get(PARAM_ERROR_MESSAGE));
 			} else {
-				output.add(fileInfo);
+				results.add(fileInfo);
 			}
 		}
 
