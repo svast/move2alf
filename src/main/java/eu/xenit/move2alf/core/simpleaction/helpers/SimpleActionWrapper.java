@@ -37,18 +37,19 @@ import eu.xenit.move2alf.web.dto.HistoryInfo;
 public class SimpleActionWrapper extends SimpleAction {
 	
 	private final Action action;
+	private CollectingJobService cjs;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SimpleActionWrapper.class);
 
 	public SimpleActionWrapper(Action action) {
 		this.action = action;
+		cjs = new CollectingJobService();
 	}
 
 	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config) {
-		List<FileInfo> output = new ArrayList<FileInfo>();
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
 		parameterMap.put(PARAM_CYCLE, 0); // hack
 		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));
@@ -61,23 +62,32 @@ public class SimpleActionWrapper extends SimpleAction {
 		configuredAction.setParameters(config);
 		// trick the action so it thinks there is a next action to execute
 		configuredAction.setAppliedConfiguredActionOnSuccess(new ConfiguredAction());
-
-		CollectingJobService cjs = new CollectingJobService(output);
 		
 		action.setJobService(cjs);
 		action.execute(configuredAction, parameterMap);
-		return cjs.getResults();
+		List<FileInfo> results = cjs.getResults();
+		
+		//The results for this thread need to be erased because the thread is reused. Otherwise files can be loaded multiple times.
+		cjs.eraseResults();
+		return results;
 	}
 
-	class CollectingJobService implements JobService {
-		private List<FileInfo> results;
+	static class CollectingJobService implements JobService {
 		
-		public CollectingJobService(List<FileInfo> results) {
-			this.results = results;
+		//We don't want threads interfering with each other results.
+		private final ThreadLocal<List<FileInfo>> results;
+		
+		public CollectingJobService() {
+			results = new ThreadLocal<List<FileInfo>>();
 		}
 		
+		public void eraseResults() {
+			results.remove();
+		}
+
 		public List<FileInfo> getResults() {
-			return this.results;
+			logger.debug("Returning Copy");
+			return new ArrayList<FileInfo>(results.get());
 		}
 		
 		// Collect calls to executeAction and add to output
@@ -87,9 +97,14 @@ public class SimpleActionWrapper extends SimpleAction {
 			FileInfo fileInfo = new FileInfo();
 			fileInfo.putAll(parameterMap);
 			if (VALUE_FAILED.equals(fileInfo.get(PARAM_STATUS))) {
+				logger.debug("STATUS FAILED");
 				throw new Move2AlfException((String) fileInfo.get(PARAM_ERROR_MESSAGE));
 			} else {
-				results.add(fileInfo);
+				logger.debug("Adding fileInfo to result list");
+				if(results.get() == null)
+					results.set(new ArrayList<FileInfo>());
+				this.results.get().add(fileInfo);
+				logger.debug("Number of results: {}", results.get().size());
 			}
 		}
 
