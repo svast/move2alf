@@ -48,6 +48,7 @@ public class ActionExecutor {
 			SuccessHandler successHandler, ErrorHandler errorHandler) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		for (FileInfo parameterMap : input) {
+			parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
 			completionService.submit(new ActionCallable(action, parameterMap,
 					config, errorHandler, jobConfig, cycle));
 		}

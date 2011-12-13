@@ -51,7 +51,6 @@ public class SimpleActionWrapper extends SimpleAction {
 			final FileInfo parameterMap,
 			final ActionConfig config) {
 		//Map<String, Object> newParameterMap = new HashMap<String, Object>(parameterMap);
-		parameterMap.put(PARAM_CYCLE, 0); // hack
 		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));
 		// some old actions except PARAM_COUNTER to be present, it's added here to prevent NPEs
 		
@@ -87,7 +86,11 @@ public class SimpleActionWrapper extends SimpleAction {
 
 		public List<FileInfo> getResults() {
 			logger.debug("Returning Copy");
-			return new ArrayList<FileInfo>(results.get());
+			if(results.get() != null)
+				return new ArrayList<FileInfo>(results.get());
+			else
+				logger.debug("No results for this iteration");
+				return new ArrayList<FileInfo>();
 		}
 		
 		// Collect calls to executeAction and add to output
