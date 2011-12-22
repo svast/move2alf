@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.text.ParseException;
+import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
 
@@ -87,8 +88,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		}
 		for (Job job : getJobService().getAllJobs()) {
 			logger.debug("Scheduling job: " + job.getName());
-			JobDetail jobDetail = new JobDetail("Job-" + job.getId(), JobExecutor.class);
 			for (Schedule schedule : job.getSchedules()) {
+				JobDetail jobDetail = new JobDetail("Job-" + job.getId() + schedule.getId(), JobExecutor.class);
 				String cronExpression = schedule.getQuartzScheduling();
 				logger.debug("Adding schedule " + cronExpression);
 				try {
@@ -121,9 +122,12 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	public void immediately(Job job, int scheduleId) {
 		logger.debug("Scheduling immediate job: " + job.getName());
 		
-		JobDetail jobDetail = new JobDetail("Schedule-"
+		String jobId = "Schedule-"
 				+ job.getName() + "-" + job.getId() + "-"
-				+ scheduleId, JobExecutor.class);
+				+ scheduleId + "-" + Calendar.getInstance().getTimeInMillis();
+		JobDetail jobDetail = new JobDetail( jobId, JobExecutor.class);
+		logger.debug("Configuring Scheduler Job with id: "+jobId);
+		
 		//Trigger fires as quick as possible
 		//first argument 0 : no repeats
 		//second argument is the interval between repeats, but irrelevant here
