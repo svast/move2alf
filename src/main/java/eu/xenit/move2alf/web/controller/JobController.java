@@ -43,6 +43,7 @@ import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.SchedulerImpl;
+import eu.xenit.move2alf.logic.UsageService;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
@@ -62,6 +63,7 @@ public class JobController {
 	private UserService userService;
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
+	private UsageService usageService;
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -98,6 +100,15 @@ public class JobController {
 	public SourceSinkFactory getSourceSinkFactory() {
 		return sourceSinkFactory;
 	}
+	
+	@Autowired
+	public void setUsageService(UsageService usageService) {
+		this.usageService = usageService;
+	}
+	
+	public UsageService getUsageService() {
+		return this.usageService;
+	}
 
 	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
@@ -127,6 +138,7 @@ public class JobController {
 		mav.addObject("jobInfoList", jobInfoList);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		mav.addObject("licenseIsValid", getUsageService().isValid());
 		mav.setViewName("dashboard");
 		return mav;
 	}

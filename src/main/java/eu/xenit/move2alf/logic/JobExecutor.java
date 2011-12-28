@@ -13,8 +13,9 @@ import eu.xenit.move2alf.core.enums.EScheduleState;
 
 public class JobExecutor implements org.quartz.Job {
 
-	private static final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(JobExecutor.class);
+
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
@@ -22,12 +23,24 @@ public class JobExecutor implements org.quartz.Job {
 				SchedulerImpl.SCHEDULE_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
-		JobExecutionService jobExecutionService = (JobExecutionService) context.getMergedJobDataMap().get(
-				SchedulerImpl.JOB_EXECUTION_SERVICE);
-		
-		Schedule schedule;
-		Job job;
-		Cycle cycle;
+		JobExecutionService jobExecutionService = (JobExecutionService) context
+				.getMergedJobDataMap().get(SchedulerImpl.JOB_EXECUTION_SERVICE);
+		UsageService usageService = (UsageService) context.getMergedJobDataMap().get(SchedulerImpl.USAGE_SERVICE);
+
+		if (checkLicense(usageService)) {
+			executeJob(scheduleId, jobService, jobExecutionService);
+		}
+	}
+
+	private boolean checkLicense(UsageService usageService) {
+		return usageService.isValid();
+	}
+
+	private void executeJob(Integer scheduleId, JobService jobService,
+			JobExecutionService jobExecutionService) {
+		Schedule schedule = null;
+		Job job = null;
+		Cycle cycle = null;
 
 		try {
 			logger.debug("looking for schedule");
@@ -41,8 +54,7 @@ public class JobExecutor implements org.quartz.Job {
 			return;
 		}
 
-		if (jobService.getJobState(job.getId()).equals(
-				EScheduleState.RUNNING)) {
+		if (jobService.getJobState(job.getId()).equals(EScheduleState.RUNNING)) {
 			logger.warn("Job \"" + job.getName()
 					+ "\" already running, not starting second cycle");
 			return;

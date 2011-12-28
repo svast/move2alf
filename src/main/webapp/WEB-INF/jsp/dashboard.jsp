@@ -22,6 +22,12 @@
 <%} %>
 <br class="clear">
 
+<c:if test="${not licenseIsValid}">
+<div class="warning">
+    <p><strong>No valid license found! No jobs will be started.</strong> Please install your license or contact XeniT for a new license.</p>
+</div>
+</c:if>
+
 <c:if test="${empty jobInfoList}">
 <p>No jobs found, use the link above to create a new one</p>
 </c:if>

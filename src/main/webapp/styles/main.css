@@ -244,3 +244,11 @@ div.labelcontainer {
 	margin: 0;
 	padding: 0;
 }
+
+div.warning {
+	color: #AF1317;
+	border: 3px solid #AF1317;
+	margin-bottom: 2em;
+	padding-left: 1em;
+	padding-right: 1em;
+}

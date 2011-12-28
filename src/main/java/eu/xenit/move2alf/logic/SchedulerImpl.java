@@ -16,9 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
@@ -33,6 +30,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	private JobService jobService;
 	
 	private JobExecutionService jobExecutionService;
+	
+	private UsageService usageService;
 
 	private org.quartz.Scheduler scheduler;
 
@@ -41,6 +40,8 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	static final String JOB_SERVICE = "jobService";
 
 	static final String JOB_EXECUTION_SERVICE = "jobExecutionService";
+	
+	static final String USAGE_SERVICE = "usageService";
 
 	public static final String DEFAULT_SCHEDULE = "0 0 0 1 1 ? 1";
 
@@ -63,6 +64,15 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		return jobExecutionService;
 	}
 
+	@Autowired
+	public void setUsageService(UsageService usageService) {
+		this.usageService = usageService;
+	}
+	
+	public UsageService getUsageService() {
+		return this.usageService;
+	}
+	
 	@PostConstruct
 	public void init() {
 		logger.debug("Initializing scheduler");
@@ -96,10 +106,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					Trigger trigger = new CronTrigger("Trigger-"
 							+ schedule.getId(), "JobScheduleGroup",
 							cronExpression);
-					JobDataMap jobData = new JobDataMap();
-					jobData.put(SCHEDULE_ID, schedule.getId());
-					jobData.put(JOB_SERVICE, getJobService());
-					jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
+					JobDataMap jobData = createJobDataMap(schedule.getId());
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {
@@ -118,6 +125,15 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		}
 	}
 
+	private JobDataMap createJobDataMap(int scheduleId) {
+		JobDataMap jobData = new JobDataMap();
+		jobData.put(SCHEDULE_ID, scheduleId);
+		jobData.put(JOB_SERVICE, getJobService());
+		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
+		jobData.put(USAGE_SERVICE, getUsageService());
+		return jobData;
+	}
+
 	@Override
 	public void immediately(Job job, int scheduleId) {
 		logger.debug("Scheduling immediate job: " + job.getName());
@@ -134,10 +150,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1000);
 		trigger.setName("Immediate trigger");
 		trigger.setGroup("JobScheduleGroup");
-		JobDataMap jobData = new JobDataMap();
-		jobData.put(SCHEDULE_ID, scheduleId);
-		jobData.put(JOB_SERVICE, getJobService());
-		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
+		JobDataMap jobData = createJobDataMap(scheduleId);
 		trigger.setJobDataMap(jobData);
 		try {
 			scheduler.scheduleJob(jobDetail, trigger);
