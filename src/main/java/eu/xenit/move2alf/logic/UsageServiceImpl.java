@@ -68,8 +68,15 @@ public class UsageServiceImpl implements UsageService {
 		return true;
 	}
 
+    @Override
+    public Licensee getLicensee() {
+        // TODO: implement
+        return null; 
+    }
+
 	private License getLicense() throws ImportException, IOException {
 		return LicenseIO.importLicense(UsageServiceImpl.class.getClassLoader()
 				.getResource("move2alf.lic").openStream());
 	}
+
 }

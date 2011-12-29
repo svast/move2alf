@@ -24,7 +24,8 @@
 
 <c:if test="${not licenseIsValid}">
 <div class="warning">
-    <p><strong>No valid license found! No jobs will be started.</strong> Please install your license or contact XeniT for a new license.</p>
+    <p><strong>You need a license key to run jobs.</strong> Please contact <a href="mailto:sales@xenit.eu?subject=Move2Alf license&body=Dear XeniT,%0A%0AWe hereby request a production license key for the Move2Alf.%0A%0AOur company information:%0A Company name:%0A Street:%0A City:%0A Postal Code:%0A State:%0A Country:%0A%0AContact person:%0A E-mail:%0A Telephone:%0A%0AMigration volume in number of documents:%0A - One time:%0A - Per year:
+        ">sales@xenit.eu</a> to obtain a license key.</p>
 </div>
 </c:if>
 
