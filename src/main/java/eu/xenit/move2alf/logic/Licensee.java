@@ -14,16 +14,20 @@ public class Licensee {
 
     public Licensee(String companyName, String street, String city, String postalCode, String state, 
             String country, String contactPerson, String email, String telephone) {
-        this.companyName = companyName;
-        this.street = street;
-        this.city = city;
-        this.postalCode = postalCode;
-        this.state = state;
-        this.country = country;
+        this.companyName = nonNullString(companyName);
+        this.street = nonNullString(street);
+        this.city = nonNullString(city);
+        this.postalCode = nonNullString(postalCode);
+        this.state = nonNullString(state);
+        this.country = nonNullString(country);
 
-        this.contactPerson = contactPerson;
-        this.email = email;
-        this.telephone = telephone;
+        this.contactPerson = nonNullString(contactPerson);
+        this.email = nonNullString(email);
+        this.telephone = nonNullString(telephone);
+    }
+    
+    private String nonNullString(String in) {
+    	return (in != null) ? in : "";
     }
 
     public String getCompanyName() { return this.companyName; }

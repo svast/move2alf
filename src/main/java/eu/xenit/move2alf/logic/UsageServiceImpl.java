@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,25 +34,17 @@ public class UsageServiceImpl implements UsageService {
 
 	@Override
 	public boolean isValid() {
-		License license = null;
-		try {
-			license = getLicense();
-		} catch (IOException e) {
-			logger.error("Could not read license");
-			return false;
-		} catch (ImportException e) {
-			logger.error("Could not import license");
-			return false;
-		} catch (NullPointerException e) {
-			logger.error("Could not read license");
-			return false;
-		}
-		
+		return (getValidationFailureCause() == null);
+	}
+	
+	@Override
+	public String getValidationFailureCause() {
+		License license = getLicense();
 		if (license == null) {
 			logger.error("Could not read license");
-			return false;
+			return "nolicense";
 		}
-		
+
 		Validator validator = new Validator(license, publicKey);
 		LicenseState licState = null;
 		try {
@@ -62,21 +55,52 @@ public class UsageServiceImpl implements UsageService {
 			for (TestResult test : licState.getFailedTests()) {
 				logger.error(test.getResultDescription());
 			}
-			return false;
+			return "validation";
 		}
-		
-		return true;
+		return null;
 	}
 
-    @Override
-    public Licensee getLicensee() {
-        // TODO: implement
-        return null; 
-    }
+	@Override
+	public Date getExpirationDate() {
+		if (isValid()) {
+			License license = getLicense();
+			return license.getExpirationDate();
+		} else {
+			return null;
+		}
+	}
 
-	private License getLicense() throws ImportException, IOException {
-		return LicenseIO.importLicense(UsageServiceImpl.class.getClassLoader()
-				.getResource("move2alf.lic").openStream());
+	@Override
+	public Licensee getLicensee() {
+		License license = getLicense();
+		if (license != null) {
+			String companyName = license.getProperty("licensee.companyName");
+			String street = license.getProperty("licensee.street");
+			String city = license.getProperty("licensee.city");
+			String postalCode = license.getProperty("licensee.postalCode");
+			String state = license.getProperty("licensee.state");
+			String country = license.getProperty("licensee.country");
+			String contactPerson = license.getProperty("licensee.contactPerson");
+			String email = license.getProperty("licensee.email");
+			String telephone = license.getProperty("licensee.telephone");
+			return new Licensee(companyName, street, city, postalCode, state,
+					country, contactPerson, email, telephone);
+		} else {
+			return null;
+		}
+	}
+
+	private License getLicense() {
+		try {
+			return LicenseIO.importLicense(UsageServiceImpl.class
+					.getClassLoader().getResource("move2alf.lic").openStream());
+		} catch (IOException e) {
+			return null;
+		} catch (ImportException e) {
+			return null;
+		} catch (NullPointerException e) {
+			return null;
+		}
 	}
 
 }

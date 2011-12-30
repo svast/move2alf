@@ -138,7 +138,13 @@ public class JobController {
 		mav.addObject("jobInfoList", jobInfoList);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
+		
+		// license info
 		mav.addObject("licenseIsValid", getUsageService().isValid());
+		mav.addObject("licenseValidationFailureCause", getUsageService().getValidationFailureCause());
+		mav.addObject("licensee", getUsageService().getLicensee());
+		mav.addObject("expirationDate", getUsageService().getExpirationDate());
+		
 		mav.setViewName("dashboard");
 		return mav;
 	}

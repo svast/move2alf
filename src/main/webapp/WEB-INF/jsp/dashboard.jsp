@@ -23,9 +23,16 @@
 <br class="clear">
 
 <c:if test="${not licenseIsValid}">
-<div class="warning">
-    <p><strong>You need a license key to run jobs.</strong> Please contact <a href="mailto:sales@xenit.eu?subject=Move2Alf license&body=Dear XeniT,%0A%0AWe hereby request a production license key for the Move2Alf.%0A%0AOur company information:%0A Company name:%0A Street:%0A City:%0A Postal Code:%0A State:%0A Country:%0A%0AContact person:%0A E-mail:%0A Telephone:%0A%0AMigration volume in number of documents:%0A - One time:%0A - Per year:
-        ">sales@xenit.eu</a> to obtain a license key.</p>
+<div class="warning"><p><strong>
+    <c:choose>
+        <c:when test="${'nolicense' eq licenseValidationFailureCause}">
+        You need a license key to run jobs.
+        </c:when>
+        <c:otherwise>
+        Your license key has expired. You will not be able to run new jobs.
+        </c:otherwise>
+    </c:choose>
+</strong>Please contact <a href="mailto:sales@xenit.eu?subject=Move2Alf license&body=Dear XeniT,%0A%0AWe hereby request a production license key for the Move2Alf.%0A%0AOur company information:%0A Company name: <c:out value="${licensee.companyName}"/>%0A Street: <c:out value="${licensee.street}"/>%0A City: <c:out value="${licensee.city}"/>%0A Postal Code: <c:out value="${licensee.postalCode}"/>%0A State: <c:out value="${licensee.state}"/>%0A Country: <c:out value="${licensee.country}"/>%0A%0AContact person: <c:out value="${licensee.contactPerson}"/>%0A E-mail: <c:out value="${licensee.email}"/>%0A Telephone: <c:out value="${licensee.telephone}"/>%0A%0AMigration volume in number of documents:%0A - One time:%0A - Per year:">sales@xenit.eu</a> to obtain a license key.</p>
 </div>
 </c:if>
 
@@ -83,6 +90,14 @@
 
 </table>
 
+    <c:if test="${licenseIsValid}">
+        <p class="info">
+        This Move2Alf is licensed to <c:out value="${licensee.companyName}"/>. 
+            <c:if test="${not empty expirationDate}">
+            The license expires on <c:out value="${expirationDate}"/>.
+            </c:if>
+        </p>
+    </c:if>
 </div>
 
 </div>
