@@ -46,6 +46,7 @@ import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
@@ -641,6 +642,36 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			;
 		}
 		return scheduleId;
+	}
+
+	@Override
+	public List<JobInfo> getAllJobInfo() {
+		List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
+		Session s = getSessionFactory().getCurrentSession();
+		List<Object[]> jobInfo = s
+				.createSQLQuery("SELECT job.id, job.name, schedule_cycle.state, MAX(schedule_cycle.startTime) AS startTime, schedule_cycle.cycleId" +
+						" FROM job LEFT JOIN (" +
+						"	SELECT schedule.jobId, schedule.state, MAX(cycle.startDateTime) AS startTime, cycle.id as cycleId FROM schedule" +
+						" LEFT JOIN cycle ON schedule.id = cycle.scheduleId GROUP BY schedule.id ORDER BY startTime DESC)" +
+						" AS schedule_cycle ON (job.id = schedule_cycle.jobId) GROUP BY job.id ORDER BY job.id;").list();
+		for (Object[] row : jobInfo) {
+			JobInfo info = new JobInfo();
+			info.setJobId((Integer) row[0]);
+			info.setJobName((String) row[1]);
+			if(row[4] != null)
+				info.setCycleId((Integer) row[4]);
+			if(row[3] != null)
+				info.setCycleStartDateTime((Date) row[3]);
+			if(row[2] != null){
+				if(row[2].equals("RUNNING"))
+					info.setScheduleState(EScheduleState.RUNNING.getDisplayName());
+				else
+					info.setScheduleState(EScheduleState.NOT_RUNNING.getDisplayName());
+			}
+			jobInfoList.add(info);
+		}
+
+		return jobInfoList;
 	}
 
 }

@@ -25,6 +25,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
 
 @Transactional
 public interface JobService {
@@ -345,6 +346,8 @@ public interface JobService {
 	public ActorRef getReportActor();
 
 	public List<HistoryInfo> getHistory(int jobId);
+	
+	public List<JobInfo> getAllJobInfo();
 
 	public void scheduleNow(int jobId, int scheduleId);
 

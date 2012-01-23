@@ -32,6 +32,7 @@ import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
 
 @SuppressWarnings("deprecation")
 public class SimpleActionWrapper extends SimpleAction {
@@ -327,6 +328,12 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public long countProcessedDocuments(int cycleId) {
 			return 0;
+		}
+
+		@Override
+		public List<JobInfo> getAllJobInfo() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }

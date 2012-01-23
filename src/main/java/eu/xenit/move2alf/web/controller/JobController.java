@@ -40,6 +40,7 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.logic.AbstractHibernateService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.SchedulerImpl;
@@ -113,29 +114,7 @@ public class JobController {
 	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
-		List<JobInfo> jobInfoList = new ArrayList();
-		List<Job> jobs = getJobService().getAllJobs();
-		if (null != jobs) {
-			for (int i = 0; i < jobs.size(); i++) {
-				JobInfo jobInfo = new JobInfo();
-				Job job = jobs.get(i);
-				jobInfo.setJobId(job.getId());
-				jobInfo.setJobName(job.getName());
-				try {
-					jobInfo.setCycleId(getJobService().getLastCycleForJob(job)
-							.getId());
-					jobInfo.setCycleStartDateTime(getJobService()
-							.getLastCycleForJob(job).getStartDateTime());
-					jobInfo.setScheduleState(getJobService().getJobState(
-							job.getId()).getDisplayName());
-
-				} catch (Exception e) {
-				}
-
-				jobInfoList.add(jobInfo);
-			}
-		}
-		mav.addObject("jobInfoList", jobInfoList);
+		mav.addObject("jobInfoList", getJobService().getAllJobInfo());
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		
