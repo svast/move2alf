@@ -649,7 +649,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
 		Session s = getSessionFactory().getCurrentSession();
 		List<Object[]> jobInfo = s
-				.createSQLQuery("SELECT job.id, job.name, schedule_cycle.state, MAX(schedule_cycle.startTime) AS startTime, schedule_cycle.cycleId" +
+				.createSQLQuery("SELECT job.id, job.name, schedule_cycle.state, MAX(schedule_cycle.startTime) AS startTime, schedule_cycle.cycleId, job.description" +
 						" FROM job LEFT JOIN (" +
 						"	SELECT schedule.jobId, schedule.state, MAX(cycle.startDateTime) AS startTime, cycle.id as cycleId FROM schedule" +
 						" LEFT JOIN cycle ON schedule.id = cycle.scheduleId GROUP BY schedule.id ORDER BY startTime DESC)" +
@@ -668,6 +668,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				else
 					info.setScheduleState(EScheduleState.NOT_RUNNING.getDisplayName());
 			}
+			info.setDescription((String)row[5]);
 			jobInfoList.add(info);
 		}
 

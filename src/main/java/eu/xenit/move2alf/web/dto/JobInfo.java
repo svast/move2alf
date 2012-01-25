@@ -9,6 +9,7 @@ public class JobInfo {
 	private int cycleId = -1;
 	private Date cycleStartDateTime;
 	private String scheduleState;
+	private String description;
 
 	public JobInfo() {
 	}
@@ -51,5 +52,13 @@ public class JobInfo {
 
 	public String getScheduleState() {
 		return scheduleState;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
