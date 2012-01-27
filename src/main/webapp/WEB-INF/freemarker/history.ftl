@@ -2,9 +2,9 @@
 <#include "header.ftl">
 
 <h2>${job.name}</h2>
-
+<div class="centercontainer">
 <#if historyInfoList??>
-	<table class="zebra-striped">
+	<table class="zebra-striped small">
 		<thead>
 			<tr>
 				<th>Start time</th>
@@ -29,6 +29,8 @@
 	This job has not yet run.
 </#if>
 
+<#assign pagedLink="/job/${job.id}/history">
+<#include "paging.ftl" />
 
-
+</div>
 <#include "footer.ftl">

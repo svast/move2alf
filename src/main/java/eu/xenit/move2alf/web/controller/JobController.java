@@ -973,12 +973,16 @@ public class JobController {
 
 			@Override
 			public int getFirstLinkedPage() {
-				return 0;
+				if(getPage()-5 <= 0)
+					return 0;
+				return getPage()-5;
 			}
 			
 			@Override
 			public int getLastLinkedPage() {
-				return getPageCount() - 1;
+				if(getPage()+4 > getPageCount()-1)
+					return getPageCount() - 1;
+				return getPage()+4;
 			}
 			
 			@Override

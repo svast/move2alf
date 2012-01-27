@@ -18,7 +18,7 @@ $(function() {
 <table id="dashboard" class="zebra-striped">
 	<thead>
 		<tr>
-			<th><a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a></th>
+			<th class="small"><a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a></th>
 			<th>Job Name</th>
 			<th>Last run</th>
 			<th>Status</th>
@@ -29,12 +29,13 @@ $(function() {
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
-			<td style="width:10px;" ><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a></td>
+			<td class="small" ><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a></td>
 			<td><a data-content="${jobInfo.description}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
 			<script>
 				$(function () {
 					$("a[rel=popover]").popover({
-						offset: 10
+						offset: 10,
+						html: true
 					}).click(function(e) {
 							e.preventDefault()
 					})
@@ -58,5 +59,6 @@ $(function() {
 		</#list>
 	</tbody>
 </table>
+
 
 <#include "footer.ftl">

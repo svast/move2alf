@@ -3,7 +3,7 @@
 
 <h2>${job.name} - ${cycle.startDateTime}</h2>
 
-<table>
+<table class="small">
 	<tr>
 		<th>Description:</th>
 		<td>${job.description}</td>
@@ -42,8 +42,8 @@
 	</tr>
 
 </table>
-
-<table class="zebra-striped">
+<div class="centercontainer">
+<table class="zebra-striped small">
 	<thead>
 		<th>Name</th>
 		<th>Processing date and time</th>
@@ -68,5 +68,8 @@
 
 </table>
 
+<#assign pagedLink="/job/${job.id}/${cycle.id}/report">
+<#include "paging.ftl" />
+</div>
 
 <#include "footer.ftl" />
