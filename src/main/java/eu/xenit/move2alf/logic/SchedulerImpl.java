@@ -148,7 +148,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		//first argument 0 : no repeats
 		//second argument is the interval between repeats, but irrelevant here
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1000);
-		trigger.setName("Immediate trigger");
+		trigger.setName("Immediate trigger - " + jobId);
 		trigger.setGroup("JobScheduleGroup");
 		JobDataMap jobData = createJobDataMap(scheduleId);
 		trigger.setJobDataMap(jobData);
