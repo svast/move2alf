@@ -6,6 +6,7 @@
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/less.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/jquery.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-twipsy.js" />"> </script>
+		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-tooltip.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-popover.js" />"> </script>
 		<link rel="stylesheet" href="<@spring.url relativeUrl="/styles/move2alf.css" />" />
 		<title>Xenit Move2Alf</title>

@@ -6,13 +6,13 @@
 </form>
 
 
-<form method="post" name="editJob">
+<form class="form-horizontal" method="post" name="editJob">
 	<fieldset>
 		<legend>General</legend>
-		<div class="clearfix">
-			<label for="name">Name:</label>
-			<div class="input">
-				<input id="name" class="xlarge" type="text" size="30" name="name" value="${job.name}"/>
+		<div class="control-group">
+			<label class="control-label" for="name">Name:</label>
+			<div class="controls">
+				<input id="name" class="input-xlarge" type="text" name="name" value="${job.name}"/>
 			</div>
 		</div>
 		<div class="clearfix">
@@ -68,19 +68,7 @@
 			</div>
 		</div>
 	</fieldset>
-	<fieldset>
-		<legend>Schedules</legend>
-		<table class="small inputTable">
-			<#list schedules as schedule>
-				<tr>
-					<td>${schedule_index}</td>
-					<td>Cronjob</td>
-					<td>${schedule.quartzScheduling}</td>
-					<td><img src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
-				</tr>
-			</#list>
-		</table>
-	</fieldset>
+	<#include "schedule.ftl">
 </form>
 
 <#include "footer.ftl">

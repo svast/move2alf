@@ -14,7 +14,7 @@ $(function() {
 });
 </script>
 
-<table id="users" class="zebra-striped">
+<table id="users" class="table-striped wide">
 	<thead>
 		<tr>
 			<th><a href="<@spring.url relativeUrl="/users/add" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Add new user" /></a></th>

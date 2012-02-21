@@ -14,7 +14,7 @@ $(function() {
 });
 </script>
 
-<table id="destinations" class="zebra-striped">
+<table id="destinations" class="table-striped wide">
 	<thead>
 		<tr>
 			<th><a href="<@spring.url relativeUrl="/destinations/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>

@@ -43,7 +43,7 @@
 
 </table>
 <div class="centercontainer">
-<table class="zebra-striped small">
+<table class="table-striped small">
 	<thead>
 		<th>Name</th>
 		<th>Processing date and time</th>

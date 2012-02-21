@@ -3,7 +3,7 @@
 <#include "header.ftl">
 
 <script src="<@spring.url relativeUrl="/js/jquery.tablesorter.js" />"></script>
-<script >
+<script>
 $(function() {
 	$("table#dashboard").tablesorter({
 		headers:{
@@ -15,7 +15,7 @@ $(function() {
 });
 </script>
 
-<table id="dashboard" class="zebra-striped">
+<table id="dashboard" class="table-striped wide">
 	<thead>
 		<tr>
 			<th class="small"><a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a></th>
@@ -31,16 +31,6 @@ $(function() {
 		<tr>
 			<td class="small" ><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a></td>
 			<td><a data-content="${jobInfo.description}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
-			<script>
-				$(function () {
-					$("a[rel=popover]").popover({
-						offset: 10,
-						html: true
-					}).click(function(e) {
-							e.preventDefault()
-					})
-				})
-			</script>
 			<td>
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">
@@ -54,11 +44,17 @@ $(function() {
 			</td>
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
-			<td><a class="btn primary" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a></td>
+			<td><a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a></td>
 		</tr>
 		</#list>
 	</tbody>
 </table>
+<script>
+$("a[rel=popover]").popover({
+	offset: 10,
+	html: true
+});
+</script>
 
 
 <#include "footer.ftl">
