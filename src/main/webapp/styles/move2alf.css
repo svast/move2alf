@@ -1,0 +1,20 @@
+label	{
+	font-weight: bold;
+}
+
+.small {
+	width: auto;
+}
+
+.centercontainer{
+	width: auto;
+	position: absolute;
+}
+
+.wide {
+	width: 100%;
+}
+
+input {
+	height: 30px;
+}
