@@ -71,7 +71,7 @@ public class Tiff2PdfAction extends Action {
 			tiff2Pdf.addImage(JAI.create("fileload", tifFilePath));
 		}
 
-		String fileName = document.getName();
+		String fileName = document.getAbsolutePath();
 		String fileNameWithoutExtension = fileName.substring(0, fileName
 				.lastIndexOf('.'));
 		File singleTifFile = new File(fileNameWithoutExtension + "-single.tif");
