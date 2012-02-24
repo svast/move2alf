@@ -63,9 +63,13 @@ public class SimpleActionWrapper extends SimpleAction {
 		// trick the action so it thinks there is a next action to execute
 		configuredAction.setAppliedConfiguredActionOnSuccess(new ConfiguredAction());
 		
-		action.setJobService(cjs);
-		action.execute(configuredAction, parameterMap);
-		List<FileInfo> results = cjs.getResults();
+		List<FileInfo> results = null;
+		
+		synchronized(action){
+			action.setJobService(cjs);
+			action.execute(configuredAction, parameterMap);
+			results = cjs.getResults();
+		}
 		
 		//The results for this thread need to be erased because the thread is reused. Otherwise files can be loaded multiple times.
 		cjs.eraseResults();
