@@ -84,7 +84,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void executeJobSteps(Job job, Cycle cycle) {
 		// get jobconfig
 		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(
