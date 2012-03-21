@@ -4,10 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -24,10 +22,8 @@ import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EScheduleState;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;

@@ -1,6 +1,9 @@
-<h1>Dashboard</h1>
+<#include "general.ftl" />
 <#assign activeMenu="Home" />
-<#include "header.ftl">
+<@html>
+<@head>
+</@head>
+<@bodyMenu title="Dashboard">
 
 <script src="<@spring.url relativeUrl="/js/jquery.tablesorter.js" />"></script>
 <script>
@@ -19,9 +22,9 @@ $(function() {
 	<thead>
 		<tr>
 			<th class="small"><a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a></th>
-			<th>Job Name</th>
-			<th>Last run</th>
-			<th>Status</th>
+			<th class="header">Job Name</th>
+			<th class="header">Last run</th>
+			<th class="header">Status</th>
 			<th></th>
 			<th></th>
 		</tr>
@@ -56,5 +59,5 @@ $("a[rel=popover]").popover({
 });
 </script>
 
-
-<#include "footer.ftl">
+</@bodyMenu>
+</@html>

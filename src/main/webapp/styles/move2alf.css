@@ -1,7 +1,3 @@
-label	{
-	font-weight: bold;
-}
-
 .small {
 	width: auto;
 }
@@ -15,6 +11,93 @@ label	{
 	width: 100%;
 }
 
-input {
-	height: 30px;
+.scheduleLine{
+	padding-top: 5px;
+	padding-bottom: 5px;
+	cursor: pointer;
+	cursor: hand;
+}
+
+.scheduleLine:hover{
+	background-color:yellow;
+}
+
+.lineSegment{
+	float: left;
+}
+
+.line{
+	clear: both;
+	margin-top: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.line label{
+	float: left;
+}
+
+.line input{
+	float: left;
+	margin-left: 10px;
+}
+
+.line select{
+	float: left;
+	margin-left: 10px;
+}
+
+.lineSegment label{
+	float: left;
+	margin-left: 5px;
+}
+
+.lineSegment input{
+	float: left;
+	margin-left: 5px;
+}
+
+.lineSegment select{
+	float: left;
+	margin-left: 5px;
+}
+
+.inactive label{
+	color: grey;
+}
+
+.inputTable td{
+	padding-top: 5px;
+	padding-right: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.inputTable th{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.clickable {
+	cursor: pointer;
+	cursor: hand;
+}
+
+.accordion-group{
+	margin-top: 20px;
+}
+
+.accordion-title{
+	padding: 5px;
+	font-weight: bold;
+	font-size: 14;
+}
+
+.radio{
+	cursor: pointer;
+	cursor: hand;
+}
+
+.help-block{
+	clear:both;
 }
