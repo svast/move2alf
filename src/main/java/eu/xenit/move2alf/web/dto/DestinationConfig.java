@@ -1,29 +1,25 @@
 package eu.xenit.move2alf.web.dto;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 public class DestinationConfig {
 
+	@NotEmpty
 	private String destinationName;
 
+	@NotEmpty
 	private String destinationType;
 
+	@NotEmpty
 	private String destinationURL;
 
+	@NotEmpty
 	private String alfUser;
 
+	@NotEmpty
 	private String alfPswd;
 
 	private int nbrThreads = 5;
-
-	private String dest;
-
-	@NotEmpty
-	private List<String> sourceSink;
 
 	public void setDestinationName(String destinationName) {
 		this.destinationName = destinationName;
@@ -73,19 +69,4 @@ public class DestinationConfig {
 		return nbrThreads;
 	}
 
-	public void setSourceSink(List<String> sourceSink) {
-		this.sourceSink = sourceSink;
-	}
-
-	public List<String> getSourceSink() {
-		return sourceSink;
-	}
-
-	public void setDest(String dest) {
-		this.dest = dest;
-	}
-
-	public String getDest() {
-		return dest;
-	}
 }

@@ -99,7 +99,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		if ("true".equals(jobConfig.getMoveNotLoad())) {
 			FileInfo inputMap = new FileInfo();
 			inputMap.put(Parameters.PARAM_FILE, new File(jobConfig
-					.getNotLoadPath()));
+					.getMoveNotLoadText()));
 			input.add(inputMap);
 		}
 

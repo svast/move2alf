@@ -47,25 +47,25 @@ public class JobConfig {
 	@NotEmpty
 	private String docExist;
 
-	private String moveBeforeProc = "false";
+	private Boolean moveBeforeProc = false;
 
-	private String beforeProcPath;
+	private String moveBeforeProcText;
 
-	private String moveAfterLoad = "false";
+	private Boolean moveAfterLoad = false;
 
-	private String afterLoadPath;
+	private String moveAfterLoadText;
 
-	private String moveNotLoad = "false";
+	private Boolean moveNotLoad = false;
 
-	private String notLoadPath;
+	private String moveNotLoadText;
 
-	private String sendNotification = "false";
+	private Boolean sendNotification = false;
 
-	private String emailAddressError;
+	private String sendNotificationText;
 
-	private String sendReport = "false";
+	private Boolean sendReport = false;
 
-	private String emailAddressRep;
+	private String sendReportText;
 
 	private String destinationName;
 
@@ -97,8 +97,7 @@ public class JobConfig {
 	
 	private String commandAfter;
 
-	@NotEmpty
-	private String dest;
+	private int dest;
 
 	private List<String> sourceSink;
 	
@@ -256,83 +255,98 @@ public class JobConfig {
 	}
 
 	public void setMoveBeforeProc(String moveBeforeProc) {
+		this.moveBeforeProc = Boolean.valueOf(moveBeforeProc);
+	}
+	
+	public void setMoveBeforeProc(Boolean moveBeforeProc) {
 		this.moveBeforeProc = moveBeforeProc;
 	}
 
-	public String getMoveBeforeProc() {
+	public Boolean getMoveBeforeProc() {
 		return moveBeforeProc;
 	}
 
-	public void setBeforeProcPath(String beforeProcPath) {
-		this.beforeProcPath = beforeProcPath;
+	public void setMoveBeforeProcText(String beforeProcPath) {
+		this.moveBeforeProcText = beforeProcPath;
 	}
 
-	public String getBeforeProcPath() {
-		return beforeProcPath;
+	public String getMoveBeforeProcText() {
+		return moveBeforeProcText;
 	}
 
 	public void setMoveAfterLoad(String moveAfterLoad) {
-		this.moveAfterLoad = moveAfterLoad;
+		this.moveAfterLoad = Boolean.valueOf(moveAfterLoad);
 	}
 
-	public String getMoveAfterLoad() {
+	public Boolean getMoveAfterLoad() {
 		return moveAfterLoad;
 	}
 
-	public void setAfterLoadPath(String afterLoadPath) {
-		this.afterLoadPath = afterLoadPath;
+	public void setMoveAfterLoadText(String afterLoadPath) {
+		this.moveAfterLoadText = afterLoadPath;
 	}
 
-	public String getAfterLoadPath() {
-		return afterLoadPath;
+	public String getMoveAfterLoadText() {
+		return moveAfterLoadText;
 	}
 
 	public void setMoveNotLoad(String moveNotLoad) {
-		this.moveNotLoad = moveNotLoad;
+		this.moveNotLoad = Boolean.valueOf(moveNotLoad);
 	}
 
-	public String getMoveNotLoad() {
+	public Boolean getMoveNotLoad() {
 		return moveNotLoad;
 	}
 
-	public void setNotLoadPath(String notLoadPath) {
-		this.notLoadPath = notLoadPath;
+	public void setMoveNotLoadText(String notLoadPath) {
+		this.moveNotLoadText = notLoadPath;
 	}
 
-	public String getNotLoadPath() {
-		return notLoadPath;
+	public String getMoveNotLoadText() {
+		return moveNotLoadText;
 	}
-
-	public void setSendNotification(String sendNotification) {
+	
+	public void setSendNotification(Boolean sendNotification) {
 		this.sendNotification = sendNotification;
 	}
 
-	public String getSendNotification() {
+	public void setSendNotification(String sendNotification) {
+		this.sendNotification = Boolean.valueOf(sendNotification);
+	}
+
+	public Boolean getSendNotification() {
 		return sendNotification;
 	}
 
-	public void setEmailAddressError(String emailAddressError) {
-		this.emailAddressError = emailAddressError;
+	public void setSendNotificationText(String emailAddressError) {
+		this.sendNotificationText = emailAddressError;
 	}
 
-	public String getEmailAddressError() {
-		return emailAddressError;
+	public String getSendNotificationText() {
+		return sendNotificationText;
 	}
-
-	public void setSendReport(String sendReport) {
+	
+	public void setSendReport(Boolean sendReport) {
 		this.sendReport = sendReport;
 	}
 
-	public String getSendReport() {
+	public void setSendReport(String sendReport) {
+		this.sendReport = Boolean.valueOf(sendReport);
+	}
+
+	public Boolean getSendReport() {
 		return sendReport;
 	}
 
-	public void setEmailAddressRep(String emailAddressRep) {
-		this.emailAddressRep = emailAddressRep;
+	public void setSendReportText(String emailAddressRep) {
+		this.sendReportText = emailAddressRep;
 	}
 
-	public String getEmailAddressRep() {
-		return emailAddressRep;
+	/*
+	 * Comma separated list of emailadresses to send the reports to.
+	 */
+	public String getSendReportText() {
+		return sendReportText;
 	}
 
 	public void setDestinationName(String destinationName) {
@@ -383,11 +397,11 @@ public class JobConfig {
 		return nbrThreads;
 	}
 
-	public void setDest(String dest) {
+	public void setDest(int dest) {
 		this.dest = dest;
 	}
 
-	public String getDest() {
+	public int getDest() {
 		return dest;
 	}
 

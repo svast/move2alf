@@ -10,7 +10,6 @@ public class User {
 	@NotEmpty
 	private String userName;
 
-	@NotEmpty
 	private String password;
 
 	@NotEmpty

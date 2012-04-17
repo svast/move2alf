@@ -40,7 +40,6 @@ import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.logic.AbstractHibernateService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.SchedulerImpl;
@@ -48,10 +47,8 @@ import eu.xenit.move2alf.logic.UsageService;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
-import eu.xenit.move2alf.web.dto.EditDestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
-import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
 
 @Controller
@@ -287,11 +284,7 @@ public class JobController {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
 
-		int destId = 0;
-
-		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
-			destId = Integer.parseInt(job.getDest().substring(10));
-		}
+		int destId = job.getDest();
 
 		List<String> sourceSink = job.getSourceSink();
 		if (sourceSink != null) {
@@ -321,7 +314,7 @@ public class JobController {
 		}
 
 		job.setId(jobId);
-		job.setDest("" + destId);
+		job.setDest(destId);
 		getPipelineAssembler().assemblePipeline(job);
 
 		mav.setViewName("redirect:/job/dashboard");
@@ -492,10 +485,7 @@ public class JobController {
 
 		List<String> sourceSink = job.getSourceSink();
 
-		int destId = 0;
-		if (job.getDest() != null && job.getDest().startsWith("destExists")) {
-			destId = Integer.parseInt(job.getDest().substring(10));
-		}
+		int destId = job.getDest();
 
 		if (sourceSink != null) {
 			for (int j = 0; j < sourceSink.size(); j++) {
@@ -531,7 +521,7 @@ public class JobController {
 		 */
 
 		job.setId(jobId);
-		job.setDest("" + destId);
+		job.setDest(destId);
 		getPipelineAssembler().assemblePipeline(job);
 
 		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
@@ -680,7 +670,7 @@ public class JobController {
 		return mav;
 	}
 
-	@RequestMapping(value = "/destinations/create", method = RequestMethod.GET)
+	@RequestMapping(value = "/destination/create", method = RequestMethod.GET)
 	public ModelAndView createDestinationsForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("destination", new DestinationConfig());
@@ -689,114 +679,58 @@ public class JobController {
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.addObject("showDestinations", "false");
-		mav.setViewName("create-destinations");
+		mav.setViewName("create-destination");
 		return mav;
 	}
 
-	@RequestMapping(value = "/destinations/create", method = RequestMethod.POST)
-	public ModelAndView createDestinations(
+	@RequestMapping(value = "/destination/create", method = RequestMethod.POST)
+	public ModelAndView createDestination(
 			@ModelAttribute("destination") @Valid DestinationConfig destination,
 			BindingResult errors) {
 
-		List<String> sourceSinks = destination.getSourceSink();
-		Set<String> uniqueSourceSinks = new HashSet();
-		boolean destinationExists = false;
-		boolean notNull = true;
-		boolean threadsIsInteger = true;
-		boolean doubleNewDestination = false;
-		if (sourceSinks != null) {
-			for (int i = 0; i < sourceSinks.size(); i++) {
-				String[] sourceSinkElements = sourceSinks.get(i).split("\\|");
-				for (int j = 0; j < sourceSinkElements.length; j++) {
-					if ("".equals(sourceSinkElements[j])
-							|| null == sourceSinkElements[j])
-						notNull = false;
-				}
-				destinationExists = getJobService().checkDestinationExists(
-						sourceSinkElements[0]);
-
-				// check whether any of the new source sinks have the same name
-				// (should then throw error)
-				boolean testBoolean = uniqueSourceSinks
-						.add(sourceSinkElements[0]);
-				if (testBoolean == false) {
-					doubleNewDestination = true;
-				}
-
-				try {
-					Integer.parseInt(sourceSinkElements[4]);
-				} catch (NumberFormatException e) {
-					threadsIsInteger = false;
-				}
-			}
-		}
-
-		if (errors.hasErrors() || notNull == false || threadsIsInteger == false
-				|| destinationExists == true || doubleNewDestination == true) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
-			List<DestinationInfo> destinationInfoList = new ArrayList();
-
-			if (sourceSinks != null) {
-				for (int i = 0; i < sourceSinks.size(); i++) {
-					String[] sourceSinkElements = sourceSinks.get(i).split(
-							"\\|");
-					DestinationInfo destinationInfo = new DestinationInfo();
-
-					destinationInfo.setDestinationName(sourceSinkElements[0]);
-					destinationInfo.setDestinationUrl(sourceSinkElements[1]);
-					destinationInfo.setDestinationValue(sourceSinks.get(i));
-
-					destinationInfoList.add(destinationInfo);
-				}
-			}
-			ModelAndView mav = new ModelAndView("create-destinations");
-			mav.addObject("threadsIsInteger", threadsIsInteger);
-			if (threadsIsInteger == true && destinationExists == false
-					&& doubleNewDestination == false) {
-				mav.addObject("createDestinationInfoList", destinationInfoList);
-			}
-			mav.addObject("destinationExists", destinationExists);
-			mav.addObject("doubleNewDestination", doubleNewDestination);
+		if(errors.hasErrors()){
+			ModelAndView mav = new ModelAndView("create-destination");
 			mav.addObject("destination", destination);
 			mav.addObject("destinationOptions", getJobService()
-					.getSourceSinksByCategory(
-							ConfigurableObject.CAT_DESTINATION));
-			mav.addObject("notNull", notNull);
-			mav.addObject("showDestinations", "false");
-			return mav;
+					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
+			mav.addObject("roles", getUserService().getCurrentUser()
+					.getUserRoleSet());
+			return mav;	
 		}
-
 		ModelAndView mav = new ModelAndView();
+		
+		HashMap<EDestinationParameter, String> destinationParams = new HashMap<EDestinationParameter, String>();
+		destinationParams.put(EDestinationParameter.NAME, destination.getDestinationName());
+		destinationParams.put(EDestinationParameter.URL, destination.getDestinationURL());
+		destinationParams.put(EDestinationParameter.USER, destination.getAlfUser());
+		destinationParams.put(EDestinationParameter.PASSWORD, destination.getAlfPswd());
+		destinationParams.put(EDestinationParameter.THREADS, Integer.toString(destination.getNbrThreads()));
+		getJobService().createDestination(destination.getDestinationType(), destinationParams);
 
-		List<String> sourceSink = destination.getSourceSink();
-
-		for (int j = 0; j < sourceSink.size(); j++) {
-
-			String createdSourceSink = sourceSink.get(j);
-			String[] parameters = createdSourceSink.split("\\|");
-
-			HashMap destinationParams = new HashMap();
-
-			destinationParams.put(EDestinationParameter.NAME, parameters[0]);
-			destinationParams.put(EDestinationParameter.URL, parameters[1]);
-			destinationParams.put(EDestinationParameter.USER, parameters[2]);
-			destinationParams
-					.put(EDestinationParameter.PASSWORD, parameters[3]);
-			destinationParams.put(EDestinationParameter.THREADS, parameters[4]);
-			getJobService().createDestination(parameters[5], destinationParams);
-
-		}
 		mav.setViewName("redirect:/destinations");
 		return mav;
 	}
 
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editDestinationForm(@PathVariable int id) {
+		ModelAndView mav = makeEditDestinationModelAndView(id);
+		return mav;
+	}
+
+	private ModelAndView makeEditDestinationModelAndView(int id) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("destinations", new EditDestinationConfig());
-		mav.addObject("destination", getJobService()
-				.getConfiguredSourceSink(id));
+		ConfiguredObject destination = getJobService().getConfiguredSourceSink(id);
+		DestinationConfig destinationConfig = new DestinationConfig();
+		
+		destinationConfig.setDestinationName(destination.getParameter("name"));
+		destinationConfig.setDestinationType(destination.getClassName());
+		destinationConfig.setDestinationURL(destination.getParameter("url"));
+		destinationConfig.setAlfUser(destination.getParameter("user"));
+		destinationConfig.setAlfPswd(destination.getParameter("password"));
+		destinationConfig.setNbrThreads(Integer.parseInt(destination.getParameter("threads")));
+		
+		mav.addObject("destination", destinationConfig);
+		mav.addObject("destinationId", id);
 		mav.addObject("destinationOptions", getJobService()
 				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("roles", getUserService().getCurrentUser()
@@ -808,27 +742,22 @@ public class JobController {
 	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
 	public ModelAndView editDestination(
 			@PathVariable int id,
-			@ModelAttribute("destinations") @Valid EditDestinationConfig destinations,
+			@ModelAttribute("destination") @Valid DestinationConfig destination,
 			BindingResult errors) {
 
 		boolean destinationExists = false;
 		if (!getJobService().getConfiguredSourceSink(id).getParameter("name")
-				.equals(destinations.getDestinationName())) {
+				.equals(destination.getDestinationName())) {
 			destinationExists = getJobService().checkDestinationExists(
-					destinations.getDestinationName());
+					destination.getDestinationName());
 		}
 
 		if (errors.hasErrors() || destinationExists == true) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
-			ModelAndView mav = new ModelAndView("edit-destination");
-			mav.addObject("destinations", destinations);
-			mav.addObject("destination", getJobService()
-					.getConfiguredSourceSink(id));
+			ModelAndView mav = makeEditDestinationModelAndView(id);
+			
 			mav.addObject("destinationExists", destinationExists);
-			mav.addObject("destinationOptions", getJobService()
-					.getSourceSinksByCategory(
-							ConfigurableObject.CAT_DESTINATION));
 			return mav;
 		}
 
@@ -836,17 +765,17 @@ public class JobController {
 
 		HashMap destinationParams = new HashMap();
 
-		destinationParams.put(EDestinationParameter.NAME, destinations
+		destinationParams.put(EDestinationParameter.NAME, destination
 				.getDestinationName());
-		destinationParams.put(EDestinationParameter.URL, destinations
+		destinationParams.put(EDestinationParameter.URL, destination
 				.getDestinationURL());
-		destinationParams.put(EDestinationParameter.USER, destinations
+		destinationParams.put(EDestinationParameter.USER, destination
 				.getAlfUser());
-		destinationParams.put(EDestinationParameter.PASSWORD, destinations
+		destinationParams.put(EDestinationParameter.PASSWORD, destination
 				.getAlfPswd());
-		destinationParams.put(EDestinationParameter.THREADS, destinations
+		destinationParams.put(EDestinationParameter.THREADS, destination
 				.getNbrThreads());
-		getJobService().editDestination(id, destinations.getDestinationType(),
+		getJobService().editDestination(id, destination.getDestinationType(),
 				destinationParams);
 
 		mav.setViewName("redirect:/destinations");

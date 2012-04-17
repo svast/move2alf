@@ -55,7 +55,7 @@ public class ErrorHandler {
 		if ("true".equals(jobConfig.getMoveNotLoad())) {
 			String inputFolder = (String) parameterMap
 					.get(Parameters.PARAM_INPUT_PATH);
-			Util.moveFile(inputFolder, jobConfig.getNotLoadPath(), file);
+			Util.moveFile(inputFolder, jobConfig.getMoveNotLoadText(), file);
 		}
 	}
 }

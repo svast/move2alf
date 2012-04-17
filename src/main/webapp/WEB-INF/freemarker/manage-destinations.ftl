@@ -1,7 +1,9 @@
-<h1>Destinations</h1>
-
+<#include "general.ftl" />
 <#assign activeMenu="Manage destinations" />
-<#include "header.ftl" />
+<@html>
+<@head>
+</@head>
+<@bodyMenu title="Destinations" >
 
 <script src="<@spring.url relativeUrl="/js/jquery.tablesorter.js" />"></script>
 <script >
@@ -17,7 +19,7 @@ $(function() {
 <table id="destinations" class="table-striped wide">
 	<thead>
 		<tr>
-			<th><a href="<@spring.url relativeUrl="/destinations/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>
+			<th><a href="<@spring.url relativeUrl="/destination/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>
 			<th>Name</th>
 			<th>Type</th>
 			<th>URL</th>
@@ -28,7 +30,7 @@ $(function() {
 	<tbody>
 		<#list destinations as destination>
 		<tr>
-			<td style="width:10px" ><a href="<@spring.url relativeUrl="/destination/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
+			<td><a href="<@spring.url relativeUrl="/destination/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
 			<td>${destination.parameters.name}</td>
 			<td>${typeNames[destination.className]}</td>
 			<td>${destination.parameters.url}</td>
@@ -39,4 +41,5 @@ $(function() {
 	</tbody>
 </table>
 
-<#include "footer.ftl" />
+</@bodyMenu>
+</@html>

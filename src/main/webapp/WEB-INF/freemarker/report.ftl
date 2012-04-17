@@ -1,8 +1,10 @@
-<h1>Report</h1>
-<#include "header.ftl" />
+<#include "general.ftl" />
 
-<h2>${job.name} - ${cycle.startDateTime}</h2>
-
+<@html>
+<@head>
+</@head>
+<@bodyMenu title="Report" >
+<h2>${job.name}</h2>
 <table class="small">
 	<tr>
 		<th>Description:</th>
@@ -42,8 +44,8 @@
 	</tr>
 
 </table>
-<div class="centercontainer">
-<table class="table-striped small">
+<hr />
+<table class="table-striped wide">
 	<thead>
 		<th>Name</th>
 		<th>Processing date and time</th>
@@ -70,6 +72,6 @@
 
 <#assign pagedLink="/job/${job.id}/${cycle.id}/report">
 <#include "paging.ftl" />
-</div>
 
-<#include "footer.ftl" />
+</@bodyMenu>
+</@html>

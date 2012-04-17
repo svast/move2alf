@@ -12,7 +12,8 @@ $(function() {
 		headers:{
 			0:{sorter: false},
 			4:{sorter: false},
-			5:{sorter: false}
+			5:{sorter: false},
+			6:{sorter: false}
 		}
 	});
 });
@@ -27,13 +28,14 @@ $(function() {
 			<th class="header">Status</th>
 			<th></th>
 			<th></th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
 			<td class="small" ><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a></td>
-			<td><a data-content="${jobInfo.description}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
+			<td><a data-content="${jobInfo.description!}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
 			<td>
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">
@@ -48,6 +50,7 @@ $(function() {
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
 			<td><a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a></td>
+			<td><img onclick="" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" class="clickable" /></td>
 		</tr>
 		</#list>
 	</tbody>

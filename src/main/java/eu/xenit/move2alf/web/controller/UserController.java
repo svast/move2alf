@@ -101,7 +101,7 @@ public class UserController {
 		return mav;
 	}
 
-	@RequestMapping(value = "/users/add", method = RequestMethod.GET)
+	@RequestMapping(value = "/user/add", method = RequestMethod.GET)
 	public ModelAndView addUserForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("add-user");
@@ -116,7 +116,7 @@ public class UserController {
 		return mav;
 	}
 
-	@RequestMapping(value = "/users/add", method = RequestMethod.POST)
+	@RequestMapping(value = "/user/add", method = RequestMethod.POST)
 	public ModelAndView addUser(@ModelAttribute("user") @Valid User user,
 			BindingResult errors) {
 
@@ -142,6 +142,7 @@ public class UserController {
 		mav.setViewName("redirect:/users/");
 		return mav;
 	}
+
 
 	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteUser(@PathVariable String userName) {
@@ -210,7 +211,7 @@ public class UserController {
 		mav.addObject("user", getUserService().getUser(userName));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
-		mav.setViewName("edit-profile");
+		mav.setViewName("edit-password");
 		return mav;
 	}
 
@@ -259,7 +260,7 @@ public class UserController {
 	@RequestMapping(value = "/user/{userName}/edit/password", method = RequestMethod.GET)
 	public ModelAndView editUserForm(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("userClass", new EditPassword());
+		mav.addObject("editPassword", new EditPassword());
 		mav.addObject("user", getUserService().getUser(userName));
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
@@ -269,14 +270,14 @@ public class UserController {
 
 	@RequestMapping(value = "/user/{userName}/edit/password", method = RequestMethod.POST)
 	public ModelAndView editUser(@PathVariable String userName,
-			@ModelAttribute("userClass") @Valid EditPassword userClass,
+			@ModelAttribute("editPassword") @Valid EditPassword editPassword,
 			BindingResult errors) {
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			ModelAndView mav = new ModelAndView("edit-user");
-			mav.addObject("userClass", userClass);
+			mav.addObject("editPassword", editPassword);
 			mav.addObject("user", getUserService().getUser(userName));
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
@@ -287,12 +288,12 @@ public class UserController {
 
 		String currentUserPassword = getUserService().getCurrentUser()
 				.getPassword();
-		String currentUserPasswordEntered = Util.convertToMd5(userClass
+		String currentUserPasswordEntered = Util.convertToMd5(editPassword
 				.getOldPassword());
 
 		if (currentUserPassword.equals(currentUserPasswordEntered)) {
 			getUserService().changePassword(userName,
-					userClass.getNewPassword());
+					editPassword.getNewPassword());
 			mav.setViewName("redirect:/users");
 		} else {
 			mav.setViewName("redirect:/user/" + userName
@@ -314,47 +315,18 @@ public class UserController {
 	@RequestMapping(value = "/user/{userName}/edit/role", method = RequestMethod.GET)
 	public ModelAndView editRoleForm(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("userClass", new EditRole());
+		EditRole editRole = new EditRole();
+		editRole.setRole(((UserRole) (getUserService().getUser(userName).getUserRoleSet().toArray()[0])).getRoleType().getDisplayName());
+		mav.addObject("editRole", editRole);
 		mav.addObject("user", getUserService().getUser(userName));
 		
-		Set userRole = getUserService().getUser(userName)
-				.getUserRoleSet();
 		
-		//Makes sure the correct role is already selected
-		String roleCheck="";
-		Iterator roleIterator = userRole.iterator();
-		while(roleIterator.hasNext()){
-			String currentRole = ((UserRole) roleIterator.next()).getRole();
-			if("SYSTEM_ADMIN".equals(currentRole)){
-				roleCheck="System admin";
-			}
-			if(roleCheck=="Consumer" || roleCheck=="Schedule admin" || roleCheck==""){
-				if("JOB_ADMIN".equals(currentRole)){
-					roleCheck="Job admin";
-				}
-			}
-			if(roleCheck=="Consumer" || roleCheck==""){
-				if("SCHEDULE_ADMIN".equals(currentRole)){
-					roleCheck="Schedule admin";
-				}
-			}
-			if(roleCheck==""){
-				if("CONSUMER".equals(currentRole)){
-					roleCheck="Consumer";
-				}
-			}
-		}
-		
-		List role = new ArrayList();
+		List roles = new ArrayList();
 		for (ERole myEnum : ERole.values()) {
-			if(myEnum.toString().equals(roleCheck)){
-				role.add(0,myEnum.getDisplayName());
-			}else{
-				role.add(myEnum.getDisplayName());
-			}
+				roles.add(myEnum.getDisplayName());
 		}
 		
-		mav.addObject("roleList", role);
+		mav.addObject("roleList", roles);
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("edit-user-role");
@@ -363,14 +335,14 @@ public class UserController {
 
 	@RequestMapping(value = "/user/{userName}/edit/role", method = RequestMethod.POST)
 	public ModelAndView editRole(@PathVariable String userName,
-			@ModelAttribute("userClass") @Valid EditRole userClass,
+			@ModelAttribute("editRole") @Valid EditRole editRole,
 			BindingResult errors) {
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			ModelAndView mav = new ModelAndView("edit-user-role");
-			mav.addObject("userClass", userClass);
+			mav.addObject("editRole", editRole);
 			
 			//Makes sure the correct role is already selected
 			Set userRole = getUserService().getUser(userName)
@@ -418,12 +390,12 @@ public class UserController {
 
 		String currentUserPassword = getUserService().getCurrentUser()
 				.getPassword();
-		String currentUserPasswordEntered = Util.convertToMd5(userClass
+		String currentUserPasswordEntered = Util.convertToMd5(editRole
 				.getOldPassword());
 
 		if (currentUserPassword.equals(currentUserPasswordEntered)) {
 			getUserService().changeRole(userName,
-					ERole.getByDisplayName(userClass.getRole()));
+					ERole.getByDisplayName(editRole.getRole()));
 			mav.setViewName("redirect:/users");
 		} else {
 			mav.setViewName("redirect:/user/" + userName + "/edit/role/failed");
@@ -438,6 +410,13 @@ public class UserController {
 		mav.addObject("roles", getUserService().getCurrentUser()
 				.getUserRoleSet());
 		mav.setViewName("edit-user-role-failed");
+		return mav;
+	}
+	
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	public ModelAndView login(){
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName("login");
 		return mav;
 	}
 }

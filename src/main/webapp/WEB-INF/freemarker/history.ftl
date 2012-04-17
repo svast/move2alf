@@ -1,10 +1,12 @@
-<h1>History</h1>
-<#include "header.ftl">
+<#include "general.ftl" />
 
+<@html>
+<@head>
+</@head>
+<@bodyMenu title="History" >
 <h2>${job.name}</h2>
-<div class="centercontainer">
 <#if historyInfoList??>
-	<table class="zebra-striped small">
+	<table class="table-striped wide">
 		<thead>
 			<tr>
 				<th>Start time</th>
@@ -32,5 +34,5 @@
 <#assign pagedLink="/job/${job.id}/history">
 <#include "paging.ftl" />
 
-</div>
-<#include "footer.ftl">
+</@bodyMenu>
+</@html>

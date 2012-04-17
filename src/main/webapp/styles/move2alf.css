@@ -101,3 +101,7 @@
 .help-block{
 	clear:both;
 }
+
+thead tr{
+	text-align: left;
+}

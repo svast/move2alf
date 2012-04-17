@@ -89,28 +89,28 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 						.param("stage", "before")
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-								jobConfig.getMoveBeforeProc())
+								jobConfig.getMoveBeforeProc().toString())
 						// true or false (String)
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-								jobConfig.getBeforeProcPath()));
+								jobConfig.getMoveBeforeProcText()));
 
 		actions
 				.add(action("eu.xenit.move2alf.core.action.SourceAction")
 						.param("path", inputPaths)
 						.param("recursive", "true")
 						.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-								jobConfig.getMoveNotLoad())
+								jobConfig.getMoveNotLoad().toString())
 						// true or false (String)
 						.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-								jobConfig.getNotLoadPath())
+								jobConfig.getMoveNotLoadText())
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-								jobConfig.getMoveBeforeProc())
+								jobConfig.getMoveBeforeProc().toString())
 						// true
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-								jobConfig.getBeforeProcPath())
+								jobConfig.getMoveBeforeProcText())
 						.sourceSink(
 								sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")));
 
@@ -119,13 +119,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
 				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc())
+						jobConfig.getMoveBeforeProc().toString())
 				// true
 				// or
 				// false
 				// (String)
 				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getBeforeProcPath())
+						jobConfig.getMoveBeforeProcText())
 				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD, "false")
 				// true or false (String)
 				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH, "")
@@ -151,13 +151,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction").param(
-				"sendNotification", jobConfig.getSendNotification()) // true or
+				"sendNotification", jobConfig.getSendNotification().toString()) // true or
 				// false
 				// (String)
 				.param("emailAddressNotification",
-						jobConfig.getEmailAddressError()).param("sendReport",
-						jobConfig.getSendReport()) // true or false (String)
-				.param("emailAddressReport", jobConfig.getEmailAddressRep()));
+						jobConfig.getSendNotificationText()).param("sendReport",
+						jobConfig.getSendReport().toString()) // true or false (String)
+				.param("emailAddressReport", jobConfig.getSendReportText()));
 
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
 				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
@@ -167,8 +167,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 							"documentExists", jobConfig.getDocExist())
 					// TODO: add param: ignore / error / overwrite / version
 					.sourceSink(
-							sourceSinkById(Integer
-									.parseInt(jobConfig.getDest()))));
+							sourceSinkById(jobConfig.getDest())));
 		}
 
 		if ("Delete".equals(jobConfig.getDocExist())) {
@@ -176,8 +175,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.param("path", jobConfig.getDestinationFolder()).param(
 							"documentExists", jobConfig.getDocExist())
 					.sourceSink(
-							sourceSinkById(Integer
-									.parseInt(jobConfig.getDest()))));
+							sourceSinkById(jobConfig.getDest())));
 		}
 
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
@@ -185,28 +183,27 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.param("path", jobConfig.getDestinationFolder()).param(
 							"documentExists", jobConfig.getDocExist())
 					.sourceSink(
-							sourceSinkById(Integer
-									.parseInt(jobConfig.getDest()))));
+							sourceSinkById(jobConfig.getDest())));
 		}
 
 		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
 				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc())
+						jobConfig.getMoveBeforeProc().toString())
 				// true or false (String)
 				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getBeforeProcPath())
+						jobConfig.getMoveBeforeProcText())
 				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
-						jobConfig.getMoveAfterLoad())
+						jobConfig.getMoveAfterLoad().toString())
 				// true or false (String)
 				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH,
-						jobConfig.getAfterLoadPath())
+						jobConfig.getMoveAfterLoadText())
 				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-						jobConfig.getMoveNotLoad())
+						jobConfig.getMoveNotLoad().toString())
 				// true or
 				// false
 				// (String)
 				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-						jobConfig.getNotLoadPath()).param("path", inputPaths)
+						jobConfig.getMoveNotLoadText()).param("path", inputPaths)
 				.param("stage", "after"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
@@ -218,22 +215,22 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 						.param("path", inputPaths)
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-								jobConfig.getMoveBeforeProc())
+								jobConfig.getMoveBeforeProc().toString())
 						// true or false (String)
 						.param(
 								MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-								jobConfig.getBeforeProcPath()).param(
+								jobConfig.getMoveBeforeProcText()).param(
 								MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
-								jobConfig.getMoveAfterLoad())
+								jobConfig.getMoveAfterLoad().toString())
 						// true or false (String)
 						.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH,
-								jobConfig.getAfterLoadPath()).param(
+								jobConfig.getMoveAfterLoadText()).param(
 								MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-								jobConfig.getMoveNotLoad()) // true or
+								jobConfig.getMoveNotLoad().toString()) // true or
 						// false
 						// (String)
 						.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-								jobConfig.getNotLoadPath()).param("stage",
+								jobConfig.getMoveNotLoadText()).param("stage",
 								"after"));
 
 		ActionBuilder[] actionsArray = (ActionBuilder[]) actions
@@ -300,7 +297,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		List<String> inputFolder = new ArrayList();
 		String inputPath = "";
 		String destinationFolder = "";
-		String dest = "";
+		int dest = 0;
 		String documentExists = "";
 
 		String metadata = "";
@@ -330,19 +327,19 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getIdAsString();
+						.getId();
 				documentExists = action.getParameter("documentExists");
 			} else if ("eu.xenit.move2alf.core.action.DeleteAction"
 					.equals(action.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getIdAsString();
+						.getId();
 				documentExists = action.getParameter("documentExists");
 			} else if ("eu.xenit.move2alf.core.action.ListAction".equals(action
 					.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getIdAsString();
+						.getId();
 				documentExists = action.getParameter("documentExists");
 			} else if ("eu.xenit.move2alf.core.action.MoveDocumentsAction"
 					.equals(action.getClassName())) {
@@ -412,15 +409,15 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setMetadata(metadata);
 		jobConfig.setTransform(transform);
 		jobConfig.setMoveBeforeProc(moveBeforeProcessing);
-		jobConfig.setBeforeProcPath(moveBeforeProcessingPath);
+		jobConfig.setMoveBeforeProcText(moveBeforeProcessingPath);
 		jobConfig.setMoveAfterLoad(moveAfterLoad);
-		jobConfig.setAfterLoadPath(moveAfterLoadPath);
+		jobConfig.setMoveAfterLoadText(moveAfterLoadPath);
 		jobConfig.setMoveNotLoad(moveNotLoaded);
-		jobConfig.setNotLoadPath(moveNotLoadedPath);
+		jobConfig.setMoveNotLoadText(moveNotLoadedPath);
 		jobConfig.setSendNotification(sendNotification);
-		jobConfig.setEmailAddressError(emailAddressNotification);
+		jobConfig.setSendNotificationText(emailAddressNotification);
 		jobConfig.setSendReport(sendReport);
-		jobConfig.setEmailAddressRep(emailAddressReport);
+		jobConfig.setSendReportText(emailAddressReport);
 		jobConfig.setExtension(extension);
 		jobConfig.setCommand(command);
 		jobConfig.setCommandAfter(commandAfter);
@@ -467,7 +464,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ActionConfig moveBeforeConfig = new ActionConfig();
 			moveBeforeConfig.put(
 					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-					jobConfig.getBeforeProcPath());
+					jobConfig.getMoveBeforeProcText());
 			pipeline.add(new PipelineStep(new SAMoveBeforeProcessing(),
 					moveBeforeConfig, null, errorHandler));
 		}
@@ -489,7 +486,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			ActionConfig transformConfig = transformParameters(jobConfig);
 			// TODO: configure number of transformer threads differently from number of Alfresco threads
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
-					Integer.parseInt(jobConfig.getDest()));
+					jobConfig.getDest());
 			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			pipeline.add(new PipelineStep(transformAction, transformConfig, null, errorHandler, new ActionExecutor(executorService)));
 		}
@@ -498,7 +495,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
 				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
-					Integer.parseInt(jobConfig.getDest()));
+					jobConfig.getDest());
 			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
 			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SAUpload(sink, sinkConfig);
@@ -509,7 +506,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 		if ("Delete".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
-					Integer.parseInt(jobConfig.getDest()));
+					jobConfig.getDest());
 			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
 			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SADelete(sink, sinkConfig);
@@ -520,7 +517,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		}
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
 			ConfiguredSourceSink sinkConfig = getJobService().getDestination(
-					Integer.parseInt(jobConfig.getDest()));
+					jobConfig.getDest());
 			SourceSink sink = getSourceSinkFactory().getObject(sinkConfig.getClassName());
 			ExecutorService executorService = getSourceSinkFactory().getThreadPool(sinkConfig);
 			SimpleAction uploadAction = new SAList(sink, sinkConfig);

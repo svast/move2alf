@@ -10,6 +10,7 @@ public class EditPassword {
 	@NotEmpty
 	private String newPassword;
 
+	@NotEmpty
 	private String newPasswordRetype;
 
 	public void setOldPassword(String oldPassword) {

@@ -52,7 +52,7 @@ public class SuccessHandler {
 		if ("true".equals(jobConfig.getMoveAfterLoad())) {
 			String inputFolder = (String) parameterMap
 					.get(Parameters.PARAM_INPUT_PATH);
-			Util.moveFile(inputFolder, jobConfig.getAfterLoadPath(), file);
+			Util.moveFile(inputFolder, jobConfig.getMoveAfterLoadText(), file);
 		}
 	}
 	

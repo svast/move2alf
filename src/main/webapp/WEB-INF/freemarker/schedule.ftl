@@ -14,11 +14,13 @@
 						</tr>
 					</thead>
 					<tbody>
-					<#list schedules as schedule>
+					<#list schedules! as schedule>
 					<#if schedule.quartzScheduling!="0 0 0 1 1 ? 1" >
 						<tr id="schedule_${schedule_index}">
 							<td>${schedule_index}</td>
-							<td class="cronexpr" >${schedule.quartzScheduling}</td>
+							<td class="cronexpr" >${schedule.quartzScheduling}
+								<input name="cron" type="hidden" value="${schedule.quartzScheduling}" />
+							</td>
 							<td><img class="clickable" onclick="$('#schedule_${schedule_index}').remove()" src="<@spring.url relativeUrl="/images/delete-icon.png" />" alt="delete" /></td>
 						</tr>
 					</#if>
