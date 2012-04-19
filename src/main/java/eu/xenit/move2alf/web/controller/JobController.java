@@ -272,6 +272,7 @@ public class JobController {
 							ConfigurableObject.CAT_DESTINATION));
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
+			mav.addObject("errors", errors.getFieldErrors());
 
 			return mav;
 		}

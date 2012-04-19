@@ -20,7 +20,7 @@
 	</tr>
 	<tr>
 		<th>End time:</th>
-		<td>${cycle.endDateTime}</td>
+		<td>${cycle.endDateTime!}</td>
 		<td></td>
 		<td></td>
 	</tr>
