@@ -17,6 +17,12 @@ $(function() {
 		}
 	});
 });
+
+function deleteJob(id){
+	if(confirm("Are you sure you want to delete this job?")){
+		window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/delete";
+	}
+}
 </script>
 
 <table id="dashboard" class="table-striped wide">
@@ -26,6 +32,7 @@ $(function() {
 			<th class="header">Job Name</th>
 			<th class="header">Last run</th>
 			<th class="header">Status</th>
+			<th></th>
 			<th></th>
 			<th></th>
 			<th></th>
@@ -50,7 +57,7 @@ $(function() {
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
 			<td><a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a></td>
-			<td><img onclick="" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" class="clickable" /></td>
+			<td><img class="clickable" onclick="deleteJob('${jobInfo.jobId}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
 		</tr>
 		</#list>
 	</tbody>

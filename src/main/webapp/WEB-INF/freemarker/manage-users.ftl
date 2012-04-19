@@ -15,6 +15,12 @@ $(function() {
 		}
 	});
 });
+
+function deleteUser(user){
+	if(confirm("Are you sure you want to delete user "+user)){
+		window.location.href = "<@spring.url relativeUrl="/user/" />"+user+"/delete";
+	}
+}
 </script>
 
 <table id="users" class="table-striped wide">
@@ -32,7 +38,7 @@ $(function() {
 			<td><a href="<@spring.url relativeUrl="/user/${user.userName}/edit/password" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
 			<td>${user.userName}</td>
 			<td>${user.role}<a href="<@spring.url relativeUrl="/user/${user.userName}/edit/role" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
-			<td><a href="<@spring.url relativeUrl="/user/${user.userName}/delete" />"><img src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></a></td>
+			<td><img class="clickable" onclick="deleteUser('${user.userName}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
 		</tr>
 		</#list>
 	</tbody>

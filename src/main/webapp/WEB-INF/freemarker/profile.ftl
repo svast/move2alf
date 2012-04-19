@@ -12,7 +12,7 @@ Username: ${user.userName}
 <p>
 Role: ${role}
 </p>
-<a class="btn" href="<@spring.url relativeUrl="/user/${user.userName}/edit" />">Edit profile</a>
+<a class="btn" href="<@spring.url relativeUrl="/user/profile/${user.userName}/edit" />">Edit profile</a>
 
 <#include "footer.ftl" />
 

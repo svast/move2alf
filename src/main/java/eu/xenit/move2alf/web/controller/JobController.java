@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -350,7 +351,7 @@ public class JobController {
 		if (!getJobService().getJob(id).getName().equals(job.getName())) {
 			jobExists = getJobService().checkJobExists(job.getName());
 		}
-
+		
 		List<String> sourceSinks = job.getSourceSink();
 		Set<String> uniqueSourceSinks = new HashSet();
 		boolean notNull = true;
@@ -472,6 +473,7 @@ public class JobController {
 			mav.addObject("notNull", notNull);
 			mav.addObject("roles", getUserService().getCurrentUser()
 					.getUserRoleSet());
+			mav.addObject("errors",errors.getFieldErrors());
 
 			return mav;
 		}
@@ -629,6 +631,7 @@ public class JobController {
 		return mav;
 	}
 
+	/*
 	@RequestMapping(value = "/job/{id}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteJob(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
@@ -637,9 +640,9 @@ public class JobController {
 				.getUserRoleSet());
 		mav.setViewName("delete-job");
 		return mav;
-	}
+	}*/
 
-	@RequestMapping(value = "/job/{id}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/job/{id}/delete", method = RequestMethod.GET)
 	public ModelAndView deleteJob(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteJob(id);
@@ -781,7 +784,7 @@ public class JobController {
 		mav.setViewName("redirect:/destinations");
 		return mav;
 	}
-
+/*
 	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteDestination(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
@@ -802,9 +805,9 @@ public class JobController {
 				.getUserRoleSet());
 		mav.setViewName("delete-destination");
 		return mav;
-	}
+	}*/
 
-	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
 	public ModelAndView deleteDestination(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteDestination(id);

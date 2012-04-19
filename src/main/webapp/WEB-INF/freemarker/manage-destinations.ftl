@@ -14,6 +14,12 @@ $(function() {
 		}
 	});
 });
+
+function deleteDestination(id){
+	if(confirm("Are you sure you want to delete this destination?")){
+		window.location.href = "<@spring.url relativeUrl="/destination/" />"+id+"/delete";
+	}
+}
 </script>
 
 <table id="destinations" class="table-striped wide">
@@ -25,6 +31,7 @@ $(function() {
 			<th>URL</th>
 			<th>Username</th>
 			<th>Threads</th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -36,6 +43,7 @@ $(function() {
 			<td>${destination.parameters.url}</td>
 			<td>${destination.parameters.user}</td>
 			<td>${destination.parameters.threads}</td>
+			<td><img class="clickable" onclick="deleteDestination('${destination.id}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
 		</tr>
 		</#list>
 	</tbody>

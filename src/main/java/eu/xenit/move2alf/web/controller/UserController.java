@@ -143,7 +143,7 @@ public class UserController {
 		return mav;
 	}
 
-
+/*
 	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.GET)
 	public ModelAndView confirmDeleteUser(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
@@ -153,9 +153,9 @@ public class UserController {
 				.getUserRoleSet());
 		mav.setViewName("delete-user");
 		return mav;
-	}
+	}*/
 
-	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.GET)
 	public ModelAndView deleteUser(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
 		logger.info("deleting user " + userName);
@@ -206,13 +206,7 @@ public class UserController {
 
 	@RequestMapping(value = "/user/profile/{userName}/edit", method = RequestMethod.GET)
 	public ModelAndView changePasswordForm(@PathVariable String userName) {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("userClass", new EditPassword());
-		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		mav.setViewName("edit-password");
-		return mav;
+		return editUserForm(userName);
 	}
 
 	@RequestMapping(value = "/user/profile/{userName}/edit", method = RequestMethod.POST)

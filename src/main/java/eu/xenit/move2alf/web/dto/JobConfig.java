@@ -8,16 +8,15 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class JobConfig {
 	private int id;
 
-	@NotEmpty
+	@NotEmpty(message="Please enter a name for the job.")
 	private String name;
 
-	@NotEmpty
 	private String description;
 
-	@NotEmpty
+	@NotEmpty(message="There should be at least one inputFolder!")
 	private List<String> inputFolder;
 
-	@NotEmpty
+	@NotEmpty(message="Please enter a destination path.")
 	private String destinationFolder;
 
 	private String runFrequency;
