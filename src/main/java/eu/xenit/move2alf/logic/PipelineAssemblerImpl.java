@@ -421,6 +421,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setExtension(extension);
 		jobConfig.setCommand(command);
 		jobConfig.setCommandAfter(commandAfter);
+		jobConfig.setCron(getJobService().getCronjobsForJob(id));
 
 		Iterator metadataMapIterator = metadataParameterMap.entrySet()
 				.iterator();

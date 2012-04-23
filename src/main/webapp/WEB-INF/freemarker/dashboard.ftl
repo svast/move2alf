@@ -69,5 +69,15 @@ $("a[rel=popover]").popover({
 });
 </script>
 
+<#if licenseIsValid >
+        <div class="info">
+        <hr>
+        	This Move2Alf is licensed to ${licensee.companyName}.
+        
+            <#if expirationDate?has_content>
+            The license expires on ${expirationDate}.
+            </#if>
+        </div>
+</#if>
 </@bodyMenu>
 </@html>

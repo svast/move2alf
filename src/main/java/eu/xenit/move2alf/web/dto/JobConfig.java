@@ -13,27 +13,11 @@ public class JobConfig {
 
 	private String description;
 
-	@NotEmpty(message="There should be at least one inputFolder!")
+	@NotEmpty(message="There should be at least one inputfolder!")
 	private List<String> inputFolder;
 
 	@NotEmpty(message="Please enter a destination path.")
 	private String destinationFolder;
-
-	private String runFrequency;
-
-	private String singleDate;
-
-	private String singleTime;
-
-	private String hourTime;
-
-	private String dayTime;
-
-	private String weekDay;
-
-	private String weekTime;
-
-	private String cronJob;
 
 	private List<String> cron = new ArrayList<String>();
 
@@ -79,15 +63,7 @@ public class JobConfig {
 	private int nbrThreads = 5;
 	
 	private String extension = "*";
-	
-	private String parameterMetadataName = "";
-	
-	private String parameterMetadataValue = "";
-	
-	private String parameterTransformName = "";
-	
-	private String parameterTransformValue = "";
-	
+		
 	private List<String> paramMetadata;
 	
 	private List<String> paramTransform;
@@ -97,8 +73,6 @@ public class JobConfig {
 	private String commandAfter;
 
 	private int dest;
-
-	private List<String> sourceSink;
 	
 	private String inputPath="";
 
@@ -152,70 +126,6 @@ public class JobConfig {
 
 	public String getDestinationFolder() {
 		return destinationFolder;
-	}
-
-	public void setRunFrequency(String runFrequency) {
-		this.runFrequency = runFrequency;
-	}
-
-	public String getRunFrequency() {
-		return runFrequency;
-	}
-
-	public void setSingleDate(String singleDate) {
-		this.singleDate = singleDate;
-	}
-
-	public String getSingleDate() {
-		return singleDate;
-	}
-
-	public void setSingleTime(String singleTime) {
-		this.singleTime = singleTime;
-	}
-
-	public String getSingleTime() {
-		return singleTime;
-	}
-
-	public void setHourTime(String hourTime) {
-		this.hourTime = hourTime;
-	}
-
-	public String getHourTime() {
-		return hourTime;
-	}
-
-	public void setDayTime(String dayTime) {
-		this.dayTime = dayTime;
-	}
-
-	public String getDayTime() {
-		return dayTime;
-	}
-
-	public void setWeekDay(String weekDay) {
-		this.weekDay = weekDay;
-	}
-
-	public String getWeekDay() {
-		return weekDay;
-	}
-
-	public void setWeekTime(String weekTime) {
-		this.weekTime = weekTime;
-	}
-
-	public String getWeekTime() {
-		return weekTime;
-	}
-
-	public void setCronJob(String cronJob) {
-		this.cronJob = cronJob;
-	}
-
-	public String getCronJob() {
-		return cronJob;
 	}
 
 	public void setCron(List<String> cron) {
@@ -403,14 +313,6 @@ public class JobConfig {
 	public int getDest() {
 		return dest;
 	}
-
-	public void setSourceSink(List<String> sourceSink) {
-		this.sourceSink = sourceSink;
-	}
-
-	public List<String> getSourceSink() {
-		return sourceSink;
-	}
 	
 	public void setExtension(String extension) {
 		this.extension = extension;
@@ -418,38 +320,6 @@ public class JobConfig {
 
 	public String getExtension() {
 		return extension;
-	}
-	
-	public void setParameterMetadataName(String parameterMetadataName) {
-		this.parameterMetadataName = parameterMetadataName;
-	}
-
-	public String getParameterMetadataName() {
-		return parameterMetadataName;
-	}
-	
-	public void setParameterMetadataValue(String parameterMetadataValue) {
-		this.parameterMetadataValue = parameterMetadataValue;
-	}
-
-	public String getParameterMetadataValue() {
-		return parameterMetadataValue;
-	}
-	
-	public void setParameterTransformName(String parameterTransformName) {
-		this.parameterTransformName = parameterTransformName;
-	}
-
-	public String getParameterTransformName() {
-		return parameterTransformName;
-	}
-	
-	public void setParameterTransformValue(String parameterTransformValue) {
-		this.parameterTransformValue = parameterTransformValue;
-	}
-
-	public String getParameterTransformValue() {
-		return parameterTransformValue;
 	}
 	
 	public void setParamMetadata(List<String> paramMetadata) {
