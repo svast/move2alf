@@ -433,6 +433,7 @@ public class JobController extends AbstractController{
 			mav.addObject("destinationOptions", getJobService()
 					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
 			mav.addObject("role", getRole());
+			mav.addObject("errors", errors.getFieldErrors());
 			return mav;	
 		}
 		ModelAndView mav = new ModelAndView();
@@ -495,6 +496,7 @@ public class JobController extends AbstractController{
 			ModelAndView mav = makeEditDestinationModelAndView(id);
 			
 			mav.addObject("destinationExists", destinationExists);
+			mav.addObject("errors", errors.getFieldErrors());
 			return mav;
 		}
 
