@@ -36,6 +36,11 @@ public class UserController extends AbstractController{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(UserController.class);
+	
+	@RequestMapping("/login")
+	public ModelAndView login(){
+		return new ModelAndView("login");
+	}
 
 	@RequestMapping("/users")
 	public ModelAndView manageUsers() {
