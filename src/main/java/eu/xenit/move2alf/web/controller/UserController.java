@@ -14,6 +14,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -128,18 +129,6 @@ public class UserController extends AbstractController{
 		return mav;
 	}
 
-/*
-	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.GET)
-	public ModelAndView confirmDeleteUser(@PathVariable String userName) {
-		ModelAndView mav = new ModelAndView();
-		logger.info("deleting user " + userName);
-		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		mav.setViewName("delete-user");
-		return mav;
-	}*/
-
 	@RequestMapping(value = "/user/{userName}/delete", method = RequestMethod.GET)
 	public ModelAndView deleteUser(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
@@ -168,6 +157,14 @@ public class UserController extends AbstractController{
 	public ModelAndView changePassword(@PathVariable String userName,
 			@ModelAttribute("userClass") @Valid EditPassword userClass,
 			BindingResult errors) {
+		
+		String oldPassword = getUserService().getUser(userName).getPassword();
+		String oldPasswordEntered = Util.convertToMd5(userClass
+				.getOldPassword());
+		
+		if (!oldPassword.equals(oldPasswordEntered)){
+			errors.addError(new FieldError("userClass","oldPassword", "You entered the wrong password."));
+		}
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: " + errors.toString());
@@ -176,33 +173,18 @@ public class UserController extends AbstractController{
 			mav.addObject("userClass", userClass);
 			mav.addObject("user", getUserService().getUser(userName));
 			mav.addObject("role", getRole());
+			mav.addObject("errors", errors.getFieldErrors());
 			return mav;
 		}
-
+		
 		ModelAndView mav = new ModelAndView();
 
-		String oldPassword = getUserService().getUser(userName).getPassword();
-		String oldPasswordEntered = Util.convertToMd5(userClass
-				.getOldPassword());
-
-		if (oldPassword.equals(oldPasswordEntered)) {
-
-			getUserService().changePassword(userClass.getNewPassword());
-			mav.setViewName("redirect:/user/profile");
-		} else {
-			mav.setViewName("redirect:/user/profile/edit/failed");
-		}
+		getUserService().changePassword(userClass.getNewPassword());
+		mav.setViewName("redirect:/user/profile");
+		
 		return mav;
 	}
 
-	@RequestMapping(value = "/user/profile/edit/failed", method = RequestMethod.GET)
-	public ModelAndView changePasswordFailed() {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("user", getUserService().getCurrentUser());
-		mav.addObject("role", getRole());
-		mav.setViewName("edit-profile-failed");
-		return mav;
-	}
 
 	@RequestMapping(value = "/user/{userName}/edit/password", method = RequestMethod.GET)
 	public ModelAndView editUserForm(@PathVariable String userName) {
@@ -218,6 +200,15 @@ public class UserController extends AbstractController{
 	public ModelAndView editUser(@PathVariable String userName,
 			@ModelAttribute("editPassword") @Valid EditPassword editPassword,
 			BindingResult errors) {
+		
+		String currentUserPassword = getUserService().getCurrentUser()
+				.getPassword();
+		String currentUserPasswordEntered = Util.convertToMd5(editPassword
+				.getOldPassword());
+
+		if (!currentUserPassword.equals(currentUserPasswordEntered)){
+			errors.addError(new FieldError("editPassword", "oldPassword", "You entered a wrong password."));
+		}
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: " + errors.toString());
@@ -226,33 +217,16 @@ public class UserController extends AbstractController{
 			mav.addObject("editPassword", editPassword);
 			mav.addObject("user", getUserService().getUser(userName));
 			mav.addObject("role", getRole());
+			mav.addObject("errors", errors.getFieldErrors());
 			return mav;
 		}
 
 		ModelAndView mav = new ModelAndView();
 
-		String currentUserPassword = getUserService().getCurrentUser()
-				.getPassword();
-		String currentUserPasswordEntered = Util.convertToMd5(editPassword
-				.getOldPassword());
-
-		if (currentUserPassword.equals(currentUserPasswordEntered)) {
-			getUserService().changePassword(userName,
+		getUserService().changePassword(userName,
 					editPassword.getNewPassword());
-			mav.setViewName("redirect:/users");
-		} else {
-			mav.setViewName("redirect:/user/" + userName
-					+ "/edit/password/failed");
-		}
-		return mav;
-	}
+		mav.setViewName("redirect:/users");
 
-	@RequestMapping(value = "/user/{userName}/edit/password/failed", method = RequestMethod.GET)
-	public ModelAndView editUserPasswordFailed(@PathVariable String userName) {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("role", getRole());
-		mav.setViewName("edit-user-password-failed");
 		return mav;
 	}
 
@@ -280,6 +254,15 @@ public class UserController extends AbstractController{
 	public ModelAndView editRole(@PathVariable String userName,
 			@ModelAttribute("editRole") @Valid EditRole editRole,
 			BindingResult errors) {
+		
+		String currentUserPassword = getUserService().getCurrentUser()
+				.getPassword();
+		String currentUserPasswordEntered = Util.convertToMd5(editRole
+				.getOldPassword());
+
+		if (!currentUserPassword.equals(currentUserPasswordEntered)){
+			errors.addError(new FieldError("editRole", "oldPassword", "You entered a wrong password."));
+		}
 
 		if (errors.hasErrors()) {
 			System.out.println("THE ERRORS: " + errors.toString());
@@ -325,39 +308,17 @@ public class UserController extends AbstractController{
 			mav.addObject("roleList", role);
 			mav.addObject("role", getRole());
 			mav.addObject("user", getUserService().getUser(userName));
+			mav.addObject("errors", errors.getFieldErrors());
 			return mav;
 		}
 
 		ModelAndView mav = new ModelAndView();
 
-		String currentUserPassword = getUserService().getCurrentUser()
-				.getPassword();
-		String currentUserPasswordEntered = Util.convertToMd5(editRole
-				.getOldPassword());
-
-		if (currentUserPassword.equals(currentUserPasswordEntered)) {
-			getUserService().changeRole(userName,
-					ERole.getByDisplayName(editRole.getRole()));
-			mav.setViewName("redirect:/users");
-		} else {
-			mav.setViewName("redirect:/user/" + userName + "/edit/role/failed");
-		}
+		getUserService().changeRole(userName,
+		ERole.getByDisplayName(editRole.getRole()));
+		mav.setViewName("redirect:/users");
+		
 		return mav;
 	}
 
-	@RequestMapping(value = "/user/{userName}/edit/role/failed", method = RequestMethod.GET)
-	public ModelAndView editUserRoleFailed(@PathVariable String userName) {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("role", getRole());
-		mav.setViewName("edit-user-role-failed");
-		return mav;
-	}
-	
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public ModelAndView login(){
-		ModelAndView mav = new ModelAndView();
-		mav.setViewName("login");
-		return mav;
-	}
 }
