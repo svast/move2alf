@@ -1,10 +1,32 @@
-<#assign menu = [ 
+<#if role?? && role=="SYSTEM_ADMIN">
+	<#assign menu = [ 
 					["Home", "/"],
 					["Manage destinations", "/destinations"],
 					["Manage users", "/users"],
 					["My profile", "/user/profile"],
 					["Logout", "/j_spring_security_logout"]
 				] />
+<#elseif role?? && role=="JOB_ADMIN">
+	<#assign menu = [ 
+					["Home", "/"],
+					["Manage destinations", "/destinations"],
+					["My profile", "/user/profile"],
+					["Logout", "/j_spring_security_logout"]
+				] />
+<#elseif role??>
+	<#assign menu = [ 
+					["Home", "/"],
+					["My profile", "/user/profile"],
+					["Logout", "/j_spring_security_logout"]
+				] />
+				
+<#else>
+	<#assign menu = [ 
+					["Home", "/"]
+				] />
+</#if>
+
+
 
 <ul style="" class="nav nav-tabs">
 		<#list menu as item >

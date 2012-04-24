@@ -45,20 +45,18 @@ import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.SchedulerImpl;
 import eu.xenit.move2alf.logic.UsageService;
-import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
 
 @Controller
-public class JobController {
+public class JobController extends AbstractController{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private UserService userService;
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
@@ -70,15 +68,6 @@ public class JobController {
 
 	public JobService getJobService() {
 		return jobService;
-	}
-
-	@Autowired
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	public UserService getUserService() {
-		return userService;
 	}
 
 	@Autowired
@@ -112,9 +101,8 @@ public class JobController {
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("jobInfoList", getJobService().getAllJobInfo());
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
-		
+		mav.addObject("role", getRole());
+			
 		// license info
 		mav.addObject("licenseIsValid", getUsageService().isValid());
 		mav.addObject("licenseValidationFailureCause", getUsageService().getValidationFailureCause());
@@ -186,8 +174,7 @@ public class JobController {
 		mav.addObject("destinationOptions", getJobService()
 				.getSourceSinksByCategory(
 						ConfigurableObject.CAT_DESTINATION));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 	}
 
 	private void jobValidation(JobConfig job, BindingResult errors) {
@@ -362,8 +349,7 @@ public class JobController {
 		mav.addObject("jobConfig", jobConfig);
 		mav.addObject("job", new ScheduleConfig());
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 		mav.setViewName("edit-schedule");
 		return mav;
@@ -380,8 +366,7 @@ public class JobController {
 			ModelAndView mav = new ModelAndView("edit-schedule");
 			mav.addObject("job", job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 			return mav;
 		}
@@ -420,8 +405,7 @@ public class JobController {
 
 		mav.addObject("destinations", destinations);
 		mav.addObject("typeNames", sourceSinkNames);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("manage-destinations");
 		return mav;
 	}
@@ -432,8 +416,7 @@ public class JobController {
 		mav.addObject("destination", new DestinationConfig());
 		mav.addObject("destinationOptions", getJobService()
 				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.addObject("showDestinations", "false");
 		mav.setViewName("create-destination");
 		return mav;
@@ -449,8 +432,7 @@ public class JobController {
 			mav.addObject("destination", destination);
 			mav.addObject("destinationOptions", getJobService()
 					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			return mav;	
 		}
 		ModelAndView mav = new ModelAndView();
@@ -489,8 +471,7 @@ public class JobController {
 		mav.addObject("destinationId", id);
 		mav.addObject("destinationOptions", getJobService()
 				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-destination");
 		return mav;
 	}
@@ -663,8 +644,7 @@ public class JobController {
 		mav.addObject("duration", duration);
 		mav.addObject("processedDocuments", processedDocuments);
 		mav.addObject("pagedListHolder", pagedListHolder);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.setViewName(viewName);
@@ -688,8 +668,7 @@ public class JobController {
 		mav.addObject("job", getJobService().getJob(jobId));
 		mav.addObject("pagedListHolder", pagedListHolder);
 		mav.addObject("historyInfoList", historyInfoList);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("history");
 		return mav;
 	}

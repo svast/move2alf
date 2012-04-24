@@ -28,7 +28,11 @@ function deleteJob(id){
 <table id="dashboard" class="table-striped wide">
 	<thead>
 		<tr>
-			<th class="small"><a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a></th>
+			<th class="small">
+				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+					<a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a>
+				</#if>		
+			</th>
 			<th class="header">Job Name</th>
 			<th class="header">Last run</th>
 			<th class="header">Status</th>
@@ -41,7 +45,11 @@ function deleteJob(id){
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
-			<td class="small" ><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a></td>
+			<td class="small" >
+				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
+				</#if>
+			</td>
 			<td><a data-content="${jobInfo.description!}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
 			<td>
 				<#if jobInfo.cycleStartDateTime??>
@@ -56,8 +64,16 @@ function deleteJob(id){
 			</td>
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
-			<td><a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a></td>
-			<td><img class="clickable" onclick="deleteJob('${jobInfo.jobId}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
+			<td>
+				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+					<a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a>
+				</#if>		
+			</td>
+			<td>
+				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+					<img class="clickable" onclick="deleteJob('${jobInfo.jobId}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" />
+				</#if>		
+			</td>
 		</tr>
 		</#list>
 	</tbody>

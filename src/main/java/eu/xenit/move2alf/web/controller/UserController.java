@@ -31,30 +31,17 @@ import eu.xenit.move2alf.web.dto.User;
 import eu.xenit.move2alf.web.dto.UserInfo;
 
 @Controller
-public class UserController {
+public class UserController extends AbstractController{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(UserController.class);
-
-	private UserService userService;
-
-	@Autowired
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	public UserService getUserService() {
-		return userService;
-	}
 
 	@RequestMapping("/users")
 	public ModelAndView manageUsers() {
 		ModelAndView mav = new ModelAndView();
 		List<UserInfo> userInfoList = new ArrayList();
 		List<UserPswd> allUsers = getUserService().getAllUsers();
-	//	mav.addObject("users", getUserService().getAllUsers());
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		
 		for(int i =0;i<allUsers.size(); i++){
 			UserInfo userInfo = new UserInfo();
@@ -110,8 +97,7 @@ public class UserController {
 			role.add(myEnum.getDisplayName());
 		}
 		mav.addObject("roleList", role);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.addObject("user", new User());
 		return mav;
 	}
@@ -129,8 +115,7 @@ public class UserController {
 				role.add(myEnum.getDisplayName());
 			}
 			mav.addObject("roleList", role);
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			mav.addObject("user", user);
 			return mav;
 		}
@@ -169,37 +154,7 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("user", getUserService().getCurrentUser());
 		
-		Set userRole = getUserService().getCurrentUser()
-				.getUserRoleSet();
-
-		//Makes sure the correct role is already selected
-		String roleCheck="";
-		Iterator roleIterator = userRole.iterator();
-		while(roleIterator.hasNext()){
-			String currentRole = ((UserRole) roleIterator.next()).getRole();
-			if("SYSTEM_ADMIN".equals(currentRole)){
-				roleCheck="System admin";
-			}
-			if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
-				if("JOB_ADMIN".equals(currentRole)){
-					roleCheck="Job admin";
-				}
-			}
-			if(roleCheck=="Consumer" || roleCheck==""){
-				if("SCHEDULE_ADMIN".equals(currentRole)){
-					roleCheck="Schedule admin";
-				}
-			}
-			if(roleCheck==""){
-				if("CONSUMER".equals(currentRole)){
-					roleCheck="Consumer";
-				}
-			}
-		}
-		
-		mav.addObject("role", roleCheck);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("profile");
 		return mav;
 	}
@@ -220,8 +175,7 @@ public class UserController {
 			ModelAndView mav = new ModelAndView("edit-profile");
 			mav.addObject("userClass", userClass);
 			mav.addObject("user", getUserService().getUser(userName));
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			return mav;
 		}
 
@@ -245,8 +199,7 @@ public class UserController {
 	public ModelAndView changePasswordFailed() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("user", getUserService().getCurrentUser());
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-profile-failed");
 		return mav;
 	}
@@ -256,8 +209,7 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("editPassword", new EditPassword());
 		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-user");
 		return mav;
 	}
@@ -273,8 +225,7 @@ public class UserController {
 			ModelAndView mav = new ModelAndView("edit-user");
 			mav.addObject("editPassword", editPassword);
 			mav.addObject("user", getUserService().getUser(userName));
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			return mav;
 		}
 
@@ -300,8 +251,7 @@ public class UserController {
 	public ModelAndView editUserPasswordFailed(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-user-password-failed");
 		return mav;
 	}
@@ -321,8 +271,7 @@ public class UserController {
 		}
 		
 		mav.addObject("roleList", roles);
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-user-role");
 		return mav;
 	}
@@ -374,8 +323,7 @@ public class UserController {
 				}
 			}
 			mav.addObject("roleList", role);
-			mav.addObject("roles", getUserService().getCurrentUser()
-					.getUserRoleSet());
+			mav.addObject("role", getRole());
 			mav.addObject("user", getUserService().getUser(userName));
 			return mav;
 		}
@@ -401,8 +349,7 @@ public class UserController {
 	public ModelAndView editUserRoleFailed(@PathVariable String userName) {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("user", getUserService().getUser(userName));
-		mav.addObject("roles", getUserService().getCurrentUser()
-				.getUserRoleSet());
+		mav.addObject("role", getRole());
 		mav.setViewName("edit-user-role-failed");
 		return mav;
 	}

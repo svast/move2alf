@@ -2,7 +2,7 @@ package eu.xenit.move2alf.core.enums;
 
 import java.util.EnumSet;
 
-public enum ERole {
+public enum ERole{
 	SYSTEM_ADMIN("System admin"),
 	JOB_ADMIN("Job admin"),
 	SCHEDULE_ADMIN("Schedule admin"),
