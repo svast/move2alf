@@ -44,6 +44,7 @@
 	</tr>
 
 </table>
+<a href="<@spring.url relativeUrl=("/job/"+job.id+"/"+cycle.id+"/report/exportcsv") />" >Export to CSV</a>
 <hr />
 <table class="table-striped wide">
 	<thead>

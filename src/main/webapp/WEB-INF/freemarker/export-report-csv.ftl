@@ -1,4 +1,3 @@
-${response}
 Name;${job.name}
 Description;${job.description}
 Start time;${cycle.startDateTime}
@@ -12,4 +11,5 @@ List of imported documents
 
 Name;Processed date and time;Status
 <#list processedDocuments as document>
-${document.name};${document.processedDateTime};${document.status.displayName}<#list document.processedDocumentParameterSet as docParameter>;${docParameter.name}: ${docParameter.value}</#list></#list>
+${document.name};${document.processedDateTime};${document.status.displayName}<#list document.processedDocumentParameterSet as docParameter>;${docParameter.name}: ${docParameter.value}</#list>
+</#list>

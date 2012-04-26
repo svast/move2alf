@@ -550,7 +550,8 @@ public class JobController extends AbstractController{
 
 	@RequestMapping("/job/{jobId}/{cycleId}/report/exportcsv")
 	public ModelAndView exportReportToCSV(@PathVariable int jobId,
-			@PathVariable int cycleId) {
+			@PathVariable int cycleId, HttpServletResponse response) {
+		response.setHeader("Content-Disposition", "attachment;filename=\"report.csv\"" );
 		return reportWithView(jobId, cycleId, 0, 0, "export-report-csv");
 	}
 
