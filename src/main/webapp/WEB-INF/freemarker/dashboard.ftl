@@ -91,7 +91,7 @@ $("a[rel=popover]").popover({
         	This Move2Alf is licensed to ${licensee.companyName}.
         
             <#if expirationDate?has_content>
-            The license expires on ${expirationDate}.
+            The license expires on ${expirationDate?date}.
             </#if>
         </div>
 </#if>
