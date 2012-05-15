@@ -66,7 +66,7 @@
 		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." />
 		
 		<@labeledSelectList label="Meta-data processor" name="metadata" options=metadataOptions helpText="Choose the meta-data processor."; processor>
-			<option value="${processor.class.name}">${processor.name} - ${processor.description}</option>
+			<option value="${processor.class.name}" <#if processor.class.name=job.metadata >selected="selected"</#if> >${processor.name} - ${processor.description}</option>
 		</@labeledSelectList>
 		
 				
