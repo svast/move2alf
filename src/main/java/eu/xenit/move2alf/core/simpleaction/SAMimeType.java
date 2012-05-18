@@ -46,6 +46,8 @@ public class SAMimeType extends SimpleActionSingleResult {
 			mimeType = "application/xml";
 		} else if (fileName.toLowerCase().endsWith("svg")) {
 			mimeType = "image/svg+xml";
+		}else if (fileName.toLowerCase().endsWith("msg")) {
+			mimeType = "application/vnd.ms-outlook";
 		} else if (fileName.toLowerCase().endsWith("docx")) {
 			mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 		} else if (fileName.toLowerCase().endsWith("xslx")) {
