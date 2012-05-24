@@ -186,6 +186,10 @@ public class JobConfig {
 	public void setMoveAfterLoad(String moveAfterLoad) {
 		this.moveAfterLoad = Boolean.valueOf(moveAfterLoad);
 	}
+	
+	public void setMoveAfterLoad(Boolean moveAfterLoad) {
+		this.moveAfterLoad = moveAfterLoad;
+	}
 
 	public Boolean getMoveAfterLoad() {
 		return moveAfterLoad;
@@ -201,6 +205,10 @@ public class JobConfig {
 
 	public void setMoveNotLoad(String moveNotLoad) {
 		this.moveNotLoad = Boolean.valueOf(moveNotLoad);
+	}
+	
+	public void setMoveNotLoad(Boolean moveNotLoad) {
+		this.moveNotLoad = moveNotLoad;
 	}
 
 	public Boolean getMoveNotLoad() {

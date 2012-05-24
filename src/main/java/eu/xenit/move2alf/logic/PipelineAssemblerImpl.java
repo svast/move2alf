@@ -80,7 +80,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				}
 			}
 		}
-
+		logger.debug("Move before not load: "+jobConfig.getMoveBeforeProc().toString());
 		actions
 				.add(action(
 						"eu.xenit.move2alf.core.action.ExecuteCommandAction")
@@ -144,7 +144,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 
-		if (!"No transformation".equals(jobConfig.getTransform())) {
+		if (!"notransformation".equals(jobConfig.getTransform())) {
 
 			actions.add(action(jobConfig.getTransform()).paramMap(
 					transformParameterMap));
@@ -461,7 +461,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		List<PipelineStep> pipeline = new ArrayList<PipelineStep>();
 		pipeline.add(new PipelineStep(new SASource(), null, null, errorHandler));
 
-		if ("true".equals(jobConfig.getMoveBeforeProc())) {
+		if (jobConfig.getMoveBeforeProc()) {
 			ActionConfig moveBeforeConfig = new ActionConfig();
 			moveBeforeConfig.put(
 					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
@@ -480,7 +480,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		ActionConfig metadataConfig = metadataParameters(jobConfig);
 		pipeline.add(new PipelineStep(metadataAction, metadataConfig, null, errorHandler));
 
-		if (!("No transformation".equals(jobConfig.getTransform()) || "".equals(jobConfig.getTransform()))) {
+		if (!("notransformation".equals(jobConfig.getTransform()) || "".equals(jobConfig.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
 			SimpleAction transformAction = new SimpleActionWrapper(
 					getActionFactory().getObject(jobConfig.getTransform()));

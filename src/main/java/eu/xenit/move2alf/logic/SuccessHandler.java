@@ -49,7 +49,7 @@ public class SuccessHandler {
 						new Date(), Parameters.VALUE_OK, params));
 
 		// move
-		if ("true".equals(jobConfig.getMoveAfterLoad())) {
+		if (jobConfig.getMoveAfterLoad()) {
 			String inputFolder = (String) parameterMap
 					.get(Parameters.PARAM_INPUT_PATH);
 			Util.moveFile(inputFolder, jobConfig.getMoveAfterLoadText(), file);

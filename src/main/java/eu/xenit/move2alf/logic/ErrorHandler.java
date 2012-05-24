@@ -52,7 +52,7 @@ public class ErrorHandler {
 						new Date(), Parameters.VALUE_FAILED, params));
 
 		// move
-		if ("true".equals(jobConfig.getMoveNotLoad())) {
+		if (jobConfig.getMoveNotLoad()) {
 			String inputFolder = (String) parameterMap
 					.get(Parameters.PARAM_INPUT_PATH);
 			Util.moveFile(inputFolder, jobConfig.getMoveNotLoadText(), file);
