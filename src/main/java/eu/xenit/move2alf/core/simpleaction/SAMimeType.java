@@ -40,6 +40,8 @@ public class SAMimeType extends SimpleActionSingleResult {
 			mimeType = "application/vnd.ms-powerpoint";
 		} else if (fileName.toLowerCase().endsWith("txt")) {
 			mimeType = "text/plain";
+		} else if (fileName.toLowerCase().endsWith("csv")) {
+			mimeType = "text/plain";
 		} else if (fileName.toLowerCase().endsWith("html")) {
 			mimeType = "text/html";
 		} else if (fileName.toLowerCase().endsWith("xml")) {
@@ -54,6 +56,8 @@ public class SAMimeType extends SimpleActionSingleResult {
 			mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 		} else if (fileName.toLowerCase().endsWith("pptx")) {
 			mimeType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+		} else if (fileName.toLowerCase().endsWith("rtf")) {
+			mimeType = "application/rtf";
 		} else {
 			logger.warn("Mimetype is unknown");
 			mimeType = "unknown";
