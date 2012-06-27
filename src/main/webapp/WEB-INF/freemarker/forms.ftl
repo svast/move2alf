@@ -92,6 +92,9 @@
 										$("#${nameId}").select();
 									}
 								});
+								$('#${valueId}').closest("form").submit(function(){
+									addParameter('${baseId}',true);
+								});
 							</script>
 							<td><img class="clickable" onclick="addParameter('${baseId}')" src="<@spring.url relativeUrl="/images/save-icon.png"/>" alt="save" /></td>
 						</tr>

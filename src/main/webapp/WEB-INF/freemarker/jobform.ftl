@@ -44,6 +44,9 @@
 									$("#inputPathTextbox").select();
 								}
 							});
+							$('#inputPathTextbox').closest("form").submit(function(){
+									addInputPath('inputPath',true);
+							});
 						</script>
 					</tbody>
 				</table>

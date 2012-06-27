@@ -1,9 +1,14 @@
-function addInputPath(baseId){
+function addInputPath(baseId, raw){
+	//default field
+	raw = typeof raw !== 'undefined' ? raw : false;
+	
 	var textBox = $("#"+baseId+"Textbox");
 	var inputPath = textBox.val();
 	
 	if(inputPath == ""){
-		alert("Input path should not be empty!")
+		if(!raw){
+			alert("Input path should not be empty!");
+		}
 	}else{
 		var tableId = baseId+"Table";
 		if($("#"+tableId+" tbody tr").size() == 1){
@@ -21,7 +26,7 @@ function addInputPath(baseId){
 				"	<td><img class=\"clickable\" onclick=\"$('#"+inputId+"').remove()\" src='"+basePath+"/images/delete-icon.png' alt='delete' /></td>" +
 				"</tr>");
 		
-		$("#"+baseId+"Textbox").val('');
+		textBox.val('');
 		
 		$("#"+inputId).effect('pulsate', {}, 300);
 	}

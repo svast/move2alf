@@ -1,9 +1,14 @@
-function addParameter(idbase){
+function addParameter(idbase, raw){
+	//default value
+	raw = typeof raw !== 'undefined' ? raw : false;
+	
 	var name = $.trim($("#"+idbase+"Name").val());
 	var value = $.trim($("#"+idbase+"Value").val());
 	
 	if(name == "" || value== ""){
-		alert("Name or value should not be empty!")
+		if(!raw){
+			alert("Name or value should not be empty!");
+		}
 	}
 	else{
 		var tableId = idbase+"Table";
