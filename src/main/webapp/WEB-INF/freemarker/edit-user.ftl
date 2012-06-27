@@ -18,7 +18,9 @@
 	<@labeledSingleLinePasswordInput label="Enter your own password" name="oldPassword" binding="editPassword.oldPassword" />
 	<@labeledSingleLinePasswordInput label="New password" name="newPassword" binding="editPassword.newPassword" />
 	<@labeledSingleLinePasswordInput label="Retype the new password" name="newPasswordRetype" binding="editPassword.newPasswordRetype" />
-	<input type="submit" value"Update password" />
+
+	<input class="btn btn-success" type="submit" value="Update password" />
+	<a class="btn btn-inverse" href="<@spring.url relativeUrl="/users" />">Cancel</a>
 </form>
 </@bodyMenu>
 </@html>

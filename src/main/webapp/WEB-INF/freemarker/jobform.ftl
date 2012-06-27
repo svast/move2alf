@@ -121,4 +121,5 @@
 		</@unLabeledInput>
 	</fieldset>
 
-	<input type="submit" value="submit" />
+	<input class="btn btn-success" type="submit" value="Save" />
+	<a class="btn btn-inverse" href="<@spring.url relativeUrl="/job/dashboard" />">Cancel</a>

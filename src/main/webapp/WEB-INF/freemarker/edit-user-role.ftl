@@ -13,8 +13,8 @@
 		${item}
 		<option value="${item}" <#if (editRole.role==item)>selected="selected"</#if>> ${item}</option>
 	</@labeledSelectList>
-	<input type="submit" value="Update role" />
-
+	<input class="btn btn-success" type="submit" value="Update role" />
+	<a class="btn btn-inverse" href="<@spring.url relativeUrl="/users" />">Cancel</a>
 </form>
 </@bodyMenu>
 </@html>
