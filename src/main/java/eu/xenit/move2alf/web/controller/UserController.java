@@ -10,9 +10,6 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -26,7 +23,6 @@ import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
-import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.web.dto.EditPassword;
 import eu.xenit.move2alf.web.dto.EditRole;
 import eu.xenit.move2alf.web.dto.User;
@@ -49,7 +45,7 @@ public class UserController extends AbstractController{
 	@RequestMapping("/users")
 	public ModelAndView manageUsers() {
 		ModelAndView mav = new ModelAndView();
-		List<UserInfo> userInfoList = new ArrayList();
+		List<UserInfo> userInfoList = new ArrayList<UserInfo>();
 		List<UserPswd> allUsers = getUserService().getAllUsers();
 		mav.addObject("role", getRole());
 		
@@ -58,12 +54,12 @@ public class UserController extends AbstractController{
 			String userName = allUsers.get(i).getUserName();
 			userInfo.setUserName(userName);
 			
-			Set userRole = getUserService().getUser(userName)
+			Set<UserRole> userRole = getUserService().getUser(userName)
 					.getUserRoleSet();
 	
 			//Makes sure the correct role is already selected
 			String roleCheck="";
-			Iterator roleIterator = userRole.iterator();
+			Iterator<UserRole> roleIterator = userRole.iterator();
 			while(roleIterator.hasNext()){
 				String currentRole = ((UserRole) roleIterator.next()).getRole();
 				if("SYSTEM_ADMIN".equals(currentRole)){
@@ -102,7 +98,7 @@ public class UserController extends AbstractController{
 	public ModelAndView addUserForm() {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("add-user");
-		List role = new ArrayList();
+		List<String> role = new ArrayList<String>();
 		for (ERole myEnum : ERole.values()) {
 			role.add(myEnum.getDisplayName());
 		}
@@ -120,7 +116,7 @@ public class UserController extends AbstractController{
 			System.out.println("THE ERRORS: " + errors.toString());
 
 			ModelAndView mav = new ModelAndView("add-user");
-			List role = new ArrayList();
+			List<String> role = new ArrayList<String>();
 			for (ERole myEnum : ERole.values()) {
 				role.add(myEnum.getDisplayName());
 			}
@@ -248,7 +244,7 @@ public class UserController extends AbstractController{
 		mav.addObject("user", getUserService().getUser(userName));
 		
 		
-		List roles = new ArrayList();
+		List<String> roles = new ArrayList<String>();
 		for (ERole myEnum : ERole.values()) {
 				roles.add(myEnum.getDisplayName());
 		}
@@ -280,10 +276,10 @@ public class UserController extends AbstractController{
 			mav.addObject("editRole", editRole);
 			
 			//Makes sure the correct role is already selected
-			Set userRole = getUserService().getUser(userName)
+			Set<UserRole> userRole = getUserService().getUser(userName)
 			.getUserRoleSet();
 			String roleCheck="";
-			Iterator roleIterator = userRole.iterator();
+			Iterator<UserRole> roleIterator = userRole.iterator();
 			while(roleIterator.hasNext()){
 				String currentRole = ((UserRole) roleIterator.next()).getRole();
 				if("SYSTEM_ADMIN".equals(currentRole)){
@@ -306,7 +302,7 @@ public class UserController extends AbstractController{
 				}
 			}
 			
-			List role = new ArrayList();
+			List<String> role = new ArrayList<String>();
 			for (ERole myEnum : ERole.values()) {
 				if(myEnum.toString().equals(roleCheck)){
 					role.add(0,myEnum.getDisplayName());
