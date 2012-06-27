@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -38,8 +39,11 @@ public class UserController extends AbstractController{
 			.getLogger(UserController.class);
 	
 	@RequestMapping("/login")
-	public ModelAndView login(){
-		return new ModelAndView("login");
+	public ModelAndView login(HttpServletRequest request){
+		String failed = request.getParameter("failed");
+		ModelAndView mav = new ModelAndView("login");
+		mav.addObject("failed", failed!=null && failed.equals("true"));
+		return mav;
 	}
 
 	@RequestMapping("/users")

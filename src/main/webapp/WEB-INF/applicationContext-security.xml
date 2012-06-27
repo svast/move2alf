@@ -8,16 +8,15 @@
 	<global-method-security pre-post-annotations="enabled" />
 
 	<http use-expressions="true" auto-config="true">
-		<intercept-url pattern="/login" access="permitAll"/>
+		<intercept-url pattern="/login*" access="permitAll"/>
 		<intercept-url pattern="/styles/*" access="permitAll"/>
 		<intercept-url pattern="/scripts/*" access="permitAll"/>
 		<intercept-url pattern="/js/*" access="permitAll"/>
 		<intercept-url pattern="/images/*" access="permitAll"/>
 		<intercept-url pattern="/resources/*" access="permitAll"/>
 		<intercept-url pattern="/**" access="hasRole('CONSUMER')" />
-		<form-login login-page="/login" default-target-url='/job/dashboard' always-use-default-target='true'/>
+		<form-login login-page="/login" default-target-url="/job/dashboard"  authentication-failure-url="/login?failed=true"/>
 		<logout />
-		<remember-me />
 	</http>
 
 	<authentication-manager alias="authenticationManager">
@@ -28,5 +27,6 @@
 				authorities-by-username-query="select userPswd.userName, userRole.role from userPswd join userRole where userPswd.userName=?"/>
 		</authentication-provider>
 	</authentication-manager>
+	
 	
 </beans:beans>

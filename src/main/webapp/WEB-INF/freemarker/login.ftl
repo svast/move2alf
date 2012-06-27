@@ -4,6 +4,11 @@
 <@head>
 </@head>
 <@bodyMenu title="Login" >
+<#if failed>
+<div class="alert alert-error">
+    	The credentials you supplied were not valid!
+</div>
+</#if>
 
 <form name='f' action='<@spring.url relativeUrl="/j_spring_security_check"  />' method='POST'> 
  <table> 
