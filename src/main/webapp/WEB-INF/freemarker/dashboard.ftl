@@ -50,7 +50,7 @@ function deleteJob(id){
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
 			</td>
-			<td><a data-content="${jobInfo.description!}" rel="popover" href="#" data-original-title="Description">${jobInfo.jobName}</a></td>
+			<td><span data-content="${jobInfo.description!}" rel="popover" data-original-title="Description">${jobInfo.jobName}</span></td>
 			<td>
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">
@@ -79,7 +79,7 @@ function deleteJob(id){
 	</tbody>
 </table>
 <script>
-$("a[rel=popover]").popover({
+$("span[rel=popover]").popover({
 	offset: 10,
 	html: true
 });
