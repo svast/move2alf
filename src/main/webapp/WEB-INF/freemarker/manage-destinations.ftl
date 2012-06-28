@@ -10,7 +10,8 @@
 $(function() {
 	$("table#destinations").tablesorter({
 		headers:{
-			0:{sorter: false}
+			0:{sorter: false},
+			6:{sorter: false}
 		}
 	});
 });
@@ -22,7 +23,7 @@ function deleteDestination(id){
 }
 </script>
 
-<table id="destinations" class="table-striped wide">
+<table id="destinations" class="table-striped wide tablesorter">
 	<thead>
 		<tr>
 			<th><a href="<@spring.url relativeUrl="/destination/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>

@@ -23,7 +23,7 @@ function deleteUser(user){
 }
 </script>
 
-<table id="users" class="table-striped wide">
+<table id="users" class="table-striped wide tablesorter">
 	<thead>
 		<tr>
 			<th><a href="<@spring.url relativeUrl="/user/add" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Add new user" /></a></th>

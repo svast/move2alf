@@ -25,7 +25,7 @@ function deleteJob(id){
 }
 </script>
 
-<table id="dashboard" class="table-striped wide">
+<table id="dashboard" class="table-striped wide tablesorter">
 	<thead>
 		<tr>
 			<th class="small">
@@ -36,7 +36,6 @@ function deleteJob(id){
 			<th class="header">Job Name</th>
 			<th class="header">Last run</th>
 			<th class="header">Status</th>
-			<th></th>
 			<th></th>
 			<th></th>
 			<th></th>
