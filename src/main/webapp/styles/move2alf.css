@@ -110,3 +110,15 @@ thead tr{
 	text-align: center;
 	margin-top: 20px;
 }
+
+col.edit-column{
+	width: 35px;
+}
+
+col.run-column{
+	width: 55px;
+}
+
+col.delete-column{
+	width: 25px;
+}

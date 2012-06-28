@@ -24,6 +24,13 @@ function deleteDestination(id){
 </script>
 
 <table id="destinations" class="table-striped wide tablesorter">
+	<col class="edit-column" />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col class="delete-column" />
 	<thead>
 		<tr>
 			<th><a href="<@spring.url relativeUrl="/destination/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>

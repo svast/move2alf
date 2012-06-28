@@ -26,9 +26,17 @@ function deleteJob(id){
 </script>
 
 <table id="dashboard" class="table-striped wide tablesorter">
+	<col class="edit-column" />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col class="run-column" />
+	<col class="delete-column" />
+	
 	<thead>
 		<tr>
-			<th class="small">
+			<th>
 				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
 					<a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a>
 				</#if>		
@@ -44,7 +52,7 @@ function deleteJob(id){
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
-			<td class="small" >
+			<td>
 				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
