@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import net.padlocksoftware.padlock.license.ImportException;
@@ -92,8 +94,8 @@ public class UsageServiceImpl implements UsageService {
 
 	private License getLicense() {
 		try {
-			return LicenseIO.importLicense(UsageServiceImpl.class
-					.getClassLoader().getResource("move2alf.lic").openStream());
+			Resource resource = new ClassPathResource("/move2alf.lic");
+			return LicenseIO.importLicense(resource.getInputStream());
 		} catch (IOException e) {
 			return null;
 		} catch (ImportException e) {
