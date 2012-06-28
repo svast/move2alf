@@ -12,11 +12,10 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-
-import eu.xenit.move2alf.common.Config;
 
 public abstract class AbstractFactory<T extends ConfigurableObject> {
 
@@ -30,13 +29,17 @@ public abstract class AbstractFactory<T extends ConfigurableObject> {
 	public AbstractFactory() {
 		super();
 	}
+	
+	@Value(value="#{'${base.package}'}")
+	private String basePackage;
 
 	public void rescan() {
 		logger.info("Scanning for objects (" + this.getClass() + ")");
 		scanForClasses("eu.xenit");
 		scanForClasses("be.pv");
-		String basePackage = Config.get("base.package");
-		if (basePackage != null) {
+		
+		logger.debug("Basepackage= "+basePackage);
+		if (!basePackage.equals("none")) {
 			scanForClasses(basePackage);
 		}
 	}

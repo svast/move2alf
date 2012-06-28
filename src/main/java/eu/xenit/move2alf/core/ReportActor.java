@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 
-import eu.xenit.move2alf.common.Config;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.action.EmailAction;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -22,6 +22,12 @@ public class ReportActor extends UntypedActor {
 		return (JobService) ApplicationContextProvider.getApplicationContext()
 				.getBean("jobService");
 	}
+	
+	@Value(value="#{'${mail.from}'}")
+	private String mailFrom;
+	
+	@Value(value="#{'${url}'}")
+	private String url;
 
 	@Override
 	public void onReceive(Object message) throws Exception {
@@ -89,7 +95,7 @@ public class ReportActor extends UntypedActor {
 			}
 
 			SimpleMailMessage mail = new SimpleMailMessage();
-			mail.setFrom(Config.get("mail.from"));
+			mail.setFrom(mailFrom);
 			mail.setTo(addresses);
 			mail.setSubject("Move2Alf error report");
 
@@ -97,7 +103,7 @@ public class ReportActor extends UntypedActor {
 
 			mail.setText("Cycle " + cycleId + " of job " + sendMailMessage.getJobName()
 					+ " completed.\n" + "The full report can be found on "
-					+ Config.get("url") + "/job/" + job.getId() + "/" + cycleId
+					+ url + "/job/" + job.getId() + "/" + cycleId
 					+ "/report" + "\n\nStatistics:" + "\nNr of files: "
 					+ processedDocuments.size() + "\nNr of failed: "
 					+ amountFailed + "\n\nTime to process: " + duration

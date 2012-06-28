@@ -9,13 +9,21 @@
 	<tx:annotation-driven transaction-manager="txManager" />
 
 	<context:annotation-config />
-	<context:component-scan base-package="eu.xenit.move2alf" />
+	<context:component-scan base-package="eu.xenit.move2alf">
+		<context:exclude-filter expression="org.springframework.stereotype.Controller"
+        type="annotation"/>
+	</context:component-scan>
 
 	<bean id="propertyPlaceholderConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="searchSystemEnvironment" value="true" />
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
 		<property name="locations">
 			<list>
 				<value>classpath:move2alf.properties</value>
+				<value>classpath:move2alf-custom.properties</value>
 			</list>
 		</property>
 	</bean>
