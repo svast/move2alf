@@ -23,7 +23,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:move2alf.properties</value>
-				<value>classpath:move2alf-custom.properties</value>
+				<value>classpath:move2alf/move2alf-custom.properties</value>
 			</list>
 		</property>
 	</bean>

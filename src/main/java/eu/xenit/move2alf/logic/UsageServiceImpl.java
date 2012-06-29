@@ -94,7 +94,7 @@ public class UsageServiceImpl implements UsageService {
 
 	private License getLicense() {
 		try {
-			Resource resource = new ClassPathResource("/move2alf.lic");
+			Resource resource = new ClassPathResource("/move2alf/move2alf.lic");
 			return LicenseIO.importLicense(resource.getInputStream());
 		} catch (IOException e) {
 			return null;
