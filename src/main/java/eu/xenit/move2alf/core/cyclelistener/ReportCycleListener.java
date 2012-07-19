@@ -9,7 +9,7 @@ public class ReportCycleListener extends CycleListener {
 	@Override
 	public void cycleEnd(int cycleId) {
 		Cycle cycle = getJobService().getCycle(cycleId);
-		String jobName = cycle.getSchedule().getJob().getName();
+		String jobName = cycle.getJob().getName();
 		getJobService().getReportActor().sendOneWay(
 				new SendMailMessage(cycleId, jobName));
 	}

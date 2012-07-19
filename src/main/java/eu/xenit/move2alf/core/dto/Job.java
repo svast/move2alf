@@ -23,6 +23,8 @@ public class Job extends IdObject {
 	
 	private Set<Schedule> schedules;
 	
+	private Set<Cycle> cycles;
+	
 	private Set<Report> reports;
 
 	public Job() {
@@ -91,6 +93,14 @@ public class Job extends IdObject {
 
 	public Set<Schedule> getSchedules() {
 		return schedules;
+	}
+	
+	public void setCycles(Set<Cycle> cycles) {
+		this.cycles = cycles;
+	}
+	
+	public Set<Cycle> getCycles() {
+		return cycles;
 	}
 
 	public void setReports(Set<Report> reports) {

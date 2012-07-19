@@ -4,12 +4,15 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 
 public class JobExecutor implements org.quartz.Job {
 
@@ -19,8 +22,9 @@ public class JobExecutor implements org.quartz.Job {
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
-		Integer scheduleId = (Integer) context.getMergedJobDataMap().get(
-				SchedulerImpl.SCHEDULE_ID);
+		Util.authenticateAsSystem();
+		Integer jobId = (Integer) context.getMergedJobDataMap().get(
+				SchedulerImpl.JOB_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
 		JobExecutionService jobExecutionService = (JobExecutionService) context
@@ -28,7 +32,7 @@ public class JobExecutor implements org.quartz.Job {
 		UsageService usageService = (UsageService) context.getMergedJobDataMap().get(SchedulerImpl.USAGE_SERVICE);
 
 		if (checkLicense(usageService)) {
-			executeJob(scheduleId, jobService, jobExecutionService);
+			executeJob(jobId, jobService, jobExecutionService);
 		}
 	}
 
@@ -36,31 +40,29 @@ public class JobExecutor implements org.quartz.Job {
 		return usageService.isValid();
 	}
 
-	private void executeJob(Integer scheduleId, JobService jobService,
+	private void executeJob(Integer jobId, JobService jobService,
 			JobExecutionService jobExecutionService) {
-		Schedule schedule = null;
 		Job job = null;
 		Cycle cycle = null;
 
 		try {
-			logger.debug("looking for schedule");
-			schedule = jobService.getSchedule(scheduleId);
-			logger.debug("The schedule exists");
-			job = schedule.getJob();
+			logger.debug("looking for job");
+			job = jobService.getJob(jobId);
+			logger.debug("The job exists");
 		} catch (Move2AlfException e) {
-			logger.error("Could not execute job with schedule ID " + scheduleId
-					+ " because schedule or job does not exist.");
+			logger.error("Could not execute job with id " + jobId
+					+ " because the job does not exist.");
 			e.printStackTrace();
 			return;
 		}
 
-		if (jobService.getJobState(job.getId()).equals(EScheduleState.RUNNING)) {
+		if (jobService.getJobState(job.getId()).equals(ECycleState.RUNNING)) {
 			logger.warn("Job \"" + job.getName()
 					+ "\" already running, not starting second cycle");
 			return;
 		}
 
-		cycle = jobExecutionService.openCycleForSchedule(scheduleId);
+		cycle = jobExecutionService.openCycleForJob(jobId);
 		jobExecutionService.executeJobSteps(job, cycle);
 		jobExecutionService.closeCycle(cycle);
 	}

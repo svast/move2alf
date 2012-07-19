@@ -25,7 +25,7 @@ import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -139,9 +139,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	public void closeCycle(Cycle cycle) {
 		Session session = getSessionFactory().getCurrentSession();
 
-		Schedule schedule = cycle.getSchedule();
-		schedule.setState(EScheduleState.NOT_RUNNING);
-		session.update(schedule);
+		cycle.setState(ECycleState.NOT_RUNNING);
 
 		cycle.setEndDateTime(new Date());
 		session.update(cycle);
@@ -151,20 +149,17 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Cycle openCycleForSchedule(Integer scheduleId) {
+	public Cycle openCycleForJob(Integer jobId) {
 		Session session = getSessionFactory().getCurrentSession();
 
-		Schedule schedule = getJobService().getSchedule(scheduleId);
-		Job job = schedule.getJob();
+		Job job = jobService.getJob(jobId);
 		logger.debug("Executing job \"" + job.getName() + "\"");
 
 		Cycle cycle = new Cycle();
-		cycle.setSchedule(schedule);
+		cycle.setJob(job);
 		cycle.setStartDateTime(new Date());
+		cycle.setState(ECycleState.RUNNING);
 		session.save(cycle);
-
-		schedule.setState(EScheduleState.RUNNING);
-		session.update(schedule);
 
 		notifyCycleListenersStart(cycle.getId(), new HashMap<String, Object>());
 

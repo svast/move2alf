@@ -26,7 +26,7 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -267,7 +267,7 @@ public class SimpleActionWrapper extends SimpleAction {
 		}
 
 		@Override
-		public EScheduleState getJobState(int jobId) {
+		public ECycleState getJobState(int jobId) {
 			return null;
 		}
 
@@ -307,7 +307,7 @@ public class SimpleActionWrapper extends SimpleAction {
 		}
 
 		@Override
-		public void resetSchedules() {
+		public void resetCycles() {
 		}
 
 		@Override
@@ -315,12 +315,7 @@ public class SimpleActionWrapper extends SimpleAction {
 		}
 
 		@Override
-		public void scheduleNow(int jobId, int scheduleId) {			
-		}
-
-		@Override
-		public int getDefaultScheduleIdForJob(int jobId) {
-			return 0;
+		public void scheduleNow(int jobId) {			
 		}
 
 		@Override

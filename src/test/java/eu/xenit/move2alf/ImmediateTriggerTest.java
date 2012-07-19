@@ -23,12 +23,4 @@ public class ImmediateTriggerTest extends IntegrationTests{
 		return jobService;
 	}
 
-	
-	public void testImmediateRunCreatesDefaultSchedule() {
-		loginAsAdmin();
-		Job newJob = getJobService().createJob("test job", "description of test job");
-		getJobService().scheduleNow(newJob.getId(),5);
-		assertTrue(getJobService().getCyclesForJob(newJob.getId()).get(0).getSchedule().getQuartzScheduling() == SchedulerImpl.DEFAULT_SCHEDULE);
-	}
-
 }

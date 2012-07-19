@@ -35,15 +35,13 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	private org.quartz.Scheduler scheduler;
 
-	static final String SCHEDULE_ID = "jobId";
+	static final String JOB_ID = "jobId";
 	
 	static final String JOB_SERVICE = "jobService";
 
 	static final String JOB_EXECUTION_SERVICE = "jobExecutionService";
 	
 	static final String USAGE_SERVICE = "usageService";
-
-	public static final String DEFAULT_SCHEDULE = "0 0 0 1 1 ? 1";
 
 
 	@Autowired
@@ -81,7 +79,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	}
 
 	public void reloadSchedules() {
-		getJobService().resetSchedules();
+		getJobService().resetCycles();
 		logger.debug("Reloading schedules");
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
@@ -106,7 +104,7 @@ public class SchedulerImpl extends AbstractHibernateService implements
 					Trigger trigger = new CronTrigger("Trigger-"
 							+ schedule.getId(), "JobScheduleGroup",
 							cronExpression);
-					JobDataMap jobData = createJobDataMap(schedule.getId());
+					JobDataMap jobData = createJobDataMap(job.getId());
 					trigger.setJobDataMap(jobData);
 					scheduler.scheduleJob(jobDetail, trigger);
 				} catch (SchedulerException schedulerException) {
@@ -125,9 +123,9 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		}
 	}
 
-	private JobDataMap createJobDataMap(int scheduleId) {
+	private JobDataMap createJobDataMap(int jobId) {
 		JobDataMap jobData = new JobDataMap();
-		jobData.put(SCHEDULE_ID, scheduleId);
+		jobData.put(JOB_ID, jobId);
 		jobData.put(JOB_SERVICE, getJobService());
 		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
 		jobData.put(USAGE_SERVICE, getUsageService());
@@ -135,12 +133,11 @@ public class SchedulerImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public void immediately(Job job, int scheduleId) {
+	public void immediately(Job job) {
 		logger.debug("Scheduling immediate job: " + job.getName());
 		
 		String jobId = "Schedule-"
-				+ job.getName() + "-" + job.getId() + "-"
-				+ scheduleId + "-" + Calendar.getInstance().getTimeInMillis();
+				+ job.getName() + "-" + job.getId() + "-" + Calendar.getInstance().getTimeInMillis();
 		JobDetail jobDetail = new JobDetail( jobId, JobExecutor.class);
 		logger.debug("Configuring Scheduler Job with id: "+jobId);
 		
@@ -150,11 +147,11 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1000);
 		trigger.setName("Immediate trigger - " + jobId);
 		trigger.setGroup("JobScheduleGroup");
-		JobDataMap jobData = createJobDataMap(scheduleId);
+		JobDataMap jobData = createJobDataMap(job.getId());
 		trigger.setJobDataMap(jobData);
 		try {
 			scheduler.scheduleJob(jobDetail, trigger);
-			logger.debug("Trigger for schedule " + scheduleId + " fired!");
+			logger.debug("Trigger for immediate run fired!");
 		} catch (SchedulerException e) {
 			logger.error("Scheduling immediate job \"" + job.getName()
 					+ "\" failed");

@@ -3,7 +3,7 @@ package eu.xenit.move2alf.core.dto;
 import java.util.Date;
 
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 
 public class Schedule extends IdObject {
 	private int id;
@@ -15,12 +15,6 @@ public class Schedule extends IdObject {
 	private Date creationDateTime;
 	
 	private Date lastModifyDateTime;
-	
-	private EScheduleState state;
-	
-	private Date startDateTime;
-	
-	private Date endDateTime;
 	
 	private String quartzScheduling;
 
@@ -67,30 +61,6 @@ public class Schedule extends IdObject {
 
 	public Date getLastModifyDateTime() {
 		return lastModifyDateTime;
-	}
-
-	public void setState(EScheduleState state) {
-		this.state = state;
-	}
-
-	public EScheduleState getState() {
-		return state;
-	}
-
-	public void setStartDateTime(Date startDateTime) {
-		this.startDateTime = startDateTime;
-	}
-
-	public Date getStartDateTime() {
-		return startDateTime;
-	}
-
-	public void setEndDateTime(Date endDateTime) {
-		this.endDateTime = endDateTime;
-	}
-
-	public Date getEndDateTime() {
-		return endDateTime;
 	}
 
 	public void setQuartzScheduling(String quartzScheduling) {

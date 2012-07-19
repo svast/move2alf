@@ -99,7 +99,7 @@ public class ReportActor extends UntypedActor {
 			mail.setTo(addresses);
 			mail.setSubject("Move2Alf error report");
 
-			Job job = cycle.getSchedule().getJob();
+			Job job = cycle.getJob();
 
 			mail.setText("Cycle " + cycleId + " of job " + sendMailMessage.getJobName()
 					+ " completed.\n" + "The full report can be found on "

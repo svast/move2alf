@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.alfresco.repo.search.impl.parsers.CMISParser.booleanLiteral_return;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 
 public class ConditionalDataSourceInitializer extends DataSourceInitializer {

@@ -43,7 +43,7 @@ public class SuccessHandler {
 		Set<ProcessedDocumentParameter> params = createProcessedDocumentParameterSet(
 				(Map<String, String>) parameterMap
 						.get(Parameters.PARAM_REPORT_FIELDS), cycle
-						.getSchedule().getJob().getFirstConfiguredAction());
+						.getJob().getFirstConfiguredAction());
 		getJobService().getReportActor().sendOneWay(
 				new ReportMessage(cycle.getId(), file.getName(),
 						new Date(), Parameters.VALUE_OK, params));

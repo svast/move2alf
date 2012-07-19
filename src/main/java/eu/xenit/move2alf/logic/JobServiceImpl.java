@@ -44,7 +44,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
@@ -195,7 +195,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getSessionFactory()
 				.getCurrentSession()
 				.createQuery(
-						"from Cycle as c where c.schedule.job.id=? order by c.endDateTime asc")
+						"from Cycle as c where c.job.id=? order by c.endDateTime asc")
 				.setLong(0, jobId).list();
 	}
 
@@ -204,15 +204,14 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getSessionFactory()
 				.getCurrentSession()
 				.createQuery(
-						"from Cycle as c where c.schedule.job.id=? order by c.startDateTime desc")
+						"from Cycle as c where c.job.id=? order by c.startDateTime desc")
 				.setLong(0, jobId).list();
 	}
 
 	@Override
 	public Cycle getLastCycleForJob(Job job) {
-		List<Job> allJobs = getAllJobs();
 
-		List<Cycle> jobCycles = new ArrayList();
+		List<Cycle> jobCycles = new ArrayList<Cycle>();
 
 		Cycle lastCycle;
 		jobCycles = getCyclesForJobDesc(job.getId());
@@ -289,9 +288,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		schedule.setCreationDateTime(now);
 		schedule.setLastModifyDateTime(now);
 		schedule.setQuartzScheduling(cronJob);
-		schedule.setState(EScheduleState.NOT_RUNNING);
-		schedule.setStartDateTime(now);
-		schedule.setEndDateTime(now);
 		getSessionFactory().getCurrentSession().save(schedule);
 
 		logger.debug("Reloading scheduler");
@@ -460,7 +456,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public Map<String, String> getActionParameters(int cycleId,
 			Class<? extends Action> clazz) {
 		Cycle cycle = getCycle(cycleId);
-		ConfiguredAction action = cycle.getSchedule().getJob()
+		ConfiguredAction action = cycle.getJob()
 				.getFirstConfiguredAction();
 		while (action != null) {
 			if (clazz.getName().equals(action.getClassName())) {
@@ -537,25 +533,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getSourceSinkFactory().getObjectsByCategory(category);
 	}
 
-	public EScheduleState getJobState(int jobId) {
+	//TODO: optimize
+	public ECycleState getJobState(int jobId) {
 		Job job = getJob(jobId);
-		for (Schedule schedule : job.getSchedules()) {
-			if (schedule.getState().equals(EScheduleState.RUNNING)) {
-				return EScheduleState.RUNNING;
+		for (Cycle cycle : job.getCycles()) {
+			if (cycle.getState().equals(ECycleState.RUNNING)) {
+				return ECycleState.RUNNING;
 			}
 		}
-		return EScheduleState.NOT_RUNNING;
+		return ECycleState.NOT_RUNNING;
 	}
 
+	//TODO: optimize
 	@Override
-	public void resetSchedules() {
+	public void resetCycles() {
 		org.hibernate.classic.Session session = getSessionFactory()
 				.getCurrentSession();
-		List<Schedule> schedules = session.createQuery("from Schedule").list();
-		for (Schedule schedule : schedules) {
-			schedule.setState(EScheduleState.NOT_RUNNING);
-			session.update(schedule);
-			Cycle last = getLastCycleForJob(schedule.getJob());
+		List<Cycle> cycles = session.createQuery("from Cycle").list();
+		for (Cycle cycle : cycles) {
+			cycle.setState(ECycleState.NOT_RUNNING);
+			session.update(cycle);
+			Cycle last = getLastCycleForJob(cycle.getJob());
 			if (last != null && last.getEndDateTime() == null) {
 				last.setEndDateTime(new Date());
 				session.update(last);
@@ -607,9 +605,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 						String
 								.format(
 										"select cycle.id as id, count(processedDocument.id) as count,"
-												+ " cycle.startDateTime as startDateTime, schedule.state as state"
-												+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId join schedule on schedule.id=cycle.scheduleId"
-												+ " where schedule.jobId=%d group by cycle.id order by cycle.startDateTime desc;",
+												+ " cycle.startDateTime as startDateTime, cycle.state as state"
+												+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId"
+												+ " where cycle.jobId=%d group by cycle.id order by cycle.startDateTime desc;",
 										jobId)).addScalar("id",
 						StandardBasicTypes.INTEGER).addScalar("count",
 						StandardBasicTypes.INTEGER).addScalar("startDateTime",
@@ -627,48 +625,33 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	 * Execute job with jobId as soon as possible
 	 */
 	@Override
-	public void scheduleNow(int jobId, int scheduleId) {
-		getScheduler().immediately(getJob(jobId), scheduleId);
+	public void scheduleNow(int jobId) {
+		getScheduler().immediately(getJob(jobId));
 	}
 
-	@Override
-	public int getDefaultScheduleIdForJob(int jobId) {
-		int scheduleId;
-		try {
-			scheduleId = getScheduleId(jobId, SchedulerImpl.DEFAULT_SCHEDULE);
-		} catch (IndexOutOfBoundsException e) { // first manual run
-			scheduleId = createSchedule(jobId, SchedulerImpl.DEFAULT_SCHEDULE)
-					.getId();
-			;
-		}
-		return scheduleId;
-	}
 
 	@Override
 	public List<JobInfo> getAllJobInfo() {
 		List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
 		Session s = getSessionFactory().getCurrentSession();
 		List<Object[]> jobInfo = s
-				.createSQLQuery("SELECT job.id, job.name, schedule_cycle.state, MAX(schedule_cycle.startTime) AS startTime, schedule_cycle.cycleId, job.description" +
-						" FROM job LEFT JOIN (" +
-						"	SELECT schedule.jobId, schedule.state, MAX(cycle.startDateTime) AS startTime, cycle.id as cycleId FROM schedule" +
-						" LEFT JOIN cycle ON schedule.id = cycle.scheduleId GROUP BY schedule.id ORDER BY startTime DESC)" +
-						" AS schedule_cycle ON (job.id = schedule_cycle.jobId) GROUP BY job.id ORDER BY job.id;").list();
+				.createSQLQuery("select job.id, job.name, cycleperjob.state, cycleperjob.startDateTime, job.description from job LEFT JOIN" +
+						" (SELECT id, jobId, state, startDateTime FROM cycle AS allcycles JOIN" +
+						" (SELECT MAX(id) AS last FROM cycle GROUP BY jobId) AS lastcycles ON lastcycles.last=allcycles.id)" +
+						" AS cycleperjob ON job.id=cycleperjob.jobId").list();
 		for (Object[] row : jobInfo) {
 			JobInfo info = new JobInfo();
 			info.setJobId((Integer) row[0]);
 			info.setJobName((String) row[1]);
-			if(row[4] != null)
-				info.setCycleId((Integer) row[4]);
 			if(row[3] != null)
 				info.setCycleStartDateTime((Date) row[3]);
 			if(row[2] != null){
 				if(row[2].equals("RUNNING"))
-					info.setScheduleState(EScheduleState.RUNNING.getDisplayName());
+					info.setScheduleState(ECycleState.RUNNING.getDisplayName());
 				else
-					info.setScheduleState(EScheduleState.NOT_RUNNING.getDisplayName());
+					info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
 			}
-			info.setDescription((String)row[5]);
+			info.setDescription((String)row[4]);
 			jobInfoList.add(info);
 		}
 

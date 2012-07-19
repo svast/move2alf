@@ -8,7 +8,7 @@ public interface JobExecutionService {
 
 	void registerCycleListener(CycleListener listener);
 
-	Cycle openCycleForSchedule(Integer scheduleId);
+	Cycle openCycleForJob(Integer jobId);
 
 	void closeCycle(Cycle cycle);
 

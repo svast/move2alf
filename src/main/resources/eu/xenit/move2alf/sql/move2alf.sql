@@ -211,14 +211,15 @@ DROP TABLE IF EXISTS `cycle`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `cycle` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `scheduleId` int(10) unsigned NOT NULL,
+  `jobId` int(10) unsigned NOT NULL,
+  `state` varchar(30) NOT NULL,
   `startDateTime` datetime NOT NULL,
   `endDateTime` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE INDEX `cycleScheduleIdIdx` ON `cycle` (`scheduleId`);
+CREATE INDEX `cycleJobIdIdx` ON `cycle` (`jobId`);
 
 --
 -- Dumping data for table `cycle`
@@ -349,9 +350,6 @@ CREATE TABLE `schedule` (
   `creatorId` int(10) unsigned NOT NULL,
   `creationDateTime` datetime NOT NULL,
   `lastModifyDateTime` datetime NOT NULL,
-  `state` varchar(30) NOT NULL,
-  `startDateTime` datetime NOT NULL,
-  `endDateTime` datetime DEFAULT NULL,
   `quartzScheduling` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

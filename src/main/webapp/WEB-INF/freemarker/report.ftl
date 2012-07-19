@@ -32,7 +32,7 @@
 	</tr>
 	<tr>
 		<th>State:</th>
-		<td>${cycle.schedule.state.displayName}</td>
+		<td>${cycle.state.displayName}</td>
 		<th>Nr. of documents</th>
 		<td>${documentListSize}</td>
 	</tr>

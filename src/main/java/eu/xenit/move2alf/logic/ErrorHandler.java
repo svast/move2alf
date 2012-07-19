@@ -44,7 +44,7 @@ public class ErrorHandler {
 		// Report everything using the first (deprecated) ConfiguredAction
 		// of
 		// the job.
-		msg.setConfiguredAction(cycle.getSchedule().getJob()
+		msg.setConfiguredAction(cycle.getJob()
 				.getFirstConfiguredAction());
 		params.add(msg);
 		getJobService().getReportActor().sendOneWay(

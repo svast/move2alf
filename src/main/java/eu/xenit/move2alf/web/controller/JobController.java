@@ -228,7 +228,6 @@ public class JobController extends AbstractController{
 		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(id);
 		
 		mav.addObject("job", jobConfig);
-		mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 		
 		jobModel(mav);
 		
@@ -293,12 +292,6 @@ public class JobController extends AbstractController{
 		logger.debug("Existing cronjobs: " + existingCronJobs);
 		logger.debug("Cronjobs given in form: " + cronJobs);
 
-		CollectionUtils.filter(existingCronJobs, new Predicate() {
-			@Override
-			public boolean evaluate(Object arg0) {
-				return !arg0.equals(SchedulerImpl.DEFAULT_SCHEDULE);
-			}
-		});
 
 		int listSize;
 
@@ -350,7 +343,6 @@ public class JobController extends AbstractController{
 		mav.addObject("job", new ScheduleConfig());
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.addObject("role", getRole());
-		mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 		mav.setViewName("edit-schedule");
 		return mav;
 	}
@@ -367,7 +359,6 @@ public class JobController extends AbstractController{
 			mav.addObject("job", job);
 			mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 			mav.addObject("role", getRole());
-			mav.addObject("defaultSchedule", SchedulerImpl.DEFAULT_SCHEDULE);
 			return mav;
 		}
 
@@ -680,8 +671,7 @@ public class JobController extends AbstractController{
 	public ModelAndView runPoller(@PathVariable int jobId) {
 		ModelAndView mav = new ModelAndView();
 
-		getJobService().scheduleNow(jobId,
-				getJobService().getDefaultScheduleIdForJob(jobId));
+		getJobService().scheduleNow(jobId);
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;

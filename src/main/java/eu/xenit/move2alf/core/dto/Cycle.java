@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
+import eu.xenit.move2alf.core.enums.ECycleState;
 
 public class Cycle extends IdObject {
 	private int id;
@@ -12,7 +13,9 @@ public class Cycle extends IdObject {
 	
 	private Date endDateTime;
 	
-	private Schedule schedule;
+	private Job job;
+	
+	private ECycleState state;
 	
 	private Set<RunningAction> runningActions;
 	
@@ -46,12 +49,20 @@ public class Cycle extends IdObject {
 		return endDateTime;
 	}
 
-	public void setSchedule(Schedule schedule) {
-		this.schedule = schedule;
+	public void setJob(Job job) {
+		this.job = job;
 	}
 
-	public Schedule getSchedule() {
-		return schedule;
+	public Job getJob() {
+		return job;
+	}
+	
+	public void setState(ECycleState state) {
+		this.state = state;
+	}
+
+	public ECycleState getState() {
+		return state;
 	}
 
 	public void setRunningActions(Set<RunningAction> runningActions) {

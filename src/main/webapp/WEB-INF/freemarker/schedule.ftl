@@ -15,7 +15,6 @@
 					</thead>
 					<tbody>
 					<#list job.cron! as schedule>
-					<#if schedule!="0 0 0 1 1 ? 1" >
 						<tr id="schedule_${schedule_index}">
 							<td>${schedule_index}</td>
 							<td class="cronexpr" >${schedule}
@@ -23,7 +22,6 @@
 							</td>
 							<td><img class="clickable" onclick="$('#schedule_${schedule_index}').remove()" src="<@spring.url relativeUrl="/images/delete-icon.png" />" alt="delete" /></td>
 						</tr>
-					</#if>
 					</#list>
 					</tbody>
 				</table>

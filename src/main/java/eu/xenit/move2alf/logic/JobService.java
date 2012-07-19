@@ -23,7 +23,7 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.EScheduleState;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
@@ -330,12 +330,12 @@ public interface JobService {
 	/**
 	 * @param jobId
 	 */
-	public EScheduleState getJobState(int jobId);
+	public ECycleState getJobState(int jobId);
 	
 	/**
 	 * Reset state of all schedules to NOT_RUNNING. 
 	 */
-	public void resetSchedules();
+	public void resetCycles();
 	
 	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
 
@@ -349,10 +349,6 @@ public interface JobService {
 	
 	public List<JobInfo> getAllJobInfo();
 
-	public void scheduleNow(int jobId, int scheduleId);
+	public void scheduleNow(int jobId);
 
-	@Transactional(
-			propagation = Propagation.REQUIRES_NEW
-			)
-	public int getDefaultScheduleIdForJob(int jobId);
 }

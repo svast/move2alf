@@ -9,6 +9,6 @@ public interface Scheduler {
 
 	public void reloadSchedules();
 
-	public void immediately(Job job, int scheduleId);
+	public void immediately(Job job);
 
 }
