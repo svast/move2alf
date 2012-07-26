@@ -10,12 +10,7 @@
 		</id>
 		<property name="startDateTime" />
 		<property name="endDateTime" />
-		<property name="state">
-			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">eu.xenit.move2alf.core.enums.ECycleState</param>
-				<param name="type">12</param>
-			</type>
-		</property>
+		
 		<many-to-one name="job" column="jobId" lazy="false"/>
 		<set name="runningActions" inverse="true">
 			<key column="cycleId" />

@@ -212,7 +212,6 @@ DROP TABLE IF EXISTS `cycle`;
 CREATE TABLE `cycle` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `jobId` int(10) unsigned NOT NULL,
-  `state` varchar(30) NOT NULL,
   `startDateTime` datetime NOT NULL,
   `endDateTime` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
