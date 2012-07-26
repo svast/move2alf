@@ -27,6 +27,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -143,7 +144,7 @@ public class SimpleActionWrapper extends SimpleAction {
 
 		@Override
 		public ConfiguredSourceSink createDestination(String destinationType,
-				HashMap destinationParams) {
+				HashMap<EDestinationParameter, Object> destinationParams){
 			return null;
 		}
 
@@ -185,7 +186,7 @@ public class SimpleActionWrapper extends SimpleAction {
 
 		@Override
 		public ConfiguredSourceSink editDestination(int sinkId,
-				String destinationType, HashMap destinationParams) {
+				String destinationType, HashMap<EDestinationParameter, Object> destinationParams) {
 			return null;
 		}
 

@@ -110,4 +110,5 @@ public class Job extends IdObject {
 	public Set<Report> getReports() {
 		return reports;
 	}
+	
 }

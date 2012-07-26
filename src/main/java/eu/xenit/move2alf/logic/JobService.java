@@ -8,13 +8,11 @@ import java.util.Set;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
 import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -24,6 +22,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
@@ -189,7 +188,7 @@ public interface JobService {
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
 	public ConfiguredSourceSink createDestination(String destinationType,
-			HashMap destinationParams);
+			HashMap<EDestinationParameter, Object> destinationParams);
 
 	/**
 	 * Edits a destination
@@ -202,7 +201,7 @@ public interface JobService {
 	 * @return the configured source sink
 	 */
 	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
-			HashMap destinationParams);
+			HashMap<EDestinationParameter, Object> destinationParams);
 	
 	/**
 	 * Get ConfiguredSourceSink by id.

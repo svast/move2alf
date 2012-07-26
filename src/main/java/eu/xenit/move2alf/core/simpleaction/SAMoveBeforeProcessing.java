@@ -3,10 +3,6 @@ package eu.xenit.move2alf.core.simpleaction;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
@@ -15,9 +11,6 @@ import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 public class SAMoveBeforeProcessing extends SimpleAction {
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(SAMoveBeforeProcessing.class);
 
 	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
 

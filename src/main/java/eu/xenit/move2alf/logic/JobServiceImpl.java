@@ -4,8 +4,6 @@ import static akka.actor.Actors.actorOf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +13,6 @@ import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +20,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
@@ -42,9 +38,9 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
@@ -165,10 +161,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public Job getJob(int id) {
 		@SuppressWarnings("unchecked")
-		List jobs = sessionFactory.getCurrentSession().createQuery(
+		List<Job> jobs = sessionFactory.getCurrentSession().createQuery(
 				"from Job as j where j.id=?").setLong(0, id).list();
 		if (jobs.size() == 1) {
-			return (Job) jobs.get(0);
+			return jobs.get(0);
 		} else {
 			throw new Move2AlfException("Job with id " + id + " not found.");
 		}
@@ -177,19 +173,21 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public boolean checkJobExists(String jobName) {
 		@SuppressWarnings("unchecked")
-		List jobs = sessionFactory.getCurrentSession().createQuery(
+		List<Job> jobs = sessionFactory.getCurrentSession().createQuery(
 				"from Job as j where j.name=?").setString(0, jobName).list();
 		return (jobs.size() > 0);
 	}
 
 	@Override
 	public Cycle getCycle(int cycleId) {
+		@SuppressWarnings("unchecked")
 		List<Cycle> cycles = getSessionFactory().getCurrentSession()
 				.createQuery("from Cycle as c where c.id=?")
 				.setLong(0, cycleId).list();
 		return cycles.get(0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Cycle> getCyclesForJob(int jobId) {
 		return getSessionFactory()
@@ -199,6 +197,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.setLong(0, jobId).list();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Cycle> getCyclesForJobDesc(int jobId) {
 		return getSessionFactory()
@@ -210,46 +209,37 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public Cycle getLastCycleForJob(Job job) {
-
-		List<Cycle> jobCycles = new ArrayList<Cycle>();
-
-		Cycle lastCycle;
-		jobCycles = getCyclesForJobDesc(job.getId());
-
-		if (jobCycles.size() == 0) {
-			lastCycle = null;
-		} else {
-			lastCycle = jobCycles.get(0);
+		
+		@SuppressWarnings("unchecked")
+		List<Cycle> list = getSessionFactory()
+				.getCurrentSession()
+				.createQuery(
+						"from Cycle as c where c.job.id=? order by c.startDateTime desc limit 1")
+				.setLong(0, job.getId()).list();
+		
+		if(list.isEmpty()){
+			return null;
 		}
-
-		/*
-		 * jobCycles = getCyclesForJob(job.getId());
-		 * 
-		 * if (jobCycles.size() == 0) { lastCycle = null; } else { if
-		 * (jobCycles.get(0).getEndDateTime() == null) { lastCycle =
-		 * jobCycles.get(0); } else { lastCycle = jobCycles.get(jobCycles.size()
-		 * - 1); } }
-		 */
-
-		return lastCycle;
+		
+		return (Cycle) list.get(0);
 	}
 
 	@Override
 	public List<Schedule> getSchedulesForJob(int jobId) {
 		@SuppressWarnings("unchecked")
-		List schedules = sessionFactory.getCurrentSession().createQuery(
+		List<Schedule> schedules = sessionFactory.getCurrentSession().createQuery(
 				"from Schedule as s where s.job.id=?").setLong(0, jobId).list();
-		return (List<Schedule>) schedules;
+		return schedules;
 	}
 
 	@Override
 	public Schedule getSchedule(int scheduleId) {
 		@SuppressWarnings("unchecked")
-		List schedules = sessionFactory.getCurrentSession().createQuery(
+		List<Schedule> schedules = sessionFactory.getCurrentSession().createQuery(
 				"from Schedule as s where s.id=?").setLong(0, scheduleId)
 				.list();
 		if (schedules.size() == 1) {
-			return (Schedule) schedules.get(0);
+			return schedules.get(0);
 		} else {
 			throw new Move2AlfException("Schedule with id " + scheduleId
 					+ " not found.");
@@ -260,7 +250,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Transactional(noRollbackFor = IndexOutOfBoundsException.class)
 	public int getScheduleId(int jobId, String cronJob) {
 		@SuppressWarnings("unchecked")
-		List schedule = sessionFactory.getCurrentSession().createQuery(
+		List<Schedule> schedule = sessionFactory.getCurrentSession().createQuery(
 				"from Schedule as s where s.job.id=? and s.quartzScheduling=?")
 				.setLong(0, jobId).setString(1, cronJob).list();
 
@@ -270,7 +260,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public List<String> getCronjobsForJob(int jobId) {
 		List<Schedule> schedules = getSchedulesForJob(jobId);
-		List<String> cronjobs = new ArrayList();
+		List<String> cronjobs = new ArrayList<String>();
 
 		for (int i = 0; i < schedules.size(); i++) {
 			cronjobs.add(schedules.get(i).getQuartzScheduling());
@@ -313,7 +303,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public ConfiguredSourceSink createDestination(String destinationType,
-			HashMap destinationParams) {
+			HashMap<EDestinationParameter, Object> destinationParams) {
 		ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
@@ -322,7 +312,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public ConfiguredSourceSink editDestination(int sinkId,
-			String destinationType, HashMap destinationParams) {
+			String destinationType, HashMap<EDestinationParameter, Object> destinationParams) {
 		ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
 		sourceSink.setClassName(destinationType);
 		createSourceSink(destinationType, destinationParams, sourceSink);
@@ -339,7 +329,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public boolean checkDestinationExists(String destinationName) {
 		@SuppressWarnings("unchecked")
-		List destinations = sessionFactory.getCurrentSession().createQuery(
+		List<ConfiguredObject> destinations = sessionFactory.getCurrentSession().createQuery(
 				"from ConfiguredSourceSink").list();
 
 		for (int i = 0; i < destinations.size(); i++) {
@@ -354,7 +344,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	private void createSourceSink(String destinationType,
-			HashMap destinationParams, ConfiguredSourceSink sourceSink) {
+			HashMap<EDestinationParameter, Object> destinationParams, ConfiguredSourceSink sourceSink) {
 		sourceSink.setClassName(destinationType);
 
 		Map<String, String> sourceSinkParameters = new HashMap<String, String>();
@@ -383,8 +373,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks() {
-		@SuppressWarnings("unchecked")
+		
 		String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
+		@SuppressWarnings("unchecked")
 		List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
 				.getCurrentSession().createQuery(
 						"from ConfiguredSourceSink as c where c.className!=?")
@@ -411,6 +402,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public ConfiguredAction getActionRelatedToConfiguredSourceSink(
 			int sourceSinkId) {
+		@SuppressWarnings("unchecked")
 		List<ConfiguredAction> configuredActions = sessionFactory
 				.getCurrentSession().createQuery("from ConfiguredAction")
 				.list();
@@ -420,7 +412,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					.get(i).getConfiguredSourceSinkSet();
 
 			for (int j = 0; j < configuredSourceSinkForAction.size(); j++) {
-				Iterator configuredSourceSinkIterator = configuredSourceSinkForAction
+				Iterator<ConfiguredSourceSink> configuredSourceSinkIterator = configuredSourceSinkForAction
 						.iterator();
 
 				while (configuredSourceSinkIterator.hasNext()) {
@@ -441,9 +433,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);
 	}
-
-	private Map<Integer, List<ConfiguredAction>> runningActions = Collections
-			.synchronizedMap(new HashMap<Integer, List<ConfiguredAction>>());
 
 	@Override
 	public void executeAction(int cycleId, ConfiguredAction action,
@@ -496,6 +485,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getProcessedDocuments(cycleId, 0, 0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ProcessedDocument> getProcessedDocuments(int cycleId,
 			int first, int count) {
@@ -505,7 +495,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		if (count > 0) {
 			query.setMaxResults(count);
 		}
-
+		
 		return (List<ProcessedDocument>) query.list();
 	}
 
@@ -533,31 +523,32 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return getSourceSinkFactory().getObjectsByCategory(category);
 	}
 
-	//TODO: optimize
 	public ECycleState getJobState(int jobId) {
-		Job job = getJob(jobId);
-		for (Cycle cycle : job.getCycles()) {
-			if (cycle.getState().equals(ECycleState.RUNNING)) {
-				return ECycleState.RUNNING;
-			}
+		logger.debug("Getting state of job: "+jobId);
+		String hql = "SELECT cycle.id FROM Cycle as cycle WHERE cycle.job.id= :jobId AND cycle.endDateTime is null";
+		Session s = sessionFactory.getCurrentSession();
+		Query q = s.createQuery(hql);
+		q.setParameter("jobId", jobId);
+		if(q.list().size()==0){
+			return ECycleState.NOT_RUNNING;
 		}
-		return ECycleState.NOT_RUNNING;
+		else{
+			return ECycleState.RUNNING;
+		}
 	}
 
-	//TODO: optimize
 	@Override
 	public void resetCycles() {
-		org.hibernate.classic.Session session = getSessionFactory()
+		logger.debug("Resetting cycles");
+		String hql = "FROM Cycle as cycle WHERE NOT cycle.endDateTime is null";
+		Session session = getSessionFactory()
 				.getCurrentSession();
-		List<Cycle> cycles = session.createQuery("from Cycle").list();
+		Query q = session.createQuery(hql);
+		@SuppressWarnings("unchecked")
+		List<Cycle> cycles = q.list();
 		for (Cycle cycle : cycles) {
-			cycle.setState(ECycleState.NOT_RUNNING);
+			cycle.setEndDateTime(new Date());
 			session.update(cycle);
-			Cycle last = getLastCycleForJob(cycle.getJob());
-			if (last != null && last.getEndDateTime() == null) {
-				last.setEndDateTime(new Date());
-				session.update(last);
-			}
 		}
 	}
 
@@ -600,24 +591,28 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<HistoryInfo> getHistory(int jobId) {
 		List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
 		Session s = getSessionFactory().getCurrentSession();
-		List<Object[]> history = s
-				.createSQLQuery(
-						String
-								.format(
-										"select cycle.id as id, count(processedDocument.id) as count,"
-												+ " cycle.startDateTime as startDateTime, cycle.state as state"
-												+ " from cycle left join processedDocument on cycle.id=processedDocument.cycleId"
-												+ " where cycle.jobId=%d group by cycle.id order by cycle.startDateTime desc;",
-										jobId)).addScalar("id",
-						StandardBasicTypes.INTEGER).addScalar("count",
-						StandardBasicTypes.INTEGER).addScalar("startDateTime",
-						StandardBasicTypes.TIMESTAMP).addScalar("state",
-						StandardBasicTypes.STRING).list();
-		for (Object[] cycle : history) {
-			historyList.add(new HistoryInfo((Integer) cycle[0],
-					(Date) cycle[2], (String) cycle[3], (Integer) cycle[1]));
-		}
+		
+		String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime FROM Cycle AS cycle JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY cycle.id ORDER BY cycle.startDateTime DESC";
+		Query query = s.createQuery(hql);
+		query.setParameter("jobId", jobId);
+		
+		@SuppressWarnings("unchecked")
+		List<Object[]> history = query.list();
 
+		for (Object[] cycle : history) {
+			HistoryInfo info = new HistoryInfo();
+			info.setCycleId((Integer) cycle[0]);
+			info.setNbrOfDocuments(((Long) cycle[1]).intValue());
+			info.setCycleStartDateTime((Date) cycle[2]);
+			if(cycle[3] == null){
+				info.setScheduleState(ECycleState.RUNNING.getDisplayName());
+			}
+			else{
+				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+			}
+			historyList.add(info);
+		}
+		
 		return historyList;
 	}
 
@@ -634,24 +629,24 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<JobInfo> getAllJobInfo() {
 		List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
 		Session s = getSessionFactory().getCurrentSession();
-		List<Object[]> jobInfo = s
-				.createSQLQuery("select job.id, job.name, cycleperjob.state, cycleperjob.startDateTime, job.description from job LEFT JOIN" +
-						" (SELECT id, jobId, state, startDateTime FROM cycle AS allcycles JOIN" +
-						" (SELECT MAX(id) AS last FROM cycle GROUP BY jobId) AS lastcycles ON lastcycles.last=allcycles.id)" +
-						" AS cycleperjob ON job.id=cycleperjob.jobId").list();
-		for (Object[] row : jobInfo) {
+		String hql = "FROM Job AS job ORDER BY job.id ASC";
+		
+		@SuppressWarnings("unchecked")
+		List<Job> jobs = s.createQuery(hql).list();
+		
+		for (Job job : jobs) {
 			JobInfo info = new JobInfo();
-			info.setJobId((Integer) row[0]);
-			info.setJobName((String) row[1]);
-			if(row[3] != null)
-				info.setCycleStartDateTime((Date) row[3]);
-			if(row[2] != null){
-				if(row[2].equals("RUNNING"))
-					info.setScheduleState(ECycleState.RUNNING.getDisplayName());
-				else
-					info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+			info.setJobId(job.getId());
+			info.setJobName(job.getName());
+			Cycle cycle = getLastCycleForJob(job);
+			if(cycle != null){
+				info.setCycleStartDateTime(cycle.getStartDateTime());
+				info.setScheduleState(cycle.getState().getDisplayName());
 			}
-			info.setDescription((String)row[4]);
+			else{
+				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+			}
+			info.setDescription(job.getDescription());
 			jobInfoList.add(info);
 		}
 

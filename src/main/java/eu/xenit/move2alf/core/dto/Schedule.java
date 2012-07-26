@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.dto;
 import java.util.Date;
 
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.enums.ECycleState;
 
 public class Schedule extends IdObject {
 	private int id;

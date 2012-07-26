@@ -15,6 +15,10 @@ public class HistoryInfo {
 		this.nbrOfDocuments = nbrOfDocuments;
 	}
 
+	public HistoryInfo() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public void setCycleId(int cycleId) {
 		this.cycleId = cycleId;
 	}

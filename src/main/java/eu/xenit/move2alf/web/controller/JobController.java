@@ -429,7 +429,7 @@ public class JobController extends AbstractController{
 		}
 		ModelAndView mav = new ModelAndView();
 		
-		HashMap<EDestinationParameter, String> destinationParams = new HashMap<EDestinationParameter, String>();
+		HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
 		destinationParams.put(EDestinationParameter.NAME, destination.getDestinationName());
 		destinationParams.put(EDestinationParameter.URL, destination.getDestinationURL());
 		destinationParams.put(EDestinationParameter.USER, destination.getAlfUser());

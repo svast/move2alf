@@ -2,7 +2,6 @@ package eu.xenit.move2alf.core.simpleaction.helpers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;

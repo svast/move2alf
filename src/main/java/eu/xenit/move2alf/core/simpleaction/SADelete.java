@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;

@@ -24,8 +24,6 @@ import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -139,8 +137,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	public void closeCycle(Cycle cycle) {
 		Session session = getSessionFactory().getCurrentSession();
 
-		cycle.setState(ECycleState.NOT_RUNNING);
-
 		cycle.setEndDateTime(new Date());
 		session.update(cycle);
 
@@ -158,7 +154,6 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		Cycle cycle = new Cycle();
 		cycle.setJob(job);
 		cycle.setStartDateTime(new Date());
-		cycle.setState(ECycleState.RUNNING);
 		session.save(cycle);
 
 		notifyCycleListenersStart(cycle.getId(), new HashMap<String, Object>());
