@@ -13,7 +13,6 @@ import eu.xenit.move2alf.common.ProcessErrorException;
 import eu.xenit.move2alf.common.StreamGobbler;
 import eu.xenit.move2alf.common.Util;
 
-
 public class FilesystemMetadataLoader implements MetadataLoader {
 
 	private final static Logger logger = LoggerFactory.getLogger(FilesystemMetadataLoader.class);
@@ -26,7 +25,7 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 		return true;
 	}
 
-	public Map<String, String> loadMetadata(String dirname, File file) {
+	public Map<String, String> loadMetadata(File file) {
 		Map<String, String> fileSystemPropertyMap = new HashMap<String, String>();
 		String os = System.getProperty("os.name");
 		logger.debug("OS {}", os);
@@ -47,8 +46,7 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 				try {
 					String output = StreamGobbler.executeCommand(p);
 					String[] lines = output.split("\n");
-					logger
-							.debug("ExtractWindowsFileSystemProperties execution ok");
+					logger.debug("ExtractWindowsFileSystemProperties execution ok");
 					if (lines.length > 0) {
 						fileSystemPropertyMap.put(fsPropCreator, lines[0]);
 					}
@@ -60,16 +58,12 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 					}
 
 				} catch (ProcessErrorException e) {
-					logger
-							.error(
-									"Error while running ExtractWindowsFileSystemProperties {}",
-									errorBuffer.toString());
+					logger.error("Error while running ExtractWindowsFileSystemProperties {}", errorBuffer.toString());
 				}
 
 			} else {
 				// UNIX: get creator with ls command
-				String[] commandArray = { "/bin/ls", "-l",
-						file.getAbsolutePath() };
+				String[] commandArray = { "/bin/ls", "-l", file.getAbsolutePath() };
 
 				java.lang.Process p = Runtime.getRuntime().exec(commandArray);
 				try {
@@ -80,9 +74,7 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 						fileSystemPropertyMap.put(fsPropCreator, lineSplit[2]);
 					}
 				} catch (ProcessErrorException e) {
-
-					logger.error("Error while running /bin/ls {}", e
-							.getMessage());
+					logger.error("Error while running /bin/ls {}", e.getMessage());
 				}
 				// Getting the date
 				// On linux with filesystems ETX1,2,3 there is no creation date

@@ -4,10 +4,10 @@ import eu.xenit.move2alf.core.action.metadata.XmlPropertiesFileMetadataLoader;
 
 public class XmlPropertiesFileMetadataAction extends MetadataAction {
 	
-	public XmlPropertiesFileMetadataAction() {
+	protected void initMetadataLoader() {
 		metadataLoader = new XmlPropertiesFileMetadataLoader();
 		//TODO meerdere loaders toelaten
-		//bv optie toevoegen: + FilesystemMetadataLoader
+		//bv optie toevoegen: + FilesystemMetadataLoader ofwel met checkboxen werken en meerdere keuzes toelaten
 	}
 
 	@Override

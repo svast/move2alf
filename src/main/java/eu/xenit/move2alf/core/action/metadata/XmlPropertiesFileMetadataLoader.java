@@ -30,16 +30,14 @@ public class XmlPropertiesFileMetadataLoader implements MetadataLoader {
 		return !file.getName().endsWith(XML_METADATA_EXTENSION);
 	}
 
-	public Map<String, String> loadMetadata(String dirname, File file) {
-		String filename = file.getName();
-		
+	public Map<String, String> loadMetadata(File file) {
 		Map<String, String> metadata = null;
 		if ( hasMetadata(file) ) {
-			File metadataFile = new File(dirname, filename + "." + XML_METADATA_EXTENSION);
-	
+			String metadataFilename = file.getAbsolutePath() + "." + XML_METADATA_EXTENSION;
+			
 			Properties properties = new Properties();
 			try {
-				FileInputStream fileInputStream = new FileInputStream(metadataFile);
+				FileInputStream fileInputStream = new FileInputStream(metadataFilename);
 				try {
 					properties.loadFromXML(fileInputStream);
 				} catch (IOException e) {
@@ -49,7 +47,7 @@ public class XmlPropertiesFileMetadataLoader implements MetadataLoader {
 					try {
 						fileInputStream.close();
 					} catch (IOException e) {
-						//TODO
+						logger.warn(e.getMessage(), e);
 					}
 				}
 				properties.remove("type");

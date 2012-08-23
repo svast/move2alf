@@ -19,21 +19,22 @@ public abstract class MetadataAction extends Action {
 	private static final Logger logger = LoggerFactory.getLogger(MetadataAction.class);
 	
 	protected MetadataLoader metadataLoader;
+	
+	protected abstract void initMetadataLoader();
 
 	@Override
 	protected final void executeImpl(ConfiguredAction configuredAction, Map<String, Object> parameterMap) {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 		
 		if ( metadataLoader.hasMetadata(file) ) {
+			//TODO moet er sowieso altijd een lege metadata-map aangemaakt worden? dan dit buiten de if zetten
 			@SuppressWarnings("unchecked")
 			Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
 			if (metadata == null) {
 				metadata = new HashMap<String, String>();
 				parameterMap.put(Parameters.PARAM_METADATA, metadata);
 			}
-			// TODO
-			String dirname = (String) parameterMap.get(Parameters.PARAM_INPUT_PATH);
-			Map<String, String> propertyMap = metadataLoader.loadMetadata(dirname, file);
+			Map<String, String> propertyMap = metadataLoader.loadMetadata(file);
 			metadata.putAll(propertyMap);
 		}
 

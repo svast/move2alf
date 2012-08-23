@@ -13,11 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class FilesystemMetadataLoaderTest {
+public class DummyMetadataLoaderTest {
 
 	private static final String DIR = "src/test/resources/testdocs";
 
-	private static FilesystemMetadataLoader metadataLoader;
+	private static DummyMetadataLoader metadataLoader;
 	private File file;
 
 	@BeforeClass
@@ -30,7 +30,7 @@ public class FilesystemMetadataLoaderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		metadataLoader = new FilesystemMetadataLoader();
+		metadataLoader = new DummyMetadataLoader();
 		file = new File(DIR, "testfile_txt.txt");
 	}
 
@@ -43,15 +43,10 @@ public class FilesystemMetadataLoaderTest {
 		assertEquals(true, metadataLoader.hasMetadata(file));
 	}
 
-	//TODO java.io.IOException: Cannot run program "lib/extractWindowsFileSystemProperties": CreateProcess error=2, Het systeem kan het opgegeven bestand niet vinden
-	@Ignore
 	@Test
 	public final void testLoadMetadata() {
 		Map<String, String> metadata = metadataLoader.loadMetadata(file);
 		
-		assertEquals(3, metadata.size());
-		assertNotNull(metadata.get(FilesystemMetadataLoader.fsPropCreationDate));
-		assertNotNull(metadata.get(FilesystemMetadataLoader.fsPropCreator));
-		assertNotNull(metadata.get(FilesystemMetadataLoader.fsPropModifyDate));
+		assertEquals(0, metadata.size());
 	}
 }

@@ -3,7 +3,7 @@
 <properties>
 	<entry key="type">cm:content</entry>
 	<entry key="aspects">cm:versionable,cm:dublincore</entry>
-	<entry key="{http://www.alfresco.org/model/content/1.0}contributor">ikke</entry>
+	<entry key="contributor">ikke</entry>
 	<!-- entry key="cm:title">Test</entry -->
 	<!-- entry key="cm:description">This is a test file</entry -->
 </properties>

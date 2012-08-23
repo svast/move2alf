@@ -49,17 +49,17 @@ public class XmlPropertiesFileMetadataLoaderTest {
 
 	@Test
 	public final void testLoadMetadataForContentFile() {
-		Map<String, String> metadata = metadataLoader.loadMetadata(DIR, contentFile);
+		Map<String, String> metadata = metadataLoader.loadMetadata(contentFile);
 		
 		assertEquals(1, metadata.size());
 		assertNull(metadata.get("type"));
 		assertNull(metadata.get("aspects"));
-		assertEquals("ikke", metadata.get("{http://www.alfresco.org/model/content/1.0}contributor"));
+		assertEquals("ikke", metadata.get("contributor"));
 	}
 
 	@Test
 	public final void testLoadMetadataForMetadataFile() {
-		Map<String, String> metadata = metadataLoader.loadMetadata(DIR, metadataFile);
+		Map<String, String> metadata = metadataLoader.loadMetadata(metadataFile);
 		
 		assertEquals(0, metadata.size());
 	}
@@ -68,13 +68,13 @@ public class XmlPropertiesFileMetadataLoaderTest {
 	public final void testLoadMetadataForNonExistingContentFile() {
 		File file = new File(DIR, "xyz");
 		@SuppressWarnings("unused")
-		Map<String, String> metadata = metadataLoader.loadMetadata(DIR, file);
+		Map<String, String> metadata = metadataLoader.loadMetadata(file);
 	}
 
 	@Test (expected = Move2AlfException.class)
 	public final void testLoadMetadataForCorruptPropertiesFile() {
 		File file = new File(DIR, "testfile_metadataCorrupt.txt");
 		@SuppressWarnings("unused")
-		Map<String, String> metadata = metadataLoader.loadMetadata(DIR, file);
+		Map<String, String> metadata = metadataLoader.loadMetadata(file);
 	}
 }

@@ -7,6 +7,6 @@ public interface MetadataLoader {
 	
 	public boolean hasMetadata (File file);
 
-	public Map<String, String> loadMetadata (String dirname, File file);
+	public Map<String, String> loadMetadata (File file);
 
 }
