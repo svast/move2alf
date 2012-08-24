@@ -17,7 +17,7 @@ public class FilesystemMetadataLoaderTest {
 
 	private static final String DIR = "src/test/resources/testdocs";
 
-	private static FilesystemMetadataLoader metadataLoader;
+	private FilesystemMetadataLoader metadataLoader;
 	private File file;
 
 	@BeforeClass

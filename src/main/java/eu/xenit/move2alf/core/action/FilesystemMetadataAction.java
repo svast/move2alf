@@ -4,8 +4,8 @@ import eu.xenit.move2alf.core.action.metadata.FilesystemMetadataLoader;
 
 public class FilesystemMetadataAction extends MetadataAction {
 	
-	protected void initMetadataLoader() {
-		metadataLoader = new FilesystemMetadataLoader();
+	protected void initMetadataLoaders() {
+		metadataLoaders.add(new FilesystemMetadataLoader());
 	}
 
 	@Override

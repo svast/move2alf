@@ -5,8 +5,8 @@ import eu.xenit.move2alf.core.action.metadata.DummyMetadataLoader;
 
 public class EmptyMetadataAction extends MetadataAction {
 	
-	protected void initMetadataLoader() {
-		metadataLoader = new DummyMetadataLoader();
+	protected void initMetadataLoaders() {
+		metadataLoaders.add(new DummyMetadataLoader());
 	}
 
 	@Override

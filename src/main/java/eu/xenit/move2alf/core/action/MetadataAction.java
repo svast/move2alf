@@ -3,6 +3,7 @@ package eu.xenit.move2alf.core.action;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,29 +19,35 @@ public abstract class MetadataAction extends Action {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(MetadataAction.class);
 	
-	protected MetadataLoader metadataLoader;
+	protected Vector<MetadataLoader> metadataLoaders;
+
+	public MetadataAction() {
+		super();
+		metadataLoaders = new Vector<MetadataLoader>();
+		initMetadataLoaders();
+	}
 	
-	protected abstract void initMetadataLoader();
+	protected abstract void initMetadataLoaders();
 
 	@Override
 	protected final void executeImpl(ConfiguredAction configuredAction, Map<String, Object> parameterMap) {
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-		
-		if ( metadataLoader.hasMetadata(file) ) {
-			//TODO moet er sowieso altijd een lege metadata-map aangemaakt worden? dan dit buiten de if zetten
-			@SuppressWarnings("unchecked")
-			Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
-			if (metadata == null) {
-				metadata = new HashMap<String, String>();
-				parameterMap.put(Parameters.PARAM_METADATA, metadata);
-			}
-			Map<String, String> propertyMap = metadataLoader.loadMetadata(file);
-			metadata.putAll(propertyMap);
-		}
 
-		//TODO moet dit nog in de "if", maw moet dit ook voor de .metadata.properties.xml file gezet worden?
-		parameterMap.put(Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
-		parameterMap.put(Parameters.PARAM_CONTENTTYPE, "content");
+		@SuppressWarnings("unchecked")
+		Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
+		for (MetadataLoader metadataLoader : metadataLoaders) {
+			if ( metadataLoader.hasMetadata(file) ) {
+				if (metadata == null) {
+					metadata = new HashMap<String, String>();
+					parameterMap.put(Parameters.PARAM_METADATA, metadata);
+				}
+				Map<String, String> propertyMap = metadataLoader.loadMetadata(file);
+				metadata.putAll(propertyMap);
+				
+				parameterMap.put(Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
+				parameterMap.put(Parameters.PARAM_CONTENTTYPE, "content");
+			}
+		}
 	}
 
 	@Override
