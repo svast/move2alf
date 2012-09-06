@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -15,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.action.metadata.FilesystemMetadataLoader;
 import eu.xenit.move2alf.core.action.metadata.XmlPropertiesFileMetadataLoader;
 
 public class XmlPropertiesFileMetadataActionTest {
@@ -47,14 +45,8 @@ public class XmlPropertiesFileMetadataActionTest {
 
 	@Test
 	public final void testInitMetadataLoader() {
-		assertEquals(2, action.metadataLoaders.size());
-		
-		Vector<String> loaderNames = new Vector<String>();
-		loaderNames.add(action.metadataLoaders.elementAt(0).getClass().getName());
-		loaderNames.add(action.metadataLoaders.elementAt(1).getClass().getName());
-		
-		assertEquals(true, loaderNames.contains(XmlPropertiesFileMetadataLoader.class.getName()));
-		assertEquals(true, loaderNames.contains(FilesystemMetadataLoader.class.getName()));
+		assertEquals(1, action.metadataLoaders.size());
+		assertEquals(XmlPropertiesFileMetadataLoader.class.getName(), action.metadataLoaders.elementAt(0).getClass().getName());
 	}
 
 	@Test
@@ -72,11 +64,7 @@ public class XmlPropertiesFileMetadataActionTest {
 		
 		@SuppressWarnings("unchecked")
 		Map<String, String> metadata = (Map<String, String>) parameterMap.get(Parameters.PARAM_METADATA);
-		
 		assertNotNull(metadata);
-		assertEquals(1, metadata.size());
-		//TODO java.io.IOException: Cannot run program "lib/extractWindowsFileSystemProperties": CreateProcess error=2, Het systeem kan het opgegeven bestand niet vinden
-		//assertEquals(4, metadata.size());
 	}
 
 	@Test
@@ -85,12 +73,8 @@ public class XmlPropertiesFileMetadataActionTest {
 		parameterMap.put(Parameters.PARAM_FILE, metadataFile);
 		
 		action.executeImpl(null, parameterMap);
-		
-		//TODO door de FileSystemMetadataLoader worden PARAM_NAMESPACE, PARAM_CONTENTTYPE en PARAM_METADATA toegevoegd,
-		//want FileSystemMetadataLoader.hasMetadata geeft altijd true terug, ook voor de xml properties file
-		assertEquals(4, parameterMap.size());
-		//assertEquals(1, parameterMap.size());
-		
+
+		assertEquals(1, parameterMap.size());
 		assertEquals(metadataFile, parameterMap.get(Parameters.PARAM_FILE));
 	}
 }
