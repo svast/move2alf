@@ -10,7 +10,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FilesystemMetadataLoaderTest {
@@ -43,8 +42,6 @@ public class FilesystemMetadataLoaderTest {
 		assertEquals(true, metadataLoader.hasMetadata(file));
 	}
 
-	//TODO java.io.IOException: Cannot run program "lib/extractWindowsFileSystemProperties": CreateProcess error=2, Het systeem kan het opgegeven bestand niet vinden
-	@Ignore
 	@Test
 	public final void testLoadMetadata() {
 		Map<String, String> metadata = metadataLoader.loadMetadata(file);

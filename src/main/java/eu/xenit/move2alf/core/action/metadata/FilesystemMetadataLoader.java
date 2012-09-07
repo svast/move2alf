@@ -2,6 +2,9 @@ package eu.xenit.move2alf.core.action.metadata;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +41,13 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 				// line 2: modifyDate
 				// this program was created by Ian
 				String filePath = file.getAbsolutePath();
-				String programPath = "lib/extractWindowsFileSystemProperties";
+				
+				URL programURL = this.getClass().getClassLoader().getResource("extractWindowsFileSystemProperties.exe");
+				URI programURI = programURL.toURI();
+				String programPath = new File(programURI).getAbsolutePath();
+				
 				String[] commandArray = { programPath, filePath };
-
+				
 				java.lang.Process p = Runtime.getRuntime().exec(commandArray);
 				StringBuffer errorBuffer = new StringBuffer();
 				try {
@@ -86,6 +93,8 @@ public class FilesystemMetadataLoader implements MetadataLoader {
 				fileSystemPropertyMap.put(fsPropModifyDate, lastModifyDate);
 			}
 		} catch (IOException e) {
+			logger.error("", e);
+		} catch (URISyntaxException e) {
 			logger.error("", e);
 		}
 
