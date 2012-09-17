@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import eu.xenit.move2alf.validation.TotalStringSize;
 
 public class JobConfig {
 	static private final int CONST_50 = 50;
@@ -28,14 +29,12 @@ public class JobConfig {
 	@Size(min=0, max=jobNameMaxLength, message="Max length of name is " + jobNameMaxLength)
 	private String name;
 
-	//TODO keuze maken: ofwel @Size, ofwel @Length
 	@Size(min=0, max=jobDescriptionMaxLength, message="Max length of description is " + jobDescriptionMaxLength)
-	@Length(min=0, max=jobDescriptionMaxLength, message="Max length of description is " + jobDescriptionMaxLength)
 	@NotEmpty(message="Please enter a description for the job.")
 	private String description;
 
 	@NotEmpty(message="There should be at least one inputfolder!")
-	//TODO max length of the concatenation of all the inputPaths is 255
+	@TotalStringSize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolder;
 
 	@Size(min=0, max=pathMaxLength, message="Max length of destination path is " + pathMaxLength)
