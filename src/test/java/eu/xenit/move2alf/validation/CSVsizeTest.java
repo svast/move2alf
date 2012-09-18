@@ -42,7 +42,16 @@ public class CSVsizeTest {
 	}
 	
 	@Test
-	public final void testCSVsize_ValidEmptyStringList () {
+	public final void testCSVsize_NullStringList () {
+		csvSizeTestClass.setStringList(null);
+		
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
+		
+		assertEquals(0, constraintViolations.size());
+	}
+	
+	@Test
+	public final void testCSVsize_EmptyStringList () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		csvSizeTestClass.setStringList(stringList);
 		

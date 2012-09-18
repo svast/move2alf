@@ -42,6 +42,15 @@ public class ParamListTest {
 	}
 	
 	@Test
+	public final void testParamList_NullParam () {
+		paramListTestClass.setStringList(null);
+		
+		Set<ConstraintViolation<ParamListTestClass>> constraintViolations = validator.validate(paramListTestClass);
+		
+		assertEquals(0, constraintViolations.size());
+	}
+	
+	@Test
 	public final void testParamList_NoParams () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		paramListTestClass.setStringList(stringList);
