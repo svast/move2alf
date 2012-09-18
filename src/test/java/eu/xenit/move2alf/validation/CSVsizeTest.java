@@ -42,7 +42,17 @@ public class CSVsizeTest {
 	}
 	
 	@Test
-	public final void testCSVsize1 () {
+	public final void testCSVsize_ValidEmptyStringList () {
+		ArrayList<String> stringList = new ArrayList<String>();
+		csvSizeTestClass.setStringList(stringList);
+		
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
+		
+		assertEquals(0, constraintViolations.size());
+	}
+	
+	@Test
+	public final void testCSVsize_ValidOneStringList () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("1234567890");
 		csvSizeTestClass.setStringList(stringList);
@@ -53,7 +63,7 @@ public class CSVsizeTest {
 	}
 	
 	@Test
-	public final void testCSVsize2 () {
+	public final void testCSVsize_InvalidOneStringList () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("1234567890a");
 		csvSizeTestClass.setStringList(stringList);
@@ -65,7 +75,7 @@ public class CSVsizeTest {
 	}
 	
 	@Test
-	public final void testCSVsize3 () {
+	public final void testCSVsize_ValidTwoStringList () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("12345678");
 		stringList.add("a");
@@ -77,7 +87,7 @@ public class CSVsizeTest {
 	}
 	
 	@Test
-	public final void testCSVsize4 () {
+	public final void testCSVsize_InvalidTwoStringList () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("12345678");
 		stringList.add("ab");

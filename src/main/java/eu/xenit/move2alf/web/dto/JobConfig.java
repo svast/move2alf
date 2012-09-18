@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import eu.xenit.move2alf.validation.CSVsize;
+import eu.xenit.move2alf.validation.ParamList;
 
 public class JobConfig {
 	static private final int CONST_50 = 50;
@@ -92,10 +93,10 @@ public class JobConfig {
 	@Size(min=0, max=extensionMaxLength, message="Max length of extension is " + extensionMaxLength)
 	private String extension = "*";
 		
-	//TODO ?? max length of name and value
+	@ParamList(maxKey=paramNameMaxLength, maxValue=paramValueMaxLength, message="Meta-data parameters: max length of name is " + paramNameMaxLength + ", max length of value is " + paramValueMaxLength)
 	private List<String> paramMetadata;
 
-	//TODO ?? max length of name and value
+	@ParamList(maxKey=paramNameMaxLength, maxValue=paramValueMaxLength, message="Tranformation parameters: max length of name is " + paramNameMaxLength + ", max length of value is " + paramValueMaxLength)
 	private List<String> paramTransform;
 
 	@Size(min=0, max=commandMaxLength, message="Max length of 'Command before' is " + commandMaxLength)
