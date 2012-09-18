@@ -2,9 +2,9 @@ package eu.xenit.move2alf.validation;
 
 import java.util.List;
 
-public class TotalStringSizeTestClass {
+public class CSVsizeTestClass {
 
-	@TotalStringSize(max=10, message="Max length is 10")
+	@CSVsize(max=10, message="Max length is 10")
 	private List<String> stringList;
 
 	public List<String> getStringList() {

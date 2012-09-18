@@ -5,11 +5,11 @@ import java.util.List;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class TotalStringSizeValidator implements ConstraintValidator<TotalStringSize, List<String>> {
+public class CSVsizeValidator implements ConstraintValidator<CSVsize, List<String>> {
 
     private int maxLength;
 
-    public void initialize(TotalStringSize constraintAnnotation) {
+    public void initialize(CSVsize constraintAnnotation) {
         this.maxLength = constraintAnnotation.max();
     }
 

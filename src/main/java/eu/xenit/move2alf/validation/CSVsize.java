@@ -11,10 +11,10 @@ import javax.validation.Payload;
 
 @Target( { FIELD })
 @Retention(RUNTIME)
-@Constraint(validatedBy = TotalStringSizeValidator.class)
-public @interface TotalStringSize {
+@Constraint(validatedBy = CSVsizeValidator.class)
+public @interface CSVsize {
 
-    String message() default "{eu.xenit.move2alf.constraints.totalstringsize}";
+    String message() default "{eu.xenit.move2alf.constraints.csvsize}";
 
     Class<?>[] groups() default {};
 

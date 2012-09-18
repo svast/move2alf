@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import eu.xenit.move2alf.validation.TotalStringSize;
+import eu.xenit.move2alf.validation.CSVsize;
 
 public class JobConfig {
 	static private final int CONST_50 = 50;
@@ -34,7 +34,7 @@ public class JobConfig {
 	private String description;
 
 	@NotEmpty(message="There should be at least one inputfolder!")
-	@TotalStringSize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
+	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolder;
 
 	@Size(min=0, max=pathMaxLength, message="Max length of destination path is " + pathMaxLength)

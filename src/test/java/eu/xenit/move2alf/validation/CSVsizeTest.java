@@ -17,10 +17,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 
-public class TotalStringSizeTest {
+public class CSVsizeTest {
 
 	private static Validator validator;
-	private TotalStringSizeTestClass totalStringSizeTestClass;
+	private CSVsizeTestClass csvSizeTestClass;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -34,7 +34,7 @@ public class TotalStringSizeTest {
 
 	@Before
 	public void setUp() throws Exception {
-		totalStringSizeTestClass = new TotalStringSizeTestClass();
+		csvSizeTestClass = new CSVsizeTestClass();
 	}
 
 	@After
@@ -42,48 +42,48 @@ public class TotalStringSizeTest {
 	}
 	
 	@Test
-	public final void testTotalStringSize1 () {
+	public final void testCSVsize1 () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("1234567890");
-		totalStringSizeTestClass.setStringList(stringList);
+		csvSizeTestClass.setStringList(stringList);
 		
-		Set<ConstraintViolation<TotalStringSizeTestClass>> constraintViolations = validator.validate(totalStringSizeTestClass);
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
 		
 		assertEquals(0, constraintViolations.size());
 	}
 	
 	@Test
-	public final void testTotalStringSize2 () {
+	public final void testCSVsize2 () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("1234567890a");
-		totalStringSizeTestClass.setStringList(stringList);
+		csvSizeTestClass.setStringList(stringList);
 		
-		Set<ConstraintViolation<TotalStringSizeTestClass>> constraintViolations = validator.validate(totalStringSizeTestClass);
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
 		
 		assertEquals(1, constraintViolations.size());
 		assertEquals("Max length is 10", constraintViolations.iterator().next().getMessage());
 	}
 	
 	@Test
-	public final void testTotalStringSize3 () {
+	public final void testCSVsize3 () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("12345678");
 		stringList.add("a");
-		totalStringSizeTestClass.setStringList(stringList);
+		csvSizeTestClass.setStringList(stringList);
 		
-		Set<ConstraintViolation<TotalStringSizeTestClass>> constraintViolations = validator.validate(totalStringSizeTestClass);
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
 		
 		assertEquals(0, constraintViolations.size());
 	}
 	
 	@Test
-	public final void testTotalStringSize4 () {
+	public final void testCSVsize4 () {
 		ArrayList<String> stringList = new ArrayList<String>();
 		stringList.add("12345678");
 		stringList.add("ab");
-		totalStringSizeTestClass.setStringList(stringList);
+		csvSizeTestClass.setStringList(stringList);
 		
-		Set<ConstraintViolation<TotalStringSizeTestClass>> constraintViolations = validator.validate(totalStringSizeTestClass);
+		Set<ConstraintViolation<CSVsizeTestClass>> constraintViolations = validator.validate(csvSizeTestClass);
 		
 		assertEquals(1, constraintViolations.size());
 		assertEquals("Max length is 10", constraintViolations.iterator().next().getMessage());
