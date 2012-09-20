@@ -456,7 +456,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 	@Override
 	public List<PipelineStep> getPipeline(JobConfig jobConfig) {
 		SuccessHandler successHandler = new SuccessHandler(getJobService());
-		ErrorHandler errorHandler = new ErrorHandler(getJobService());
+		ErrorHandler errorHandler = new DefaultErrorHandler(getJobService());
 		
 		List<PipelineStep> pipeline = new ArrayList<PipelineStep>();
 		pipeline.add(new PipelineStep(new SASource(), null, null, errorHandler));

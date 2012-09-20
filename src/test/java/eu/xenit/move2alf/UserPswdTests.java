@@ -1,12 +1,14 @@
 package eu.xenit.move2alf;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +22,6 @@ import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.logic.UserServiceImpl;
 
-@Ignore
 public class UserPswdTests extends IntegrationTests {
 
 	private UserService userService;

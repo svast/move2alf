@@ -20,6 +20,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
@@ -123,6 +124,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public Job createJob(String name, String description) {
 		Date now = new Date();
 		Job job = new Job();
