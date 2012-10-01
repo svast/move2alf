@@ -2,8 +2,6 @@ package eu.xenit.move2alf.freemarkerchecktool;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,21 +35,21 @@ public class FreemarkerCheckToolTest {
 	public void tearDown() throws Exception {
 	}
 
-	private Map<String, Object> createRootMap () {
-		Map<String, Object> rootMap = freemarkerCheckTool.createRootMap();
+	private RootMap createRootMap () throws Exception {
+		RootMap rootMap = freemarkerCheckTool.createRootMap();
 		
 		JobConfig jobConfig = new JobConfig();
 		jobConfig.setName("x");
 		jobConfig.setDescription("x");
 		
-		rootMap.put("job", jobConfig);
+		rootMap.addValue("job", jobConfig);
 		
 		return rootMap;
 	}
 
 	@Test
 	public void testTemplate() throws Exception {
-		Map<String, Object> rootMap = createRootMap();
+		RootMap rootMap = createRootMap();
 		String result = freemarkerCheckTool.processTemplateIntoString("testTemplate.ftl", rootMap);
         Assert.notNull(result);
         assertEquals("    <textarea id=\"description\" name=\"description\" >x</textarea>\n" 
@@ -60,19 +58,19 @@ public class FreemarkerCheckToolTest {
 
 	@Test (expected = InvalidReferenceException.class)
 	public void testTemplate_invalidFmReference() throws Exception {
-		Map<String, Object> rootMap = createRootMap();
+		RootMap rootMap = createRootMap();
 		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidFmReference.ftl", rootMap);
 	}
 
 	@Test (expected = TemplateModelException.class)
 	public void testTemplate_invalidSpringBinding() throws Exception {
-		Map<String, Object> rootMap = createRootMap();
+		RootMap rootMap = createRootMap();
 		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidSpringBinding.ftl", rootMap);
 	}
 
 	@Test (expected = TemplateException.class)
 	public void testTemplate_invalidMacroParam() throws Exception {
-		Map<String, Object> rootMap = createRootMap();
+		RootMap rootMap = createRootMap();
 		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidMacroParam.ftl", rootMap);
 	}
 }
