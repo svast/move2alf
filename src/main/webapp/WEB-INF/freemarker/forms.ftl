@@ -21,15 +21,15 @@
 </div>
 </#macro>
 
-<#macro textArea label name binding helpText=''>
+<#macro textArea label name binding helpText='' attributes=''>
 <@labeledInput label=label forId=name helpText=helpText>
-	<@spring.formTextarea binding, "class=\"input-xlarge\" rows=\"5\"" />
+	<@spring.formTextarea binding, "class=\"input-xlarge\" rows=\"5\" " + attributes />
 </@labeledInput>
 </#macro>
 
-<#macro labeledSingleLineTextInput label name binding helpText=''>
+<#macro labeledSingleLineTextInput label name binding helpText='' attributes=''>
 <@labeledInput label=label forId=name helpText=helpText>
-	<@spring.formInput binding, "class=\"input-xlarge\"" />
+	<@spring.formInput binding, "class=\"input-xlarge\" " + attributes />
 </@labeledInput>
 </#macro>
 
@@ -49,7 +49,7 @@
 </@labeledInput>
 </#macro>
 
-<#macro labeledParamTableAndInput label baseId paramList='' >
+<#macro labeledParamTableAndInput label baseId paramNameMaxLength paramValueMaxLength paramList='' >
 <#assign tableId=baseId+"Table" />
 <@labeledInput label=label forId=tableId>
 
@@ -82,8 +82,8 @@
 							<td><img src="<@spring.url relativeUrl="/images/new.png"/>" alt="new" /></td>
 							<#assign nameId=baseId+"Name" />
 							<#assign valueId=baseId+"Value" />
-							<td><input id="${nameId}" name="${nameId}" type="text" style="width:100%" maxlength="255" /></td>
-							<td><input id="${valueId}" name="${valueId}" type="text" style="width:100%" maxlength="255" /></td>
+							<td><input id="${nameId}" name="${nameId}" type="text" style="width:100%" maxlength="${paramNameMaxLength}" /></td>
+							<td><input id="${valueId}" name="${valueId}" type="text" style="width:100%" maxlength="${paramValueMaxLength}" /></td>
 							<script>
 								$('#${valueId}').bind('keypress', function(e) {
 									if(e.keyCode==13){
@@ -129,7 +129,7 @@
     <@spring.closeTag/>
 </#macro>
 
-<#macro checkboxWithOption binding label checked=false textboxValue='' >
+<#macro checkboxWithOption binding label checked=false textboxValue='' attributes='' >
 <#assign name=binding?split('.')?last />
 <div class="line" id="<#--{name}-->-container">
 	<label class="checkbox">
@@ -137,7 +137,7 @@
 		<@formCheckbox binding />${label}:
 	</label>
 	<#-- <input type="text" id="${name}Text" name="${name}Text" value="${textboxValue!}"<#if !checked> disabled="disabled"</#if> /> -->
-	<@spring.formInput (binding+"Text") />
+	<@spring.formInput (binding+"Text"), attributes />
 </div>
 
 <script>

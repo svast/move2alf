@@ -1,8 +1,8 @@
 	<fieldset>
 		<legend>General</legend>
-		<@labeledSingleLineTextInput label="Name" name="name" binding="job.name" />
+		<@labeledSingleLineTextInput label="Name" name="name" binding="job.name" attributes="maxlength='${job.jobNameMaxLength}'" />
 		
-		<@textArea label="Description" name="description" binding="job.description" />
+		<@textArea label="Description" name="description" binding="job.description" attributes="maxlength='${job.jobDescriptionMaxLength}'" />
 		
 	</fieldset>
 	<fieldset>
@@ -33,7 +33,7 @@
 					</#list>
 						<tr>
 							<td><img src="<@spring.url relativeUrl="/images/new.png"/>" alt="new" /></td>
-							<td><input id="inputPathTextbox" name="inputPath" type="text" style="width:100%" maxlength="255" /></td>
+							<td><input id="inputPathTextbox" name="inputPath" type="text" style="width:100%" maxlength="${job.pathMaxLength}" /></td>
 							<td><img onclick="addInputPath('inputPath')" src="<@spring.url relativeUrl="/images/save-icon.png" />" alt="save" class="clickable" /></td>
 						</tr>
 						<script>
@@ -52,21 +52,21 @@
 				</table>
 		</@labeledInput>
 		
-		<@labeledSingleLineTextInput label="Extension" name="extension" binding="job.extension" />
+		<@labeledSingleLineTextInput label="Extension" name="extension" binding="job.extension" attributes="maxlength='${job.extensionMaxLength}'" />
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
 			<#if destination.parameters?has_content>
 				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>> ${destination.parameters.name} - ${destination.parameters.url}</option>
 			</#if>
 		</@labeledSelectList>
 		
-		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" />
+		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />
 		
 	</fieldset>
 	<#include "schedule.ftl">
 	<fieldset>
 		<legend>Processing</legend>
 		
-		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." />
+		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." attributes="maxlength='${job.commandMaxLength}'" />
 		
 		<@labeledSelectList label="Meta-data processor" name="metadata" options=metadataOptions helpText="Choose the meta-data processor."; processor>
 			<option value="${processor.class.name}" <#if job.metadata?? && processor.class.name=job.metadata >selected="selected"</#if> >${processor.name} - ${processor.description}</option>
@@ -75,7 +75,7 @@
 				
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/parameterHandler2.js" />"> </script>
 		
-		<@labeledParamTableAndInput label="Meta-data parameters" baseId="paramMetadata" paramList=job.paramMetadata />
+		<@labeledParamTableAndInput label="Meta-data parameters" baseId="paramMetadata" paramList=job.paramMetadata paramNameMaxLength="${job.paramNameMaxLength}" paramValueMaxLength="${job.paramValueMaxLength}" />
 		
 		<@labeledInput label="Transformation" forId="transformation">
 				<@radio name="transform" value="notransformation" checked=(jobTransform?? || !jobTransform?has_content || "No transformation"==jobTransform) description="No transformation" />
@@ -84,9 +84,9 @@
 			</#list>
 		</@labeledInput>
 		
-		<@labeledParamTableAndInput label="Tranformation parameters" baseId="paramTransform" paramList=job.paramTransform />
+		<@labeledParamTableAndInput label="Tranformation parameters" baseId="paramTransform" paramList=job.paramTransform paramNameMaxLength="${job.paramNameMaxLength}" paramValueMaxLength="${job.paramValueMaxLength}" />
 		
-		<@labeledSingleLineTextInput label="Command after" name="commandafter" binding="job.commandAfter" helpText="Execute command after processing." />
+		<@labeledSingleLineTextInput label="Command after" name="commandafter" binding="job.commandAfter" helpText="Execute command after processing." attributes="maxlength='${job.commandMaxLength}'" />
 		
 	</fieldset>
 	
@@ -105,19 +105,19 @@
 		
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/checkboxWithText.js" />"> </script>
 		<@unLabeledInput>
-			<@checkboxWithOption binding="job.moveBeforeProc" label="Move before processing to path" textboxValue=job.beforeProcPath />
-			<@checkboxWithOption binding="job.moveAfterLoad" label="Move loaded files to path" textboxValue=job.afterLoadPath />
-			<@checkboxWithOption binding="job.moveNotLoad" label="Move not loaded files to path" textboxValue=job.notLoadPath />
+			<@checkboxWithOption binding="job.moveBeforeProc" label="Move before processing to path" textboxValue=job.beforeProcPath attributes="maxlength='${job.pathMaxLength}'" />
+			<@checkboxWithOption binding="job.moveAfterLoad" label="Move loaded files to path" textboxValue=job.afterLoadPath attributes="maxlength='${job.pathMaxLength}'" />
+			<@checkboxWithOption binding="job.moveNotLoad" label="Move not loaded files to path" textboxValue=job.notLoadPath attributes="maxlength='${job.pathMaxLength}'" />
 		</@unLabeledInput>
 	</fieldset>
 
 	<fieldset>
 		<legend>Error reporting</legend>
 		<@unLabeledInput helpText="Separate multiple e-mail addresses with commas">
-			<@checkboxWithOption binding="job.sendNotification" label="Send notification e-mails on errors to" textboxValue=job.emailAddressError />
+			<@checkboxWithOption binding="job.sendNotification" label="Send notification e-mails on errors to" textboxValue=job.emailAddressError attributes="maxlength='${job.emailMaxLength}'" />
 		</@unLabeledInput>
 		<@unLabeledInput helpText="Separate multiple e-mail addresses with commas">
-			<@checkboxWithOption binding="job.sendReport" label="Send load reporting e-mails to" textboxValue=job.emailAddressRep />
+			<@checkboxWithOption binding="job.sendReport" label="Send load reporting e-mails to" textboxValue=job.emailAddressRep attributes="maxlength='${job.emailMaxLength}'" />
 		</@unLabeledInput>
 	</fieldset>
 
