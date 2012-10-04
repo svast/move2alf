@@ -1,8 +1,14 @@
 package eu.xenit.move2alf.core.simpleaction;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
@@ -11,6 +17,9 @@ import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(SAUpload.class);
+
 	public static final String PARAM_PATH = "path";
 	/**
 	 * SourceSink.MODE_SKIP or SourceSink.MODE_SKIP_AND_LOG or
@@ -18,20 +27,102 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	 */
 	public static final String PARAM_DOCUMENT_EXISTS = "documentExists";
 
-	public SAUpload(SourceSink sink, ConfiguredSourceSink sinkConfig) {
+	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
 	}
 
 	@Override
-	public List<FileInfo> execute(FileInfo parameterMap,
-			ActionConfig config) {
-		List<FileInfo> output = new ArrayList<FileInfo>();
-		FileInfo newParameterMap = new FileInfo();
+	public List<FileInfo> execute(final FileInfo parameterMap,
+			final ActionConfig config) {
+		final List<FileInfo> output = new ArrayList<FileInfo>();
+		final FileInfo newParameterMap = new FileInfo();
 		newParameterMap.putAll(parameterMap);
-		getSink().send(getSinkConfig(), newParameterMap, config.get(PARAM_PATH),
-				config.get(PARAM_DOCUMENT_EXISTS));
+
+		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
+		final String relativePath = getParameterWithDefault(parameterMap,
+				Parameters.PARAM_RELATIVE_PATH, "");
+		final String remotePath = normalizeRemotePath(basePath, relativePath);
+		logger.debug("Writing to " + remotePath);
+		final String mimeType = getParameterWithDefault(parameterMap,
+				Parameters.PARAM_MIMETYPE, "text/plain");
+		final String namespace = getParameterWithDefault(parameterMap,
+				Parameters.PARAM_NAMESPACE,
+				"{http://www.alfresco.org/model/content/1.0}");
+		final String contentType = getParameterWithDefault(parameterMap,
+				Parameters.PARAM_CONTENTTYPE, "content");
+		final String description = getParameterWithDefault(parameterMap,
+				Parameters.PARAM_DESCRIPTION, "");
+		final Map<String, String> metadata = (Map<String, String>) parameterMap
+				.get(Parameters.PARAM_METADATA);
+		final Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
+				.get(Parameters.PARAM_MULTI_VALUE_METADATA);
+		final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
+				.get(Parameters.PARAM_ACL);
+		final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
+		final File document = (File) parameterMap.get(Parameters.PARAM_FILE);
+
+		getSink().send(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
+				basePath, remotePath, mimeType, namespace, contentType,
+				description, metadata, multiValueMetadata, acl,
+				inheritPermissions, document);
 		output.add(newParameterMap);
 		return output;
 	}
 
+	private static boolean getInheritPermissionsFromParameterMap(
+			final Map<String, Object> parameterMap) {
+		boolean inheritPermissions;
+		if (parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS) == null) {
+			inheritPermissions = false;
+		} else {
+			inheritPermissions = (Boolean) parameterMap
+					.get(Parameters.PARAM_INHERIT_PERMISSIONS);
+		}
+		return inheritPermissions;
+	}
+
+	private static String normalizeRemotePath(final String basePath,
+			final String relativePathInput) {
+		String relativePath = relativePathInput.replace("\\", "/");
+
+		if (relativePath.startsWith("/")) {
+			relativePath = relativePath.substring(1);
+		}
+
+		// add "cm:" in front of each path component
+		String remotePath = basePath + relativePath;
+		final String[] components = remotePath.split("/");
+		remotePath = "";
+		for (final String component : components) {
+			if ("".equals(component)) {
+				remotePath += "/";
+			} else if (component.contains(":")) {
+				remotePath += component + "/";
+			} else {
+				remotePath += "cm:" + component + "/";
+			}
+		}
+		remotePath = remotePath.substring(0, remotePath.length() - 1);
+		return remotePath;
+	}
+
+	private static String normalizeBasePath(final String path) {
+		String basePath = (path == null) ? "/" : path;
+		if (!basePath.endsWith("/")) {
+			basePath = basePath + "/";
+		}
+
+		if (!basePath.startsWith("/")) {
+			basePath = "/" + basePath;
+		}
+		return basePath;
+	}
+
+	private static String getParameterWithDefault(
+			final Map<String, Object> parameterMap, final String parameter,
+			final String defaultValue) {
+		String value = (String) parameterMap.get(parameter);
+		value = (value != null) ? value : defaultValue;
+		return value;
+	}
 }

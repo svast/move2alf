@@ -18,20 +18,20 @@ public class FileSourceSink extends SourceSink {
 			.getLogger(FileSourceSink.class);
 
 	@Override
-	public List<File> list(ConfiguredSourceSink sourceConfig, String path,
-			boolean recursive) {
+	public List<File> list(final ConfiguredSourceSink sourceConfig,
+			final String path, final boolean recursive) {
 		logger.info("Reading files from " + path);
-		File source = new File(path);
-		if(source.exists() == false){
+		final File source = new File(path);
+		if (source.exists() == false) {
 			source.mkdir();
 		}
 		return listFiles(source, recursive, new ArrayList<File>());
 	}
 
-	private List<File> listFiles(File source, boolean recursive,
-			ArrayList<File> fileList) {
-		File[] files = source.listFiles();
-		for (File file : files) {
+	private List<File> listFiles(final File source, final boolean recursive,
+			final ArrayList<File> fileList) {
+		final File[] files = source.listFiles();
+		for (final File file : files) {
 			if (recursive && file.isDirectory()) {
 				listFiles(file, recursive, fileList);
 			}
@@ -43,14 +43,21 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap, String path, String docExistsMode) {
+	public void send(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final String basePath,
+			final String remotePath, final String mimeType,
+			final String namespace, final String contentType,
+			final String description, final Map<String, String> metadata,
+			final Map<String, String> multiValueMetadata,
+			final Map<String, Map<String, String>> acl,
+			final boolean inheritPermissions, final File document) {
+		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
-	public boolean exists(ConfiguredSourceSink sinkConfig, String remotePath,
-			String name) {
+	public boolean exists(final ConfiguredSourceSink sinkConfig,
+			final String remotePath, final String name) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -71,10 +78,9 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void delete(ConfiguredSourceSink sinkConfig, String remotePath,
-			String name) {
+	public void delete(final ConfiguredSourceSink sinkConfig,
+			final String remotePath, final String name) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 }

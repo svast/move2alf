@@ -13,7 +13,6 @@ import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.SourceSink;
@@ -36,151 +35,94 @@ public class AlfrescoSourceSink extends SourceSink {
 			.getLogger(AlfrescoSourceSink.class);
 
 	@Override
-	public List<File> list(ConfiguredSourceSink sourceConfig, String path,
-			boolean recursive) {
+	public List<File> list(final ConfiguredSourceSink sourceConfig,
+			final String path, final boolean recursive) {
 		return null;
 	}
 
 	@Override
-	public void send(ConfiguredSourceSink configuredSourceSink,
-			Map<String, Object> parameterMap, String path, String docExistsMode) {
-		// TODO: refactoring needed: a SourceSink shouldn't know about the
-		// parameterMap and setting the status, this should be done by the
-		// appropriate action, in this case SinkAction. The current code causes
-		// a lot of duplication when implementing a new SourceSink.
-
+	public void send(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final String basePath,
+			final String remotePath, final String mimeType,
+			final String namespace, final String contentType,
+			final String description, final Map<String, String> metadata,
+			final Map<String, String> multiValueMetadata,
+			final Map<String, Map<String, String>> acl,
+			final boolean inheritPermissions, final File document) {
 		try {
-			RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
-			// run(ras);
-			String basePath = (path == null) ? "/" : path;
-			if (!basePath.endsWith("/")) {
-				basePath = basePath + "/";
-			}
-
-			if (!basePath.startsWith("/")) {
-				basePath = "/" + basePath;
-			}
-
-			String relativePath = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_RELATIVE_PATH, "");
-			relativePath = relativePath.replace("\\", "/");
-
-			if (relativePath.startsWith("/")) {
-				relativePath = relativePath.substring(1);
-			}
-
-			// add "cm:" in front of each path component
-			String remotePath = basePath + relativePath;
-			String[] components = remotePath.split("/");
-			remotePath = "";
-			for (String component : components) {
-				if ("".equals(component)) {
-					remotePath += "/";
-				} else if (component.contains(":")) {
-					remotePath += component + "/";
-				} else {
-					remotePath += "cm:" + component + "/";
-				}
-			}
-			remotePath = remotePath.substring(0, remotePath.length() - 1);
-
-			logger.debug("Writing to " + remotePath);
-
-			String mimeType = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_MIMETYPE, "text/plain");
-			String namespace = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_NAMESPACE,
-					"{http://www.alfresco.org/model/content/1.0}");
-			String contentType = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_CONTENTTYPE, "content");
-
-			String description = getParameterWithDefault(parameterMap,
-					Parameters.PARAM_DESCRIPTION, "");
-
-			Map<String, String> metadata = (Map<String, String>) parameterMap
-					.get(Parameters.PARAM_METADATA);
-			Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
-					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
-
-			Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
-					.get(Parameters.PARAM_ACL);
-
-			boolean inheritPermissions;
-			if (parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS) == null) {
-				inheritPermissions = false;
-			} else {
-				inheritPermissions = (Boolean) parameterMap
-						.get(Parameters.PARAM_INHERIT_PERMISSIONS);
-			}
-
-			File document = (File) parameterMap.get(Parameters.PARAM_FILE);
-
+			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
 				logger.debug("Uploading file " + document.getName());
 				uploadFile(docExistsMode, ras, basePath, remotePath, mimeType,
 						namespace, contentType, description, metadata,
 						multiValueMetadata, acl, inheritPermissions, document);
-			} catch (RepositoryAccessException e) {
+			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
-					// retry
-					logger.debug("Authentication failure? Creating new RAS");
-					destroyRepositoryAccessSession();
-					ras = createRepositoryAccessSession(configuredSourceSink);
-
-					logger.debug("Retrying file " + document.getName());
-					uploadFile(docExistsMode, ras, basePath, remotePath,
-							mimeType, namespace, contentType, description,
-							metadata, multiValueMetadata, acl,
+					retryUpload(configuredSourceSink, docExistsMode, basePath,
+							remotePath, mimeType, namespace, contentType,
+							description, metadata, multiValueMetadata, acl,
 							inheritPermissions, document);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
 				}
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException e) {
 				if ("Error writing content to repository server".equals(e
 						.getMessage())) {
-					// retry
-					logger.debug("Authentication failure? Creating new RAS");
-					destroyRepositoryAccessSession();
-					ras = createRepositoryAccessSession(configuredSourceSink);
-
-					logger.debug("Retrying file " + document.getName());
-					uploadFile(docExistsMode, ras, basePath, remotePath,
-							mimeType, namespace, contentType, description,
-							metadata, multiValueMetadata, acl,
+					retryUpload(configuredSourceSink, docExistsMode, basePath,
+							remotePath, mimeType, namespace, contentType,
+							description, metadata, multiValueMetadata, acl,
 							inheritPermissions, document);
-
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
 				}
 			}
-
-		} catch (RepositoryAccessException e) {
+		} catch (final RepositoryAccessException e) {
 			// we end up here if there is a communication error during a session
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
-		} catch (RepositoryException e) {
+		} catch (final RepositoryException e) {
 			// we end up here if the request could not be handled by the
 			// repository
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
-		} catch (WebServiceException e) {
+		} catch (final WebServiceException e) {
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
-		} catch (RepositoryFatalException e) {
+		} catch (final RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
 			// TODO: stop job instead of stopping tomcat
 			// System.exit(1);
-		} catch (RuntimeException e2) {
+		} catch (final RuntimeException e2) {
 			logger.error(e2.getMessage(), e2);
 			throw new Move2AlfException(e2.getMessage(), e2);
 		}
 	}
 
-	private void uploadFile(final String docExistsMode,
+	private static void retryUpload(
+			final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final String basePath,
+			final String remotePath, final String mimeType,
+			final String namespace, final String contentType,
+			final String description, final Map<String, String> metadata,
+			final Map<String, String> multiValueMetadata,
+			final Map<String, Map<String, String>> acl,
+			final boolean inheritPermissions, final File document)
+			throws RepositoryAccessException, RepositoryException {
+		logger.debug("Authentication failure? Creating new RAS");
+		destroyRepositoryAccessSession();
+		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
+
+		logger.debug("Retrying file " + document.getName());
+		uploadFile(docExistsMode, ras, basePath, remotePath, mimeType,
+				namespace, contentType, description, metadata,
+				multiValueMetadata, acl, inheritPermissions, document);
+	}
+
+	private static void uploadFile(final String docExistsMode,
 			final RepositoryAccessSession ras, final String basePath,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
@@ -194,7 +136,7 @@ public class AlfrescoSourceSink extends SourceSink {
 					description, namespace, contentType, metadata,
 					multiValueMetadata);
 			if (acl != null) {
-				for (String aclPath : acl.keySet()) {
+				for (final String aclPath : acl.keySet()) {
 
 					String parserAclPath = aclPath;
 					// add "cm:" in front of each path component
@@ -208,9 +150,9 @@ public class AlfrescoSourceSink extends SourceSink {
 					}
 
 					String remoteACLPath = basePath + parserAclPath;
-					String[] aclComponents = remoteACLPath.split("/");
+					final String[] aclComponents = remoteACLPath.split("/");
 					remoteACLPath = "";
-					for (String aclComponent : aclComponents) {
+					for (final String aclComponent : aclComponents) {
 						if ("".equals(aclComponent)) {
 							remoteACLPath += "/";
 						} else if (aclComponent.contains(":")) {
@@ -219,8 +161,8 @@ public class AlfrescoSourceSink extends SourceSink {
 							remoteACLPath += "cm:" + aclComponent + "/";
 						}
 					}
-					remoteACLPath = remoteACLPath.substring(0, remoteACLPath
-							.length() - 1);
+					remoteACLPath = remoteACLPath.substring(0,
+							remoteACLPath.length() - 1);
 
 					logger.debug("ACL path: " + remoteACLPath);
 
@@ -228,17 +170,16 @@ public class AlfrescoSourceSink extends SourceSink {
 							acl.get(aclPath));
 				}
 			}
-		} catch (RepositoryException e) {
+		} catch (final RepositoryException e) {
 			Throwable cause = e.getCause();
 			if (cause == null) {
 				cause = e;
 			}
 			logger.info("Message {}", cause.getMessage());
-			Writer result = new StringWriter();
-			PrintWriter printWriter = new PrintWriter(result);
+			final Writer result = new StringWriter();
+			final PrintWriter printWriter = new PrintWriter(result);
 			cause.printStackTrace(printWriter);
-			String stackTrace = result.toString();
-			// logger.debug("Stacktrace {}", stackTrace);
+			final String stackTrace = result.toString();
 			if (stackTrace
 					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
 				if (MODE_SKIP.equals(docExistsMode)) {
@@ -252,14 +193,12 @@ public class AlfrescoSourceSink extends SourceSink {
 				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
-					ras.updateContentByDocNameAndPath(remotePath, document
-							.getName(), document, mimeType, false);
+					ras.updateContentByDocNameAndPath(remotePath,
+							document.getName(), document, mimeType, false);
 					if (metadata != null) {
-						ras.updateMetaDataByDocNameAndPath(remotePath, document
-								.getName(), metadata);
-						// TODO: updating multivalue metadata not
-						// supported
-						// by
+						ras.updateMetaDataByDocNameAndPath(remotePath,
+								document.getName(), metadata);
+						// TODO: updating multivalue metadata not supported by
 						// RRA?
 					}
 				}
@@ -270,22 +209,22 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	@Override
-	public boolean exists(ConfiguredSourceSink sinkConfig, String remotePath,
-			String name) {
+	public boolean exists(final ConfiguredSourceSink sinkConfig,
+			final String remotePath, final String name) {
 		try {
 			try {
-				RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 				return ras.doesDocExist(name, remotePath);
-			} catch (RepositoryAccessException e) {
+			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
 					// retry
 					destroyRepositoryAccessSession();
-					RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 					try {
 						return ras.doesDocExist(name, remotePath);
-					} catch (RepositoryAccessException e2) {
+					} catch (final RepositoryAccessException e2) {
 						logger.error(e2.getMessage(), e2);
 						throw new Move2AlfException(e2.getMessage(), e2);
 					}
@@ -294,29 +233,29 @@ public class AlfrescoSourceSink extends SourceSink {
 					throw new Move2AlfException(e.getMessage(), e);
 				}
 			}
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
 		}
 	}
 
 	@Override
-	public void delete(ConfiguredSourceSink sinkConfig, String remotePath,
-			String name) {
+	public void delete(final ConfiguredSourceSink sinkConfig,
+			final String remotePath, final String name) {
 		try {
 			try {
-				RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 				ras.deleteByDocNameAndSpace(remotePath, name);
-			} catch (RepositoryAccessException e) {
+			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
 					// retry
 					destroyRepositoryAccessSession();
-					RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
 					try {
 						ras.deleteByDocNameAndSpace(remotePath, name);
-					} catch (RepositoryAccessException e2) {
+					} catch (final RepositoryAccessException e2) {
 						logger.error(e.getMessage(), e);
 						throw new Move2AlfException(e.getMessage(), e);
 					}
@@ -325,24 +264,24 @@ public class AlfrescoSourceSink extends SourceSink {
 					throw new Move2AlfException(e.getMessage(), e);
 				}
 			}
-		} catch (RepositoryException e) {
+		} catch (final RepositoryException e) {
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
 		}
 	}
 
-	private RepositoryAccessSession createRepositoryAccessSession(
-			ConfiguredSourceSink sinkConfig) {
+	private static RepositoryAccessSession createRepositoryAccessSession(
+			final ConfiguredSourceSink sinkConfig) {
 		// RepositoryAccessSession ras;
 		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
 		if (ras == null) {
 			logger.debug("Creating new RepositoryAccessSession for thread "
 					+ Thread.currentThread());
-			String user = sinkConfig.getParameter(PARAM_USER);
-			String password = sinkConfig.getParameter(PARAM_PASSWORD);
+			final String user = sinkConfig.getParameter(PARAM_USER);
+			final String password = sinkConfig.getParameter(PARAM_PASSWORD);
 			String url = sinkConfig.getParameter(PARAM_URL);
 			if (url.endsWith("/")) {
 				url = url + "api/";
@@ -353,7 +292,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			try {
 				ra = new WebServiceRepositoryAccess(new URL(url), user,
 						password);
-			} catch (MalformedURLException e1) {
+			} catch (final MalformedURLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -367,16 +306,9 @@ public class AlfrescoSourceSink extends SourceSink {
 		// return ras;
 	}
 
-	private void destroyRepositoryAccessSession() {
+	private static void destroyRepositoryAccessSession() {
 		AlfrescoSourceSink.ras.get().closeSession();
 		AlfrescoSourceSink.ras.remove();
-	}
-
-	private String getParameterWithDefault(Map<String, Object> parameterMap,
-			String parameter, String defaultValue) {
-		String value = (String) parameterMap.get(parameter);
-		value = (value != null) ? value : defaultValue;
-		return value;
 	}
 
 	@Override
