@@ -29,7 +29,10 @@ public class CommandCycleListener extends CycleListener {
 	public void cycleStart(int cycleId, Map<String, Object> parameterMap) {
 
 		Map<String, String> commandParameters = getCommandActionParameter(cycleId);
-		String command = commandParameters.get(ExecuteCommandAction.COMMAND);
+		String command = null;
+		if(commandParameters != null){
+			command = commandParameters.get(ExecuteCommandAction.COMMAND);
+		}
 
 		logger.debug("Command: " + command);
 		if (command != null && !"".equals(command)) {

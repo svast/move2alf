@@ -1,20 +1,29 @@
 package eu.xenit.move2alf;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Ignore;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.logic.JobExecutor;
 import eu.xenit.move2alf.logic.JobService;
+import eu.xenit.move2alf.logic.Scheduler;
 
-@Ignore
 public class JobsTests extends IntegrationTests {
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(JobsTests.class);
 
 	private JobService jobService;
 
@@ -25,6 +34,17 @@ public class JobsTests extends IntegrationTests {
 
 	public JobService getJobService() {
 		return jobService;
+	}
+	
+	private Scheduler scheduler;
+	
+	@Autowired 
+	public void setScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+	
+	public Scheduler getScheduler() {
+		return this.scheduler;
 	}
 	
 	@Test
@@ -40,11 +60,12 @@ public class JobsTests extends IntegrationTests {
 		assertTrue(before.before(newJob.getLastModifyDateTime()) || before.equals(newJob.getLastModifyDateTime()));
 		assertTrue(after.after(newJob.getLastModifyDateTime()) || after.equals(newJob.getLastModifyDateTime()));
 		assertEquals("admin", newJob.getCreator().getUserName());
+		getJobService().deleteJob(newJob.getId());
 	}
 	
 	@Test
 	public void testGetAllJobs() {
-		getJobService().createJob("testJob", "description of test job");
+		Job newJob  = getJobService().createJob("testJob", "description of test job");
 		List<Job> jobs = getJobService().getAllJobs();
 		assertNotNull(jobs);
 		boolean testJobInResult = false;
@@ -55,13 +76,23 @@ public class JobsTests extends IntegrationTests {
 			}
 		}
 		assertTrue(testJobInResult);
+		getJobService().deleteJob(newJob.getId());
 	}
 	
 	@Test
-	public void testGetCyclesForJob() {
-		Job newJob = getJobService().createJob("testJob", "description of test job");
+	public void testGetCyclesForJob() throws InterruptedException {
+		Job newJob = getJobService().createJob("testJob2", "description of test job");
+		
 		List<Cycle> cycles = getJobService().getCyclesForJob(newJob.getId());
 		assertNotNull(cycles);
+		assertEquals(0, cycles.size());
+		
+		getScheduler().immediately(newJob);
+		//cycles = getJobService().getCyclesForJob(newJob.getId());
+		Thread.sleep(1000);
+		
+		getJobService().deleteJob(newJob.getId());
+		//assertEquals(1, cycles.size());
 		// TODO: run job, see if cycle is created
 		// TODO: do cycles need to be sorted chronologically?
 	}
