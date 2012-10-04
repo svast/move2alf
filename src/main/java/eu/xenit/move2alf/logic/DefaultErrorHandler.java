@@ -37,7 +37,7 @@ public class DefaultErrorHandler implements ErrorHandler {
 	 */
 	@Override
 	public void handleError(FileInfo parameterMap, JobConfig jobConfig,
-			Cycle cycle, Exception e, SimpleAction simpleAction) {
+			Cycle cycle, Exception e) {
 		// TODO: handle cleaner?
 		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
 
