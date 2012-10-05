@@ -26,6 +26,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	 * SourceSink.MODE_OVERWRITE
 	 */
 	public static final String PARAM_DOCUMENT_EXISTS = "documentExists";
+	public static final String PARAM_BATCH_SIZE = "batchSize";
 
 	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
