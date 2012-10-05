@@ -20,7 +20,7 @@ public class SourceSinkFactory extends AbstractFactory<SourceSink> {
 	private static final Logger logger = LoggerFactory
 			.getLogger(SourceSinkFactory.class);
 
-	private Map<Integer, ExecutorService> threadPools = new HashMap<Integer, ExecutorService>();
+	private final Map<Integer, ExecutorService> threadPools = new HashMap<Integer, ExecutorService>();
 
 	@Override
 	protected AssignableTypeFilter getTypeFilter() {
@@ -28,26 +28,28 @@ public class SourceSinkFactory extends AbstractFactory<SourceSink> {
 	}
 
 	@Override
-	protected void initializeObject(SourceSink object) {
+	protected void initializeObject(final SourceSink object) {
 		// no initialization required for SourceSink objects
 	}
 
-	// TODO: synchronize
-	public ExecutorService getThreadPool(ConfiguredSourceSink sourceSink) {
-		ExecutorService threadPool = threadPools.get(sourceSink.getId());
-		if (threadPool != null) {
-			return threadPool;
-		} else {
-			// create new threadpool
-			String threadsValue = sourceSink.getParameter("threads");
-			int threads = DEFAULT_THREADS;
-			if (threadsValue != null) {
-				threads = Integer.parseInt(threadsValue);
+	public ExecutorService getThreadPool(final ConfiguredSourceSink sourceSink) {
+		synchronized (threadPools) {
+			final ExecutorService threadPool = threadPools.get(sourceSink
+					.getId());
+			if (threadPool != null) {
+				return threadPool;
+			} else {
+				// create new threadpool
+				final String threadsValue = sourceSink.getParameter("threads");
+				int threads = DEFAULT_THREADS;
+				if (threadsValue != null) {
+					threads = Integer.parseInt(threadsValue);
+				}
+				final ExecutorService newThreadPool = Executors
+						.newFixedThreadPool(threads);
+				threadPools.put(sourceSink.getId(), newThreadPool);
+				return newThreadPool;
 			}
-			ExecutorService newThreadPool = Executors
-					.newFixedThreadPool(threads);
-			threadPools.put(sourceSink.getId(), newThreadPool);
-			return newThreadPool;
 		}
 	}
 }
