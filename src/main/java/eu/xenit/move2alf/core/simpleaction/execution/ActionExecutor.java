@@ -38,16 +38,17 @@ public class ActionExecutor {
 		this(defaultExecutorService);
 	}
 
-	public ActionExecutor(ExecutorService executorService) {
+	public ActionExecutor(final ExecutorService executorService) {
 		this.completionService = new ExecutorCompletionService<List<FileInfo>>(
 				executorService);
 	}
 
-	public List<FileInfo> execute(List<FileInfo> input, JobConfig jobConfig,
-			Cycle cycle, SimpleAction action, ActionConfig config,
-			SuccessHandler successHandler, ErrorHandler errorHandler) {
-		List<FileInfo> output = new ArrayList<FileInfo>();
-		for (FileInfo parameterMap : input) {
+	public List<FileInfo> execute(final List<FileInfo> input,
+			final JobConfig jobConfig, final Cycle cycle,
+			final SimpleAction action, final ActionConfig config,
+			final SuccessHandler successHandler, final ErrorHandler errorHandler) {
+		final List<FileInfo> output = new ArrayList<FileInfo>();
+		for (final FileInfo parameterMap : input) {
 			parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
 			completionService.submit(new ActionCallable(action, parameterMap,
 					config, errorHandler, jobConfig, cycle));
@@ -58,21 +59,22 @@ public class ActionExecutor {
 				if ((i + 1) % 100 == 0) {
 					logger.info("Processed " + (i + 1) + " files out of "
 							+ input.size() + " (" + 100 * (float) (i + 1)
-							/ (float) input.size() + "%)");
+							/ input.size() + "%)");
 				}
-				Future<List<FileInfo>> futureOutput = completionService.take();
-				List<FileInfo> fileInfos = futureOutput.get();
+				final Future<List<FileInfo>> futureOutput = completionService
+						.take();
+				final List<FileInfo> fileInfos = futureOutput.get();
 				output.addAll(fileInfos);
-				for (FileInfo fileInfo : fileInfos) {
+				for (final FileInfo fileInfo : fileInfos) {
 					if (successHandler != null) {
 						successHandler
 								.handleSuccess(fileInfo, jobConfig, cycle);
 					}
 				}
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				logger.error("Thread interrupted", e);
-			} catch (ExecutionException e) {
-				Throwable t = e.getCause();
+			} catch (final ExecutionException e) {
+				final Throwable t = e.getCause();
 				if (t instanceof Move2AlfException) {
 					// action failed, no output
 				} else {
@@ -92,9 +94,10 @@ public class ActionExecutor {
 		private final JobConfig jobConfig;
 		private final Cycle cycle;
 
-		public ActionCallable(SimpleAction action, FileInfo fileInfo,
-				ActionConfig config, ErrorHandler errorHandler,
-				JobConfig jobConfig, Cycle cycle) {
+		public ActionCallable(final SimpleAction action,
+				final FileInfo fileInfo, final ActionConfig config,
+				final ErrorHandler errorHandler, final JobConfig jobConfig,
+				final Cycle cycle) {
 			this.simpleAction = action;
 			this.fileInfo = fileInfo;
 			this.actionConfig = config;
@@ -107,7 +110,7 @@ public class ActionExecutor {
 		public List<FileInfo> call() {
 			try {
 				return simpleAction.execute(fileInfo, actionConfig);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				if (errorHandler != null) {
 					errorHandler.handleError(fileInfo, jobConfig, cycle, e);
 				}
