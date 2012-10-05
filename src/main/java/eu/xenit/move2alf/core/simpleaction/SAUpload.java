@@ -12,6 +12,7 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 
@@ -28,6 +29,17 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	public static final String PARAM_DOCUMENT_EXISTS = "documentExists";
 	public static final String PARAM_BATCH_SIZE = "batchSize";
 
+	/*
+	 * Store batches here before submitting.
+	 * 
+	 * The map is necessary because multiple jobs could be running at the same
+	 * time so threads can be reused over jobs. Cycle id is used as key.
+	 * 
+	 * ThreadLocal to prevent concurrency complexity, multiple threads can be
+	 * uploading at the same time.
+	 */
+	private static final ThreadLocal<Map<Integer, Batch>> batches = new ThreadLocal<Map<Integer, Batch>>();
+
 	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
 	}
@@ -35,6 +47,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
 			final ActionConfig config) {
+
 		final List<FileInfo> output = new ArrayList<FileInfo>();
 		final FileInfo newParameterMap = new FileInfo();
 		newParameterMap.putAll(parameterMap);
