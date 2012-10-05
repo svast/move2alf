@@ -116,6 +116,8 @@
 
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
 		lazy-init="false">
+		<property name="registrationBehaviorName"
+					value="REGISTRATION_REPLACE_EXISTING"/>
 		<property name="beans">
 			<map>
 				<entry key="bean:name=Move2Alf" value-ref="move2alfJmxBean" />
