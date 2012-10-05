@@ -17,10 +17,10 @@ import freemarker.template.TemplateModelException;
 public class FreemarkerCheckToolTest {
 	public static FreemarkerCheckTool freemarkerCheckTool;
 
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		freemarkerCheckTool = new FreemarkerCheckTool("classpath:eu/xenit/move2alf/freemarkerchecktool");
+		freemarkerCheckTool = new FreemarkerCheckTool(
+				"classpath:eu/xenit/move2alf/freemarkerchecktool");
 	}
 
 	@AfterClass
@@ -35,42 +35,47 @@ public class FreemarkerCheckToolTest {
 	public void tearDown() throws Exception {
 	}
 
-	private RootMap createRootMap () throws Exception {
-		RootMap rootMap = freemarkerCheckTool.createRootMap();
-		
-		JobConfig jobConfig = new JobConfig();
+	private RootMap createRootMap() throws Exception {
+		final RootMap rootMap = freemarkerCheckTool.createRootMap();
+
+		final JobConfig jobConfig = new JobConfig();
 		jobConfig.setName("x");
 		jobConfig.setDescription("x");
-		
+
 		rootMap.addValue("job", jobConfig);
-		
+
 		return rootMap;
 	}
 
 	@Test
 	public void testTemplate() throws Exception {
-		RootMap rootMap = createRootMap();
-		String result = freemarkerCheckTool.processTemplateIntoString("testTemplate.ftl", rootMap);
-        Assert.notNull(result);
-        assertEquals("    <textarea id=\"description\" name=\"description\" >x</textarea>\n" 
-	        + "param=\"x\"; Name: x; Description: x", result);
+		final RootMap rootMap = createRootMap();
+		final String result = freemarkerCheckTool.processTemplateIntoString(
+				"testTemplate.ftl", rootMap);
+		Assert.notNull(result);
+		assertEquals(
+				"    <textarea id=\"description\" name=\"description\" >x</textarea>\n"
+						+ "param=\"x\"; Name: x; Description: x", result);
 	}
 
-	@Test (expected = InvalidReferenceException.class)
+	@Test(expected = InvalidReferenceException.class)
 	public void testTemplate_invalidFmReference() throws Exception {
-		RootMap rootMap = createRootMap();
-		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidFmReference.ftl", rootMap);
+		final RootMap rootMap = createRootMap();
+		freemarkerCheckTool.processTemplateIntoString(
+				"testTemplate_invalidFmReference.ftl", rootMap);
 	}
 
-	@Test (expected = TemplateModelException.class)
+	@Test(expected = TemplateModelException.class)
 	public void testTemplate_invalidSpringBinding() throws Exception {
-		RootMap rootMap = createRootMap();
-		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidSpringBinding.ftl", rootMap);
+		final RootMap rootMap = createRootMap();
+		freemarkerCheckTool.processTemplateIntoString(
+				"testTemplate_invalidSpringBinding.ftl", rootMap);
 	}
 
-	@Test (expected = TemplateException.class)
+	@Test(expected = TemplateException.class)
 	public void testTemplate_invalidMacroParam() throws Exception {
-		RootMap rootMap = createRootMap();
-		freemarkerCheckTool.processTemplateIntoString("testTemplate_invalidMacroParam.ftl", rootMap);
+		final RootMap rootMap = createRootMap();
+		freemarkerCheckTool.processTemplateIntoString(
+				"testTemplate_invalidMacroParam.ftl", rootMap);
 	}
 }
