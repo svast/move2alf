@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,12 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	 * ThreadLocal to prevent concurrency complexity, multiple threads can be
 	 * uploading at the same time.
 	 */
-	private static final ThreadLocal<Map<Integer, Batch>> batches = new ThreadLocal<Map<Integer, Batch>>();
+	private static final ThreadLocal<Map<Integer, Batch>> batches = new ThreadLocal<Map<Integer, Batch>>() {
+		@Override
+		protected synchronized Map<Integer, Batch> initialValue() {
+			return new HashMap<Integer, Batch>();
+		}
+	};
 
 	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
@@ -48,38 +54,69 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	public List<FileInfo> execute(final FileInfo parameterMap,
 			final ActionConfig config) {
 
+		final Map<Integer, Batch> batches = SAUpload.batches.get();
+		Batch batch = null;
+		final Integer cycleId = (Integer) parameterMap
+				.get(Parameters.PARAM_CYCLE);
+		if (batches.containsKey(cycleId)) {
+			batch = batches.get(cycleId);
+		} else {
+			batch = new Batch();
+			batches.put(cycleId, batch);
+		}
+		final Integer maxBatchSize = Integer.parseInt(config
+				.get(PARAM_BATCH_SIZE));
+
+		if (batch.size() < maxBatchSize) {
+			batch.add(parameterMap);
+		}
+
+		if (batch.size() == maxBatchSize) {
+			final List<FileInfo> output = upload(batch, config);
+			batch.clear();
+			return output;
+		} else {
+			return new ArrayList<FileInfo>();
+		}
+	}
+
+	private List<FileInfo> upload(final Batch batch, final ActionConfig config) {
 		final List<FileInfo> output = new ArrayList<FileInfo>();
-		final FileInfo newParameterMap = new FileInfo();
-		newParameterMap.putAll(parameterMap);
+		for (final FileInfo parameterMap : batch) {
+			final FileInfo newParameterMap = new FileInfo();
+			newParameterMap.putAll(parameterMap);
 
-		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
-		final String relativePath = getParameterWithDefault(parameterMap,
-				Parameters.PARAM_RELATIVE_PATH, "");
-		final String remotePath = normalizeRemotePath(basePath, relativePath);
-		logger.debug("Writing to " + remotePath);
-		final String mimeType = getParameterWithDefault(parameterMap,
-				Parameters.PARAM_MIMETYPE, "text/plain");
-		final String namespace = getParameterWithDefault(parameterMap,
-				Parameters.PARAM_NAMESPACE,
-				"{http://www.alfresco.org/model/content/1.0}");
-		final String contentType = getParameterWithDefault(parameterMap,
-				Parameters.PARAM_CONTENTTYPE, "content");
-		final String description = getParameterWithDefault(parameterMap,
-				Parameters.PARAM_DESCRIPTION, "");
-		final Map<String, String> metadata = (Map<String, String>) parameterMap
-				.get(Parameters.PARAM_METADATA);
-		final Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
-				.get(Parameters.PARAM_MULTI_VALUE_METADATA);
-		final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
-				.get(Parameters.PARAM_ACL);
-		final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
-		final File document = (File) parameterMap.get(Parameters.PARAM_FILE);
+			final String basePath = normalizeBasePath(config.get(PARAM_PATH));
+			final String relativePath = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_RELATIVE_PATH, "");
+			final String remotePath = normalizeRemotePath(basePath,
+					relativePath);
+			logger.debug("Writing to " + remotePath);
+			final String mimeType = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_MIMETYPE, "text/plain");
+			final String namespace = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_NAMESPACE,
+					"{http://www.alfresco.org/model/content/1.0}");
+			final String contentType = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_CONTENTTYPE, "content");
+			final String description = getParameterWithDefault(parameterMap,
+					Parameters.PARAM_DESCRIPTION, "");
+			final Map<String, String> metadata = (Map<String, String>) parameterMap
+					.get(Parameters.PARAM_METADATA);
+			final Map<String, String> multiValueMetadata = (Map<String, String>) parameterMap
+					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
+			final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
+					.get(Parameters.PARAM_ACL);
+			final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
+			final File document = (File) parameterMap
+					.get(Parameters.PARAM_FILE);
 
-		getSink().send(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
-				basePath, remotePath, mimeType, namespace, contentType,
-				description, metadata, multiValueMetadata, acl,
-				inheritPermissions, document);
-		output.add(newParameterMap);
+			getSink().send(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
+					basePath, remotePath, mimeType, namespace, contentType,
+					description, metadata, multiValueMetadata, acl,
+					inheritPermissions, document);
+			output.add(newParameterMap);
+		}
 		return output;
 	}
 
