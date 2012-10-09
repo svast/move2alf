@@ -102,6 +102,35 @@ public class AlfrescoSourceSink extends SourceSink {
 		}
 	}
 
+	@Override
+	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final List<Document> documents) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setACL(final ConfiguredSourceSink configuredSourceSink,
+			final ACL acl) {
+		if (acl != null && acl.acls != null) {
+			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
+			for (final String aclPath : acl.acls.keySet()) {
+				try {
+					ras.setAccessControlList(aclPath, acl.inheritsPermissions,
+							acl.acls.get(aclPath));
+					// TODO: exception handling
+				} catch (final RepositoryAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (final RepositoryException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
 	private static void retryUpload(
 			final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final String basePath,
@@ -324,13 +353,5 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public String getName() {
 		return "Alfresco";
-	}
-
-	@Override
-	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final String basePath,
-			final List<Document> documents, final List<ACL> acls) {
-		// TODO Auto-generated method stub
-
 	}
 }

@@ -86,8 +86,14 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final String basePath,
-			final List<Document> documents, final List<ACL> acls) {
+			final String docExistsMode, final List<Document> documents) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setACL(final ConfiguredSourceSink configuredSourceSink,
+			final ACL acls) {
 		// TODO Auto-generated method stub
 
 	}

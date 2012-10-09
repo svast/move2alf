@@ -22,8 +22,10 @@ public abstract class SourceSink extends ConfigurableObject {
 			File document);
 
 	public abstract void sendBatch(ConfiguredSourceSink configuredSourceSink,
-			String docExistsMode, String basePath, List<Document> documents,
-			List<ACL> acls);
+			String docExistsMode, List<Document> documents);
+
+	public abstract void setACL(ConfiguredSourceSink configuredSourceSink,
+			ACL acls);
 
 	public abstract List<File> list(ConfiguredSourceSink sourceConfig,
 			String path, boolean recursive);
