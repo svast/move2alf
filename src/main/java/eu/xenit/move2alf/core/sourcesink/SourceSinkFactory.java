@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core;
+package eu.xenit.move2alf.core.sourcesink;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.core.AbstractFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 @Service("sourceSinkFactory")

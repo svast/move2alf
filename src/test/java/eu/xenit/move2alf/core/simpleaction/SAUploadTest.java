@@ -9,10 +9,12 @@ import java.util.Map;
 import org.junit.Test;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.core.sourcesink.ACL;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class SAUploadTest {
 	@Test
@@ -127,6 +129,15 @@ public class SAUploadTest {
 			public String getCategory() {
 				// TODO Auto-generated method stub
 				return null;
+			}
+
+			@Override
+			public void sendBatch(
+					final ConfiguredSourceSink configuredSourceSink,
+					final String docExistsMode, final String basePath,
+					final List<Document> documents, final List<ACL> acls) {
+				// TODO Auto-generated method stub
+
 			}
 
 		};

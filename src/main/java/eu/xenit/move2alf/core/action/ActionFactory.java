@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core;
+package eu.xenit.move2alf.core.action;
 
 import java.util.Map;
 
@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Service;
 
+import eu.xenit.move2alf.core.AbstractFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.JobService;
 
 @Service("actionFactory")

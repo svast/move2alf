@@ -20,9 +20,8 @@ import org.springframework.mail.SimpleMailMessage;
 
 import akka.actor.ActorRef;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.action.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -35,6 +34,7 @@ import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;

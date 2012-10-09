@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
 import eu.xenit.move2alf.repository.RepositoryFatalException;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
 
 public class AlfrescoSourceSink extends SourceSink {
@@ -324,5 +324,13 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public String getName() {
 		return "Alfresco";
+	}
+
+	@Override
+	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final String basePath,
+			final List<Document> documents, final List<ACL> acls) {
+		// TODO Auto-generated method stub
+
 	}
 }

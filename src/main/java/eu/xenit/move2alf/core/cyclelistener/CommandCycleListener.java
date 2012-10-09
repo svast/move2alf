@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.action.ExecuteCommandAction;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.action.SourceAction;

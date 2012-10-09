@@ -13,11 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import eu.xenit.move2alf.core.Action;
-import eu.xenit.move2alf.core.ActionFactory;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.SourceSink;
-import eu.xenit.move2alf.core.SourceSinkFactory;
+import eu.xenit.move2alf.core.action.Action;
+import eu.xenit.move2alf.core.action.ActionFactory;
 import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -33,6 +31,8 @@ import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")

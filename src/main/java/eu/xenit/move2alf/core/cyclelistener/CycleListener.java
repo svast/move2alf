@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core;
+package eu.xenit.move2alf.core.cyclelistener;
 
 import java.util.Map;
 

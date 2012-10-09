@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.cyclelistener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.xenit.move2alf.core.CycleListener;
 
 public class LoggingCycleListener extends CycleListener {
 	private static final Logger logger = LoggerFactory

@@ -10,12 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 

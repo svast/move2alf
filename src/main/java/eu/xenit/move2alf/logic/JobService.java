@@ -12,9 +12,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import akka.actor.ActorRef;
-import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.SourceSink;
+import eu.xenit.move2alf.core.action.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -24,6 +23,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 

@@ -12,11 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.DebuggingCountDownLatch;
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 public class SourceAction extends Action {
 	public static final String PARAM_PATH = "path";

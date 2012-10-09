@@ -6,11 +6,11 @@ import java.util.List;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 public class SAList extends SimpleActionWithSourceSink {
 

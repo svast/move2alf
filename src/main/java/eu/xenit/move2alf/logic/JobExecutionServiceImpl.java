@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.Cycle;
