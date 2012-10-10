@@ -94,6 +94,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			throw new Move2AlfException(e.getMessage(), e);
 		} catch (final RepositoryFatalException e) {
 			logger.error("Fatal Exception", e);
+			throw new Move2AlfException(e.getMessage(), e);
 			// TODO: stop job instead of stopping tomcat
 			// System.exit(1);
 		} catch (final RuntimeException e2) {
@@ -105,8 +106,107 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final List<Document> documents) {
-		// TODO Auto-generated method stub
+		try {
+			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
+			try {
+				logger.debug("Uploading " + documents.size() + " files");
+				uploadBatch(docExistsMode, ras, documents);
+			} catch (final RepositoryAccessException e) {
+				if (!(e.getMessage() == null)
+						&& (e.getMessage()
+								.indexOf("security processing failed") != -1)) {
+					retryBatch(configuredSourceSink, docExistsMode, documents);
+				} else {
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
+				}
+			} catch (final RuntimeException e) {
+				if ("Error writing content to repository server".equals(e
+						.getMessage())) {
+					retryBatch(configuredSourceSink, docExistsMode, documents);
+				} else {
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
+				}
+			}
+		} catch (final RepositoryAccessException e) {
+			// we end up here if there is a communication error during a session
+			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage(), e);
+		} catch (final RepositoryException e) {
+			// we end up here if the request could not be handled by the
+			// repository
+			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage(), e);
+		} catch (final WebServiceException e) {
+			logger.error(e.getMessage(), e);
+			throw new Move2AlfException(e.getMessage(), e);
+		} catch (final RepositoryFatalException e) {
+			logger.error("Fatal Exception", e);
+			throw new Move2AlfException(e.getMessage(), e);
+			// TODO: stop job instead of stopping tomcat
+			// System.exit(1);
+		} catch (final RuntimeException e2) {
+			logger.error(e2.getMessage(), e2);
+			throw new Move2AlfException(e2.getMessage(), e2);
+		}
+	}
 
+	private void uploadBatch(final String docExistsMode,
+			final RepositoryAccessSession ras, final List<Document> documents)
+			throws RepositoryAccessException, RepositoryException {
+		try {
+			ras.storeDocsAndCreateParentSpaces(documents);
+		} catch (final RepositoryException e) {
+			Throwable cause = e.getCause();
+			if (cause == null) {
+				cause = e;
+			}
+			logger.info("Message {}", cause.getMessage());
+			final Writer result = new StringWriter();
+			final PrintWriter printWriter = new PrintWriter(result);
+			cause.printStackTrace(printWriter);
+			final String stackTrace = result.toString();
+			if (stackTrace
+					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
+				if (MODE_SKIP.equals(docExistsMode)) {
+					// ignore
+				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
+					logger.warn("One or more of the documents in this batch already exist in the repository");
+					throw new Move2AlfException(
+							"One or more of the documents in this batch already exist in the repository");
+				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
+					logger.info("One or more of the documents in this batch already exist in the repository. "
+							+ "Overwriting documents one-by-one.");
+					for (final Document doc : documents) {
+						logger.info("- Overwriting document "
+								+ doc.file.getName());
+						ras.updateContentByDocNameAndPath(doc.spacePath,
+								doc.file.getName(), doc.file, doc.mimeType,
+								false);
+						if (doc.meta != null) {
+							ras.updateMetaDataByDocNameAndPath(doc.spacePath,
+									doc.file.getName(), doc.meta);
+							// TODO: updating multivalue metadata not supported
+							// by RRA?
+						}
+					}
+				}
+			} else {
+				throw e;
+			}
+		}
+	}
+
+	private void retryBatch(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final List<Document> documents)
+			throws RepositoryAccessException, RepositoryException {
+		logger.debug("Authentication failure? Creating new RAS");
+		destroyRepositoryAccessSession();
+		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
+
+		logger.debug("Retrying batch");
+		uploadBatch(docExistsMode, ras, documents);
 	}
 
 	@Override
@@ -118,17 +218,30 @@ public class AlfrescoSourceSink extends SourceSink {
 				try {
 					ras.setAccessControlList(aclPath, acl.inheritsPermissions,
 							acl.acls.get(aclPath));
-					// TODO: exception handling
 				} catch (final RepositoryAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// we end up here if there is a communication error during a
+					// session
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
 				} catch (final RepositoryException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// we end up here if the request could not be handled by the
+					// repository
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
+				} catch (final WebServiceException e) {
+					logger.error(e.getMessage(), e);
+					throw new Move2AlfException(e.getMessage(), e);
+				} catch (final RepositoryFatalException e) {
+					logger.error("Fatal Exception", e);
+					throw new Move2AlfException(e.getMessage(), e);
+					// TODO: stop job instead of stopping tomcat
+					// System.exit(1);
+				} catch (final RuntimeException e2) {
+					logger.error(e2.getMessage(), e2);
+					throw new Move2AlfException(e2.getMessage(), e2);
 				}
 			}
 		}
-
 	}
 
 	private static void retryUpload(
