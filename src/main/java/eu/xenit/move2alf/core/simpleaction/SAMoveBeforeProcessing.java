@@ -1,8 +1,10 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
@@ -17,7 +19,7 @@ public class SAMoveBeforeProcessing extends SimpleAction {
 	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
-			final ActionConfig config) {
+			final ActionConfig config, final Map<String, Serializable> state) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		String destination = config.get(PARAM_MOVE_BEFORE_PROCESSING_PATH);
 		String source = (String) parameterMap.get(Parameters.PARAM_INPUT_PATH);

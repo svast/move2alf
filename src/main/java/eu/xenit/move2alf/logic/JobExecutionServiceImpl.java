@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import eu.xenit.move2alf.core.cyclestate.CycleStateManager;
+import eu.xenit.move2alf.core.cyclestate.StateCycleListener;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +35,8 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("jobExecutionService")
 @Transactional
-public class JobExecutionServiceImpl extends AbstractHibernateService implements
-		JobExecutionService {
+public class JobExecutionServiceImpl extends AbstractHibernateService
+        implements JobExecutionService {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobExecutionServiceImpl.class);
@@ -44,6 +46,8 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	private PipelineAssembler pipelineAssembler;
 
 	private final List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
+
+    private CycleStateManager stateManager;
 
 	@Autowired
 	public void setJobService(final JobService jobService) {
@@ -63,15 +67,21 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		return pipelineAssembler;
 	}
 
+    @Autowired
+    public void setStateManager(CycleStateManager stateManager) {
+        this.stateManager = stateManager;
+    }
+
 	@PostConstruct
 	public void init() {
 		registerCycleListener(new LoggingCycleListener());
 		registerCycleListener(new CommandCycleListener());
 		// removed MoveCycleListener
 		registerCycleListener(new ReportCycleListener());
+        registerCycleListener(new StateCycleListener(this.stateManager));
 	}
 
-	@Override
+    @Override
 	public void registerCycleListener(final CycleListener listener) {
 		listener.setJobService(getJobService());
 		this.cycleListeners.add(listener);
@@ -122,7 +132,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
 		final List<FileInfo> output = executor.execute(input, jobConfig, cycle,
-				action, config, successHandler, errorHandler);
+				action, config, successHandler, errorHandler, this.stateManager.getState(cycle.getId()));
 
 		final Date stop = new Date();
 		final long time = stop.getTime() - start.getTime();

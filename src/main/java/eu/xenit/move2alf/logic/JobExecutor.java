@@ -24,7 +24,7 @@ public class JobExecutor implements org.quartz.Job {
 				SchedulerImpl.JOB_ID);
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
-		JobExecutionService jobExecutionService = (JobExecutionService) context
+        JobExecutionService jobExecutionService = (JobExecutionService) context
 				.getMergedJobDataMap().get(SchedulerImpl.JOB_EXECUTION_SERVICE);
 		UsageService usageService = (UsageService) context.getMergedJobDataMap().get(SchedulerImpl.USAGE_SERVICE);
 

@@ -71,18 +71,22 @@ public class Parameters {
 	public static final String PARAM_REPORT_FIELDS = "reportFields";
 
 	/**
-	 * INTERNAL Id of the current cycle Type: Integer
+	 * Alternative to throwing Move2AlfException.
+	 * Type: String (VALUE_OK | VALUE_FAILED)
 	 */
-	public static final String PARAM_CYCLE = "cycle";
+	public static final String PARAM_STATUS = "status";
+	public static final String VALUE_FAILED = "failed";
+	public static final String VALUE_OK = "ok";
+	public static final String PARAM_ERROR_MESSAGE = "errormessage";
 
 	/************************************************************************************
 	 * TO CHECK
 	 ************************************************************************************/
 
 	public static final String PARAM_STAGE = "stage";
-	public static final String VALUE_AFTER = "after";
-	public static final String VALUE_BEFORE = "before";
 
+    public static final String VALUE_AFTER = "after";
+    public static final String VALUE_BEFORE = "before";
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
 
 	public static final String PARAM_INPUT_FILE = "inputFile";
@@ -93,9 +97,16 @@ public class Parameters {
 	 * DEPRECATED
 	 ************************************************************************************/
 
+    /**
+     * INTERNAL Id of the current cycle Type: Integer
+     * @deprecated
+     */
+    @Deprecated
+    public static final String PARAM_CYCLE = "cycle";
+
 	/**
 	 * Counter with number of files to load. Type: CountDownLatch
-	 * 
+	 *
 	 * @deprecated
 	 */
 	@Deprecated
@@ -103,7 +114,7 @@ public class Parameters {
 
 	/**
 	 * INTERNAL
-	 * 
+	 *
 	 * @deprecated
 	 */
 	@Deprecated
@@ -116,26 +127,5 @@ public class Parameters {
 	 */
 	@Deprecated
 	public static final String PARAM_THREAD = "thread";
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public static final String PARAM_STATUS = "status";
-	/**
-	 * @deprecated Throw Move2AlfException instead.
-	 */
-	@Deprecated
-	public static final String VALUE_FAILED = "failed";
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public static final String VALUE_OK = "ok";
-	/**
-	 * @deprecated Throw Move2AlfException instead.
-	 */
-	@Deprecated
-	public static final String PARAM_ERROR_MESSAGE = "errormessage";
 
 }

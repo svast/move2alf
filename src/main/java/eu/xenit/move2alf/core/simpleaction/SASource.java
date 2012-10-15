@@ -1,8 +1,10 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
@@ -15,7 +17,7 @@ public class SASource extends SimpleAction {
 	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
-			final ActionConfig config) {
+			final ActionConfig config, final Map<String, Serializable> state) {
 		FileSourceSink source = new FileSourceSink();
 		File inputFile = (File) parameterMap.get(Parameters.PARAM_FILE);
 		String inputPath = Util.normalizePath(inputFile.getAbsolutePath());

@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,106 +33,105 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	 */
 	public static final String PARAM_DOCUMENT_EXISTS = "documentExists";
 	public static final String PARAM_BATCH_SIZE = "batchSize";
+    public static final String STATE_BATCH = "batch";
+    public static final String STATE_ACL_BATCH = "aclBatch";
 
-	/*
-	 * Store batches here before submitting.
-	 * 
-	 * The map is necessary because multiple jobs could be running at the same
-	 * time so threads can be reused over jobs. Cycle id is used as key.
-	 * 
-	 * ThreadLocal to prevent concurrency complexity, multiple threads can be
-	 * uploading at the same time.
-	 */
-	private static final ThreadLocal<Map<Integer, Batch>> batches = new ThreadLocal<Map<Integer, Batch>>() {
-		@Override
-		protected synchronized Map<Integer, Batch> initialValue() {
-			return new HashMap<Integer, Batch>();
-		}
-	};
-
-	private static final ThreadLocal<Map<Integer, List<ACL>>> aclBatches = new ThreadLocal<Map<Integer, List<ACL>>>() {
-		@Override
-		protected synchronized Map<Integer, List<ACL>> initialValue() {
-			return new HashMap<Integer, List<ACL>>();
-		}
-	};
-
-	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
+    public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
 	}
 
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
-			final ActionConfig config) {
+			final ActionConfig config, final Map<String, Serializable> state) {
 		final Integer maxBatchSize = Integer.parseInt(config
 				.get(PARAM_BATCH_SIZE));
-		final Integer cycleId = (Integer) parameterMap
-				.get(Parameters.PARAM_CYCLE);
 
-		final Batch batch = getCurrentBatch(cycleId);
-		final List<ACL> aclBatch = getCurrentACLBatch(cycleId);
+		final Batch batch = getCurrentBatch(state);
+		final List<ACL> aclBatch = getCurrentACLBatch(state);
 
-		if (batch.size() < maxBatchSize) {
-			batch.add(parameterMap);
+        boolean uploadNow = false;
+        Batch batchToUpload = new Batch();
+        List<ACL> aclsToSet = new ArrayList<ACL>();
 
-			final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
-					.get(Parameters.PARAM_ACL);
-			if (acl != null) {
-				final String basePath = normalizeBasePath(config
-						.get(PARAM_PATH));
-				final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
-				for (final String aclPath : acl.keySet()) {
-					normalizedAcl.put(normalizeAclPath(basePath, aclPath),
-							acl.get(aclPath));
-				}
-				final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
-				aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
-			}
-		} else {
-			// this should never happen
-			throw new Move2AlfException(
-					"Batch size too big, failed to commit batch?");
-		}
+        synchronized (batch) {
+            if (batch.size() < maxBatchSize) {
+                batch.add(parameterMap);
 
-		if (batch.size() == maxBatchSize) {
+                final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
+                        .get(Parameters.PARAM_ACL);
+                if (acl != null) {
+                    final String basePath = normalizeBasePath(config
+                            .get(PARAM_PATH));
+                    final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
+                    for (final String aclPath : acl.keySet()) {
+                        normalizedAcl.put(normalizeAclPath(basePath, aclPath),
+                                acl.get(aclPath));
+                    }
+                    final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
+                    aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
+                }
+            } else {
+                // this should never happen
+                throw new Move2AlfException(
+                        "Batch size too big, failed to commit batch?");
+            }
+
+            if (batch.size() == maxBatchSize) {
+                uploadNow = true;
+                // make a local copies
+                batchToUpload = new Batch(batch);
+                batch.clear();
+                aclsToSet = new ArrayList<ACL>(aclBatch);
+                aclBatch.clear();
+            }
+        }
+
+        // Move slow IO code outside of synchronized block
+        if (uploadNow) {
+            final List<FileInfo> output = upload(batchToUpload, config);
+            for (final ACL acl : aclsToSet) {
+                getSink().setACL(getSinkConfig(), acl);
+            }
+            return output;
+        }  else {
+            return new ArrayList<FileInfo>();
+        }
+    }
+
+	@Override
+	public List<FileInfo> initializeState(final ActionConfig config, final Map<String, Serializable> state) {
+		state.put(STATE_BATCH, new Batch());
+		state.put(STATE_ACL_BATCH, new ArrayList<ACL>());
+		return null;
+	}
+
+	@Override
+	public List<FileInfo> cleanupState(final ActionConfig config, final Map<String, Serializable> state) {
+		final Batch batch = getCurrentBatch(state);
+		if (batch.size() > 0) {
+			final List<ACL> aclBatch = getCurrentACLBatch(state);
 			final List<FileInfo> output = upload(batch, config);
-			batch.clear();
-
 			for (final ACL acl : aclBatch) {
 				getSink().setACL(getSinkConfig(), acl);
 			}
-			aclBatch.clear();
+			state.remove(STATE_BATCH);
+			state.remove(STATE_ACL_BATCH);
 			return output;
 		} else {
-			return new ArrayList<FileInfo>();
+			return null;
 		}
 	}
 
-	private List<ACL> getCurrentACLBatch(final Integer cycleId) {
-		final Map<Integer, List<ACL>> aclBatches = SAUpload.aclBatches.get();
-		List<ACL> aclBatch = null;
-		if (aclBatches.containsKey(cycleId)) {
-			aclBatch = aclBatches.get(cycleId);
-		} else {
-			aclBatch = new ArrayList<ACL>();
-			aclBatches.put(cycleId, aclBatch);
-		}
-		return aclBatch;
+	private Batch getCurrentBatch(final Map<String, Serializable> state) {
+		return (Batch) state.get(STATE_BATCH);
 	}
 
-	private Batch getCurrentBatch(final Integer cycleId) {
-		final Map<Integer, Batch> batches = SAUpload.batches.get();
-		Batch batch = null;
-		if (batches.containsKey(cycleId)) {
-			batch = batches.get(cycleId);
-		} else {
-			batch = new Batch();
-			batches.put(cycleId, batch);
-		}
-		return batch;
+	private List<ACL> getCurrentACLBatch(final Map<String, Serializable> state) {
+		return (List<ACL>) state.get(STATE_ACL_BATCH);
 	}
 
-	private List<FileInfo> upload(final Batch batch, final ActionConfig config) {
+	private List<FileInfo> upload(final Batch batch,
+			final ActionConfig config) {
 		final List<FileInfo> output = new ArrayList<FileInfo>();
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));

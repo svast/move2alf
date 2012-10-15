@@ -6,6 +6,7 @@ import static eu.xenit.move2alf.common.Parameters.PARAM_RELATIVE_PATH;
 import static eu.xenit.move2alf.common.Parameters.PARAM_STATUS;
 import static eu.xenit.move2alf.common.Parameters.VALUE_FAILED;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ public class SimpleActionWrapper extends SimpleAction {
 
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
-			final ActionConfig config) {
+			final ActionConfig config, final Map<String, Serializable> state) {
 		// Map<String, Object> newParameterMap = new HashMap<String,
 		// Object>(parameterMap);
 		parameterMap.put(PARAM_COUNTER, new CountDownLatch(0));

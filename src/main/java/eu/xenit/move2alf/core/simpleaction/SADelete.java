@@ -1,8 +1,10 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -20,7 +22,7 @@ public class SADelete extends SimpleActionWithSourceSink {
 	}
 
 	@Override
-	public List<FileInfo> execute(FileInfo parameterMap, ActionConfig config) {
+	public List<FileInfo> execute(FileInfo parameterMap, ActionConfig config, final Map<String, Serializable> state) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		FileInfo newParameterMap = new FileInfo();
 		newParameterMap.putAll(parameterMap);
