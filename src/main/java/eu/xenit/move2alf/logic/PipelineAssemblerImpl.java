@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import eu.xenit.move2alf.core.simpleaction.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,6 @@ import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.simpleaction.SADelete;
-import eu.xenit.move2alf.core.simpleaction.SAFilter;
-import eu.xenit.move2alf.core.simpleaction.SAList;
-import eu.xenit.move2alf.core.simpleaction.SAMimeType;
-import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
-import eu.xenit.move2alf.core.simpleaction.SASource;
-import eu.xenit.move2alf.core.simpleaction.SAUpload;
-import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
@@ -553,6 +546,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					successHandler, errorHandler, new ActionExecutor(
 							executorService)));
 		}
+
+		pipeline.add(new PipelineStep(new SAError(), null, null, errorHandler));
 
 		return pipeline;
 	}
