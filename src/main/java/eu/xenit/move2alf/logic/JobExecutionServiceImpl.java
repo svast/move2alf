@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -111,14 +112,15 @@ public class JobExecutionServiceImpl extends AbstractHibernateService
 			input.add(inputMap);
 		}
 
+		final Map<String, Serializable> state = this.stateManager.getState(cycle.getId());
 		for (final PipelineStep step : pipeline) {
-			input = executePipelineStep(step, input, jobConfig, cycle);
+			input = executePipelineStep(step, input, jobConfig, cycle, state);
 		}
 	}
 
 	private List<FileInfo> executePipelineStep(final PipelineStep step,
 			final List<FileInfo> input, final JobConfig jobConfig,
-			final Cycle cycle) {
+			final Cycle cycle, Map<String, Serializable> state) {
 		final SimpleAction action = step.getAction();
 		final ActionConfig config = step.getConfig();
 		final ActionExecutor executor = step.getExecutor();
@@ -132,7 +134,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
 		final List<FileInfo> output = executor.execute(input, jobConfig, cycle,
-				action, config, successHandler, errorHandler, this.stateManager.getState(cycle.getId()));
+				action, config, successHandler, errorHandler, state);
 
 		final Date stop = new Date();
 		final long time = stop.getTime() - start.getTime();

@@ -51,14 +51,14 @@ public class ActionExecutor {
 			final SimpleAction action, final ActionConfig config,
 			final SuccessHandler successHandler, final ErrorHandler errorHandler, final Map<String, Serializable> state) {
 		final List<FileInfo> output = new ArrayList<FileInfo>();
+		final List<FileInfo> stateInitializationOutput = action.initializeState(config, state);
+		if (stateInitializationOutput != null) {
+			output.addAll(stateInitializationOutput);
+		}
 		for (final FileInfo parameterMap : input) {
 			parameterMap.put(Parameters.PARAM_CYCLE, cycle.getId());
 			completionService.submit(new ActionCallable(action, parameterMap,
 					config, errorHandler, jobConfig, cycle, state));
-		}
-		final List<FileInfo> stateInitializationOutput = action.initializeState(config, state);
-		if (stateInitializationOutput != null) {
-			output.addAll(stateInitializationOutput);
 		}
 		for (int i = 0; i < input.size(); i++) {
 			try {

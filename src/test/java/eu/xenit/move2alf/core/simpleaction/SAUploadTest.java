@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public class SAUploadTest {
 
 	private FileInfo dummyFileInfo() {
 		final FileInfo dummyFileInfo = new FileInfo();
+		dummyFileInfo.put(Parameters.PARAM_FILE, new File("foo.txt"));
 		dummyFileInfo.put(Parameters.PARAM_RELATIVE_PATH, "/foo");
 		return dummyFileInfo;
 	}
@@ -170,7 +172,7 @@ public class SAUploadTest {
 
 	private FileInfo dummyFileInfoWithACL() {
 		final FileInfo dummyFileInfo = new FileInfo();
-		dummyFileInfo.put(Parameters.PARAM_CYCLE, 123);
+		dummyFileInfo.put(Parameters.PARAM_FILE, new File("foo.txt"));
 		dummyFileInfo.put(Parameters.PARAM_RELATIVE_PATH, "/foo");
 		final Map<String, Map<String, String>> acls = new HashMap<String, Map<String, String>>();
 		dummyFileInfo.put(Parameters.PARAM_ACL, acls);

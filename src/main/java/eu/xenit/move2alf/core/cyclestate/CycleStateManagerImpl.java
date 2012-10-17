@@ -1,33 +1,42 @@
 package eu.xenit.move2alf.core.cyclestate;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CycleStateManagerImpl implements CycleStateManager {
 
-	private final Map<Integer, Map<String, Serializable>> state;
+	private static final Logger logger = LoggerFactory
+			.getLogger(CycleStateManagerImpl.class);
+
+	private final Map<Integer, Map<String, Serializable>> statePerCycle;
 
 	public CycleStateManagerImpl() {
-		this.state = new HashMap<Integer, Map<String, Serializable>>();
+		logger.debug("Creating CycleStateManager");
+		this.statePerCycle = new ConcurrentHashMap<Integer, Map<String, Serializable>>();
 	}
 
 	@Override
 	public Map<String, Serializable> getState(final int cycleId) {
-		return state.get(cycleId);
+		logger.debug("Getting state for cycle " + cycleId);
+		return statePerCycle.get(cycleId);
 	}
 
 	@Override
 	public void initializeState(final int cycleId) {
-		state.put(cycleId, new HashMap<String, Serializable>());
+		logger.debug("Initializing state for cycle " + cycleId);
+		statePerCycle.put(cycleId, new ConcurrentHashMap<String, Serializable>());
 	}
 
 	@Override
 	public void destroyState(final int cycleId) {
-		state.remove(cycleId);
+		logger.debug("Destroying state for cycle " + cycleId);
+		statePerCycle.remove(cycleId);
 	}
 
 }

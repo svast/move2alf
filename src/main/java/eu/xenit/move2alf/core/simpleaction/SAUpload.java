@@ -57,6 +57,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 		synchronized (batch) {
 			if (batch.size() < maxBatchSize) {
+				logger.debug("Queueing file for upload: " + ((File) parameterMap.get(Parameters.PARAM_FILE)).getName());
 				batch.add(parameterMap);
 
 				final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
@@ -79,6 +80,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			}
 
 			if (batch.size() == maxBatchSize) {
+				logger.debug("Batch size reached, uploading " + maxBatchSize + " files");
 				uploadNow = true;
 				// make a local copies
 				batchToUpload = new Batch(batch);
@@ -125,6 +127,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 	@Override
 	public List<FileInfo> initializeState(final ActionConfig config, final Map<String, Serializable> state) {
+		logger.debug("Initializing state");
 		state.put(STATE_BATCH, new Batch());
 		state.put(STATE_ACL_BATCH, new ArrayList<ACL>());
 		return null;
@@ -132,16 +135,19 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 	@Override
 	public List<FileInfo> cleanupState(final ActionConfig config, final Map<String, Serializable> state) {
+		logger.debug("Cleaning up state");
 		final Batch batch = getCurrentBatch(state);
+		List<FileInfo> output = null;
 		if (batch.size() > 0) {
+			logger.debug("There are documents queued for upload, uploading " + batch.size() + " documents");
 			final List<ACL> aclBatch = getCurrentACLBatch(state);
-			final List<FileInfo> output = uploadAndSetACLs(config, batch, aclBatch);
-			state.remove(STATE_BATCH);
-			state.remove(STATE_ACL_BATCH);
-			return output;
+			output = uploadAndSetACLs(config, batch, aclBatch);
 		} else {
-			return null;
+			logger.debug("No documents queued");
 		}
+		state.remove(STATE_BATCH);
+		state.remove(STATE_ACL_BATCH);
+		return output;
 	}
 
 	private Batch getCurrentBatch(final Map<String, Serializable> state) {
@@ -161,7 +167,6 @@ public class SAUpload extends SimpleActionWithSourceSink {
 					Parameters.PARAM_RELATIVE_PATH, "");
 			final String remotePath = normalizeRemotePath(basePath,
 					relativePath);
-			logger.debug("Writing to " + remotePath);
 			final String mimeType = getParameterWithDefault(parameterMap,
 					Parameters.PARAM_MIMETYPE, "text/plain");
 			final String namespace = getParameterWithDefault(parameterMap,
