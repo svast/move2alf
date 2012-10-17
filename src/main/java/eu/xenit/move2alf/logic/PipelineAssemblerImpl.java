@@ -509,7 +509,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					jobConfig.getDocExist());
 			uploadConfig.put(SAUpload.PARAM_BATCH_SIZE, defaultBatchSize);
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
-					successHandler, errorHandler, new ActionExecutor(
+					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
 		if ("Delete".equals(jobConfig.getDocExist())) {
@@ -526,7 +526,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
 					jobConfig.getDocExist());
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
-					successHandler, errorHandler, new ActionExecutor(
+					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
 		if ("ListPresence".equals(jobConfig.getDocExist())) {
@@ -543,11 +543,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
 					jobConfig.getDocExist());
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
-					successHandler, errorHandler, new ActionExecutor(
+					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
 
-		pipeline.add(new PipelineStep(new SAError(), null, null, errorHandler));
+		pipeline.add(new PipelineStep(new SAReport(), null, successHandler, errorHandler));
 
 		return pipeline;
 	}

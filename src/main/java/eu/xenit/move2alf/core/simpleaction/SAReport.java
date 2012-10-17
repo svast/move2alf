@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class SAError extends SimpleActionSingleResult {
+public class SAReport extends SimpleActionSingleResult {
 
 	@Override
 	public FileInfo executeSingleResult(final FileInfo parameterMap, final ActionConfig config) {

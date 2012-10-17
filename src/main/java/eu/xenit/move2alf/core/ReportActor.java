@@ -30,7 +30,7 @@ public class ReportActor extends UntypedActor {
 	private String url;
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceive(Object message) {
 		if (message instanceof ReportMessage) {
 			ReportMessage reportMessage = (ReportMessage) message;
 			getJobService().createProcessedDocument(reportMessage.cycleId,
