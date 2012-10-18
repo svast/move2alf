@@ -14,7 +14,7 @@ public class Parameters {
 	 * structure). Type: String
 	 */
 	public static final String PARAM_RELATIVE_PATH = "relativePath";
-	
+
 	/**
 	 * Relative path of file to upload in destination (used to create folder
 	 * structure). Type: String
@@ -63,79 +63,69 @@ public class Parameters {
 	public static final String PARAM_ACL = "acl";
 
 	public static final String PARAM_INHERIT_PERMISSIONS = "inheritPermissions";
-	
+
 	/**
 	 * Fields to add to the report for the current file. Type: Map<String,
 	 * String>
 	 */
 	public static final String PARAM_REPORT_FIELDS = "reportFields";
-	
-	
-	
-	
-	
+
+	/**
+	 * Alternative to throwing Move2AlfException.
+	 * Type: String (VALUE_OK | VALUE_FAILED)
+	 */
+	public static final String PARAM_STATUS = "status";
+	public static final String VALUE_FAILED = "failed";
+	public static final String VALUE_OK = "ok";
+	public static final String PARAM_ERROR_MESSAGE = "errormessage";
+
 	/************************************************************************************
 	 * TO CHECK
 	 ************************************************************************************/
-	
-	
-	public static final String PARAM_STAGE = "stage";
-	public static final String VALUE_AFTER = "after";
-	public static final String VALUE_BEFORE = "before";
 
+	public static final String PARAM_STAGE = "stage";
+
+    public static final String VALUE_AFTER = "after";
+    public static final String VALUE_BEFORE = "before";
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
 
 	public static final String PARAM_INPUT_FILE = "inputFile";
 
 	public static final String PARAM_COMMAND = "command";
-	
-	
-	
-	
-	
+
 	/************************************************************************************
 	 * DEPRECATED
 	 ************************************************************************************/
 
+    /**
+     * INTERNAL Id of the current cycle Type: Integer
+     * @deprecated
+     */
+    @Deprecated
+    public static final String PARAM_CYCLE = "cycle";
+
 	/**
 	 * Counter with number of files to load. Type: CountDownLatch
+	 *
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final String PARAM_COUNTER = "counter";
 
 	/**
-	 * INTERNAL Id of the current cycle Type: Integer
-	 * @deprecated
-	 */
-	public static final String PARAM_CYCLE = "cycle";
-
-	/**
 	 * INTERNAL
+	 *
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final String PARAM_THREADPOOL = "threadpool";
 
 	/**
 	 * INTERNAL
+	 * 
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final String PARAM_THREAD = "thread";
-	
-	/**
-	 * @deprecated
-	 */
-	public static final String PARAM_STATUS = "status";
-	/**
-	 * @deprecated Throw Move2AlfException instead.
-	 */
-	public static final String VALUE_FAILED = "failed";
-	/**
-	 * @deprecated
-	 */
-	public static final String VALUE_OK = "ok";
-	/**
-	 * @deprecated Throw Move2AlfException instead.
-	 */
-	public static final String PARAM_ERROR_MESSAGE = "errormessage";
 
 }

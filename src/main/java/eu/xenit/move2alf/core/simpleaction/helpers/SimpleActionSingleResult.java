@@ -1,7 +1,9 @@
 package eu.xenit.move2alf.core.simpleaction.helpers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
@@ -12,7 +14,7 @@ public abstract class SimpleActionSingleResult extends SimpleAction {
 	@Override
 	public final List<FileInfo> execute(
 			final FileInfo parameterMap,
-			final ActionConfig config) {
+			final ActionConfig config, final Map<String, Serializable> state) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		output.add(executeSingleResult(parameterMap, config));
 		return output;

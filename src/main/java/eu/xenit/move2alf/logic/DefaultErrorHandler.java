@@ -22,7 +22,7 @@ public class DefaultErrorHandler implements ErrorHandler {
 	private final JobService jobService;
 	
 	/**
-	 * @param jobExecutionServiceImpl
+	 * @param jobService
 	 */
 	DefaultErrorHandler(JobService jobService) {
 		this.jobService = jobService;

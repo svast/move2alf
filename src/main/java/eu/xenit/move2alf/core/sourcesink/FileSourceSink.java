@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.SourceSink;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class FileSourceSink extends SourceSink {
 
@@ -80,6 +80,20 @@ public class FileSourceSink extends SourceSink {
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
 			final String remotePath, final String name) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final List<Document> documents) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setACL(final ConfiguredSourceSink configuredSourceSink,
+			final ACL acls) {
 		// TODO Auto-generated method stub
 
 	}

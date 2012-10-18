@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.Action;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.common.Tiff2Pdf;

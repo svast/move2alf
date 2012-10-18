@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import eu.xenit.move2alf.core.cyclestate.CycleStateManager;
+import eu.xenit.move2alf.core.cyclestate.StateCycleListener;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +21,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
+import eu.xenit.move2alf.core.cyclelistener.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -33,8 +36,8 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("jobExecutionService")
 @Transactional
-public class JobExecutionServiceImpl extends AbstractHibernateService implements
-		JobExecutionService {
+public class JobExecutionServiceImpl extends AbstractHibernateService
+        implements JobExecutionService {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobExecutionServiceImpl.class);
@@ -43,10 +46,12 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 	private PipelineAssembler pipelineAssembler;
 
-	private List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
+	private final List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
+
+    private CycleStateManager stateManager;
 
 	@Autowired
-	public void setJobService(JobService jobService) {
+	public void setJobService(final JobService jobService) {
 		this.jobService = jobService;
 	}
 
@@ -55,7 +60,7 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Autowired
-	public void setPipelineAssembler(PipelineAssembler pipelineAssembler) {
+	public void setPipelineAssembler(final PipelineAssembler pipelineAssembler) {
 		this.pipelineAssembler = pipelineAssembler;
 	}
 
@@ -63,69 +68,76 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		return pipelineAssembler;
 	}
 
+    @Autowired
+    public void setStateManager(CycleStateManager stateManager) {
+        this.stateManager = stateManager;
+    }
+
 	@PostConstruct
 	public void init() {
 		registerCycleListener(new LoggingCycleListener());
 		registerCycleListener(new CommandCycleListener());
 		// removed MoveCycleListener
 		registerCycleListener(new ReportCycleListener());
+        registerCycleListener(new StateCycleListener(this.stateManager));
 	}
 
-	@Override
-	public void registerCycleListener(CycleListener listener) {
+    @Override
+	public void registerCycleListener(final CycleListener listener) {
 		listener.setJobService(getJobService());
 		this.cycleListeners.add(listener);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void executeJobSteps(Job job, Cycle cycle) {
+	public void executeJobSteps(final Job job, final Cycle cycle) {
 		// get jobconfig
-		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(
+		final JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(
 				job.getId());
-		List<PipelineStep> pipeline = getPipelineAssembler().getPipeline(
+		final List<PipelineStep> pipeline = getPipelineAssembler().getPipeline(
 				jobConfig);
 
 		// execute job...
-		List<String> inputFolders = jobConfig.getInputFolder();
+		final List<String> inputFolders = jobConfig.getInputFolder();
 		List<FileInfo> input = new ArrayList<FileInfo>();
-		for (String inputFolder : inputFolders) {
-			FileInfo inputMap = new FileInfo();
+		for (final String inputFolder : inputFolders) {
+			final FileInfo inputMap = new FileInfo();
 			inputMap.put(Parameters.PARAM_FILE, new File(inputFolder));
 			input.add(inputMap);
 		}
 		if ("true".equals(jobConfig.getMoveNotLoad())) {
-			FileInfo inputMap = new FileInfo();
-			inputMap.put(Parameters.PARAM_FILE, new File(jobConfig
-					.getMoveNotLoadText()));
+			final FileInfo inputMap = new FileInfo();
+			inputMap.put(Parameters.PARAM_FILE,
+					new File(jobConfig.getMoveNotLoadText()));
 			input.add(inputMap);
 		}
 
-		for (PipelineStep step : pipeline) {
-			input = executePipelineStep(step, input, jobConfig, cycle);
+		final Map<String, Serializable> state = this.stateManager.getState(cycle.getId());
+		for (final PipelineStep step : pipeline) {
+			input = executePipelineStep(step, input, jobConfig, cycle, state);
 		}
 	}
 
-	// TODO: make multithreaded by passing executor ...
-	private List<FileInfo> executePipelineStep(PipelineStep step,
-			List<FileInfo> input, JobConfig jobConfig, Cycle cycle) {
-		SimpleAction action = step.getAction();
-		ActionConfig config = step.getConfig();
-		ActionExecutor executor = step.getExecutor();
-		
-		SuccessHandler successHandler = step.getSuccessHandler();
-		ErrorHandler errorHandler = step.getErrorHandler();
+	private List<FileInfo> executePipelineStep(final PipelineStep step,
+			final List<FileInfo> input, final JobConfig jobConfig,
+			final Cycle cycle, Map<String, Serializable> state) {
+		final SimpleAction action = step.getAction();
+		final ActionConfig config = step.getConfig();
+		final ActionExecutor executor = step.getExecutor();
 
-		Date start = new Date();
-		int numberOfInputFiles = input.size();
+		final SuccessHandler successHandler = step.getSuccessHandler();
+		final ErrorHandler errorHandler = step.getErrorHandler();
+
+		final Date start = new Date();
+		final int numberOfInputFiles = input.size();
 		logger.info("STEP: " + action.getClass().toString());
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
-		List<FileInfo> output = executor.execute(input, jobConfig, cycle,
-				action, config, successHandler, errorHandler);
+		final List<FileInfo> output = executor.execute(input, jobConfig, cycle,
+				action, config, successHandler, errorHandler, state);
 
-		Date stop = new Date();
-		long time = stop.getTime() - start.getTime();
+		final Date stop = new Date();
+		final long time = stop.getTime() - start.getTime();
 		logger.info(" * OUTPUT: " + output.size() + " files in " + time
 				+ " ms - " + new Float(numberOfInputFiles) / time * 1000
 				+ " input files / sec");
@@ -134,8 +146,8 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void closeCycle(Cycle cycle) {
-		Session session = getSessionFactory().getCurrentSession();
+	public void closeCycle(final Cycle cycle) {
+		final Session session = getSessionFactory().getCurrentSession();
 
 		cycle.setEndDateTime(new Date());
 		session.update(cycle);
@@ -145,13 +157,13 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Cycle openCycleForJob(Integer jobId) {
-		Session session = getSessionFactory().getCurrentSession();
+	public Cycle openCycleForJob(final Integer jobId) {
+		final Session session = getSessionFactory().getCurrentSession();
 
-		Job job = jobService.getJob(jobId);
+		final Job job = jobService.getJob(jobId);
 		logger.debug("Executing job \"" + job.getName() + "\"");
 
-		Cycle cycle = new Cycle();
+		final Cycle cycle = new Cycle();
 		cycle.setJob(job);
 		cycle.setStartDateTime(new Date());
 		session.save(cycle);
@@ -161,15 +173,15 @@ public class JobExecutionServiceImpl extends AbstractHibernateService implements
 		return cycle;
 	}
 
-	private void notifyCycleListenersStart(int cycleId,
-			Map<String, Object> parameterMap) {
-		for (CycleListener listener : this.cycleListeners) {
+	private void notifyCycleListenersStart(final int cycleId,
+			final Map<String, Object> parameterMap) {
+		for (final CycleListener listener : this.cycleListeners) {
 			listener.cycleStart(cycleId, parameterMap);
 		}
 	}
 
-	private void notifyCycleListenersEnd(int cycleId) {
-		for (CycleListener listener : this.cycleListeners) {
+	private void notifyCycleListenersEnd(final int cycleId) {
+		for (final CycleListener listener : this.cycleListeners) {
 			listener.cycleEnd(cycleId);
 		}
 	}

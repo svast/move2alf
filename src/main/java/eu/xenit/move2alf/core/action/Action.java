@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core;
+package eu.xenit.move2alf.core.action;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,7 +7,9 @@ import java.util.Map;
 import org.hibernate.SessionFactory;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.JobService;
 
 public abstract class Action extends ConfigurableObject {

@@ -1,10 +1,12 @@
-package eu.xenit.move2alf.core;
+package eu.xenit.move2alf.core.sourcesink;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public abstract class SourceSink extends ConfigurableObject {
 	public static final String MODE_SKIP = "Skip";
@@ -18,6 +20,12 @@ public abstract class SourceSink extends ConfigurableObject {
 			Map<String, String> multiValueMetadata,
 			Map<String, Map<String, String>> acl, boolean inheritPermissions,
 			File document);
+
+	public abstract void sendBatch(ConfiguredSourceSink configuredSourceSink,
+			String docExistsMode, List<Document> documents);
+
+	public abstract void setACL(ConfiguredSourceSink configuredSourceSink,
+			ACL acls);
 
 	public abstract List<File> list(ConfiguredSourceSink sourceConfig,
 			String path, boolean recursive);

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.ParameterDefinition;
-import eu.xenit.move2alf.core.Action;
+import eu.xenit.move2alf.core.action.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 public class SomeTransformationClass extends Action {

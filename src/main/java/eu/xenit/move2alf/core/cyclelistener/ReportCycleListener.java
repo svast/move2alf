@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.core.cyclelistener;
 
-import eu.xenit.move2alf.core.CycleListener;
 import eu.xenit.move2alf.core.SendMailMessage;
 import eu.xenit.move2alf.core.dto.Cycle;
 
