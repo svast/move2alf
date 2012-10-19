@@ -45,6 +45,7 @@ public class SAUploadTest {
 		final FileInfo dummyFileInfo = dummyFileInfo();
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
+		reset(mockSink);
 
 		// file 1
 		final List<FileInfo> result1 = actionUnderTest.execute(dummyFileInfo,
@@ -81,6 +82,7 @@ public class SAUploadTest {
 		final FileInfo dummyFileInfo = dummyFileInfo();
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
+		reset(mockSink);
 
 		// batch 1, three files
 		final List<FileInfo> result1 = actionUnderTest.execute(dummyFileInfo,
@@ -134,6 +136,7 @@ public class SAUploadTest {
 		final FileInfo dummyFileInfoWithACL = dummyFileInfoWithACL();
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
+		reset(mockSink);
 
 		// batch 1, 2 acls
 		final List<FileInfo> result1 = actionUnderTest.execute(

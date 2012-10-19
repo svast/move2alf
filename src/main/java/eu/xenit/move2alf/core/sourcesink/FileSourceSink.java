@@ -85,6 +85,11 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
+	public void clearCaches(final ConfiguredSourceSink sinkConfig) {
+		// nothing to do here
+	}
+
+	@Override
 	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final List<Document> documents) {
 		// TODO Auto-generated method stub

@@ -131,6 +131,9 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		logger.debug("Initializing state");
 		state.put(STATE_BATCH, new Batch());
 		state.put(STATE_ACL_BATCH, new ArrayList<ACL>());
+
+		getSink().clearCaches(getSinkConfig());
+
 		return null;
 	}
 
