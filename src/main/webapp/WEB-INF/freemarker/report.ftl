@@ -62,7 +62,11 @@
 				<td>
 					<#list item.processedDocumentParameterSet as parameter>
 						<p>
-							<strong>${parameter.name}:</strong> ${parameter.value}
+						    <#if parameter.name = "errormessage">
+							    <strong>${parameter.name}:</strong> ${parameter.value?replace(" < ", "<br/>&lt; ")}
+							<#else>
+							    <strong>${parameter.name}:</strong> ${parameter.value}
+							</#if>
 						</p>
 					</#list>
 			</tr>

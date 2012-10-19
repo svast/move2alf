@@ -11,6 +11,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -195,5 +198,18 @@ public class Util {
 		return String.format("%d:%02d:%02d",
 				seconds / 3600, (seconds % 3600) / 60,
 				(seconds % 60));
+	}
+
+	public static String getFullErrorMessage(final Exception e) {
+		List<Throwable> causalChain = Throwables.getCausalChain(e);
+		List<String> errorMessages = new ArrayList<String>();
+		for(Throwable t : causalChain) {
+			if (t instanceof Move2AlfException) {
+				errorMessages.add(t.getMessage());
+			}  else {
+				errorMessages.add(t.getClass().getSimpleName() + ": " + t.getMessage());
+			}
+		}
+		return Joiner.on(" < ").join(errorMessages);
 	}
 }

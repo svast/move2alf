@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.xenit.move2alf.common.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			}
 		} catch (final Exception e) {
 			batchFailed = true;
-			errorMessage = e.getMessage();
+			errorMessage = Util.getFullErrorMessage(e);
 		}
 
 		final List<FileInfo> output = new ArrayList<FileInfo>();

@@ -4,16 +4,13 @@
 package eu.xenit.move2alf.logic;
 
 import java.io.File;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
@@ -44,11 +41,11 @@ public class DefaultErrorHandler implements ErrorHandler {
 		// reporting
 		Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
 		ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+
+		final String errorMessage = Util.getFullErrorMessage(e);
 		msg.setName(Parameters.PARAM_ERROR_MESSAGE);
-		msg.setValue(e.getClass().getName() + ": " + e.getMessage());
-		// Report everything using the first (deprecated) ConfiguredAction
-		// of
-		// the job.
+		msg.setValue(errorMessage);
+		// Report everything using the first (deprecated) ConfiguredAction of the job.
 		msg.setConfiguredAction(cycle.getJob()
 				.getFirstConfiguredAction());
 		params.add(msg);
@@ -63,4 +60,5 @@ public class DefaultErrorHandler implements ErrorHandler {
 			Util.moveFile(inputFolder, jobConfig.getMoveNotLoadText(), file);
 		}
 	}
+
 }
