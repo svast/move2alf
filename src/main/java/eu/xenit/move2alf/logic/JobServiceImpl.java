@@ -555,15 +555,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void resetCycles() {
 		logger.debug("Resetting cycles");
-		final String hql = "FROM Cycle as cycle WHERE NOT cycle.endDateTime is null";
+		final String hql = "UPDATE Cycle as cycle SET cycle.endDateTime = :now WHERE cycle.endDateTime is null";
 		final Session session = getSessionFactory().getCurrentSession();
 		final Query q = session.createQuery(hql);
-		@SuppressWarnings("unchecked")
-		final List<Cycle> cycles = q.list();
-		for (final Cycle cycle : cycles) {
-			cycle.setEndDateTime(new Date());
-			session.update(cycle);
-		}
+		q.setTimestamp("now", new Date());
+		q.executeUpdate();
 	}
 
 	@Override
