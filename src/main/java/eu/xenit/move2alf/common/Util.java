@@ -205,7 +205,12 @@ public class Util {
 		List<String> errorMessages = new ArrayList<String>();
 		for(Throwable t : causalChain) {
 			if (t instanceof Move2AlfException) {
-				errorMessages.add(t.getMessage());
+				final String message = t.getMessage();
+				if (message != null) {
+					errorMessages.add(message);
+				} else {
+					errorMessages.add("null");
+				}
 			}  else {
 				errorMessages.add(t.getClass().getSimpleName() + ": " + t.getMessage());
 			}
