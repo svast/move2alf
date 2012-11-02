@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
@@ -534,7 +535,7 @@ public class JobController extends AbstractController{
 			HttpServletResponse response) {
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
 		int pageSize = ServletRequestUtils
-				.getIntParameter(request, "count", 10);
+				.getIntParameter(request, "count", 50);
 		return reportWithView(jobId, cycleId, page * pageSize, pageSize,
 				"report");
 	}
@@ -569,8 +570,9 @@ public class JobController extends AbstractController{
 		String docsPerSecond;
 		String duration = Util.formatDuration(totalTimeInSeconds);
 
-		final Long documentListSize = getJobService().countProcessedDocuments(
-				cycleId);
+		final Long documentListSize = getJobService().countProcessedDocuments(cycleId);
+		final Long nrOfFailedDocuments = getJobService().countProcessedDocumentsWithStatus(cycleId,
+				EProcessedDocumentStatus.FAILED);
 		List<ProcessedDocument> processedDocuments = getJobService()
 				.getProcessedDocuments(cycleId, start, count);
 
@@ -641,6 +643,7 @@ public class JobController extends AbstractController{
 		mav.addObject("role", getRole());
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
+		mav.addObject("nrOfFailedDocuments", nrOfFailedDocuments);
 		mav.setViewName(viewName);
 		return mav;
 	}

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
@@ -281,6 +282,14 @@ public interface JobService {
 	 * @param cycleId
 	 */
 	public long countProcessedDocuments(int cycleId);
+
+	/**
+	 * Return the number of ProcessedDocuments for a given cycle and status.
+	 *
+	 * @param cycleId
+	 * @param status
+	 */
+	public long countProcessedDocumentsWithStatus(int cycleId, EProcessedDocumentStatus status);
 
 	/** gets all configured source sink but filters out the fileSystem source sink
 	 * 

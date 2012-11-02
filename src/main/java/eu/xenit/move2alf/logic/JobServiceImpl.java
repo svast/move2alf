@@ -523,6 +523,17 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
+	public long countProcessedDocumentsWithStatus(final int cycleId, EProcessedDocumentStatus status) {
+		final Query query = sessionFactory
+				.getCurrentSession()
+				.createQuery(
+						"select count(*) from ProcessedDocument as d where d.cycle.id=? and d.status=?")
+				.setLong(0, cycleId)
+				.setParameter(1, status);
+		return (Long) query.uniqueResult();
+	}
+
+	@Override
 	public void deleteAction(final int id) {
 		final Session s = getSessionFactory().getCurrentSession();
 		s.delete(s.get(ConfiguredAction.class, id));

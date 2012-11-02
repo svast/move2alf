@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
@@ -344,6 +345,11 @@ public class SimpleActionWrapper extends SimpleAction {
 
 		@Override
 		public long countProcessedDocuments(final int cycleId) {
+			return 0;
+		}
+
+		@Override
+		public long countProcessedDocumentsWithStatus(final int cycleId, EProcessedDocumentStatus status) {
 			return 0;
 		}
 

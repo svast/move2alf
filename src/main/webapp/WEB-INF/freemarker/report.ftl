@@ -31,16 +31,16 @@
 		<td></td>
 	</tr>
 	<tr>
-		<th>State:</th>
-		<td>${cycle.state.displayName}</td>
-		<th>Nr. of documents</th>
+		<th>Nr. of documents:</th>
 		<td>${documentListSize}</td>
+		<th<#if (nrOfFailedDocuments > 0)> class="failedWarning"</#if>>Failed documents:</th>
+		<td<#if (nrOfFailedDocuments > 0)> class="failedWarning"</#if>>${nrOfFailedDocuments}</td>
 	</tr>
 	<tr>
+		<th>State:</th>
+    	<td>${cycle.state.displayName}</td>
 		<th>Docs/s:</th>
 		<td>${docsPerSecond}</td>
-		<td></td>
-		<td></td>
 	</tr>
 
 </table>
