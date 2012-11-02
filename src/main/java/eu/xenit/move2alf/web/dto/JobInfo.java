@@ -10,6 +10,8 @@ public class JobInfo {
 	private Date cycleStartDateTime;
 	private String scheduleState;
 	private String description;
+	private Long nrOfDocuments;
+	private Long nrOfFailedDocuments;
 
 	public JobInfo() {
 	}
@@ -60,5 +62,21 @@ public class JobInfo {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Long getNrOfFailedDocuments() {
+		return nrOfFailedDocuments;
+	}
+
+	public void setNrOfFailedDocuments(final Long nrOfFailedDocuments) {
+		this.nrOfFailedDocuments = nrOfFailedDocuments;
+	}
+
+	public Long getNrOfDocuments() {
+		return nrOfDocuments;
+	}
+
+	public void setNrOfDocuments(final Long nrOfDocuments) {
+		this.nrOfDocuments = nrOfDocuments;
 	}
 }

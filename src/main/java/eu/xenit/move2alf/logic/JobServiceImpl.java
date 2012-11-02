@@ -660,6 +660,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			if (cycle != null) {
 				info.setCycleStartDateTime(cycle.getStartDateTime());
 				info.setScheduleState(cycle.getState().getDisplayName());
+				info.setNrOfDocuments(countProcessedDocuments(cycle.getId()));
+				info.setNrOfFailedDocuments(countProcessedDocumentsWithStatus(cycle.getId(),
+						EProcessedDocumentStatus.FAILED));
 			} else {
 				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
 			}
