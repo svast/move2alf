@@ -283,4 +283,9 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		value = (value != null) ? value : defaultValue;
 		return value;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Uploading documents to Alfresco";
+	}
 }

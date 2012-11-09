@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.logic.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
@@ -42,10 +43,6 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
-import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.logic.PipelineAssembler;
-import eu.xenit.move2alf.logic.SchedulerImpl;
-import eu.xenit.move2alf.logic.UsageService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
@@ -58,9 +55,19 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
+	private JobExecutionService jobExecutionService;
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
+
+	public JobExecutionService getJobExecutionService() {
+		return jobExecutionService;
+	}
+
+	@Autowired
+	public void setJobExecutionService(final JobExecutionService jobExecutionService) {
+		this.jobExecutionService = jobExecutionService;
+	}
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -588,6 +595,8 @@ public class JobController extends AbstractController{
 			}
 		}
 
+		final List<PipelineStepProgress> progress = getJobExecutionService().getProgress(cycleId);
+
 		// easiest way to keep the pagination links, not the cleanest
 		PagedListHolder<ProcessedDocument> pagedListHolder = new PagedListHolder<ProcessedDocument>() {
 			/**
@@ -644,6 +653,7 @@ public class JobController extends AbstractController{
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.addObject("nrOfFailedDocuments", nrOfFailedDocuments);
+		mav.addObject("progress", progress);
 		mav.setViewName(viewName);
 		return mav;
 	}

@@ -23,6 +23,11 @@ public class SAList extends SimpleActionWithSourceSink {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Listing documents in Alfresco";
+	}
+
+	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
 			final ActionConfig config, final Map<String, Serializable> state) {
 		List<FileInfo> output = new ArrayList<FileInfo>();

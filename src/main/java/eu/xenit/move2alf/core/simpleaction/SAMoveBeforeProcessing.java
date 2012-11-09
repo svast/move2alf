@@ -17,6 +17,11 @@ public class SAMoveBeforeProcessing extends SimpleAction {
 	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
 
 	@Override
+	public String getDescription() {
+		return "Moving documents";
+	}
+
+	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config, final Map<String, Serializable> state) {

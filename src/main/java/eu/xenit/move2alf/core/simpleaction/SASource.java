@@ -15,6 +15,11 @@ import eu.xenit.move2alf.core.sourcesink.FileSourceSink;
 public class SASource extends SimpleAction {
 
 	@Override
+	public String getDescription() {
+		return "Listing documents";
+	}
+
+	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config, final Map<String, Serializable> state) {

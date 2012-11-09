@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
@@ -33,6 +34,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.logic.PipelineAssembler.PipelineStep;
 import eu.xenit.move2alf.web.dto.JobConfig;
+import sun.security.krb5.internal.HostAddress;
 
 @Service("jobExecutionService")
 @Transactional
@@ -49,6 +51,8 @@ public class JobExecutionServiceImpl extends AbstractHibernateService
 	private final List<CycleListener> cycleListeners = new ArrayList<CycleListener>();
 
     private CycleStateManager stateManager;
+
+	private Map<Integer, List<PipelineStepProgress>> progress = new ConcurrentHashMap<Integer, List<PipelineStepProgress>>();
 
 	@Autowired
 	public void setJobService(final JobService jobService) {
@@ -112,10 +116,22 @@ public class JobExecutionServiceImpl extends AbstractHibernateService
 			input.add(inputMap);
 		}
 
+		final List<PipelineStepProgress> cycleProgress = new ArrayList<PipelineStepProgress>();
+		for(final PipelineStep step : pipeline) {
+			cycleProgress.add(new PipelineStepProgress(step.getAction(), 0, -1));
+		}
+		this.progress.put(cycle.getId(), cycleProgress);
+
 		final Map<String, Serializable> state = this.stateManager.getState(cycle.getId());
 		for (final PipelineStep step : pipeline) {
 			input = executePipelineStep(step, input, jobConfig, cycle, state);
 		}
+
+		this.progress.remove(cycle.getId());
+	}
+
+	public List<PipelineStepProgress> getProgress(Integer cycleId) {
+		return this.progress.get(cycleId);
 	}
 
 	private List<FileInfo> executePipelineStep(final PipelineStep step,
@@ -133,8 +149,16 @@ public class JobExecutionServiceImpl extends AbstractHibernateService
 		logger.info("STEP: " + action.getClass().toString());
 		logger.info(" * INPUT: " + numberOfInputFiles + " files");
 
+		PipelineStepProgress currentProgress = null;
+		for(PipelineStepProgress stepProgress : getProgress(cycle.getId())) {
+			if (stepProgress.getAction().equals(action)) {
+				currentProgress = stepProgress;
+			}
+		}
+		currentProgress.setTotal(numberOfInputFiles);
+
 		final List<FileInfo> output = executor.execute(input, jobConfig, cycle,
-				action, config, successHandler, errorHandler, state);
+				action, config, successHandler, errorHandler, state, currentProgress);
 
 		final Date stop = new Date();
 		final long time = stop.getTime() - start.getTime();

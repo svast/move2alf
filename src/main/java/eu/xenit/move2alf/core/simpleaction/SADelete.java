@@ -22,6 +22,11 @@ public class SADelete extends SimpleActionWithSourceSink {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Deleting documents in Alfresco";
+	}
+
+	@Override
 	public List<FileInfo> execute(FileInfo parameterMap, ActionConfig config, final Map<String, Serializable> state) {
 		List<FileInfo> output = new ArrayList<FileInfo>();
 		FileInfo newParameterMap = new FileInfo();

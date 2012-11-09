@@ -56,6 +56,11 @@ public class SimpleActionWrapper extends SimpleAction {
 	}
 
 	@Override
+	public String getDescription() {
+		return this.action.getDescription();
+	}
+
+	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
 			final ActionConfig config, final Map<String, Serializable> state) {
 		// Map<String, Object> newParameterMap = new HashMap<String,

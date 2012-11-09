@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import eu.xenit.move2alf.core.cyclestate.CycleStateManager;
+import eu.xenit.move2alf.logic.PipelineStepProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,8 @@ public class ActionExecutor {
 	public List<FileInfo> execute(final List<FileInfo> input,
 			final JobConfig jobConfig, final Cycle cycle,
 			final SimpleAction action, final ActionConfig config,
-			final SuccessHandler successHandler, final ErrorHandler errorHandler, final Map<String, Serializable> state) {
+			final SuccessHandler successHandler, final ErrorHandler errorHandler,
+			final Map<String, Serializable> state, final PipelineStepProgress progress) {
 		final List<FileInfo> output = new ArrayList<FileInfo>();
 		final List<FileInfo> stateInitializationOutput = action.initializeState(config, state);
 		if (stateInitializationOutput != null) {
@@ -66,6 +68,7 @@ public class ActionExecutor {
 					logger.info("Processed " + (i + 1) + " files out of "
 							+ input.size() + " (" + 100 * (float) (i + 1)
 							/ input.size() + "%)");
+					progress.setProcessed(i+1);
 				}
 				final Future<List<FileInfo>> futureOutput = completionService
 						.take();
@@ -90,6 +93,7 @@ public class ActionExecutor {
 				}
 			}
 		}
+		progress.setProcessed(input.size());
 		final List<FileInfo> stateCleanupOutput = action.cleanupState(config, state);
 		if (stateCleanupOutput != null) {
 			output.addAll(stateCleanupOutput);

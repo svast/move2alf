@@ -18,4 +18,8 @@ public abstract class SimpleAction {
 	public List<FileInfo> cleanupState(final ActionConfig config, final Map<String, Serializable> state) {
 		return null;
 	}
+
+	public String getDescription() {
+		return this.getClass().getSimpleName();
+	}
 }

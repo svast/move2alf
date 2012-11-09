@@ -8,13 +8,11 @@
 <table class="small">
 	<tr>
 		<th>Description:</th>
-		<td>${job.description}</td>
-		<td></td>
-		<td></td>
+		<td colspan="2">${job.description}</td>
 	</tr>
 	<tr>
 		<th>Start time:</th>
-		<td>${cycle.startDateTime}</td>
+		<td colspan="2">${cycle.startDateTime}</td>
 		<td></td>
 		<td></td>
 	</tr>
@@ -45,7 +43,28 @@
 
 </table>
 <a href="<@spring.url relativeUrl=("/job/"+job.id+"/"+cycle.id+"/report/exportcsv") />" >Export to CSV</a>
+<#if progress??>
 <hr />
+<h3>Progress</h3>
+<table style="cell-spacing: 1em">
+<#list progress as step>
+<tr><td style="text-align: center; padding: 0 15px 0 10px;">⬇</td><td></td></tr>
+<#if step.total = -1>
+<tr><td style="text-align: center; padding: 0 15px 0 10px;">${step.action.description}</td><td style="color: gray;">Waiting...</td></tr>
+<#else>
+    <#if step.processed < step.total>
+<tr><td style="text-align: center; padding: 0 15px 0 10px; font-weight: bold;">${step.action.description}</td>
+    <td>Processed ${step.processed} documents out of ${step.total}</td></tr>
+    <#else>
+<tr><td style="text-align: center; padding: 0 15px 0 10px;">${step.action.description}</td>
+    <td style="color: gray;">Processed ${step.processed} documents out of ${step.total}</td></tr>
+    </#if>
+</#if>
+</#list>
+</table>
+</#if>
+<hr />
+<h3>Report</h3>
 <table class="table-striped wide">
 	<thead>
 		<th>Name</th>

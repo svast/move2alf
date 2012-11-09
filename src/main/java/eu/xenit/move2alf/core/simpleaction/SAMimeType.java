@@ -17,7 +17,12 @@ public class SAMimeType extends SimpleActionSingleResult {
 
 	private static final Logger logger = LoggerFactory.getLogger(SAMimeType.class);
 	private static final Tika tika = new Tika();
-	
+
+	@Override
+	public String getDescription() {
+		return "Determining MIME types";
+	}
+
 	@Override
 	public FileInfo executeSingleResult(
 			final FileInfo parameterMap, final ActionConfig config) {

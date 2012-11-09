@@ -13,6 +13,11 @@ import java.util.Map;
 public class SAReport extends SimpleActionSingleResult {
 
 	@Override
+	public String getDescription() {
+		return "Generating report";
+	}
+
+	@Override
 	public FileInfo executeSingleResult(final FileInfo parameterMap, final ActionConfig config) {
 		final String status = (String) parameterMap.get(Parameters.PARAM_STATUS);
 		if (status != null && Parameters.VALUE_FAILED.equals(status)) {

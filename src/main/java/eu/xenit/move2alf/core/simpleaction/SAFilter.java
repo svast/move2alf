@@ -21,6 +21,11 @@ public class SAFilter extends SimpleAction {
 			.getLogger(SAFilter.class);
 
 	@Override
+	public String getDescription() {
+		return "Filtering documents";
+	}
+
+	@Override
 	public List<FileInfo> execute(
 			final FileInfo parameterMap,
 			final ActionConfig config, final Map<String, Serializable> state) {

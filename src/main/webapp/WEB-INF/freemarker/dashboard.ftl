@@ -68,7 +68,7 @@ function deleteJob(id){
 						${jobInfo.cycleStartDateTime}
 					</#if>
 					</a>
-					 - ${jobInfo.nrOfDocuments} documents,
+					 — ${jobInfo.nrOfDocuments} documents,
 					 <span<#if (jobInfo.nrOfFailedDocuments > 0)> class="failedWarning"</#if>>${jobInfo.nrOfFailedDocuments} failed</span>
 				</#if>
 			</td>

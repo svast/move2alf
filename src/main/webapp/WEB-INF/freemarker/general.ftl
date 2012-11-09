@@ -10,6 +10,7 @@
 
 <#macro head>
 	<head>
+        <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
 		<link rel="stylesheet" href="<@spring.url relativeUrl="/styles/bootstrap.min.css" />" />
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/jquery.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/jquery-ui.js" />"> </script>
