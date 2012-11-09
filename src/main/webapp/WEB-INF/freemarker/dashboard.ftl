@@ -57,7 +57,8 @@ function deleteJob(id){
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
 			</td>
-			<td><span data-content="${jobInfo.description!}" rel="popover" data-original-title="Description">${jobInfo.jobName}</span></td>
+			<td><span data-content="${jobInfo.description!?html}" rel="popover"
+			    data-original-title="Description">${jobInfo.jobName?html}</span></td>
 			<td>
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">

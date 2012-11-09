@@ -4,7 +4,7 @@
 <@head>
 </@head>
 <@bodyMenu title="History" >
-<h2>${job.name}</h2>
+<h2>${job.name?html}</h2>
 <#if historyInfoList??>
 	<table class="table-striped wide">
 		<thead>

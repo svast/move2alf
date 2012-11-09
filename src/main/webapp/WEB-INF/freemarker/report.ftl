@@ -4,7 +4,7 @@
 <@head>
 </@head>
 <@bodyMenu title="Report" >
-<h2>${job.name}</h2>
+<h2>${job.name?html}</h2>
 <table class="small">
 	<tr>
 		<th>Description:</th>
