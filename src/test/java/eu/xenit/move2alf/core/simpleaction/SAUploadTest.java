@@ -1,17 +1,23 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,9 +29,12 @@ import org.mockito.MockitoAnnotations;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.logic.Licensee;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class SAUploadTest {
@@ -185,7 +194,48 @@ public class SAUploadTest {
 
 	private SAUpload actionUnderTest(final SourceSink mockSink) {
 		final ConfiguredSourceSink mockSinkConfig = null;
-		return new SAUpload(mockSink, mockSinkConfig);
+		SAUpload saUpload = new SAUpload(mockSink, mockSinkConfig, new UsageService() {
+			
+			@Override
+			public boolean isValid() {
+				return true;
+			}
+			
+			@Override
+			public boolean isBlockedByDocumentCounter() {
+				return false;
+			}
+			
+			@Override
+			public String getValidationFailureCause() {
+				return null;
+			}
+			
+			@Override
+			public int getTotalNumberOfDocuments() {
+				return 1000;
+			}
+			
+			@Override
+			public Licensee getLicensee() {
+				return null;
+			}
+			
+			@Override
+			public Date getExpirationDate() {
+				return null;
+			}
+			
+			@Override
+			public int getDocumentCounter() {
+				return 1000;
+			}
+			
+			@Override
+			public void decrementDocumentCounter() {				
+			}
+		});
+		return saUpload;
 	}
 
 	private ActionConfig actionConfigWithBatchSize(final int batchSize) {

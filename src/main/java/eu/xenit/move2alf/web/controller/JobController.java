@@ -45,7 +45,7 @@ import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
 import eu.xenit.move2alf.logic.SchedulerImpl;
-import eu.xenit.move2alf.logic.UsageService;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
@@ -109,6 +109,8 @@ public class JobController extends AbstractController{
 		mav.addObject("licenseValidationFailureCause", getUsageService().getValidationFailureCause());
 		mav.addObject("licensee", getUsageService().getLicensee());
 		mav.addObject("expirationDate", getUsageService().getExpirationDate());
+		mav.addObject("documentCounter", getUsageService().getDocumentCounter());
+		mav.addObject("totalNumberOfDocuments", getUsageService().getTotalNumberOfDocuments());
 		
 		mav.setViewName("dashboard");
 		return mav;

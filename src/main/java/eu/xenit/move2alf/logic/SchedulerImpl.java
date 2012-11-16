@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 
 @Service("scheduler")
 public class SchedulerImpl extends AbstractHibernateService implements

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+	
+
+
+	<bean id="h2dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass">
+			<value>org.h2.Driver</value>
+		</property>
+		<property name="jdbcUrl">
+			<value>jdbc:h2:~/.move2alf/move2alf</value>
+		</property>
+		<property name="user">
+			<value>move2alf</value>
+		</property>
+		<property name="password">
+			<value>move2alf</value>
+		</property>
+		<property name="idleConnectionTestPeriod">
+			<value>100</value>
+		</property>
+		<property name="minPoolSize">
+			<value>2</value>
+		</property>
+		<property name="maxPoolSize">
+			<value>10</value>
+		</property>
+		<property name="acquireIncrement">
+			<value>2</value>
+		</property>
+		<property name="maxStatements">
+			<value>0</value>
+		</property>
+	</bean>
+
+	<bean id="h2sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="h2dataSource" />
+		<property name="mappingResources">
+			<list>
+				<value>eu/xenit/move2alf/logic/usageservice/dto/LicenseHistory.hbm.xml</value>
+				<value>eu/xenit/move2alf/logic/usageservice/dto/DocumentCounter.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+				<prop key="hibernate.query.substitutions"> true 1, false 0 </prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- prop key="hibernate.hbm2ddl.auto">create</prop -->
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">false</prop>
+			</props>
+		</property>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="h2txManager" />
+
+	<bean id="h2txManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="h2sessionFactory" />
+	</bean>
+</beans>

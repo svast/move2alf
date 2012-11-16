@@ -41,6 +41,7 @@ import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
@@ -49,6 +50,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobServiceImpl.class);
+	
+	@Autowired
+	private UsageService usageService;
 
 	private UserService userService;
 
@@ -591,6 +595,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			}
 			doc.setProcessedDocumentParameterSet(params);
 			getSessionFactory().getCurrentSession().save(doc);
+			if ( EProcessedDocumentStatus.OK.equals(doc.getStatus()) ) {
+				usageService.decrementDocumentCounter();
+			}
 		} catch (final Exception e) {
 			logger.error("Failed to write " + name + " to report.", e);
 		}
