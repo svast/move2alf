@@ -418,7 +418,11 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public void clearCaches(final ConfiguredSourceSink sinkConfig) {
 		RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-		ras.clearCaches();
+		if(ras != null) {
+			ras.clearCaches();
+		} else {
+			logger.warn("Tried to clear caches of inexistent RepositoryAccessSession");
+		}
 	}
 
 	private static RepositoryAccessSession createRepositoryAccessSession(
