@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.common;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
@@ -101,16 +103,18 @@ public class Util {
 			String newFileName = fullDestinationPath + "/" + file.getName();
 			File newFile = new File(newFileName);
 			deleteIfExists(newFile);
-			if (file.renameTo(new File(newFileName))) {
-				File movedFile = new File(newFileName);
+			File movedFile = new File(newFileName);
+			try {			
+				FileUtils.moveFile(file, new File(newFileName));
 				logger.info("Moved file to " + movedFile.getAbsolutePath());
-				return movedFile;
-			} else {
-				logger.warn("Could not move document "
-						+ file.getAbsolutePath());
+			} catch (IOException e) {
+				logger.error("Could not move document "
+						+ file.getAbsolutePath(), e);
 				return null;
 			}
-		} else {
+			return movedFile;
+		}
+		else {
 			logger.warn("Destination path could not be made for document "
 					+ file.getAbsolutePath());
 			return null;
