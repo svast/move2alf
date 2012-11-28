@@ -44,13 +44,12 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final String basePath,
+			final String docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final Map<String, Map<String, String>> acl,
-			final boolean inheritPermissions, final File document) {
+			final File document) {
 		// TODO Auto-generated method stub
 
 	}

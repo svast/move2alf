@@ -42,28 +42,26 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final String basePath,
+			final String docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final Map<String, Map<String, String>> acl,
-			final boolean inheritPermissions, final File document) {
+			final File document) {
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
 				logger.debug("Uploading file " + document.getName());
-				uploadFile(docExistsMode, ras, basePath, remotePath, mimeType,
+				uploadFile(docExistsMode, ras, remotePath, mimeType,
 						namespace, contentType, description, metadata,
-						multiValueMetadata, acl, inheritPermissions, document);
+						multiValueMetadata, document);
 			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
-					retryUpload(configuredSourceSink, docExistsMode, basePath,
+					retryUpload(configuredSourceSink, docExistsMode,
 							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, acl,
-							inheritPermissions, document);
+							description, metadata, multiValueMetadata, document);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -71,10 +69,9 @@ public class AlfrescoSourceSink extends SourceSink {
 			} catch (final RuntimeException e) {
 				if ("Error writing content to repository server".equals(e
 						.getMessage())) {
-					retryUpload(configuredSourceSink, docExistsMode, basePath,
+					retryUpload(configuredSourceSink, docExistsMode, 
 							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, acl,
-							inheritPermissions, document);
+							description, metadata, multiValueMetadata, document);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -169,29 +166,14 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String stackTrace = result.toString();
 			if (stackTrace
 					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
-				if (MODE_SKIP.equals(docExistsMode)) {
-					// ignore
-				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
-					logger.warn("One or more of the documents in this batch already exist in the repository");
-					throw new Move2AlfException(
-							"One or more of the documents in this batch already exist in the repository");
-				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
-					logger.info("One or more of the documents in this batch already exist in the repository. "
-							+ "Overwriting documents one-by-one.");
-					for (final Document doc : documents) {
-						logger.info("- Overwriting document "
-								+ doc.file.getName());
-						ras.updateContentByDocNameAndPath(doc.spacePath,
-								doc.file.getName(), doc.file, doc.mimeType,
-								false);
-						if (doc.meta != null) {
-							ras.updateMetaDataByDocNameAndPath(doc.spacePath,
-									doc.file.getName(), doc.contentModelNamespace, doc.meta);
-							// TODO: updating multivalue metadata not supported
-							// by RRA?
-						}
-					}
+				logger.info("This batch contained at least one duplicate, trying to upload seperately");
+			
+				for (final Document doc : documents) {
+					logger.info("- Trying to upload seperately "
+							+ doc.file.getName());
+					uploadFile(docExistsMode, ras, doc.spacePath, doc.mimeType, doc.contentModelNamespace, doc.contentModelType, doc.description, doc.meta, doc.multiValueMeta, doc.file);
 				}
+				
 			} else {
 				throw e;
 			}
@@ -246,72 +228,35 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private static void retryUpload(
 			final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final String basePath,
+			final String docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final Map<String, Map<String, String>> acl,
-			final boolean inheritPermissions, final File document)
+			final File document)
 			throws RepositoryAccessException, RepositoryException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
 		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 
 		logger.debug("Retrying file " + document.getName());
-		uploadFile(docExistsMode, ras, basePath, remotePath, mimeType,
+		uploadFile(docExistsMode, ras, remotePath, mimeType,
 				namespace, contentType, description, metadata,
-				multiValueMetadata, acl, inheritPermissions, document);
+				multiValueMetadata, document);
 	}
 
 	private static void uploadFile(final String docExistsMode,
-			final RepositoryAccessSession ras, final String basePath,
+			final RepositoryAccessSession ras,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final Map<String, Map<String, String>> acl,
-			final boolean inheritPermissions, final File document)
+			final File document)
 			throws RepositoryAccessException, RepositoryException {
 		try {
 			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
 					description, namespace, contentType, metadata,
 					multiValueMetadata);
-			if (acl != null) {
-				for (final String aclPath : acl.keySet()) {
-
-					String parserAclPath = aclPath;
-					// add "cm:" in front of each path component
-					if (parserAclPath.startsWith("/")) {
-						parserAclPath = parserAclPath.substring(1,
-								parserAclPath.length());
-					}
-					if (parserAclPath.endsWith("/")) {
-						parserAclPath = parserAclPath.substring(0,
-								parserAclPath.length() - 1);
-					}
-
-					String remoteACLPath = basePath + parserAclPath;
-					final String[] aclComponents = remoteACLPath.split("/");
-					remoteACLPath = "";
-					for (final String aclComponent : aclComponents) {
-						if ("".equals(aclComponent)) {
-							remoteACLPath += "/";
-						} else if (aclComponent.contains(":")) {
-							remoteACLPath += aclComponent + "/";
-						} else {
-							remoteACLPath += "cm:" + aclComponent + "/";
-						}
-					}
-					remoteACLPath = remoteACLPath.substring(0,
-							remoteACLPath.length() - 1);
-
-					logger.debug("ACL path: " + remoteACLPath);
-
-					ras.setAccessControlList(remoteACLPath, inheritPermissions,
-							acl.get(aclPath));
-				}
-			}
 		} catch (final RepositoryException e) {
 			Throwable cause = e.getCause();
 			if (cause == null) {
