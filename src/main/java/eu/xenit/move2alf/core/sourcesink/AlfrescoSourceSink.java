@@ -186,7 +186,7 @@ public class AlfrescoSourceSink extends SourceSink {
 								false);
 						if (doc.meta != null) {
 							ras.updateMetaDataByDocNameAndPath(doc.spacePath,
-									doc.file.getName(), doc.meta);
+									doc.file.getName(), doc.contentModelNamespace, doc.meta);
 							// TODO: updating multivalue metadata not supported
 							// by RRA?
 						}
@@ -339,7 +339,7 @@ public class AlfrescoSourceSink extends SourceSink {
 							document.getName(), document, mimeType, false);
 					if (metadata != null) {
 						ras.updateMetaDataByDocNameAndPath(remotePath,
-								document.getName(), metadata);
+								document.getName(), namespace, metadata);
 						// TODO: updating multivalue metadata not supported by
 						// RRA?
 					}
