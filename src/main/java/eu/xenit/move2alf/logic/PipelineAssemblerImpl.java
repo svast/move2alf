@@ -133,13 +133,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
 
-		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 
 		if (!"notransformation".equals(jobConfig.getTransform())) {
 
 			actions.add(action(jobConfig.getTransform()).paramMap(
 					transformParameterMap));
 		}
+		
+		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
 				.param("sendNotification",
@@ -467,8 +468,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		filterConfig.put(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
 		pipeline.add(new PipelineStep(new SAFilter(), filterConfig, null,
 				errorHandler));
-		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
-				errorHandler));
 
 		final SimpleAction metadataAction = new SimpleActionWrapper(
 				getActionFactory().getObject(jobConfig.getMetadata()));
@@ -491,6 +490,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			pipeline.add(new PipelineStep(transformAction, transformConfig,
 					null, errorHandler, new ActionExecutor(executorService)));
 		}
+		
+		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
+				errorHandler));
 
 		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
 				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
