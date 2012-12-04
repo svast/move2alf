@@ -195,22 +195,21 @@ public class WebServiceRepositoryAccessSession implements
 		CML cml = new CML();
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
+		List<IllegalDuplicateException> duplicateExceptions = new ArrayList<IllegalDuplicateException>();
 		
-		//First prepare the documents (Independent of creation or update)
-		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
-		for(Document doc: documents){
-			cmlDocs.add(new CMLDocument(doc));
-		}
-		
-		for(CMLDocument doc : cmlDocs){
+		for(Document doc : documents){
 			
 			// Check if the document exists
 			if(!optimistic){
-				pessimisticCML(allowOverwrite, updates, creates, doc);
+				try {
+					pessimisticCML(allowOverwrite, updates, creates, doc);
+				} catch (IllegalDuplicateException e) {
+					duplicateExceptions.add(e);
+				}
 			}
 			// First try to upload
 			else {
-				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
+				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.spacePath)));
 			}
 		}
 		try{
@@ -218,33 +217,40 @@ public class WebServiceRepositoryAccessSession implements
 		}
 		catch(RepositoryFault e){
 			updates = new ArrayList<CMLUpdate>();
-			creates = new ArrayList<CMLCreate>();			
+			creates = new ArrayList<CMLCreate>();
+			duplicateExceptions = new ArrayList<IllegalDuplicateException>();
 			//TODO check if failed do to duplicates
 			if(true){
-				for(CMLDocument doc: cmlDocs){
-					pessimisticCML(allowOverwrite, updates, creates, doc);
+				for(Document doc: documents){
+					try {
+						pessimisticCML(allowOverwrite, updates, creates, doc);
+					} catch (IllegalDuplicateException e1) {
+						//should not happen
+						duplicateExceptions.add(e1);
+					}
 				}
 				//TODO: upload again
 			}
 			
 		}
+		//do something with the illegal duplicates
 		
 	}
 
 	private void pessimisticCML(boolean allowOverwrite,
-			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc)
-			throws RepositoryAccessException, RepositoryException {
+			List<CMLUpdate> updates, List<CMLCreate> creates, Document doc) throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
 		Reference ref = getReference(doc.getXpath());
+		List<Document> illegalDuplicates = new ArrayList<Document>();
 		if(ref!=null){
 			if(allowOverwrite){
 				updates.add(doc.toCMLUpdate(ref));
 			}
 			else{
-				//Add to list of errors
+				throw new IllegalDuplicateException(doc);
 			}
 		}
 		else{
-			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
+			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.spacePath)));
 		}
 	}
 	
