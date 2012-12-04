@@ -154,10 +154,17 @@ public interface RepositoryAccessSession {
 	public long removeZeroSizedFromTree(String spacePath)
 			throws RepositoryAccessException, RepositoryException;
 
-	void storeDocAndCreateParentSpaces(Document document)
+	public void storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException;
 
-	void storeDocsAndCreateParentSpaces(List<Document> documents)
+	/**
+	 * Store all documents and create parent spaces if necessary
+	 * @param documents	The list of documents
+	 * @param allowOverwrite	Should an overwrite be done when the document exists in the destination?
+	 * @throws RepositoryAccessException
+	 * @throws RepositoryException
+	 */
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException;
 
 	/**

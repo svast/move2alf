@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.util.ISO9075;
 import org.alfresco.webservice.accesscontrol.ACE;
 import org.alfresco.webservice.accesscontrol.AccessControlServiceSoapBindingStub;
@@ -179,11 +180,52 @@ public class WebServiceRepositoryAccessSession implements
 			throws RepositoryAccessException, RepositoryException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
-		storeDocsAndCreateParentSpaces(documents);
+		storeDocsAndCreateParentSpaces(documents, false);
 	}
+	
+	/**
+	 * Store documents and create parent spaces if necessary.
+	 * @param documents The list of documents
+	 * @param allowOverwrite	What to do for documents that already exist?
+	 * @param optimistic	Should we try to upload without checking if the document exists? If true, uploads will go faster in case of success.
+	 * @throws RepositoryException 
+	 * @throws RepositoryAccessException 
+	 */
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException{
+		CML cml = new CML();
+		
+		for(Document doc : documents){
+			// First check if the document exists
+			if(!optimistic){
+				boolean doesDocExist = doesDocExist(doc.file.getName(), doc.spacePath);
+				if(doesDocExist){
+					if(allowOverwrite){
+						//TODO Add to update list
+					}
+					else{
+						//TODO Add to a list of failures
+					}
+				}
+				else{
+					//TODO Add to create list
+				}
+			}
+			// First try to upload
+			else {
+				//TODO Add to create list
+				try{
+					//TODO: try to upload
+				}
+				catch(RepositoryFault e){
+					
+				}
+			}
+		}
+	}
+	
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents)
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		CML cml = new CML();
 		Integer id = 1;
@@ -239,6 +281,20 @@ public class WebServiceRepositoryAccessSession implements
 				}
 			}
 		} catch (RepositoryFault e) {
+			Throwable cause = e.getCause();
+			if (cause == null) {
+				cause = e;
+			}
+			final Writer result = new StringWriter();
+			final PrintWriter printWriter = new PrintWriter(result);
+			cause.printStackTrace(printWriter);
+			final String stackTrace = result.toString();
+			if (stackTrace
+					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
+				for(Document doc: documents){
+					logger.debug("Does doc "+doc.file.getName()+" exist? "+doesDocExist(doc.file.getName(), doc.spacePath));
+				}
+			}
 			logger.debug(e.getMessage(), e);
 			throw new RepositoryException(e.getMessage(), e);
 		} catch (RemoteException e) {

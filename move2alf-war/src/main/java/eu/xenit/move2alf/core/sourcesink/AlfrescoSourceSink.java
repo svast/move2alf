@@ -153,7 +153,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			final RepositoryAccessSession ras, final List<Document> documents)
 			throws RepositoryAccessException, RepositoryException {
 		try {
-			ras.storeDocsAndCreateParentSpaces(documents);
+			boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
+			ras.storeDocsAndCreateParentSpaces(documents, overwrite);
 		} catch (final RepositoryException e) {
 			Throwable cause = e.getCause();
 			if (cause == null) {

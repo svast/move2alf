@@ -101,7 +101,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	}
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents)
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
