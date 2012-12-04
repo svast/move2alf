@@ -193,33 +193,58 @@ public class WebServiceRepositoryAccessSession implements
 	 */
 	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException{
 		CML cml = new CML();
+		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
+		List<CMLCreate> creates = new ArrayList<CMLCreate>();
 		
-		for(Document doc : documents){
-			// First check if the document exists
+		//First prepare the documents (Independent of creation or update)
+		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
+		for(Document doc: documents){
+			cmlDocs.add(new CMLDocument(doc));
+		}
+		
+		for(CMLDocument doc : cmlDocs){
+			
+			// Check if the document exists
 			if(!optimistic){
-				boolean doesDocExist = doesDocExist(doc.file.getName(), doc.spacePath);
-				if(doesDocExist){
-					if(allowOverwrite){
-						//TODO Add to update list
-					}
-					else{
-						//TODO Add to a list of failures
-					}
-				}
-				else{
-					//TODO Add to create list
-				}
+				pessimisticCML(allowOverwrite, updates, creates, doc);
 			}
 			// First try to upload
 			else {
-				//TODO Add to create list
-				try{
-					//TODO: try to upload
-				}
-				catch(RepositoryFault e){
-					
-				}
+				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
 			}
+		}
+		try{
+			//TODO: try to upload
+		}
+		catch(RepositoryFault e){
+			updates = new ArrayList<CMLUpdate>();
+			creates = new ArrayList<CMLCreate>();			
+			//TODO check if failed do to duplicates
+			if(true){
+				for(CMLDocument doc: cmlDocs){
+					pessimisticCML(allowOverwrite, updates, creates, doc);
+				}
+				//TODO: upload again
+			}
+			
+		}
+		
+	}
+
+	private void pessimisticCML(boolean allowOverwrite,
+			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc)
+			throws RepositoryAccessException, RepositoryException {
+		Reference ref = getReference(doc.getXpath());
+		if(ref!=null){
+			if(allowOverwrite){
+				updates.add(doc.toCMLUpdate(ref));
+			}
+			else{
+				//Add to list of errors
+			}
+		}
+		else{
+			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
 		}
 	}
 	
