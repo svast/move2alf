@@ -75,7 +75,7 @@ public class WebServiceRepositoryAccessSession implements
 	// if this would ever change it would be better to make it a session
 	// property than
 	// to provide the store in every method call
-	private static final Store store = new Store(Constants.WORKSPACE_STORE,
+	protected static final Store store = new Store(Constants.WORKSPACE_STORE,
 			"SpacesStore");
 
 	private static final int recoverySleepTime = 10000; // 10 seconds
@@ -221,7 +221,7 @@ public class WebServiceRepositoryAccessSession implements
 			if(isDuplicateChildFault(e1)){
 				if(!optimistic){
 					logger.error("Duplicatefault in pessimistic upload!", e1);
-					assert false;
+					throw new RepositoryException("An other process could be interfering with the same nodes on Alfresco");
 				}
 				exceptions = new ArrayList<IllegalDocumentException>();
 				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
@@ -247,7 +247,7 @@ public class WebServiceRepositoryAccessSession implements
 			}
 			// First try to upload
 			else {
-				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
+				creates.add(doc.toCMLCreate());
 			}
 		}
 		CML cml = new CML();
@@ -268,7 +268,7 @@ public class WebServiceRepositoryAccessSession implements
 			}
 		}
 		else{
-			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
+			creates.add(doc.toCMLCreate());
 		}
 	}
 	
@@ -577,7 +577,7 @@ public class WebServiceRepositoryAccessSession implements
 	 *            /cm:Space1/cm:Space2/cm:Space3
 	 */
 
-	private Reference createSpaceIfNotExists(String path)
+	protected Reference createSpaceIfNotExists(String path)
 			throws RepositoryAccessException, RepositoryException {
 		Semaphore lock = null;
 		if (USE_FOLDER_CREATION_LOCKS) {
@@ -843,7 +843,7 @@ public class WebServiceRepositoryAccessSession implements
 				+ ((multiValueMeta != null) ? multiValueMeta.size() : 0) + 2 // fixed
 				// properties
 				- nbrOfAuditableProperties;
-		int i = 2;
+
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
 
 		// these properties are always present
@@ -859,22 +859,8 @@ public class WebServiceRepositoryAccessSession implements
 
 		// multiValue properties
 		if (multiValueMeta != null) {
-			for (String key : multiValueMeta.keySet()) {
-				String val = multiValueMeta.get(key);
-				logger.debug("Prop - Value:  {} - {}", key, val);
-				List<String> valList = new ArrayList<String>();
-				StringTokenizer tokenizer = new StringTokenizer(val, ",");
-				while (tokenizer.hasMoreElements()) {
-					String token = tokenizer.nextToken();
-					valList.add(token);
-				}
-				if (!key.startsWith("{")) {
-					key = contentModelNamespace + key;
-				}
-				contentProps.add(Utils.createNamedValue(key,
-						(String[]) valList.toArray(new String[valList.size()])));
-				i++;
-			}
+			processMultiValuedMetadata(contentModelNamespace, multiValueMeta,
+					contentProps);
 		}
 
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
@@ -917,6 +903,25 @@ public class WebServiceRepositoryAccessSession implements
 		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
 	}
 
+	protected void processMultiValuedMetadata(String contentModelNamespace,
+			Map<String, String> multiValueMeta, List<NamedValue> contentProps) {
+		for (String key : multiValueMeta.keySet()) {
+			String val = multiValueMeta.get(key);
+			logger.debug("Prop - Value:  {} - {}", key, val);
+			List<String> valList = new ArrayList<String>();
+			StringTokenizer tokenizer = new StringTokenizer(val, ",");
+			while (tokenizer.hasMoreElements()) {
+				String token = tokenizer.nextToken();
+				valList.add(token);
+			}
+			if (!key.startsWith("{")) {
+				key = contentModelNamespace + key;
+			}
+			contentProps.add(Utils.createNamedValue(key,
+					(String[]) valList.toArray(new String[valList.size()])));
+		}
+	}
+
 	protected String putContent(File file, String mimeType) {
 		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
 				mimeType, "UTF-8");
@@ -924,7 +929,7 @@ public class WebServiceRepositoryAccessSession implements
 		return contentDetails;
 	}
 
-	private void processMetadata(String contentModelNamespace,
+	protected void processMetadata(String contentModelNamespace,
 			Map<String, String> meta, List<NamedValue> contentProps) {
 		for (String key : meta.keySet()) {
 			String value = meta.get(key);
