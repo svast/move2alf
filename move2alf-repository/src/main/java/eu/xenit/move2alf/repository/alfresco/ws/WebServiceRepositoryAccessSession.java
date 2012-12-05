@@ -190,67 +190,85 @@ public class WebServiceRepositoryAccessSession implements
 	 * @param optimistic	Should we try to upload without checking if the document exists? If true, uploads will go faster in case of success.
 	 * @throws RepositoryException 
 	 * @throws RepositoryAccessException 
+	 * @throws PartialUploadFailureException 
 	 */
-	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException{
-		CML cml = new CML();
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException, PartialUploadFailureException{
+		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
+		for(Document doc: documents){
+			cmlDocs.add(new CMLDocument(this, doc));
+		}
+		
+		List<IllegalDocumentException> exceptions = new ArrayList<IllegalDocumentException>();
+		
+		UpdateResult[] results = updateRepositoryAndHandleErrors(allowOverwrite,
+						cmlDocs, exceptions, optimistic);
+		
+		setAuditableProperties(documents, results);
+		if(!exceptions.isEmpty()){
+			throw new PartialUploadFailureException(exceptions);
+		}
+	}
+
+	private UpdateResult[] updateRepositoryAndHandleErrors(
+			boolean allowOverwrite, List<CMLDocument> cmlDocs,
+			List<IllegalDocumentException> exceptions,
+			boolean optimistic) throws RepositoryAccessException,
+			RepositoryException {
+		UpdateResult[] results = null;
+		try {
+			results = updateRepository(cmlDocs, allowOverwrite, optimistic, exceptions);
+		} catch (RepositoryFault e1) {
+			if(isDuplicateChildFault(e1)){
+				if(!optimistic){
+					logger.error("Duplicatefault in pessimistic upload!", e1);
+					assert false;
+				}
+				exceptions = new ArrayList<IllegalDocumentException>();
+				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
+			}
+		} catch (RemoteException e1) {
+			throw new RepositoryAccessException(e1.getMessage(), e1);
+		}
+		return results;
+	}
+
+	private UpdateResult[] updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic, List<IllegalDocumentException> duplicateExceptions) throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
-		List<IllegalDuplicateException> duplicateExceptions = new ArrayList<IllegalDuplicateException>();
-		
-		for(Document doc : documents){
+		for(CMLDocument doc : cmlDocs){
 			
 			// Check if the document exists
 			if(!optimistic){
 				try {
 					pessimisticCML(allowOverwrite, updates, creates, doc);
-				} catch (IllegalDuplicateException e) {
+				} catch (IllegalDocumentException e) {
 					duplicateExceptions.add(e);
 				}
 			}
 			// First try to upload
 			else {
-				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.spacePath)));
+				creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
 			}
 		}
-		try{
-			//TODO: try to upload
-		}
-		catch(RepositoryFault e){
-			updates = new ArrayList<CMLUpdate>();
-			creates = new ArrayList<CMLCreate>();
-			duplicateExceptions = new ArrayList<IllegalDuplicateException>();
-			//TODO check if failed do to duplicates
-			if(true){
-				for(Document doc: documents){
-					try {
-						pessimisticCML(allowOverwrite, updates, creates, doc);
-					} catch (IllegalDuplicateException e1) {
-						//should not happen
-						duplicateExceptions.add(e1);
-					}
-				}
-				//TODO: upload again
-			}
-			
-		}
-		//do something with the illegal duplicates
-		
+		CML cml = new CML();
+		cml.setCreate(creates.toArray(new CMLCreate[0]));
+		cml.setUpdate(updates.toArray(new CMLUpdate[0]));
+		return repositoryService.update(cml);
 	}
 
 	private void pessimisticCML(boolean allowOverwrite,
-			List<CMLUpdate> updates, List<CMLCreate> creates, Document doc) throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
+		List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
 		Reference ref = getReference(doc.getXpath());
-		List<Document> illegalDuplicates = new ArrayList<Document>();
 		if(ref!=null){
 			if(allowOverwrite){
 				updates.add(doc.toCMLUpdate(ref));
 			}
 			else{
-				throw new IllegalDuplicateException(doc);
+				throw new IllegalDuplicateException(doc.getDocument());
 			}
 		}
 		else{
-			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.spacePath)));
+			creates.add(doc.toCMLCreate(createSpaceIfNotExists(doc.getSpacePath())));
 		}
 	}
 	
@@ -276,20 +294,31 @@ public class WebServiceRepositoryAccessSession implements
 			}
 			id++;
 		}
-		Reference content = null;
-
+		
 		UpdateResult[] results;
 		try {
 			results = repositoryService.update(cml);
-			
 			// try to set auditable properties on results
-			Iterator<Document> documentsIterator = documents.iterator();
+			setAuditableProperties(documents, results);
+		} catch (RepositoryFault e) {
+			logger.debug(e.getMessage(), e);
+			throw new RepositoryException(e.getMessage(), e);
+		} catch (RemoteException e) {
+			// connectivity problem
+			throw new RepositoryAccessException(e.getMessage(), e);
+		}
+	}
+
+	private void setAuditableProperties(List<Document> documents,
+			UpdateResult[] results) {
+		Iterator<Document> documentsIterator = documents.iterator();
+		try{
 			for(UpdateResult result : results) {
 				if ("addAspect".equals(result.getStatement())) {
 					continue;
 				}
 				
-				content = result.getDestination();
+				Reference content = result.getDestination();
 				logger.debug("Reference:  {} {}", content.getStore().getAddress(),
 						content.getPath());
 				
@@ -311,27 +340,8 @@ public class WebServiceRepositoryAccessSession implements
 					}
 				}
 			}
-		} catch (RepositoryFault e) {
-			Throwable cause = e.getCause();
-			if (cause == null) {
-				cause = e;
-			}
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			cause.printStackTrace(printWriter);
-			final String stackTrace = result.toString();
-			if (stackTrace
-					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
-				for(Document doc: documents){
-					logger.debug("Does doc "+doc.file.getName()+" exist? "+doesDocExist(doc.file.getName(), doc.spacePath));
-				}
-			}
-			logger.debug(e.getMessage(), e);
-			throw new RepositoryException(e.getMessage(), e);
-		} catch (RemoteException e) {
-			// connectivity problem
-			throw new RepositoryAccessException(e.getMessage(), e);
-		} catch (WebServiceException e) {
+		}
+		catch(WebServiceException e){
 			if ("Unable to execute action".equals(e.getMessage())) {
 				logger.warn("Trying to set auditable properties but edit-auditable-aspect action not found. "
 						+ "Please install move2alf-amp on the Alfresco server.");
@@ -339,6 +349,18 @@ public class WebServiceRepositoryAccessSession implements
 				throw e;
 			}
 		}
+	}
+
+	private boolean isDuplicateChildFault(RepositoryFault e) {
+		Throwable cause = e.getCause();
+		if (cause == null) {
+			cause = e;
+		}
+		final Writer result = new StringWriter();
+		final PrintWriter printWriter = new PrintWriter(result);
+		cause.printStackTrace(printWriter);
+		final String stackTrace = result.toString();
+		return stackTrace.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException");
 	}
 
 	@Override
@@ -805,12 +827,7 @@ public class WebServiceRepositoryAccessSession implements
 
 		logger.debug("Filename {}", fileName);
 
-		// Put the content onto the server
-		String contentDetails = null;
-
-		contentDetails = ContentUtils.putContent(file, host, port, webapp,
-				mimeType, "UTF-8");
-		logger.debug("File put in repository");
+		String contentDetails = putContent(file, mimeType);
 
 		// audtiable properties need a special handling, they can not be set
 		// like other
@@ -898,6 +915,13 @@ public class WebServiceRepositoryAccessSession implements
 		
 		cml.setCreate(creates.toArray(new CMLCreate[creates.size()]));
 		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
+	}
+
+	protected String putContent(File file, String mimeType) {
+		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
+				mimeType, "UTF-8");
+		logger.debug("File put in repository");
+		return contentDetails;
 	}
 
 	private void processMetadata(String contentModelNamespace,
