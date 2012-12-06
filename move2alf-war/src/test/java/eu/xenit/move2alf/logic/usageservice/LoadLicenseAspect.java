@@ -15,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import eu.xenit.move2alf.logic.usageservice.Loader;
-
-
-
 @Aspect
 class LoadLicenseAspect {
 

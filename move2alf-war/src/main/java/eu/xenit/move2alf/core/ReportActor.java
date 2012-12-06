@@ -19,8 +19,7 @@ import akka.actor.UntypedActor;
 public class ReportActor extends UntypedActor {
 
 	public JobService getJobService() {
-		return (JobService) ApplicationContextProvider.getApplicationContext()
-				.getBean("jobService");
+		return (JobService) ApplicationContextProvider.getApplicationContext().getBean("jobService");
 	}
 	
 	@Value(value="#{'${mail.from}'}")
