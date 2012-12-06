@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.xenit.move2alf.logic.Licensee;
 import eu.xenit.move2alf.logic.usageservice.dto.DocumentCounter;
 import eu.xenit.move2alf.logic.usageservice.dto.LicenseHistory;
 

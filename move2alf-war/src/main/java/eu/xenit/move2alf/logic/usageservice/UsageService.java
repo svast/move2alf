@@ -2,8 +2,6 @@ package eu.xenit.move2alf.logic.usageservice;
 
 import java.util.Date;
 
-import eu.xenit.move2alf.logic.Licensee;
-
 public interface UsageService {
 	
 	public boolean isValid();

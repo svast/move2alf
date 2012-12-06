@@ -3,12 +3,16 @@ package eu.xenit.move2alf.logic.usageservice;
 import java.util.Date;
 import java.util.List;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import net.padlocksoftware.padlock.license.License;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.joda.time.LocalDate;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,7 @@ import eu.xenit.move2alf.logic.usageservice.dto.LicenseHistory;
 
 @Service("dbInitializer")
 @Transactional("h2txManager")
-class DbInitializer implements ApplicationListener<ContextRefreshedEvent> {//, BeanFactoryPostProcessor  { //TODO jonas h2db
+class DbInitializer implements ApplicationListener<ContextRefreshedEvent>, BeanFactoryPostProcessor { //TODO jonas h2db
 	
 	private static final int MAX_INSTALLATION_DAYS = 10;
 	
@@ -48,14 +52,14 @@ class DbInitializer implements ApplicationListener<ContextRefreshedEvent> {//, B
 	//but ... this is not possible at the moment because of a spring bug ...
 	//more info https://jira.springsource.org/browse/SPR-4935 - @Autowired not working in BeanFactoryPostProcessor - Fix Version/s: 3.1 M2
 	//TODO => upgrade spring and use BeanFactoryPostProcessor to modify user and password
-//	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {	
-//		Object ds = beanFactory.getBean("h2dataSource");
-//    	if (ds != null && ds instanceof ComboPooledDataSource) {
-//    		ComboPooledDataSource h2dataSource = (ComboPooledDataSource)ds;
-//    		h2dataSource.setUser("move2alf1234xenit");
-//    		h2dataSource.setPassword("move2alf1234xenit");
-//    	}
-//    }
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		Object ds = beanFactory.getBean("h2dataSource");
+    	if (ds != null && ds instanceof ComboPooledDataSource) {
+    		ComboPooledDataSource h2dataSource = (ComboPooledDataSource) ds;
+    		h2dataSource.setUser("move2alf1234xenit");
+    		h2dataSource.setPassword("move2alf1234xenit");
+    	}
+    }
 	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {

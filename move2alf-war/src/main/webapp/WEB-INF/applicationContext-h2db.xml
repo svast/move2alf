@@ -14,23 +14,17 @@
 		<property name="jdbcUrl">
 			<value>jdbc:h2:~/.move2alf/move2alf</value>
 		</property>
-		<property name="user">
-			<value>move2alf</value>
-		</property>
-		<property name="password">
-			<value>move2alf</value>
-		</property>
 		<property name="idleConnectionTestPeriod">
 			<value>100</value>
 		</property>
 		<property name="minPoolSize">
-			<value>2</value>
+			<value>1</value>
 		</property>
 		<property name="maxPoolSize">
-			<value>10</value>
+			<value>3</value>
 		</property>
 		<property name="acquireIncrement">
-			<value>2</value>
+			<value>1</value>
 		</property>
 		<property name="maxStatements">
 			<value>0</value>
