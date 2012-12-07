@@ -4,8 +4,8 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class IllegalDuplicateException extends IllegalDocumentException {
 
-	public IllegalDuplicateException(Document document) {
-		super(document);
+	public IllegalDuplicateException(Document document, String message) {
+		super(document, message);
 	}
 
 	/**

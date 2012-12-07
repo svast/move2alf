@@ -265,7 +265,7 @@ public class WebServiceRepositoryAccessSession implements
 				updates.add(doc.toCMLUpdate(ref));
 			}
 			else{
-				throw new IllegalDuplicateException(doc.getDocument());
+				throw new IllegalDuplicateException(doc.getDocument(), "File exists: "+doc.getXpath());
 			}
 		}
 		else{
