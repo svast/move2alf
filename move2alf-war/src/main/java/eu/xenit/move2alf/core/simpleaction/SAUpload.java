@@ -49,7 +49,6 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
 								  final ActionConfig config, final Map<String, Serializable> state) {
-		//TODO jonas - adapt to new batch processing
 		if ( usageService.isBlockedByDocumentCounter() ) {
 			throw new Move2AlfException("Document counter is 0.");
 		}
