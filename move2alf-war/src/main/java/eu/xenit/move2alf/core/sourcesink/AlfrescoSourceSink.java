@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.IllegalDocumentException;
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
@@ -47,7 +49,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final File document) {
+			final File document) throws IllegalDocumentException {
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
@@ -102,7 +104,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) {
+			final String docExistsMode, final List<Document> documents) throws PartialUploadFailureException {
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
@@ -150,39 +152,16 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	private void uploadBatch(final String docExistsMode,
-			final RepositoryAccessSession ras, final List<Document> documents)
-			throws RepositoryAccessException, RepositoryException {
-		try {
-			ras.storeDocsAndCreateParentSpaces(documents);
-		} catch (final RepositoryException e) {
-			Throwable cause = e.getCause();
-			if (cause == null) {
-				cause = e;
-			}
-			logger.info("Message {}", cause.getMessage());
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			cause.printStackTrace(printWriter);
-			final String stackTrace = result.toString();
-			if (stackTrace
-					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
-				logger.info("This batch contained at least one duplicate, trying to upload seperately");
-			
-				for (final Document doc : documents) {
-					logger.info("- Trying to upload seperately "
-							+ doc.file.getName());
-					uploadFile(docExistsMode, ras, doc.spacePath, doc.mimeType, doc.contentModelNamespace, doc.contentModelType, doc.description, doc.meta, doc.multiValueMeta, doc.file);
-				}
-				
-			} else {
-				throw e;
-			}
-		}
+		final RepositoryAccessSession ras, final List<Document> documents)
+		throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+		
+		boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
+		ras.storeDocsAndCreateParentSpaces(documents, overwrite, false);
 	}
 
 	private void retryBatch(final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final List<Document> documents)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
 		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
@@ -234,7 +213,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
 			final File document)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
 		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
@@ -252,7 +231,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
 			final File document)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		try {
 			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
 					description, namespace, contentType, metadata,

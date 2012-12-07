@@ -48,12 +48,13 @@ public interface RepositoryAccessSession {
 	 * @throws RepositoryAccessException : exception thrown when there is
 	 * a connectivity problem to the repository.
 	 * @throws RepositoryException : exception thrown when the repository can not execute the request.
+	 * @throws IllegalDocumentException 
 	 */
 	public abstract void storeDocAndCreateParentSpaces(File document,
 			String mimeType, String spacePath, String description,
 			String contentModelNamespace, String contentModelType,
 			Map<String, String> meta, Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException;
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException;
 
 	/**
 	 * Check whether the document with name <code>docName</code> exists in the
@@ -154,15 +155,36 @@ public interface RepositoryAccessSession {
 	public long removeZeroSizedFromTree(String spacePath)
 			throws RepositoryAccessException, RepositoryException;
 
-	void storeDocAndCreateParentSpaces(Document document)
-			throws RepositoryAccessException, RepositoryException;
+	public void storeDocAndCreateParentSpaces(Document document)
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException;
 
-	void storeDocsAndCreateParentSpaces(List<Document> documents)
-			throws RepositoryAccessException, RepositoryException;
+	/**
+	 * Store all documents and create parent spaces if necessary
+	 * @param documents	The list of documents
+	 * @param allowOverwrite	Should an overwrite be done when the document exists in the destination?
+	 * @throws RepositoryAccessException
+	 * @throws RepositoryException
+	 * @throws PartialUploadFailureException 
+	 */
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException;
 
 	/**
 	 * Clear all caches
 	 */
 	public void clearCaches();
+
+	/**
+	 * Store documents and create parent spaces if necessary.
+	 * @param documents The list of documents
+	 * @param allowOverwrite	What to do for documents that already exist?
+	 * @param optimistic	Should we try to upload without checking if the document exists? If true, uploads will go faster in case of success.
+	 * @throws RepositoryException 
+	 * @throws RepositoryAccessException 
+	 * @throws PartialUploadFailureException 
+	 */
+	public abstract void storeDocsAndCreateParentSpaces(List<Document> documents,
+			boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException,
+			RepositoryException, PartialUploadFailureException;
 
 }

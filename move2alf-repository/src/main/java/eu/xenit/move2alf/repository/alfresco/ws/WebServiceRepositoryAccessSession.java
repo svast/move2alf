@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.util.ISO9075;
 import org.alfresco.webservice.accesscontrol.ACE;
 import org.alfresco.webservice.accesscontrol.AccessControlServiceSoapBindingStub;
@@ -57,6 +58,9 @@ import org.alfresco.webservice.util.WebServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.repository.IllegalDocumentException;
+import eu.xenit.move2alf.repository.IllegalDuplicateException;
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
@@ -74,7 +78,7 @@ public class WebServiceRepositoryAccessSession implements
 	// if this would ever change it would be better to make it a session
 	// property than
 	// to provide the store in every method call
-	private static final Store store = new Store(Constants.WORKSPACE_STORE,
+	protected static final Store store = new Store(Constants.WORKSPACE_STORE,
 			"SpacesStore");
 
 	private static final int recoverySleepTime = 10000; // 10 seconds
@@ -159,6 +163,7 @@ public class WebServiceRepositoryAccessSession implements
 	}
 
 	/**
+	 * @throws IllegalDocumentException 
 	 * @deprecated as of Move2Alf 1.2, replaced by {@see
 	 *             void storeDocAndCreateParentSpaces(Document)}
 	 */
@@ -167,7 +172,7 @@ public class WebServiceRepositoryAccessSession implements
 			String spacePath, String description, String contentModelNamespace,
 			String contentModelType, Map<String, String> meta,
 			Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		Document document = new Document(file, mimeType, spacePath,
 				description, contentModelNamespace, contentModelType, meta,
 				multiValueMeta);
@@ -176,47 +181,115 @@ public class WebServiceRepositoryAccessSession implements
 
 	@Override
 	public void storeDocAndCreateParentSpaces(Document document)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
-		storeDocsAndCreateParentSpaces(documents);
+		try {
+			storeDocsAndCreateParentSpaces(documents, false);
+		} catch (PartialUploadFailureException e) {
+			throw e.getExceptions().get(0);
+		}
+	}
+	
+	
+	@Override
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException, PartialUploadFailureException{
+		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
+		for(Document doc: documents){
+			cmlDocs.add(new CMLDocument(this, doc));
+		}
+		
+		List<IllegalDocumentException> exceptions = new ArrayList<IllegalDocumentException>();
+		
+		UpdateResult[] results = updateRepositoryAndHandleErrors(allowOverwrite,
+						cmlDocs, exceptions, optimistic);
+		
+		setAuditableProperties(documents, results);
+		if(!exceptions.isEmpty()){
+			throw new PartialUploadFailureException(exceptions);
+		}
 	}
 
-	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents)
-			throws RepositoryAccessException, RepositoryException {
-		CML cml = new CML();
-		Integer id = 1;
-		for (Document document : documents) {
-			Reference ref = createSpaceIfNotExists(document.spacePath);
-			if (ref != null) {
-				logger.debug("Adding File ...");
-
-				addDocumentToCML(document.file, document.mimeType, ref, document.description,
-						document.contentModelNamespace, document.contentModelType, document.meta,
-						document.multiValueMeta, cml, id.toString());
-
-				logger.info("File :" + document.file.getName() + " Added File.");
-			} else {
-				logger.error("Can not create space {}", document.spacePath);
-				throw new RepositoryException("Can not create space " + document.spacePath);
-			}
-			id++;
-		}
-		Reference content = null;
-
-		UpdateResult[] results;
+	private UpdateResult[] updateRepositoryAndHandleErrors(
+			boolean allowOverwrite, List<CMLDocument> cmlDocs,
+			List<IllegalDocumentException> exceptions,
+			boolean optimistic) throws RepositoryAccessException,
+			RepositoryException {
+		UpdateResult[] results = null;
 		try {
-			results = repositoryService.update(cml);
+			results = updateRepository(cmlDocs, allowOverwrite, optimistic, exceptions);
+		} catch (RepositoryFault e1) {
+			if(isDuplicateChildFault(e1)){
+				if(!optimistic){
+					logger.error("Duplicatefault in pessimistic upload!", e1);
+					throw new RepositoryException("An other process could be interfering with the same nodes on Alfresco");
+				}
+				exceptions = new ArrayList<IllegalDocumentException>();
+				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
+			}
+		} catch (RemoteException e1) {
+			throw new RepositoryAccessException(e1.getMessage(), e1);
+		}
+		return results;
+	}
+
+	private UpdateResult[] updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic, List<IllegalDocumentException> duplicateExceptions) throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
+		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
+		List<CMLCreate> creates = new ArrayList<CMLCreate>();
+		for(CMLDocument doc : cmlDocs){
 			
-			// try to set auditable properties on results
-			Iterator<Document> documentsIterator = documents.iterator();
+			// Check if the document exists
+			if(!optimistic){
+				try {
+					pessimisticCML(allowOverwrite, updates, creates, doc);
+				} catch (IllegalDocumentException e) {
+					duplicateExceptions.add(e);
+				}
+			}
+			// First try to upload
+			else {
+				creates.add(doc.toCMLCreate());
+			}
+		}
+		CML cml = new CML();
+		cml.setCreate(creates.toArray(new CMLCreate[0]));
+		cml.setUpdate(updates.toArray(new CMLUpdate[0]));
+		return repositoryService.update(cml);
+	}
+
+	private void pessimisticCML(boolean allowOverwrite,
+		List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
+		Reference ref = getReference(doc.getXpath());
+		if(ref!=null){
+			if(allowOverwrite){
+				updates.add(doc.toCMLUpdate(ref));
+			}
+			else{
+				throw new IllegalDuplicateException(doc.getDocument(), "File exists: "+doc.getXpath());
+			}
+		}
+		else{
+			creates.add(doc.toCMLCreate());
+		}
+	}
+	
+
+	@Override
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+		storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
+	}
+
+	private void setAuditableProperties(List<Document> documents,
+			UpdateResult[] results) {
+		Iterator<Document> documentsIterator = documents.iterator();
+		try{
 			for(UpdateResult result : results) {
 				if ("addAspect".equals(result.getStatement())) {
 					continue;
 				}
 				
-				content = result.getDestination();
+				Reference content = result.getDestination();
 				logger.debug("Reference:  {} {}", content.getStore().getAddress(),
 						content.getPath());
 				
@@ -238,13 +311,8 @@ public class WebServiceRepositoryAccessSession implements
 					}
 				}
 			}
-		} catch (RepositoryFault e) {
-			logger.debug(e.getMessage(), e);
-			throw new RepositoryException(e.getMessage(), e);
-		} catch (RemoteException e) {
-			// connectivity problem
-			throw new RepositoryAccessException(e.getMessage(), e);
-		} catch (WebServiceException e) {
+		}
+		catch(WebServiceException e){
 			if ("Unable to execute action".equals(e.getMessage())) {
 				logger.warn("Trying to set auditable properties but edit-auditable-aspect action not found. "
 						+ "Please install move2alf-amp on the Alfresco server.");
@@ -252,6 +320,18 @@ public class WebServiceRepositoryAccessSession implements
 				throw e;
 			}
 		}
+	}
+
+	private boolean isDuplicateChildFault(RepositoryFault e) {
+		Throwable cause = e.getCause();
+		if (cause == null) {
+			cause = e;
+		}
+		final Writer result = new StringWriter();
+		final PrintWriter printWriter = new PrintWriter(result);
+		cause.printStackTrace(printWriter);
+		final String stackTrace = result.toString();
+		return stackTrace.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException");
 	}
 
 	@Override
@@ -468,7 +548,7 @@ public class WebServiceRepositoryAccessSession implements
 	 *            /cm:Space1/cm:Space2/cm:Space3
 	 */
 
-	private Reference createSpaceIfNotExists(String path)
+	protected Reference createSpaceIfNotExists(String path)
 			throws RepositoryAccessException, RepositoryException {
 		Semaphore lock = null;
 		if (USE_FOLDER_CREATION_LOCKS) {
@@ -718,12 +798,7 @@ public class WebServiceRepositoryAccessSession implements
 
 		logger.debug("Filename {}", fileName);
 
-		// Put the content onto the server
-		String contentDetails = null;
-
-		contentDetails = ContentUtils.putContent(file, host, port, webapp,
-				mimeType, "UTF-8");
-		logger.debug("File put in repository");
+		String contentDetails = putContent(file, mimeType);
 
 		// audtiable properties need a special handling, they can not be set
 		// like other
@@ -739,7 +814,7 @@ public class WebServiceRepositoryAccessSession implements
 				+ ((multiValueMeta != null) ? multiValueMeta.size() : 0) + 2 // fixed
 				// properties
 				- nbrOfAuditableProperties;
-		int i = 2;
+
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
 
 		// these properties are always present
@@ -755,22 +830,8 @@ public class WebServiceRepositoryAccessSession implements
 
 		// multiValue properties
 		if (multiValueMeta != null) {
-			for (String key : multiValueMeta.keySet()) {
-				String val = multiValueMeta.get(key);
-				logger.debug("Prop - Value:  {} - {}", key, val);
-				List<String> valList = new ArrayList<String>();
-				StringTokenizer tokenizer = new StringTokenizer(val, ",");
-				while (tokenizer.hasMoreElements()) {
-					String token = tokenizer.nextToken();
-					valList.add(token);
-				}
-				if (!key.startsWith("{")) {
-					key = contentModelNamespace + key;
-				}
-				contentProps.add(Utils.createNamedValue(key,
-						(String[]) valList.toArray(new String[valList.size()])));
-				i++;
-			}
+			processMultiValuedMetadata(contentModelNamespace, multiValueMeta,
+					contentProps);
 		}
 
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
@@ -813,7 +874,33 @@ public class WebServiceRepositoryAccessSession implements
 		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
 	}
 
-	private void processMetadata(String contentModelNamespace,
+	protected void processMultiValuedMetadata(String contentModelNamespace,
+			Map<String, String> multiValueMeta, List<NamedValue> contentProps) {
+		for (String key : multiValueMeta.keySet()) {
+			String val = multiValueMeta.get(key);
+			logger.debug("Prop - Value:  {} - {}", key, val);
+			List<String> valList = new ArrayList<String>();
+			StringTokenizer tokenizer = new StringTokenizer(val, ",");
+			while (tokenizer.hasMoreElements()) {
+				String token = tokenizer.nextToken();
+				valList.add(token);
+			}
+			if (!key.startsWith("{")) {
+				key = contentModelNamespace + key;
+			}
+			contentProps.add(Utils.createNamedValue(key,
+					(String[]) valList.toArray(new String[valList.size()])));
+		}
+	}
+
+	protected String putContent(File file, String mimeType) {
+		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
+				mimeType, "UTF-8");
+		logger.debug("File put in repository");
+		return contentDetails;
+	}
+
+	protected void processMetadata(String contentModelNamespace,
 			Map<String, String> meta, List<NamedValue> contentProps) {
 		for (String key : meta.keySet()) {
 			String value = meta.get(key);
@@ -1214,7 +1301,7 @@ public class WebServiceRepositoryAccessSession implements
 	 * "/app:company_home/cm:My Space//*" will become
 	 * "/app:company_home/cm:My_x0020_Space//*"
 	 */
-	private String getXPathEscape(String psToEncode) {
+	protected String getXPathEscape(String psToEncode) {
 		StringBuilder sbResult = new StringBuilder(psToEncode.length());
 
 		String sDelimiters = ":/_*";

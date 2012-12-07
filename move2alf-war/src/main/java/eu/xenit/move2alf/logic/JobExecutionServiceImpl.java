@@ -11,8 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import eu.xenit.move2alf.core.cyclestate.CycleStateManager;
-import eu.xenit.move2alf.core.cyclestate.StateCycleListener;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +24,8 @@ import eu.xenit.move2alf.core.cyclelistener.CommandCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.CycleListener;
 import eu.xenit.move2alf.core.cyclelistener.LoggingCycleListener;
 import eu.xenit.move2alf.core.cyclelistener.ReportCycleListener;
+import eu.xenit.move2alf.core.cyclestate.CycleStateManager;
+import eu.xenit.move2alf.core.cyclestate.StateCycleListener;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.simpleaction.SimpleAction;
@@ -34,7 +34,6 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.logic.PipelineAssembler.PipelineStep;
 import eu.xenit.move2alf.web.dto.JobConfig;
-import sun.security.krb5.internal.HostAddress;
 
 @Service("jobExecutionService")
 @Transactional

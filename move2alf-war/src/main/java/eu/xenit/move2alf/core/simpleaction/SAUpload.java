@@ -20,6 +20,8 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.repository.IllegalDocumentException;
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 import javax.jws.soap.SOAPBinding;
@@ -103,8 +105,14 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	private List<FileInfo> uploadAndSetACLs(final ActionConfig config, final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
 		String errorMessage = "";
+		PartialBatchUploadFailureException partialBatchFailure = null;
 		try {
-			upload(batch, config);
+			try{
+				upload(batch, config);
+			}
+			catch(PartialBatchUploadFailureException failure){
+				partialBatchFailure = failure;
+			}
 			for (final ACL acl : acls) {
 				getSink().setACL(getSinkConfig(), acl);
 			}
@@ -120,6 +128,10 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			if (batchFailed) {
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
+			}
+			if (partialBatchFailure != null && partialBatchFailure.getException(oldParameterMap) != null){
+				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, Util.getFullErrorMessage(partialBatchFailure.getException(oldParameterMap)));
 			}
 			output.add(newParameterMap);
 		}
@@ -163,9 +175,11 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	}
 
 	private void upload(final Batch batch,
-						final ActionConfig config) {
+						final ActionConfig config) throws PartialBatchUploadFailureException {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
+		
+		Map<Document, FileInfo> documentFileInfoMapping = new HashMap<Document, FileInfo>();
 		for (final FileInfo parameterMap : batch) {
 			final String relativePath = getParameterWithDefault(parameterMap,
 					Parameters.PARAM_RELATIVE_PATH, "");
@@ -191,9 +205,19 @@ public class SAUpload extends SimpleActionWithSourceSink {
 					description, namespace, contentType, metadata,
 					multiValueMetadata);
 			documentsToUpload.add(document);
+			documentFileInfoMapping.put(document, parameterMap);
 		}
-		getSink().sendBatch(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
-				documentsToUpload);
+		
+		try {
+			getSink().sendBatch(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
+					documentsToUpload);
+		} catch (PartialUploadFailureException e) {
+			Map<FileInfo, IllegalDocumentException> fileInfoExceptions = new HashMap<FileInfo, IllegalDocumentException>();
+			for(IllegalDocumentException illegalDException: e.getExceptions()){
+				fileInfoExceptions.put(documentFileInfoMapping.get(illegalDException.getDocument()), illegalDException);
+			}
+			throw new PartialBatchUploadFailureException(fileInfoExceptions);
+		}
 	}
 
 	private static boolean getInheritPermissionsFromParameterMap(

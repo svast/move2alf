@@ -6,6 +6,8 @@ import java.util.Map;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.IllegalDocumentException;
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public abstract class SourceSink extends ConfigurableObject {
@@ -18,10 +20,10 @@ public abstract class SourceSink extends ConfigurableObject {
 			String mimeType, String namespace, String contentType,
 			String description, Map<String, String> metadata,
 			Map<String, String> multiValueMetadata,
-			File document);
+			File document) throws IllegalDocumentException;
 
 	public abstract void sendBatch(ConfiguredSourceSink configuredSourceSink,
-			String docExistsMode, List<Document> documents);
+			String docExistsMode, List<Document> documents) throws PartialUploadFailureException;
 
 	public abstract void setACL(ConfiguredSourceSink configuredSourceSink,
 			ACL acls);

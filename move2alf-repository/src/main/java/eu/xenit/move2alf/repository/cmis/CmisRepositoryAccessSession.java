@@ -6,14 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
@@ -101,7 +100,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	}
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents)
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
@@ -111,6 +110,11 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	public void clearCaches() {
 		// TODO
 		throw new RuntimeException("not implemented");
+	}
+
+	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
+			boolean optimistic) throws RepositoryAccessException, RepositoryException,
+			PartialUploadFailureException {
 	}
 
 }
