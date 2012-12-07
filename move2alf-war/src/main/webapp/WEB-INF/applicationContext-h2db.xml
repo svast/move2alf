@@ -14,6 +14,12 @@
 		<property name="jdbcUrl">
 			<value>jdbc:h2:~/.move2alf/move2alf</value>
 		</property>
+        <property name="user">
+            <value>move2alf</value>
+        </property>
+        <property name="password">
+            <value>aPyKtgBZz2tt9T</value>
+        </property>
 		<property name="idleConnectionTestPeriod">
 			<value>100</value>
 		</property>

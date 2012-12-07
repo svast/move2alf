@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -24,10 +25,10 @@ import eu.xenit.move2alf.logic.usageservice.dto.LicenseHistory;
 
 @Service("dbInitializer")
 @Transactional("h2txManager")
-class DbInitializer implements ApplicationListener<ContextRefreshedEvent>, BeanFactoryPostProcessor { //TODO jonas h2db
+class DbInitializer implements ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final int MAX_INSTALLATION_DAYS = 10;
-	
+
 	enum ActionEnum {
 		CREATE_TABLES, ADD_REPLENISHMENT, DO_NOTHING
 	}
@@ -42,28 +43,12 @@ class DbInitializer implements ApplicationListener<ContextRefreshedEvent>, BeanF
 	
 	private License license;
 	
-
-	//TODO jonas h2db
-	// 1) change user & password of h2dataSource in the java code
-	// 2) maybe modify some other properties in the xml file. These properties are a copy of the mysql-dataSource properties
-	// 3) db has to be encrypted??
-	
-	//solution for "1) change user & password of h2dataSource" -> use BeanFactoryPostProcessor and implement postProcessBeanFactory
-	//but ... this is not possible at the moment because of a spring bug ...
-	//more info https://jira.springsource.org/browse/SPR-4935 - @Autowired not working in BeanFactoryPostProcessor - Fix Version/s: 3.1 M2
-	//TODO => upgrade spring and use BeanFactoryPostProcessor to modify user and password
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Object ds = beanFactory.getBean("h2dataSource");
-    	if (ds != null && ds instanceof ComboPooledDataSource) {
-    		ComboPooledDataSource h2dataSource = (ComboPooledDataSource) ds;
-    		h2dataSource.setUser("move2alf1234xenit");
-    		h2dataSource.setPassword("move2alf1234xenit");
-    	}
-    }
-	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		//application context is completely loaded
+
+		// TOOO: why does Autowired fail??
+		this.licenseLoader = (Loader) event.getApplicationContext().getBean("licenseLoader");
 		
 		loadLicense();
 		
