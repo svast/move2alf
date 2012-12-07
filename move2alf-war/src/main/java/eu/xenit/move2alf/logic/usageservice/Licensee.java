@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.logic;
+package eu.xenit.move2alf.logic.usageservice;
 
 public class Licensee {
     private String companyName;

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import eu.xenit.move2alf.core.simpleaction.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +21,29 @@ import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.simpleaction.SADelete;
+import eu.xenit.move2alf.core.simpleaction.SAFilter;
+import eu.xenit.move2alf.core.simpleaction.SAList;
+import eu.xenit.move2alf.core.simpleaction.SAMimeType;
+import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
+import eu.xenit.move2alf.core.simpleaction.SAReport;
+import eu.xenit.move2alf.core.simpleaction.SASource;
+import eu.xenit.move2alf.core.simpleaction.SAUpload;
+import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
 
+	@Autowired
+	private UsageService usageService;
+	
 	private ActionFactory actionFactory;
 	private SourceSinkFactory sourceSinkFactory;
 
@@ -503,7 +515,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					sinkConfig.getClassName());
 			final ExecutorService executorService = getSourceSinkFactory()
 					.getThreadPool(sinkConfig);
-			final SimpleAction uploadAction = new SAUpload(sink, sinkConfig);
+			final SimpleAction uploadAction = new SAUpload(sink, sinkConfig, usageService);
 			final ActionConfig uploadConfig = new ActionConfig();
 			uploadConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
