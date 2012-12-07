@@ -7,6 +7,7 @@ import org.alfresco.webservice.types.CMLCreate;
 import org.alfresco.webservice.types.CMLUpdate;
 import org.alfresco.webservice.types.NamedValue;
 import org.alfresco.webservice.types.ParentReference;
+import org.alfresco.webservice.types.Predicate;
 import org.alfresco.webservice.types.Reference;
 import org.alfresco.webservice.util.Constants;
 import org.alfresco.webservice.util.Utils;
@@ -30,11 +31,31 @@ public class CMLDocument {
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {
-		// TODO Auto-generated method stub
-		return null;
+		Predicate pred = new Predicate(new Reference[] { ref },
+				WebServiceRepositoryAccessSession.store, null);
+
+		return new CMLUpdate(getContentPropsAndCreateIfNotExists(), pred, null);
 	}
 
 	public CMLCreate toCMLCreate() throws RepositoryAccessException, RepositoryException {
+
+		Reference parentSpace = session.createSpaceIfNotExists(doc.spacePath);
+		ParentReference parentRef = new ParentReference(WebServiceRepositoryAccessSession.store,
+				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
+		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
+				+ doc.file.getName());
+
+		return new CMLCreate(String.valueOf(this.hashCode()), parentRef, parentSpace.getUuid(),
+				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
+				doc.contentModelNamespace + doc.contentModelType, getContentPropsAndCreateIfNotExists());	
+	}
+
+	private NamedValue[] contentProps;
+	private NamedValue[] getContentPropsAndCreateIfNotExists() {
+		if(contentProps != null){
+			return contentProps;
+		}
+		
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
 
 		// these properties are always present
@@ -53,21 +74,14 @@ public class CMLDocument {
 		
 		contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
 		contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
-		
-		Reference parentSpace = session.createSpaceIfNotExists(doc.spacePath);
-		ParentReference parentRef = new ParentReference(WebServiceRepositoryAccessSession.store,
-				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
-		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
-				+ doc.file.getName());
-
-		return new CMLCreate(String.valueOf(this.hashCode()), parentRef, parentSpace.getUuid(),
-				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
-				doc.contentModelNamespace + doc.contentModelType, contentProps.toArray(new NamedValue[0]));	
+		for(NamedValue value: contentProps){
+			System.out.println(value.getName()+": "+value.getValue());
+		}
+		return contentProps.toArray(new NamedValue[0]);
 	}
 	
 	public String getXpath() {
-		// TODO Auto-generated method stub
-		return null;
+		return WebServiceRepositoryAccessSession.companyHomePath+session.getXPathEscape(doc.spacePath+"/cm:"+doc.file.getName());
 	}
 	
 	public String getContentDetails(){
@@ -75,8 +89,7 @@ public class CMLDocument {
 	}
 
 	public String getSpacePath() {
-		// TODO Auto-generated method stub
-		return null;
+		return doc.spacePath;
 	}
 	
 	private String getContentDetailsAndCreateIfNotExists(){

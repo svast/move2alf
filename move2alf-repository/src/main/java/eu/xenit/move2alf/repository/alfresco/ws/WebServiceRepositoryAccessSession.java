@@ -58,6 +58,9 @@ import org.alfresco.webservice.util.WebServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.repository.IllegalDocumentException;
+import eu.xenit.move2alf.repository.IllegalDuplicateException;
+import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
@@ -160,6 +163,7 @@ public class WebServiceRepositoryAccessSession implements
 	}
 
 	/**
+	 * @throws IllegalDocumentException 
 	 * @deprecated as of Move2Alf 1.2, replaced by {@see
 	 *             void storeDocAndCreateParentSpaces(Document)}
 	 */
@@ -168,7 +172,7 @@ public class WebServiceRepositoryAccessSession implements
 			String spacePath, String description, String contentModelNamespace,
 			String contentModelType, Map<String, String> meta,
 			Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		Document document = new Document(file, mimeType, spacePath,
 				description, contentModelNamespace, contentModelType, meta,
 				multiValueMeta);
@@ -177,21 +181,18 @@ public class WebServiceRepositoryAccessSession implements
 
 	@Override
 	public void storeDocAndCreateParentSpaces(Document document)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
-		storeDocsAndCreateParentSpaces(documents, false);
+		try {
+			storeDocsAndCreateParentSpaces(documents, false);
+		} catch (PartialUploadFailureException e) {
+			throw e.getExceptions().get(0);
+		}
 	}
 	
-	/**
-	 * Store documents and create parent spaces if necessary.
-	 * @param documents The list of documents
-	 * @param allowOverwrite	What to do for documents that already exist?
-	 * @param optimistic	Should we try to upload without checking if the document exists? If true, uploads will go faster in case of success.
-	 * @throws RepositoryException 
-	 * @throws RepositoryAccessException 
-	 * @throws PartialUploadFailureException 
-	 */
+	
+	@Override
 	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException, PartialUploadFailureException{
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
 		for(Document doc: documents){
@@ -275,38 +276,8 @@ public class WebServiceRepositoryAccessSession implements
 
 	@Override
 	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
-			throws RepositoryAccessException, RepositoryException {
-		CML cml = new CML();
-		Integer id = 1;
-		for (Document document : documents) {
-			Reference ref = createSpaceIfNotExists(document.spacePath);
-			if (ref != null) {
-				logger.debug("Adding File ...");
-
-				addDocumentToCML(document.file, document.mimeType, ref, document.description,
-						document.contentModelNamespace, document.contentModelType, document.meta,
-						document.multiValueMeta, cml, id.toString());
-
-				logger.info("File :" + document.file.getName() + " Added File.");
-			} else {
-				logger.error("Can not create space {}", document.spacePath);
-				throw new RepositoryException("Can not create space " + document.spacePath);
-			}
-			id++;
-		}
-		
-		UpdateResult[] results;
-		try {
-			results = repositoryService.update(cml);
-			// try to set auditable properties on results
-			setAuditableProperties(documents, results);
-		} catch (RepositoryFault e) {
-			logger.debug(e.getMessage(), e);
-			throw new RepositoryException(e.getMessage(), e);
-		} catch (RemoteException e) {
-			// connectivity problem
-			throw new RepositoryAccessException(e.getMessage(), e);
-		}
+			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+		storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
 	}
 
 	private void setAuditableProperties(List<Document> documents,
@@ -1330,7 +1301,7 @@ public class WebServiceRepositoryAccessSession implements
 	 * "/app:company_home/cm:My Space//*" will become
 	 * "/app:company_home/cm:My_x0020_Space//*"
 	 */
-	private String getXPathEscape(String psToEncode) {
+	protected String getXPathEscape(String psToEncode) {
 		StringBuilder sbResult = new StringBuilder(psToEncode.length());
 
 		String sDelimiters = ":/_*";

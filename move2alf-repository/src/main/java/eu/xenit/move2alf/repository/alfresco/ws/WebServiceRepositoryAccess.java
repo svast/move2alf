@@ -9,6 +9,7 @@ import org.alfresco.webservice.util.WebServiceException;
 
 import eu.xenit.move2alf.repository.RepositoryAccess;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
+import eu.xenit.move2alf.repository.RepositoryAccessSession;
 
 public class WebServiceRepositoryAccess extends RepositoryAccess {
 
@@ -33,7 +34,7 @@ public class WebServiceRepositoryAccess extends RepositoryAccess {
 //		this.ticket = ticket;
 //	}
 
-	public WebServiceRepositoryAccessSession createSession()
+	public RepositoryAccessSession createSession()
 			throws RepositoryAccessException {
 		if (ticket != null) {
 			logger.info("Opening rra session with ticket {}", ticket);

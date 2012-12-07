@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.repository.alfresco.ws;
+package eu.xenit.move2alf.repository;
 
 import java.util.List;
 

@@ -1,4 +1,6 @@
-package eu.xenit.move2alf.repository.alfresco.ws;
+package eu.xenit.move2alf.repository;
+
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class IllegalDocumentException extends Exception {
 	
