@@ -1030,6 +1030,8 @@ public class WebServiceRepositoryAccessSession implements
 				results = repositoryService.update(cml);
 				for (UpdateResult result : results) {
 					logger.info("DELETE..., {} ", result.getStatement());
+					referenceCache.remove(ref.getPath());
+					logger.info("Deleted from cache {}", ref.getPath());
 				}
 			} catch (RepositoryFault e) {
 				logger.warn("Could not delete file {}", docName);
@@ -1059,6 +1061,8 @@ public class WebServiceRepositoryAccessSession implements
 			UpdateResult[] results = repositoryService.update(cml);
 			for (UpdateResult result : results) {
 				logger.info("DELETE..., {} ", result.getStatement());
+				referenceCache.remove(reference.getPath());
+				logger.info("Deleted from cache {}", reference.getPath());
 			}
 		} catch (RepositoryFault e) {
 			logger.warn("Could not delete file {}", reference.getPath());
