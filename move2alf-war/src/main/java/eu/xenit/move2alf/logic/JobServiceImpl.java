@@ -619,7 +619,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
 		final Session s = getSessionFactory().getCurrentSession();
 
-		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime FROM Cycle AS cycle JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY cycle.id ORDER BY cycle.startDateTime DESC";
+		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY cycle.id ORDER BY cycle.startDateTime DESC";
 		final Query query = s.createQuery(hql);
 		query.setParameter("jobId", jobId);
 
