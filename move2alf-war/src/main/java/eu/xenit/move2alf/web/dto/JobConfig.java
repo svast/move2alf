@@ -40,7 +40,7 @@ public class JobConfig {
 
 	@Size(min=0, max=pathMaxLength, message="Max length of destination path is " + pathMaxLength)
 	@NotEmpty(message="Please enter a destination path.")
-	private String destinationFolder;
+	private String destinationFolder="/move2alf";
 
 	private List<String> cron = new ArrayList<String>();
 
