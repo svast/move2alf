@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.xenit.move2alf.common.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
@@ -22,9 +22,8 @@ import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.PartialUploadFailureException;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
-
-import javax.jws.soap.SOAPBinding;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 
@@ -41,13 +40,21 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	public static final String STATE_BATCH = "batch";
 	public static final String STATE_ACL_BATCH = "aclBatch";
 
-	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig) {
+	private UsageService usageService;
+
+
+	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig, UsageService usageService) {
 		super(sink, sinkConfig);
+		this.usageService = usageService;
 	}
 
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
 								  final ActionConfig config, final Map<String, Serializable> state) {
+		if ( usageService.isBlockedByDocumentCounter() ) {
+			throw new Move2AlfException("Document counter is 0.");
+		}
+		
 		final Integer maxBatchSize = Integer.parseInt(config
 				.get(PARAM_BATCH_SIZE));
 

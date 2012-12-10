@@ -10,6 +10,7 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 
 public class JobExecutor implements org.quartz.Job {
 
