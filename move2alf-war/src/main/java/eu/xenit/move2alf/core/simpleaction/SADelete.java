@@ -65,7 +65,9 @@ public class SADelete extends SimpleActionWithSourceSink {
 				remotePath += "cm:" + component + "/";
 			}
 		}
-		remotePath = remotePath.substring(0, remotePath.length() - 1);
+		if(remotePath.length() > 0){
+			remotePath = remotePath.substring(0, remotePath.length() - 1);
+		}
 
 		String name = ((File) newParameterMap.get(Parameters.PARAM_FILE))
 				.getName();
