@@ -262,7 +262,9 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				remotePath += "cm:" + component + "/";
 			}
 		}
-		remotePath = remotePath.substring(0, remotePath.length() - 1);
+		if(remotePath.length() > 0){
+			remotePath = remotePath.substring(0, remotePath.length() - 1);
+		}
 		return remotePath;
 	}
 
