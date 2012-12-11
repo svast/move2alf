@@ -30,6 +30,7 @@ public class AlfrescoSourceSink extends SourceSink {
 	private static final String PARAM_URL = "url";
 	private static final String PARAM_PASSWORD = "password";
 	private static final String PARAM_USER = "user";
+	private static final boolean OPTIMISTIC = true;
 
 	private static ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
@@ -156,7 +157,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
 		
 		boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
-		ras.storeDocsAndCreateParentSpaces(documents, overwrite, false);
+		ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC);
 	}
 
 	private void retryBatch(final ConfiguredSourceSink configuredSourceSink,
