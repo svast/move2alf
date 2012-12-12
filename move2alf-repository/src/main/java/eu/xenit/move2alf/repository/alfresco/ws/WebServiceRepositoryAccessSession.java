@@ -896,7 +896,7 @@ public class WebServiceRepositoryAccessSession implements
 	protected String putContent(File file, String mimeType) {
 		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
 				mimeType, "UTF-8");
-		logger.debug("File put in repository");
+		logger.debug("File put in repository, details: {}", contentDetails);
 		return contentDetails;
 	}
 
