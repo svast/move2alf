@@ -143,16 +143,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		actions.add(action(jobConfig.getMetadata()).paramMap(
 				metadataParameterMap));
 
-		actions.add(action("eu.xenit.move2alf.core.action.ThreadAction"));
-
-
 		if (!"notransformation".equals(jobConfig.getTransform())) {
 
 			actions.add(action(jobConfig.getTransform()).paramMap(
 					transformParameterMap));
 		}
-		
-		actions.add(action("eu.xenit.move2alf.core.action.MimetypeAction"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
 				.param("sendNotification",
@@ -211,8 +206,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
 						jobConfig.getMoveNotLoadText())
 				.param("path", inputPaths).param("stage", "after"));
-
-		actions.add(action("eu.xenit.move2alf.core.action.ReportAction"));
 
 		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
 				.param("command", jobConfig.getCommandAfter())

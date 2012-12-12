@@ -101,6 +101,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	// to reduce the number of queries to alfresco (lucene queries cause the
 	// threads in alfresco to block eachother)
+	// paths are lower case
 	private HashMap<String, Reference> referenceCache = new HashMap<String, Reference>();
 	private static final int maxSizeReferenceCache = 1000;
 
@@ -269,7 +270,16 @@ public class WebServiceRepositoryAccessSession implements
 			}
 		}
 		else{
-			creates.add(doc.toCMLCreate());
+			// fallback to Lucene search
+			// happens when searching case sensitive for folder or file names
+			String luceneQuery = "{!afts}cm\\:name:\"" + doc.getDocument().file.getName() + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
+			List<Reference> references = locateByLuceneQuery(luceneQuery, 1);
+			if(references.size()>0 && allowOverwrite) {
+				updates.add(doc.toCMLUpdate(references.get(0)));
+				logger.info("Found {} learned from lucene query", references.get(0).getUuid());
+			}
+			else
+				creates.add(doc.toCMLCreate());
 		}
 	}
 	
@@ -640,7 +650,7 @@ public class WebServiceRepositoryAccessSession implements
 						// put in cache
 						logger.info("Put {} in cache (learned from creation)",
 								path);
-						referenceCache.put(getXPathEscape(path), result.getDestination());
+						referenceCache.put(getXPathEscape(path).toLowerCase(), result.getDestination());
 						return result.getDestination();
 					} else {
 						logger.warn("Did not get result from repositoryService.update");
@@ -732,7 +742,7 @@ public class WebServiceRepositoryAccessSession implements
 		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path,
 				(new Date()).getTime());
 
-		Reference reference = referenceCache.get(path);
+		Reference reference = referenceCache.get(path.toLowerCase());
 
 		if (reference == null) {
 			if (referenceCache.size() > maxSizeReferenceCache) {
@@ -761,7 +771,7 @@ public class WebServiceRepositoryAccessSession implements
 
 				logger.info("Put {} in cache (learned from query) {}", path,
 						reference.getUuid());
-				referenceCache.put(path, reference);
+				referenceCache.put(path.toLowerCase(), reference);
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
 				logger.debug("RepositoryFault in getSpaceReference for path "
@@ -1030,7 +1040,7 @@ public class WebServiceRepositoryAccessSession implements
 				results = repositoryService.update(cml);
 				for (UpdateResult result : results) {
 					logger.info("DELETE..., {} ", result.getStatement());
-					referenceCache.remove(ref.getPath());
+					referenceCache.remove(ref.getPath().toLowerCase());
 					logger.info("Deleted from cache {}", ref.getPath());
 				}
 			} catch (RepositoryFault e) {
@@ -1061,7 +1071,7 @@ public class WebServiceRepositoryAccessSession implements
 			UpdateResult[] results = repositoryService.update(cml);
 			for (UpdateResult result : results) {
 				logger.info("DELETE..., {} ", result.getStatement());
-				referenceCache.remove(reference.getPath());
+				referenceCache.remove(reference.getPath().toLowerCase());
 				logger.info("Deleted from cache {}", reference.getPath());
 			}
 		} catch (RepositoryFault e) {
@@ -1316,8 +1326,9 @@ public class WebServiceRepositoryAccessSession implements
 
 			if (sDelimiters.contains(sToken))
 				sbResult.append(sToken);
-			else
+			else {
 				sbResult.append(ISO9075.encode(sToken));
+			}
 		}
 
 		return sbResult.toString();
