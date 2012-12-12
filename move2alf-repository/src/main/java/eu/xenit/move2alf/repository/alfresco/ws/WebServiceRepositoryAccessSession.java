@@ -227,8 +227,8 @@ public class WebServiceRepositoryAccessSession implements
 				}
 				exceptions = new ArrayList<IllegalDocumentException>();
 				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
-			}
-		} catch (RemoteException e1) {
+			} 
+			} catch (RemoteException e1) {
 			throw new RepositoryAccessException(e1.getMessage(), e1);
 		}
 		return results;
@@ -269,18 +269,8 @@ public class WebServiceRepositoryAccessSession implements
 				throw new IllegalDuplicateException(doc.getDocument(), "File exists: "+doc.getXpath());
 			}
 		}
-		else{
-			// fallback to Lucene search
-			// happens when searching case sensitive for folder or file names
-			String luceneQuery = "{!afts}cm\\:name:\"" + doc.getDocument().file.getName() + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
-			List<Reference> references = locateByLuceneQuery(luceneQuery, 1);
-			if(references.size()>0 && allowOverwrite) {
-				updates.add(doc.toCMLUpdate(references.get(0)));
-				logger.info("Found {} learned from lucene query", references.get(0).getUuid());
-			}
 			else
 				creates.add(doc.toCMLCreate());
-		}
 	}
 	
 
@@ -597,8 +587,7 @@ public class WebServiceRepositoryAccessSession implements
 			if (path.indexOf("/") != -1) {
 				String parentSpacePath = path.substring(0,
 						path.lastIndexOf("/"));
-				logger.info("TIMESTAMP: Getting parent {} at {}",
-						parentSpacePath, (new Date()).getTime());
+				logger.info("TIMESTAMP: Getting parent {} at {}", parentSpacePath, (new Date()).getTime());
 				Reference parentSpaceReference = createSpaceIfNotExists(parentSpacePath);
 				if (parentSpaceReference == null) {
 					// on 20100211 we encountered the case that Alfresco
@@ -612,23 +601,19 @@ public class WebServiceRepositoryAccessSession implements
 					// nullness
 					// and exit
 					if (USE_FOLDER_CREATION_LOCKS) {
-						logger.debug("Releasing folder creation lock for "
-								+ path);
+						logger.debug("Releasing folder creation lock for " + path);
 						lock.release();
 					}
 					logger.warn("Can not find space |{}|", parentSpacePath);
-					throw new RepositoryFatalException("Can not find space "
-							+ parentSpacePath);
+					throw new RepositoryFatalException("Can not find space " + parentSpacePath);
 				}
 
 				// skip "/cm:" part
-				String spaceName = path.substring(path.lastIndexOf("/") + 4,
-						path.length());
+				String spaceName = path.substring(path.lastIndexOf("/") + 4, path.length());
 
 				// based on http://wiki.alfresco.com/wiki/
 				// IngresTutorial_Alfresco_Web_Service_API_for_Java
-				ParentReference parentReference = new ParentReference(store,
-						parentSpaceReference.getUuid(), null,
+				ParentReference parentReference = new ParentReference(store, parentSpaceReference.getUuid(), null,
 						Constants.ASSOC_CONTAINS, Constants.createQNameString(
 								Constants.NAMESPACE_CONTENT_MODEL, spaceName));
 
@@ -739,8 +724,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	private Reference getReference(String path)
 			throws RepositoryAccessException {
-		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path,
-				(new Date()).getTime());
+		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path,(new Date()).getTime());
 
 		Reference reference = referenceCache.get(path.toLowerCase());
 
@@ -751,8 +735,7 @@ public class WebServiceRepositoryAccessSession implements
 				referenceCache.clear();
 			}
 
-			Reference uncheckedReference = new Reference(store, null,
-					path);
+			Reference uncheckedReference = new Reference(store, null,path);
 			// can throw:
 			// java.rmi.RemoteException: when connection problem?
 			// org.alfresco.webservice.repository.RepositoryFault: this will
@@ -765,17 +748,29 @@ public class WebServiceRepositoryAccessSession implements
 
 			Node[] nodes;
 			try {
-				nodes = repositoryService.get(new Predicate(
-						new Reference[] { uncheckedReference }, store, null));
+				nodes = repositoryService.get(new Predicate(new Reference[] { uncheckedReference }, store, null));
 				reference = nodes[0].getReference();
 
-				logger.info("Put {} in cache (learned from query) {}", path,
-						reference.getUuid());
+				logger.info("Put {} in cache (learned from soap query) for path {}", reference.getUuid(), path);
 				referenceCache.put(path.toLowerCase(), reference);
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
-				logger.debug("RepositoryFault in getSpaceReference for path "
-						+ path, e);
+				logger.debug("Could not get soap query reference for path {}, falling to lucene query", path);
+				// fallback to Lucene search
+				// happens when searching case sensitive for folder or file names
+				String luceneQuery = "{!afts}cm\\:name:\"" + getNameFromPath(path) + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
+				List<Reference> references;
+				try {
+					references = locateByLuceneQuery(luceneQuery, 1);
+				} catch (RepositoryException e1) {
+					logger.error("Could not get lucene reference for path {}", path);
+					return null;
+				}
+				if(references.size()>0) {
+					references.get(0).setPath(path);
+					logger.info("Found lucene reference {} for path {}", references.get(0).getUuid(), references.get(0).getPath());
+					return references.get(0);
+				}
 				return null;
 			} catch (RemoteException e) {
 				// connectivity problem
@@ -785,6 +780,17 @@ public class WebServiceRepositoryAccessSession implements
 			logger.info("Obtained reference from cache {}", path);
 		}
 		return reference;
+	}
+
+	private String getNameFromPath(String path) {
+		String sDelimiters = "/:";
+		StringTokenizer T = new StringTokenizer(path, sDelimiters, true);
+		String name = path;
+		
+		while (T.hasMoreTokens()) {
+			name = T.nextToken();
+		}
+		return name;
 	}
 
 	private void addDocumentToCML(File file, String mimeType,
