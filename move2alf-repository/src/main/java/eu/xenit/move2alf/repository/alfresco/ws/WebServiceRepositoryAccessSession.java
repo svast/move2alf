@@ -18,7 +18,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
+import org.apache.lucene.queryParser.QueryParser;
+import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
+import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.webservice.accesscontrol.ACE;
 import org.alfresco.webservice.accesscontrol.AccessControlServiceSoapBindingStub;
@@ -758,7 +762,9 @@ public class WebServiceRepositoryAccessSession implements
 				logger.debug("Could not get soap query reference for path {}, falling to lucene query", path);
 				// fallback to Lucene search
 				// happens when searching case sensitive for folder or file names
-				String luceneQuery = "{!afts}cm\\:name:\"" + getNameFromPath(path) + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
+				// Solr query
+				//String luceneQuery = "{!afts}cm\\:name:\"" + getNameFromPath(path) + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
+				String luceneQuery = "\\@" + escapeQName(QName.createQName(Constants.NAMESPACE_CONTENT_MODEL, "name")) + ":\"" + getNameFromPath(path) + "\"";
 				List<Reference> references;
 				try {
 					references = locateByLuceneQuery(luceneQuery, 1);
@@ -771,6 +777,7 @@ public class WebServiceRepositoryAccessSession implements
 					logger.info("Found lucene reference {} for path {}", references.get(0).getUuid(), references.get(0).getPath());
 					return references.get(0);
 				}
+				logger.error("Could not get lucene reference for path {}", path);
 				return null;
 			} catch (RemoteException e) {
 				// connectivity problem
@@ -781,6 +788,12 @@ public class WebServiceRepositoryAccessSession implements
 		}
 		return reference;
 	}
+	
+	   private String escapeQName(QName qname)
+	    {
+	        return LuceneQueryParser.escape(qname.toString());
+	    }
+
 
 	private String getNameFromPath(String path) {
 		String sDelimiters = "/:";
