@@ -11,11 +11,16 @@ import org.alfresco.webservice.types.Predicate;
 import org.alfresco.webservice.types.Reference;
 import org.alfresco.webservice.util.Constants;
 import org.alfresco.webservice.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryException;
 
 public class CMLDocument {
+	
+	private static Logger logger = LoggerFactory
+			.getLogger(CMLDocument.class);
 
 	private Document doc;
 	public Document getDocument() {
@@ -31,6 +36,7 @@ public class CMLDocument {
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {
+		logger.debug("Converting doc to CMLUpdate: {}", doc.file.getName());
 		Predicate pred = new Predicate(new Reference[] { ref },
 				WebServiceRepositoryAccessSession.store, null);
 
@@ -38,7 +44,7 @@ public class CMLDocument {
 	}
 
 	public CMLCreate toCMLCreate() throws RepositoryAccessException, RepositoryException {
-
+		logger.debug("Converting doc to CMLCreate: {}", doc.file.getName());
 		Reference parentSpace = session.createSpaceIfNotExists(doc.spacePath);
 		ParentReference parentRef = new ParentReference(WebServiceRepositoryAccessSession.store,
 				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
