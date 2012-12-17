@@ -14,7 +14,7 @@ public class SAReport extends SimpleActionSingleResult {
 
 	@Override
 	public String getDescription() {
-		return "Generating report";
+		return "Checking for errors";
 	}
 
 	@Override

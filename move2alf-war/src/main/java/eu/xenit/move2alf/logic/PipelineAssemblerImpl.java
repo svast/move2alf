@@ -479,6 +479,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		final ActionConfig metadataConfig = metadataParameters(jobConfig);
 		pipeline.add(new PipelineStep(metadataAction, metadataConfig, null,
 				errorHandler));
+		pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
 
 		if (!("notransformation".equals(jobConfig.getTransform()) || ""
 				.equals(jobConfig.getTransform()))) {
@@ -494,8 +495,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.getThreadPool(sinkConfig);
 			pipeline.add(new PipelineStep(transformAction, transformConfig,
 					null, errorHandler, new ActionExecutor(executorService)));
+			pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
 		}
-		
+
+
 		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
 				errorHandler));
 
