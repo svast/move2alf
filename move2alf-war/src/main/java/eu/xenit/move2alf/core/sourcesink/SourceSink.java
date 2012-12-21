@@ -38,4 +38,6 @@ public abstract class SourceSink extends ConfigurableObject {
 			String remotePath, String name);
 
 	public abstract void clearCaches(ConfiguredSourceSink sinkConfig);
+
+	public abstract boolean fileNameExists(ConfiguredSourceSink sinkConfig, String name);
 }

@@ -1368,4 +1368,10 @@ public class WebServiceRepositoryAccessSession implements
 		return value;
 	}
 
+	@Override
+	public boolean doesFileNameExists(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

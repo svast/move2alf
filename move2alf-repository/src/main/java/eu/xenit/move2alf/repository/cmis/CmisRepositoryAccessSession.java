@@ -117,4 +117,10 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 			PartialUploadFailureException {
 	}
 
+	@Override
+	public boolean doesFileNameExists(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
