@@ -289,66 +289,41 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public boolean exists(final ConfiguredSourceSink sinkConfig,
 			final String remotePath, final String name) {
-		try {
-			try {
-				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+		
+		return new RepositoryOperation<Boolean>() {
+
+			@Override
+			protected Boolean executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException {
 				return ras.doesDocExist(name, remotePath);
-			} catch (final RepositoryAccessException e) {
-				if (!(e.getMessage() == null)
-						&& (e.getMessage()
-								.indexOf("security processing failed") != -1)) {
-					// retry
-					destroyRepositoryAccessSession();
-					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-					try {
-						return ras.doesDocExist(name, remotePath);
-					} catch (final RepositoryAccessException e2) {
-						logger.error(e2.getMessage(), e2);
-						throw new Move2AlfException(e2.getMessage(), e2);
-					}
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
-				}
 			}
-		} catch (final RuntimeException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		}
+		}.execute(sinkConfig);
+
 	}
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
 			final String remotePath, final String name) {
-		try {
-			try {
-				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+		new RepositoryOperation<Object>() {
+
+			@Override
+			protected Object executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException {
 				ras.deleteByDocNameAndSpace(remotePath, name);
-			} catch (final RepositoryAccessException e) {
-				if (!(e.getMessage() == null)
-						&& (e.getMessage()
-								.indexOf("security processing failed") != -1)) {
-					// retry
-					destroyRepositoryAccessSession();
-					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-					try {
-						ras.deleteByDocNameAndSpace(remotePath, name);
-					} catch (final RepositoryAccessException e2) {
-						logger.error(e.getMessage(), e);
-						throw new Move2AlfException(e.getMessage(), e);
-					}
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
-				}
+				return null;
 			}
-		} catch (final RepositoryException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		} catch (final RuntimeException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		}
+		}.execute(sinkConfig);
+	}
+	
+	@Override
+	public boolean fileNameExists(final ConfiguredSourceSink sinkConfig, final String name) {
+		return new RepositoryOperation<Boolean>(){
+
+			@Override
+			protected Boolean executeImpl(RepositoryAccessSession ras)
+					throws RepositoryAccessException, RepositoryException {
+				return ras.doesFileNameExists(name);
+			}
+			
+		}.execute(sinkConfig);
 	}
 
 	@Override
@@ -412,5 +387,43 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public String getName() {
 		return "Alfresco";
+	}
+
+	private abstract class RepositoryOperation<T>{
+		
+		protected abstract T executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException;
+		
+		public T execute(final ConfiguredSourceSink sinkConfig){
+			try {
+				try {
+					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+					return executeImpl(ras);
+				} catch (final RepositoryAccessException e) {
+					if (!(e.getMessage() == null)
+							&& (e.getMessage().indexOf(
+									"security processing failed") != -1)) {
+						// retry
+						destroyRepositoryAccessSession();
+						final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+						try {
+							return executeImpl(ras);
+						} catch (final RepositoryAccessException e2) {
+							logger.error(e2.getMessage(), e2);
+							throw new Move2AlfException(e2.getMessage(), e2);
+						}
+					} else {
+						logger.error(e.getMessage(), e);
+						throw new Move2AlfException(e.getMessage(), e);
+					}
+				}
+			} catch (final RuntimeException e) {
+				logger.error(e.getMessage(), e);
+				throw new Move2AlfException(e.getMessage(), e);
+			} catch (RepositoryException e) {
+	            logger.error(e.getMessage(), e);
+	            throw new Move2AlfException(e.getMessage(), e);
+	
+			}
+		}
 	}
 }

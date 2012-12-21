@@ -117,4 +117,10 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		throw new RuntimeException("not implemented");
 	}
 
+	@Override
+	public boolean doesFileNameExists(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

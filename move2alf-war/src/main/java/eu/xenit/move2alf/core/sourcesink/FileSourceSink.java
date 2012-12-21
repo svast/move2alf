@@ -103,4 +103,10 @@ public class FileSourceSink extends SourceSink {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public boolean fileNameExists(ConfiguredSourceSink sinkConfig, String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
