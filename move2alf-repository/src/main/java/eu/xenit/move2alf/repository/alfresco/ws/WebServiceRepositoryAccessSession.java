@@ -71,10 +71,10 @@ import eu.xenit.move2alf.repository.RepositoryException;
 import eu.xenit.move2alf.repository.RepositoryFatalException;
 
 public class WebServiceRepositoryAccessSession implements
-		RepositoryAccessSession {
+RepositoryAccessSession {
 
 	// FIELDS
-
+	private static int MAX_LUCENE_RESULTS = 1000;
 	private static Logger logger = LoggerFactory
 			.getLogger(WebServiceRepositoryAccessSession.class);
 
@@ -132,14 +132,14 @@ public class WebServiceRepositoryAccessSession implements
 				.toString());
 		accessControlService = WebServiceFactory
 				.getAccessControlService(alfrescoUrl.toString());
-		
+
 		WebServiceFactory.setEndpointAddress(alfrescoUrl.toString());
-		
+
 		repositoryService.setTimeout(wsStubTimeout);// milliseconds
 		contentService.setTimeout(wsStubTimeout);// milliseconds
 		dictionaryService.setTimeout(wsStubTimeout);// milliseconds
 		accessControlService.setTimeout(wsStubTimeout);// milliseconds
-		
+
 		host = alfrescoUrl.getHost();
 		port = alfrescoUrl.getPort();
 		webapp = alfrescoUrl.getPath().substring(1,
@@ -177,7 +177,7 @@ public class WebServiceRepositoryAccessSession implements
 			String spacePath, String description, String contentModelNamespace,
 			String contentModelType, Map<String, String> meta,
 			Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
+					throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		Document document = new Document(file, mimeType, spacePath,
 				description, contentModelNamespace, contentModelType, meta,
 				multiValueMeta);
@@ -195,20 +195,20 @@ public class WebServiceRepositoryAccessSession implements
 			throw e.getExceptions().get(0);
 		}
 	}
-	
-	
+
+
 	@Override
 	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException, PartialUploadFailureException{
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
 		for(Document doc: documents){
 			cmlDocs.add(new CMLDocument(this, doc));
 		}
-		
+
 		List<IllegalDocumentException> exceptions = new ArrayList<IllegalDocumentException>();
-		
+
 		UpdateResult[] results = updateRepositoryAndHandleErrors(allowOverwrite,
-						cmlDocs, exceptions, optimistic);
-		
+				cmlDocs, exceptions, optimistic);
+
 		setAuditableProperties(documents, results);
 		if(!exceptions.isEmpty()){
 			throw new PartialUploadFailureException(exceptions);
@@ -232,7 +232,7 @@ public class WebServiceRepositoryAccessSession implements
 				exceptions = new ArrayList<IllegalDocumentException>();
 				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
 			} 
-			} catch (RemoteException e1) {
+		} catch (RemoteException e1) {
 			throw new RepositoryAccessException(e1.getMessage(), e1);
 		}
 		return results;
@@ -242,7 +242,7 @@ public class WebServiceRepositoryAccessSession implements
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
 		for(CMLDocument doc : cmlDocs){
-			
+
 			// Check if the document exists
 			if(!optimistic){
 				try {
@@ -263,7 +263,7 @@ public class WebServiceRepositoryAccessSession implements
 	}
 
 	private void pessimisticCML(boolean allowOverwrite,
-		List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
+			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
 		Reference ref = getReference(doc.getXpath());
 		if(ref!=null){
 			if(allowOverwrite){
@@ -273,10 +273,10 @@ public class WebServiceRepositoryAccessSession implements
 				throw new IllegalDuplicateException(doc.getDocument(), "File exists: "+doc.getXpath());
 			}
 		}
-			else
-				creates.add(doc.toCMLCreate());
+		else
+			creates.add(doc.toCMLCreate());
 	}
-	
+
 
 	@Override
 	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
@@ -292,11 +292,11 @@ public class WebServiceRepositoryAccessSession implements
 				if ("addAspect".equals(result.getStatement())) {
 					continue;
 				}
-				
+
 				Reference content = result.getDestination();
 				logger.debug("Reference:  {} {}", content.getStore().getAddress(),
 						content.getPath());
-				
+
 				if (documentsIterator.hasNext()) {
 					Document doc = documentsIterator.next();
 					Map<String, String> auditablePropertyMap = new HashMap<String, String>();
@@ -354,7 +354,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	public void updateContentByDocNameAndPath(String spacePath, String docName,
 			File docNewContent, String mimeType, boolean checkSize)
-			throws RepositoryAccessException, RepositoryException {
+					throws RepositoryAccessException, RepositoryException {
 		Reference pathRef = new Reference(store, null, companyHomePath
 				+ getXPathEscape(spacePath));
 		updateContentByDocNameAndSpace(pathRef, docName, docNewContent,
@@ -363,7 +363,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	public void updateMetaDataByDocNameAndPath(String spacePath,
 			String docName, String nameSpace, Map<String, String> meta)
-			throws RepositoryAccessException, RepositoryException {
+					throws RepositoryAccessException, RepositoryException {
 		Reference ref = locateByFileNameAndPath(spacePath, docName);
 		updateMetaData(ref, nameSpace, meta);
 	}
@@ -424,7 +424,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	public void setAccessControlList(String path, boolean inheritPermissions,
 			Map<String, String> accessControl)
-			throws RepositoryAccessException, RepositoryException {
+					throws RepositoryAccessException, RepositoryException {
 
 		Reference ref = new Reference(store, null, (new StringBuilder(
 				companyHomePath)).append(getXPathEscape(path)).toString());
@@ -755,27 +755,29 @@ public class WebServiceRepositoryAccessSession implements
 				nodes = repositoryService.get(new Predicate(new Reference[] { uncheckedReference }, store, null));
 				reference = nodes[0].getReference();
 
-				logger.info("Put {} in cache (learned from soap query) for path {}", reference.getUuid(), path);
+				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), path);
 				referenceCache.put(path.toLowerCase(), reference);
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
-				logger.debug("Could not get soap query reference for path {}, falling to lucene query", path);
+				logger.debug("Could not get results from reference query for path {}, falling to lucene query", path);
 				// fallback to Lucene search
 				// happens when searching case sensitive for folder or file names
-				// Solr query
-				//String luceneQuery = "{!afts}cm\\:name:\"" + getNameFromPath(path) + "\" AND (+TYPE:\"cm:content\" +TYPE:\"cm:folder\") AND -TYPE:\"cm:thumbnail\" AND -TYPE:\"cm:failedThumbnail\" AND -TYPE:\"cm:rating\" AND NOT ASPECT:\"sys:hidden\"";
 				String luceneQuery = "\\@" + escapeQName(QName.createQName(Constants.NAMESPACE_CONTENT_MODEL, "name")) + ":\"" + getNameFromPath(path) + "\"";
 				List<Reference> references;
 				try {
-					references = locateByLuceneQuery(luceneQuery, 1);
+					references = locateByLuceneQuery(luceneQuery, MAX_LUCENE_RESULTS);
 				} catch (RepositoryException e1) {
 					logger.error("Could not get lucene reference for path {}", path);
 					return null;
 				}
 				if(references.size()>0) {
-					references.get(0).setPath(path);
-					logger.info("Found lucene reference {} for path {}", references.get(0).getUuid(), references.get(0).getPath());
-					return references.get(0);
+					for(int i=0; i<references.size(); i++) {
+						logger.info("Comparing " + references.get(i).getPath() + " with " + path);
+						if(equalPaths(references.get(i).getPath(),path)) {
+							logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
+							return references.get(i);
+						}
+					}
 				}
 				logger.error("Could not get lucene reference for path {}", path);
 				return null;
@@ -788,18 +790,30 @@ public class WebServiceRepositoryAccessSession implements
 		}
 		return reference;
 	}
-	
-	   private String escapeQName(QName qname)
-	    {
-	        return LuceneQueryParser.escape(qname.toString());
-	    }
+
+	// first path: /{http://www.alfresco.org/model/application/1.0}company_home/{http://www.alfresco.org/model/content/1.0}Move2alf/{http://www.alfresco.org/model/content/1.0}file1.txt
+	// second path: /app:company_home/cm:move2alf/cm:File1.txt
+	// should be equal case insensitive
+	private boolean equalPaths(String path, String path2) {
+		// replace prefix namespace with uri in path2
+		String newPath2 = path2.replaceAll("/cm:", "/{" + Constants.NAMESPACE_CONTENT_MODEL + "}");
+		newPath2 = newPath2.replaceAll("/app:", "/{" + Constants.NAMESPACE_APPLICATION_MODEL + "}");
+
+		//logger.info("path=" + String.valueOf(path) + " and newPath2=" + String.valueOf(newPath2) + " and equality=" + String.valueOf(path).compareTo(String.valueOf(newPath2)));
+		return (path.toLowerCase().compareTo(newPath2.toLowerCase())==0);
+	}
+
+	private String escapeQName(QName qname)
+	{
+		return LuceneQueryParser.escape(qname.toString());
+	}
 
 
 	private String getNameFromPath(String path) {
 		String sDelimiters = "/:";
 		StringTokenizer T = new StringTokenizer(path, sDelimiters, true);
 		String name = path;
-		
+
 		while (T.hasMoreTokens()) {
 			name = T.nextToken();
 		}
@@ -810,7 +824,7 @@ public class WebServiceRepositoryAccessSession implements
 			Reference parentSpace, String description,
 			String contentModelNamespace, String contentModelType,
 			Map<String, String> meta, Map<String, String> multiValueMeta, CML cml, String cmlId)
-			throws RepositoryAccessException, RepositoryException {
+					throws RepositoryAccessException, RepositoryException {
 		if (parentSpace == null) {
 			logger.warn("ParentSpace is null, can not store {}", file.getName());
 			throw new RepositoryException("ParentSpace is null");
@@ -883,7 +897,7 @@ public class WebServiceRepositoryAccessSession implements
 		} else {
 			creates = new ArrayList<CMLCreate>(Arrays.asList(createsArray));
 		}
-		
+
 		CMLAddAspect[] addAspectsArray = cml.getAddAspect();
 		List<CMLAddAspect> addAspects;
 		if (addAspectsArray == null) {
@@ -891,14 +905,14 @@ public class WebServiceRepositoryAccessSession implements
 		} else {
 			addAspects = new ArrayList<CMLAddAspect>(Arrays.asList(addAspectsArray));
 		}
-		
+
 		CMLCreate create = new CMLCreate(cmlId, parentRef, parentSpace.getUuid(),
 				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
 				contentModelNamespace + contentModelType, contentProps.toArray(new NamedValue[0]));
-		
+
 		creates.add(create);
 		addAspects.add(titleAspect);
-		
+
 		cml.setCreate(creates.toArray(new CMLCreate[creates.size()]));
 		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
 	}
@@ -972,10 +986,10 @@ public class WebServiceRepositoryAccessSession implements
 
 	private Reference locateByFileNameAndPath(String parentPath, String name)
 			throws RepositoryAccessException {
-		
+
 		String path = getXPathEscape(companyHomePath
 				+ parentPath + "/cm:"+name);
-		
+
 		return getReference(path);
 
 	}
@@ -984,7 +998,7 @@ public class WebServiceRepositoryAccessSession implements
 			throws RepositoryAccessException {
 		String path = parent.getPath()+"/cm:"+getXPathEscape(name);
 		logger.info("Locating document: "+path);
-		
+
 		return getReference(path);
 	}
 
@@ -992,8 +1006,7 @@ public class WebServiceRepositoryAccessSession implements
 	private Reference locateByFileName(String name)
 			throws RepositoryAccessException, RepositoryException {
 
-		Query query = new Query(Constants.QUERY_LANG_LUCENE, "@cm\\:name:\""
-				+ name + "\"");
+		Query query = new Query(Constants.QUERY_LANG_LUCENE, "@cm\\:name:\"" + name + "\"");
 		// Execute the query
 		QueryResult queryResult;
 		try {
@@ -1163,7 +1176,7 @@ public class WebServiceRepositoryAccessSession implements
 			throws RepositoryAccessException, RepositoryException {
 
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
-		
+
 		processMetadata(nameSpace, meta, contentProps);
 
 		Predicate predicate = new Predicate(new Reference[] { reference },
@@ -1188,7 +1201,7 @@ public class WebServiceRepositoryAccessSession implements
 
 	private void setAccessControlList(Reference ref,
 			boolean inheritPermissions, Map<String, String> accessControl)
-			throws RepositoryAccessException, RepositoryException {
+					throws RepositoryAccessException, RepositoryException {
 		try {
 			Predicate predicate = new Predicate(new Reference[] { ref }, store,
 					null);
@@ -1276,8 +1289,8 @@ public class WebServiceRepositoryAccessSession implements
 
 		try {
 			repositoryService.setHeader(new RepositoryServiceLocator()
-					.getServiceName().getNamespaceURI(), "QueryHeader",
-					queryCfg);
+			.getServiceName().getNamespaceURI(), "QueryHeader",
+			queryCfg);
 
 			logger.info("Store {}", store.getAddress());
 			QueryResult queryResult = repositoryService.query(store, query,
@@ -1286,14 +1299,45 @@ public class WebServiceRepositoryAccessSession implements
 			ResultSet resultSet = queryResult.getResultSet();
 			ResultSetRow[] rows = resultSet.getRows();
 
-			outputResultSet(rows);
+			//outputResultSet(rows);
 
 			if (rows != null) {
 				logger.info("Number of rows {}", rows.length);
 				for (ResultSetRow row : rows) {
 					String resultId = row.getNode().getId();
-					Reference reference = new Reference(store, resultId, null);
+					NamedValue[] columns = row.getColumns();
+					String resultPath = "";
+					for(int i=0; i<columns.length; i++) {
+						if("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
+							resultPath = columns[i].getValue();
+					}
+					Reference reference = new Reference(store, resultId, resultPath);
 					referenceList.add(reference);
+				}
+				// if there are still results; is there a better way to do this?
+				while(rows.length==maxNbrOfResults) {
+					String querySession = queryResult.getQuerySession();
+					queryResult = repositoryService.fetchMore(querySession);
+
+					resultSet = queryResult.getResultSet();
+					rows = resultSet.getRows();
+
+					outputResultSet(rows);
+
+					if (rows != null) {
+						logger.info("Number of rows {}", rows.length);
+						for (ResultSetRow row : rows) {
+							String resultId = row.getNode().getId();
+							NamedValue[] columns = row.getColumns();
+							String resultPath = "";
+							for(int i=0; i<columns.length; i++) {
+								if("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
+									resultPath = columns[i].getValue();
+							}
+							Reference reference = new Reference(store, resultId, resultPath);
+							referenceList.add(reference);
+						}
+					}
 				}
 			}
 		} catch (RepositoryFault e) {

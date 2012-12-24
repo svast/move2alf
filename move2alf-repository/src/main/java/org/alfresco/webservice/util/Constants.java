@@ -41,6 +41,7 @@ public class Constants
     /** Namespace constants */
     public static final String NAMESPACE_SYSTEM_MODEL   = "http://www.alfresco.org/model/system/1.0";
     public static final String NAMESPACE_CONTENT_MODEL  = "http://www.alfresco.org/model/content/1.0";
+    public static final String NAMESPACE_APPLICATION_MODEL  = "http://www.alfresco.org/model/application/1.0";
     
     /** Useful model constants */
     public static final String ASSOC_CHILDREN =         createQNameString(NAMESPACE_SYSTEM_MODEL, "children");    

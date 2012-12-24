@@ -54,7 +54,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
-				logger.debug("Uploading file " + document.getName());
+				logger.debug("Uploading file " + document.getName() + " to remotePath " + remotePath);
 				uploadFile(docExistsMode, ras, remotePath, mimeType,
 						namespace, contentType, description, metadata,
 						multiValueMetadata, document);
