@@ -1460,9 +1460,8 @@ RepositoryAccessSession {
 	}
 
 	@Override
-	public boolean doesFileNameExists(String name) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException {
+		return locateByFileName(name) != null;
 	}
 
 }
