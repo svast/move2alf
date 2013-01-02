@@ -187,6 +187,6 @@ public interface RepositoryAccessSession {
 			boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException,
 			RepositoryException, PartialUploadFailureException;
 
-	public abstract boolean doesFileNameExists(String name);
+	public abstract boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException;
 
 }
