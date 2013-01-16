@@ -49,9 +49,17 @@ public class JobConfig {
 
 	@NotEmpty
 	private String transform;
+	
+	@NotEmpty
+	private Mode mode;
 
 	@NotEmpty
-	private String docExist;
+	private WriteOption writeOption;	
+	
+	@NotEmpty
+	private DeleteOption deleteOption;
+	
+	private boolean listIgnorePath;
 
 	private Boolean moveBeforeProc = false;
 
@@ -187,13 +195,21 @@ public class JobConfig {
 	public String getTransform() {
 		return transform;
 	}
-
-	public void setDocExist(String docExist) {
-		this.docExist = docExist;
+	
+	public Mode getMode(){
+		return this.mode;
+	}
+	
+	public void setMode(String mode){
+		this.mode = Mode.valueOf(mode);
 	}
 
-	public String getDocExist() {
-		return docExist;
+	public void setWriteOption(String writeOption) {
+		this.writeOption = WriteOption.valueOf(writeOption);
+	}
+
+	public WriteOption getWriteOption() {
+		return writeOption;
 	}
 
 	public void setMoveBeforeProc(String moveBeforeProc) {
@@ -425,6 +441,21 @@ public class JobConfig {
 
 	public int getEmailMaxLength() {
 		return emailMaxLength;
+	}
+
+	public void setDeleteOption(String deleteOption){
+		this.deleteOption = DeleteOption.valueOf(deleteOption);
+	}
+	public DeleteOption getDeleteOption() {
+		return this.deleteOption;
+	}
+
+	public void setListIgnorePath(boolean listIgnorePath){
+		this.listIgnorePath = listIgnorePath;
+	}
+	
+	public boolean getListIgnorePath() {
+		return this.listIgnorePath;
 	}
 
 }

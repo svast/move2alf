@@ -37,6 +37,7 @@ import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.Mode;
 
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
@@ -163,27 +164,25 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 																			// (String)
 				.param("emailAddressReport", jobConfig.getSendReportText()));
 
-		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
-				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
-				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
+		if (Mode.WRITE == jobConfig.getMode()) {
 			actions.add(action("eu.xenit.move2alf.core.action.SinkAction")
 					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
+					.param("writeOption", jobConfig.getWriteOption().toString())
 					// TODO: add param: ignore / error / overwrite / version
 					.sourceSink(sourceSinkById(jobConfig.getDest())));
 		}
 
-		if ("Delete".equals(jobConfig.getDocExist())) {
+		if (Mode.DELETE == jobConfig.getMode()) {
 			actions.add(action("eu.xenit.move2alf.core.action.DeleteAction")
 					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
+					.param("deleteOption", jobConfig.getDeleteOption().toString())
 					.sourceSink(sourceSinkById(jobConfig.getDest())));
 		}
 
-		if ("ListPresence".equals(jobConfig.getDocExist())) {
+		if (Mode.LIST == jobConfig.getMode()) {
 			actions.add(action("eu.xenit.move2alf.core.action.ListAction")
 					.param("path", jobConfig.getDestinationFolder())
-					.param("documentExists", jobConfig.getDocExist())
+					.param("ignorePath", Boolean.toString(jobConfig.getListIgnorePath()))
 					.sourceSink(sourceSinkById(jobConfig.getDest())));
 		}
 
@@ -400,7 +399,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);
-		jobConfig.setDocExist(documentExists);
+		jobConfig.setWriteOption(documentExists);
 		jobConfig.setMetadata(metadata);
 		jobConfig.setTransform(transform);
 		jobConfig.setMoveBeforeProc(moveBeforeProcessing);
@@ -502,9 +501,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
 				errorHandler));
 
-		if (SourceSink.MODE_SKIP.equals(jobConfig.getDocExist())
-				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getDocExist())
-				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getDocExist())) {
+		if (SourceSink.MODE_SKIP.equals(jobConfig.getWriteOption())
+				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getWriteOption())
+				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getWriteOption())) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
@@ -516,13 +515,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			uploadConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getDocExist());
+					jobConfig.getWriteOption().toString());
 			uploadConfig.put(SAUpload.PARAM_BATCH_SIZE, defaultBatchSize);
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
-		if ("Delete".equals(jobConfig.getDocExist())) {
+		if ("Delete".equals(jobConfig.getWriteOption())) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
@@ -534,12 +533,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			uploadConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getDocExist());
+					jobConfig.getWriteOption().toString());
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
-		if ("ListPresence".equals(jobConfig.getDocExist())) {
+		if ("ListPresence".equals(jobConfig.getWriteOption())) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
@@ -551,7 +550,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			uploadConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
 			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getDocExist());
+					jobConfig.getWriteOption().toString());
 			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));
