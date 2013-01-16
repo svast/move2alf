@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.Cycle" table="cycle">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="startDateTime" />
+		<property name="endDateTime" />
+		
+		<many-to-one name="job" column="jobId" lazy="false"/>
+		<set name="runningActions" inverse="true">
+			<key column="cycleId" />
+			<one-to-many class="eu.xenit.move2alf.core.dto.RunningAction" />
+		</set>
+		<set name="processedDocuments" inverse="true">
+			<key column="cycleId" />
+			<one-to-many class="eu.xenit.move2alf.core.dto.ProcessedDocument" />
+		</set>
+	</class>
+</hibernate-mapping>

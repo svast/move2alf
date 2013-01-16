@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.logic.usageservice.dto.LicenseHistory" table="licenseHistory">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="creationDateTime" not-null="true" />
+		<property name="replenishment" not-null="true" />
+		<property name="numberOfDocuments" not-null="true" />
+	</class>
+</hibernate-mapping>
