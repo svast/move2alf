@@ -191,4 +191,7 @@ public class Reference  implements java.io.Serializable {
             _javaType, _xmlType, typeDesc);
     }
 
+    public String toString() {
+    	return "store: " + this.getStore() + ", uuid: " + this.getUuid() + ", path: " + this.getPath();
+    }
 }

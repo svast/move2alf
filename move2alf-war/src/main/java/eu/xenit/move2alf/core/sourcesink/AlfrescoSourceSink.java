@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,11 +18,11 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
-import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
 import eu.xenit.move2alf.repository.RepositoryFatalException;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
 
@@ -31,11 +32,11 @@ public class AlfrescoSourceSink extends SourceSink {
 	private static final String PARAM_PASSWORD = "password";
 	private static final String PARAM_USER = "user";
 	private static final boolean OPTIMISTIC = true;
+	private static final boolean PESSIMISTIC = false;
 
 	private static ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AlfrescoSourceSink.class);
+	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSourceSink.class);
 
 	@Override
 	public List<File> list(final ConfiguredSourceSink sourceConfig,
@@ -104,18 +105,22 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) throws PartialUploadFailureException {
+	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final String docExistsMode, final List<Document> documents) {
+		HashMap<String, UploadResult> results = null;
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
 				logger.debug("Uploading " + documents.size() + " files");
-				uploadBatch(docExistsMode, ras, documents);
+				results = uploadBatch(docExistsMode, ras, documents);
+				if(results.size() != documents.size())
+					throw new RuntimeException("Upload results do not match required number of documents, results=" + results.size() + " and documents=" + documents.size());
+					
 			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
-					retryBatch(configuredSourceSink, docExistsMode, documents);
+					results = retryBatch(configuredSourceSink, docExistsMode, documents);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -150,25 +155,31 @@ public class AlfrescoSourceSink extends SourceSink {
 			logger.error(e2.getMessage(), e2);
 			throw new Move2AlfException(e2.getMessage(), e2);
 		}
+		return results;
 	}
 
-	private void uploadBatch(final String docExistsMode,
+	private HashMap<String, UploadResult> uploadBatch(final String docExistsMode,
 		final RepositoryAccessSession ras, final List<Document> documents)
-		throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+		throws RepositoryAccessException, RepositoryException {
 		
 		boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
-		ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC);
+		// if overwrite=true, try directly pessimistic upload, which has a small performance penalty due to checks in the repository
+		// if overwrite=false, try optimistic upload, which falls back to pessimistic in case of duplicates; in this mode, documents are uploaded twice
+		if(overwrite)
+			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, PESSIMISTIC);
+		else
+			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC);
 	}
 
-	private void retryBatch(final ConfiguredSourceSink configuredSourceSink,
+	private HashMap<String, UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final List<Document> documents)
-			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+			throws RepositoryAccessException, RepositoryException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
 		final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 
 		logger.debug("Retrying batch");
-		uploadBatch(docExistsMode, ras, documents);
+		return uploadBatch(docExistsMode, ras, documents);
 	}
 
 	@Override

@@ -75,7 +75,7 @@
 	<tbody>
 		<#list processedDocuments as item>
 			<tr>
-				<td>${item.name}</td>
+				<td><a href="${item.reference}">${item.name}</a></td>
 				<td>${item.processedDateTime}</td>
 				<td>${item.status.displayName}</td>
 				<td>

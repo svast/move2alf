@@ -30,7 +30,7 @@ public class JobExecutor implements org.quartz.Job {
 		UsageService usageService = (UsageService) context.getMergedJobDataMap().get(SchedulerImpl.USAGE_SERVICE);
 
 		if (checkLicense(usageService)) {
-			executeJob(jobId, jobService, jobExecutionService);
+				executeJob(jobId, jobService, jobExecutionService);
 		}
 	}
 

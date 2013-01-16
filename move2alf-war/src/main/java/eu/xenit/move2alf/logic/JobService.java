@@ -346,7 +346,7 @@ public interface JobService {
 	 */
 	public void resetCycles();
 	
-	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params);
+	public void createProcessedDocument(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params, String reference);
 
 	public void sendMail(SimpleMailMessage message);
 

@@ -80,9 +80,9 @@ public class CMLDocument {
 		
 		contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
 		contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
-		for(NamedValue value: contentProps){
+/*		for(NamedValue value: contentProps){
 			System.out.println(value.getName()+": "+value.getValue());
-		}
+		}*/
 		return contentProps.toArray(new NamedValue[0]);
 	}
 	

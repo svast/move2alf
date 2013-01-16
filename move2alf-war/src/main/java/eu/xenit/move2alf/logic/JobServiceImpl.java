@@ -580,8 +580,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void createProcessedDocument(final int cycleId, final String name,
 			final Date date, final String state,
-			final Set<ProcessedDocumentParameter> params) {
-		logger.debug("Creating processed document:" + name);
+			final Set<ProcessedDocumentParameter> params, final String reference) {
+		//logger.debug("Creating processed document:" + name);
 		try {
 			final ProcessedDocument doc = new ProcessedDocument();
 			doc.setCycle(getCycle(cycleId));
@@ -594,6 +594,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				}
 			}
 			doc.setProcessedDocumentParameterSet(params);
+			doc.setReference(reference);
 			getSessionFactory().getCurrentSession().save(doc);
 			if ( EProcessedDocumentStatus.OK.equals(doc.getStatus()) ) {
 				usageService.decrementDocumentCounter();

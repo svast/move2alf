@@ -12,10 +12,10 @@ import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 
-import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class CmisRepositoryAccessSession implements RepositoryAccessSession {
@@ -93,14 +93,14 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	}
 
 	@Override
-	public void storeDocAndCreateParentSpaces(Document document)
+	public HashMap<String,UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
@@ -112,9 +112,9 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		throw new RuntimeException("not implemented");
 	}
 
-	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
-			boolean optimistic) throws RepositoryAccessException, RepositoryException,
-			PartialUploadFailureException {
+	public HashMap<String,UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
+			boolean optimistic) throws RepositoryAccessException, RepositoryException {
+		throw new RuntimeException("not implemented");
 	}
 
 }

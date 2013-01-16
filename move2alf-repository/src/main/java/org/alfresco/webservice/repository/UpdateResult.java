@@ -260,4 +260,8 @@ public class UpdateResult  implements java.io.Serializable {
             _javaType, _xmlType, typeDesc);
     }
 
+    public String toString() {
+    	return "sourceId: " + this.getSourceId() + " and statement:" + this.getStatement() + " and destination: " + this.getDestination() + " and source:" + this.getSource() + " and updateCount:" + this.getUpdateCount();
+    			
+    }
 }

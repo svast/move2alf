@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.sourcesink;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class FileSourceSink extends SourceSink {
@@ -89,10 +91,10 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
+	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final String docExistsMode, final List<Document> documents) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override

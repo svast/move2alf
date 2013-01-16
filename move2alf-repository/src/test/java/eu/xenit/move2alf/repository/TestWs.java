@@ -3,6 +3,7 @@ package eu.xenit.move2alf.repository;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.webservice.repository.RepositoryFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ public class TestWs extends TestBase {
 	}
 
 	public void testBatch() throws RepositoryAccessException,
-			RepositoryException, PartialUploadFailureException {
+			RepositoryException, RepositoryFault, RemoteException {
 		RepositoryAccessSession ras = ra.createSession();
 		List<Document> docs = new ArrayList<Document>();
 		docs.add(doc("/tmp/m2a/01.txt", "/cm:Foo"));
@@ -49,7 +51,7 @@ public class TestWs extends TestBase {
 	}
 
 	public void testBatchWithAuditableProperties()
-			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
+			throws RepositoryAccessException, RepositoryException, RepositoryFault, RemoteException {
 		RepositoryAccessSession ras = ra.createSession();
 		List<Document> docs = new ArrayList<Document>();
 		Document doc1 = doc("/tmp/m2a/01.txt", "/cm:Foo");
@@ -62,7 +64,7 @@ public class TestWs extends TestBase {
 	}
 
 	public void testPerformance() throws RepositoryAccessException,
-			RepositoryException, PartialUploadFailureException {
+			RepositoryException, RepositoryFault, RemoteException {
 		RepositoryAccessSession ras = ra.createSession();
 		Date start1 = new Date();
 		List<Document> docs = new ArrayList<Document>();

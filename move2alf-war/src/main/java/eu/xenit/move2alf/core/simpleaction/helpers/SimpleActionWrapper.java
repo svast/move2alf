@@ -176,7 +176,7 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public void createProcessedDocument(final int cycleId,
 				final String name, final Date date, final String state,
-				final Set<ProcessedDocumentParameter> params) {
+				final Set<ProcessedDocumentParameter> params, String reference) {
 		}
 
 		@Override

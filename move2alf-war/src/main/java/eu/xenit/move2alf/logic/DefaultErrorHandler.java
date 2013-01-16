@@ -51,7 +51,7 @@ public class DefaultErrorHandler implements ErrorHandler {
 		params.add(msg);
 		getJobService().getReportActor().sendOneWay(
 				new ReportMessage(cycle.getId(), file.getName(),
-						new Date(), Parameters.VALUE_FAILED, params));
+						new Date(), Parameters.VALUE_FAILED, params, ""));
 
 		// move
 		if (jobConfig.getMoveNotLoad()) {

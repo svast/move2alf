@@ -33,7 +33,6 @@ import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.logic.usageservice.Licensee;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
@@ -48,7 +47,7 @@ public class SAUploadTest {
 	}
 
 	@Test
-	public void testSingleFileUpload() throws PartialUploadFailureException {
+	public void testSingleFileUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(1);
@@ -85,7 +84,7 @@ public class SAUploadTest {
 	}
 
 	@Test
-	public void testBatchUpload() throws PartialUploadFailureException {
+	public void testBatchUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(3);
@@ -138,7 +137,7 @@ public class SAUploadTest {
 	}
 
 	@Test
-	public void testUploadWithACL() throws PartialUploadFailureException {
+	public void testUploadWithACL() {
 		final SourceSink mockSink = mock(SourceSink.class);
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(2);
