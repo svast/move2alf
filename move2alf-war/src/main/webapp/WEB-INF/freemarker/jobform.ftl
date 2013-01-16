@@ -102,18 +102,18 @@
 		</@labeledInput>
 		
 		<span id="write-options" >
-		<@labeledInput label="If content exists in destination" forId="docExists" helpText="What should happen when the document already exists in the destination?">
-			<@radios name="docExist" options=[
-			 ["SkipAndLog", (!job.docExist?? | job.docExist=="SkipAndLog"),"Skip document and log error"],
-			 ["Skip", job.docExist?? && job.docExist=="Skip", "Skip document silently"],
-			 ["Overwrite", job.docExist?? && job.docExist=="Overwrite", "Overwrite document"]
+		<@labeledInput label="If content exists in destination" forId="writeOption" helpText="What should happen when the document already exists in the destination?">
+			<@radios name="writeOption" options=[
+			 ["SKIPANDREPORTFAILURE", (!job.writeOption?? | job.writeOption=="SKIPANDREPORTFAILURE"),"Skip document and log error"],
+			 ["SKIPANDIGNORE", job.writeOption?? && job.writeOption=="SKIPANDIGNORE", "Skip document silently"],
+			 ["OVERWRITE", job.writeOption?? && job.writeOption=="OVERWRITE", "Overwrite document"]
 			 ] />
 		</@labeledInput>
 		</span>
 		
 		<span id="delete-options" class="hidden" >
 		<@labeledInput label="If content does not exists in destination" forId="docNotExists" helpText="What should happen when the document does not exists in the destination?">
-			<@radios name="docExist" options=[
+			<@radios name="docNotExist" options=[
 			 ["SkipAndLog", true,"Skip document and log error"],
 			 ["Skip", false, "Skip document silently"]
 			 ] />
