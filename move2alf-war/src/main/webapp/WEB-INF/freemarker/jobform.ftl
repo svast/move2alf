@@ -93,15 +93,38 @@
 	<fieldset>
 		<legend>Options</legend>
 		
+		<@labeledInput label="Mode" forId="mode" helpText="What should Move2Alf do with the documents?">
+			<@radios name="mode" options=[
+				["WRITE", (!job.mode?? | job.mode=="WRITE"), "Write"],
+				["DELETE", job.mode?? && job.mode=="DELETE", "Delete"],
+				["LIST", job.mode?? && job.mode=="LIST", "List presence"]
+			] />
+		</@labeledInput>
+		
+		<span id="write-options" >
 		<@labeledInput label="If content exists in destination" forId="docExists" helpText="What should happen when the document already exists in the destination?">
 			<@radios name="docExist" options=[
 			 ["SkipAndLog", (!job.docExist?? | job.docExist=="SkipAndLog"),"Skip document and log error"],
 			 ["Skip", job.docExist?? && job.docExist=="Skip", "Skip document silently"],
-			 ["Overwrite", job.docExist?? && job.docExist=="Overwrite", "Overwrite document"],
-			 ["Delete", job.docExist?? && job.docExist=="Delete", "Delete document"],
-			 ["ListPresence", job.docExist?? && job.docExist=="ListPresence", "List presence"]
+			 ["Overwrite", job.docExist?? && job.docExist=="Overwrite", "Overwrite document"]
 			 ] />
 		</@labeledInput>
+		</span>
+		
+		<span id="delete-options" class="hidden" >
+		<@labeledInput label="If content does not exists in destination" forId="docNotExists" helpText="What should happen when the document does not exists in the destination?">
+			<@radios name="docExist" options=[
+			 ["SkipAndLog", true,"Skip document and log error"],
+			 ["Skip", false, "Skip document silently"]
+			 ] />
+		</@labeledInput>
+		</span>
+		
+		<span id="list-options" class="hidden" >
+		<@unLabeledInput>
+			<@checkboxWithText binding="job.MoveBeforeProc" label="Ignore path" />
+		</@unLabeledInput>
+		</span>
 		
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/checkboxWithText.js" />"> </script>
 		<@unLabeledInput>
