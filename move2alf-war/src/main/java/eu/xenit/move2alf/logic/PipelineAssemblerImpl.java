@@ -501,9 +501,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
 				errorHandler));
 
-		if (SourceSink.MODE_SKIP.equals(jobConfig.getWriteOption())
-				|| SourceSink.MODE_SKIP_AND_LOG.equals(jobConfig.getWriteOption())
-				|| SourceSink.MODE_OVERWRITE.equals(jobConfig.getWriteOption())) {
+		if (Mode.WRITE == jobConfig.getMode()) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
@@ -521,37 +519,37 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
-		if ("Delete".equals(jobConfig.getWriteOption())) {
+		if (Mode.DELETE  == jobConfig.getMode()) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
 					sinkConfig.getClassName());
 			final ExecutorService executorService = getSourceSinkFactory()
 					.getThreadPool(sinkConfig);
-			final SimpleAction uploadAction = new SADelete(sink, sinkConfig);
-			final ActionConfig uploadConfig = new ActionConfig();
-			uploadConfig.put(SAUpload.PARAM_PATH,
+			final SimpleAction deleteAction = new SADelete(sink, sinkConfig);
+			final ActionConfig deleteConfig = new ActionConfig();
+			deleteConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
-			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getWriteOption().toString());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
+			deleteConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
+					jobConfig.getDeleteOption().toString());
+			pipeline.add(new PipelineStep(deleteAction, deleteConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
-		if ("ListPresence".equals(jobConfig.getWriteOption())) {
+		if (Mode.LIST == jobConfig.getMode()) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
 					sinkConfig.getClassName());
 			final ExecutorService executorService = getSourceSinkFactory()
 					.getThreadPool(sinkConfig);
-			final SimpleAction uploadAction = new SAList(sink, sinkConfig);
-			final ActionConfig uploadConfig = new ActionConfig();
-			uploadConfig.put(SAUpload.PARAM_PATH,
+			final SimpleAction listAction = new SAList(sink, sinkConfig);
+			final ActionConfig listConfig = new ActionConfig();
+			listConfig.put(SAUpload.PARAM_PATH,
 					jobConfig.getDestinationFolder());
-			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
+			listConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
 					jobConfig.getWriteOption().toString());
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
+			pipeline.add(new PipelineStep(listAction, listConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
