@@ -102,6 +102,7 @@
 		</@labeledInput>
 		
 		<span id="write-options" >
+
 		<@labeledInput label="If content exists in destination" forId="writeOption" helpText="What should happen when the document already exists in the destination?">
 			<@radios name="writeOption" options=[
 			 ["SKIPANDREPORTFAILURE", (!job.writeOption?? | job.writeOption=="SKIPANDREPORTFAILURE"),"Skip document and log error"],
@@ -119,7 +120,7 @@
 			 ] />
 		</@labeledInput>
 		</span>
-		
+
 		<span id="list-options" class="hidden" >
 		<@unLabeledInput>
 			<@checkboxWithText binding="job.MoveBeforeProc" label="Ignore path" />

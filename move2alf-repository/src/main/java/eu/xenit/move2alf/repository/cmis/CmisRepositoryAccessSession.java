@@ -123,4 +123,10 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		return false;
 	}
 
+	@Override
+	public boolean doesFileNameExists(String name) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -501,6 +501,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
 				errorHandler));
 
+
 		if (Mode.WRITE == jobConfig.getMode()) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
@@ -519,6 +520,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					null, errorHandler, new ActionExecutor(
 							executorService)));
 		}
+
 		if (Mode.DELETE  == jobConfig.getMode()) {
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
@@ -537,6 +539,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 							executorService)));
 		}
 		if (Mode.LIST == jobConfig.getMode()) {
+
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
