@@ -46,7 +46,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -106,7 +106,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) {
+			final WriteOption docExistsMode, final List<Document> documents) {
 		HashMap<String, UploadResult> results = null;
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
@@ -158,11 +158,11 @@ public class AlfrescoSourceSink extends SourceSink {
 		return results;
 	}
 
-	private HashMap<String, UploadResult> uploadBatch(final String docExistsMode,
+	private HashMap<String, UploadResult> uploadBatch(final WriteOption docExistsMode,
 		final RepositoryAccessSession ras, final List<Document> documents)
 		throws RepositoryAccessException, RepositoryException {
 		
-		boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
+		boolean overwrite = WriteOption.OVERWRITE == docExistsMode;
 		// if overwrite=true, try directly pessimistic upload, which has a small performance penalty due to checks in the repository
 		// if overwrite=false, try optimistic upload, which falls back to pessimistic in case of duplicates; in this mode, documents are uploaded twice
 		if(overwrite)
@@ -172,7 +172,7 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	private HashMap<String, UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents)
+			final WriteOption docExistsMode, final List<Document> documents)
 			throws RepositoryAccessException, RepositoryException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
@@ -219,7 +219,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private static void retryUpload(
 			final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -236,7 +236,7 @@ public class AlfrescoSourceSink extends SourceSink {
 				multiValueMetadata, document);
 	}
 
-	private static void uploadFile(final String docExistsMode,
+	private static void uploadFile(final WriteOption docExistsMode,
 			final RepositoryAccessSession ras,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
@@ -260,15 +260,15 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String stackTrace = result.toString();
 			if (stackTrace
 					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
-				if (MODE_SKIP.equals(docExistsMode)) {
+				if (WriteOption.SKIPANDIGNORE == docExistsMode) {
 					// ignore
-				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
+				} else if (WriteOption.SKIPANDREPORTFAILED == docExistsMode) {
 					logger.warn("Document " + document.getName()
 							+ " already exists in " + remotePath);
 					throw new Move2AlfException("Document "
 							+ document.getName() + " already exists in "
 							+ remotePath);
-				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
+				} else if (WriteOption.OVERWRITE == docExistsMode) {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
 					ras.updateContentByDocNameAndPath(remotePath,

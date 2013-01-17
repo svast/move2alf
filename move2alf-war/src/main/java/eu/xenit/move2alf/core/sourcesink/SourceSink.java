@@ -13,19 +13,16 @@ import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public abstract class SourceSink extends ConfigurableObject {
-	public static final String MODE_SKIP = "Skip";
-	public static final String MODE_SKIP_AND_LOG = "SkipAndLog";
-	public static final String MODE_OVERWRITE = "Overwrite";
 
 	public abstract void send(ConfiguredSourceSink configuredSourceSink,
-			String docExistsMode, String remotePath,
+			WriteOption docExistsMode, String remotePath,
 			String mimeType, String namespace, String contentType,
 			String description, Map<String, String> metadata,
 			Map<String, String> multiValueMetadata,
 			File document) throws IllegalDocumentException;
 
 	public abstract HashMap<String, UploadResult> sendBatch(ConfiguredSourceSink configuredSourceSink,
-			String docExistsMode, List<Document> documents);
+			WriteOption docExistsMode, List<Document> documents);
 
 	public abstract void setACL(ConfiguredSourceSink configuredSourceSink,
 			ACL acls);

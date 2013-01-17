@@ -3,10 +3,13 @@ package eu.xenit.move2alf.web.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
+import eu.xenit.move2alf.logic.Mode;
 import eu.xenit.move2alf.validation.CSVsize;
 import eu.xenit.move2alf.validation.ParamList;
 
@@ -50,13 +53,13 @@ public class JobConfig {
 	@NotEmpty
 	private String transform;
 	
-	@NotEmpty
+	@NotNull(message="mode is null")
 	private Mode mode;
 
-	@NotEmpty
+	@NotNull(message="writeOption is null")
 	private WriteOption writeOption;	
 	
-	@NotEmpty
+	@NotNull(message="deleteOption is null")
 	private DeleteOption deleteOption;
 	
 	private boolean listIgnorePath;
@@ -200,12 +203,12 @@ public class JobConfig {
 		return this.mode;
 	}
 	
-	public void setMode(String mode){
-		this.mode = Mode.valueOf(mode);
+	public void setMode(Mode mode){
+		this.mode = mode;
 	}
 
-	public void setWriteOption(String writeOption) {
-		this.writeOption = WriteOption.valueOf(writeOption);
+	public void setWriteOption(WriteOption writeOption) {
+		this.writeOption = writeOption;
 	}
 
 	public WriteOption getWriteOption() {
@@ -443,8 +446,8 @@ public class JobConfig {
 		return emailMaxLength;
 	}
 
-	public void setDeleteOption(String deleteOption){
-		this.deleteOption = DeleteOption.valueOf(deleteOption);
+	public void setDeleteOption(DeleteOption deleteOption){
+		this.deleteOption = deleteOption;
 	}
 	public DeleteOption getDeleteOption() {
 		return this.deleteOption;

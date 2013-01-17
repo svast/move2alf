@@ -20,6 +20,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
@@ -224,7 +225,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			documentFileInfoMapping.put(document, parameterMap);
 		}
 
-		return getSink().sendBatch(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
+		return getSink().sendBatch(getSinkConfig(), WriteOption.valueOf(config.get(PARAM_DOCUMENT_EXISTS)),
 				documentsToUpload);
 	}
 

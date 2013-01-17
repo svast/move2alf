@@ -22,6 +22,7 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.simpleaction.SADelete;
+import eu.xenit.move2alf.core.simpleaction.SAExistenceCheck;
 import eu.xenit.move2alf.core.simpleaction.SAFilter;
 import eu.xenit.move2alf.core.simpleaction.SAList;
 import eu.xenit.move2alf.core.simpleaction.SAMimeType;
@@ -35,9 +36,10 @@ import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
+import eu.xenit.move2alf.web.dto.DeleteOption;
 import eu.xenit.move2alf.web.dto.JobConfig;
-import eu.xenit.move2alf.web.dto.Mode;
 
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
@@ -292,7 +294,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		String inputPath = "";
 		String destinationFolder = "";
 		int dest = 0;
-		String documentExists = "";
+		String writeOption = null;
+		String deleteOption = null;
+		Mode mode = null;
+		boolean ignorePath = false;
 
 		String metadata = "";
 		String transform = "";
@@ -322,19 +327,23 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
 						.getId();
-				documentExists = action.getParameter("documentExists");
+				writeOption = action.getParameter("writeOption");
+				mode = Mode.WRITE;
 			} else if ("eu.xenit.move2alf.core.action.DeleteAction"
 					.equals(action.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
 						.getId();
-				documentExists = action.getParameter("documentExists");
+				deleteOption = action.getParameter("deleteOption");
+				mode = Mode.DELETE;
 			} else if ("eu.xenit.move2alf.core.action.ListAction".equals(action
 					.getClassName())) {
 				destinationFolder = action.getParameter("path");
 				dest = action.getConfiguredSourceSinkSet().iterator().next()
 						.getId();
-				documentExists = action.getParameter("documentExists");
+				String bla = action.getParameter("ignorePath");
+				ignorePath = Boolean.valueOf(action.getParameter("ignorePath"));
+				mode = Mode.LIST;
 			} else if ("eu.xenit.move2alf.core.action.MoveDocumentsAction"
 					.equals(action.getClassName())) {
 				moveBeforeProcessing = action
@@ -399,7 +408,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);
-		jobConfig.setWriteOption(documentExists);
+		jobConfig.setMode(mode);
+		if(writeOption != null){
+			jobConfig.setWriteOption(WriteOption.valueOf(writeOption));
+		}
+		if(deleteOption != null){
+			jobConfig.setDeleteOption(DeleteOption.valueOf(deleteOption));
+		}
+		jobConfig.setListIgnorePath(ignorePath);
 		jobConfig.setMetadata(metadata);
 		jobConfig.setTransform(transform);
 		jobConfig.setMoveBeforeProc(moveBeforeProcessing);
@@ -539,19 +555,24 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 							executorService)));
 		}
 		if (Mode.LIST == jobConfig.getMode()) {
-
+			
 			final ConfiguredSourceSink sinkConfig = getJobService()
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
 					sinkConfig.getClassName());
 			final ExecutorService executorService = getSourceSinkFactory()
 					.getThreadPool(sinkConfig);
-			final SimpleAction listAction = new SAList(sink, sinkConfig);
+			final SimpleAction listAction;
 			final ActionConfig listConfig = new ActionConfig();
-			listConfig.put(SAUpload.PARAM_PATH,
-					jobConfig.getDestinationFolder());
-			listConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getWriteOption().toString());
+			
+			if(jobConfig.getListIgnorePath()){
+				listAction = new SAExistenceCheck(sink, sinkConfig);
+			}
+			else{
+				listAction = new SAList(sink, sinkConfig);
+				listConfig.put(SAUpload.PARAM_PATH,
+						jobConfig.getDestinationFolder());			
+			}
 			pipeline.add(new PipelineStep(listAction, listConfig,
 					null, errorHandler, new ActionExecutor(
 							executorService)));

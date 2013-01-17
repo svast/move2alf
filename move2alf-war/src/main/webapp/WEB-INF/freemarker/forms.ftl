@@ -107,9 +107,9 @@
 <#macro radio name value checked description>
 	<label class="radio">
 		<#if checked>
-			<input type="radio" name="${name}" checked="true" value="${value}" />
+			<input type="radio" id="${name}-${value}" name="${name}" checked="true" value="${value}" />
 		<#else>
-			<input type="radio" name="${name}" value="${value}" />
+			<input type="radio" id="${name}-${value}" name="${name}" value="${value}" />
 		</#if>
 		${description}
 	</label>

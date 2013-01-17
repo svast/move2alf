@@ -101,31 +101,46 @@
 			] />
 		</@labeledInput>
 		
-		<span id="write-options" >
+		<span id="WRITE-options" class="options<#if job.mode?? && job.mode!="WRITE" > hidden</#if>">
 
 		<@labeledInput label="If content exists in destination" forId="writeOption" helpText="What should happen when the document already exists in the destination?">
 			<@radios name="writeOption" options=[
-			 ["SKIPANDREPORTFAILURE", (!job.writeOption?? | job.writeOption=="SKIPANDREPORTFAILURE"),"Skip document and log error"],
+			 ["SKIPANDREPORTFAILED", (!job.writeOption?? | job.writeOption=="SKIPANDREPORTFAILED"),"Skip document and log error"],
 			 ["SKIPANDIGNORE", job.writeOption?? && job.writeOption=="SKIPANDIGNORE", "Skip document silently"],
 			 ["OVERWRITE", job.writeOption?? && job.writeOption=="OVERWRITE", "Overwrite document"]
 			 ] />
 		</@labeledInput>
 		</span>
 		
-		<span id="delete-options" class="hidden" >
+		<span id="DELETE-options" class="options<#if !job.mode?? | job.mode!="DELETE" > hidden</#if>">
 		<@labeledInput label="If content does not exists in destination" forId="docNotExists" helpText="What should happen when the document does not exists in the destination?">
-			<@radios name="docNotExist" options=[
-			 ["SkipAndLog", true,"Skip document and log error"],
-			 ["Skip", false, "Skip document silently"]
+			<@radios name="deleteOption" options=[
+			 ["SKIPANDREPORTFAILED", (!job.deleteOption?? | job.deleteOption=="SKIPANDREPORTFAILED"),"Skip document and log error"],
+			 ["SKIPANDIGNORE", job.deleteOption?? && job.deleteOption=="SKIPANDIGNORE", "Skip document silently"]
 			 ] />
 		</@labeledInput>
 		</span>
 
-		<span id="list-options" class="hidden" >
+		<span id="LIST-options" class="options<#if !job.mode?? | job.mode!="LIST" > hidden</#if>">
 		<@unLabeledInput>
-			<@checkboxWithText binding="job.MoveBeforeProc" label="Ignore path" />
+			<@checkboxWithText binding="job.listIgnorePath" label="Ignore path" />
 		</@unLabeledInput>
 		</span>
+		
+		<script>
+			$('input:radio[name="mode"]').each(function(){
+				$( this ).change(function(){
+					$('input:radio[name="mode"]').each(function(){
+						if($( this ).attr('checked') != "undefined" && $( this ).attr('checked') == "checked"){
+							$('span#'+$( this ).val()+'-options').removeClass('hidden');
+						}
+						else{
+							$('span#'+$( this ).val()+'-options').addClass('hidden');
+						}							
+					});
+				});
+			});
+		</script>
 		
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/checkboxWithText.js" />"> </script>
 		<@unLabeledInput>
