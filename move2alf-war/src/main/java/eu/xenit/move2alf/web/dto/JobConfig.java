@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.Mode;
 import eu.xenit.move2alf.validation.CSVsize;

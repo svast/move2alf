@@ -34,7 +34,7 @@ public abstract class SourceSink extends ConfigurableObject {
 			String remotePath, String name);
 
 	public abstract void delete(ConfiguredSourceSink sinkConfig,
-			String remotePath, String name);
+			String remotePath, String name, DeleteOption option);
 
 	public abstract void clearCaches(ConfiguredSourceSink sinkConfig);
 

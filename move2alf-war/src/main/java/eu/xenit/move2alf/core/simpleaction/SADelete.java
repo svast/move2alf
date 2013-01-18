@@ -11,11 +11,13 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
+import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 public class SADelete extends SimpleActionWithSourceSink {
 
 	public static final String PARAM_PATH = "path";
+	public static final String PARAM_DELETEOPTION = "deleteOption";
 
 	public SADelete(SourceSink sink, ConfiguredSourceSink sinkConfig) {
 		super(sink, sinkConfig);
@@ -72,7 +74,7 @@ public class SADelete extends SimpleActionWithSourceSink {
 		String name = ((File) newParameterMap.get(Parameters.PARAM_FILE))
 				.getName();
 
-		sink.delete(sinkConfig, remotePath, name);
+		sink.delete(sinkConfig, remotePath, name, DeleteOption.valueOf(config.get(PARAM_DELETEOPTION)));
 
 		output.add(newParameterMap);
 		return output;

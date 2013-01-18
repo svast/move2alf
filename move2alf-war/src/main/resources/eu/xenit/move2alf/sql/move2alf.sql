@@ -271,6 +271,7 @@ CREATE TABLE `processedDocument` (
   `name` varchar(255) NOT NULL,
   `processingDateTime` datetime NOT NULL,
   `status` varchar(30) NOT NULL,
+  `reference` varchar(512) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

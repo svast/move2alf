@@ -34,11 +34,11 @@ import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
+import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
-import eu.xenit.move2alf.web.dto.DeleteOption;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Service("pipelineAssembler")
@@ -546,9 +546,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.getThreadPool(sinkConfig);
 			final SimpleAction deleteAction = new SADelete(sink, sinkConfig);
 			final ActionConfig deleteConfig = new ActionConfig();
-			deleteConfig.put(SAUpload.PARAM_PATH,
+			deleteConfig.put(SADelete.PARAM_PATH,
 					jobConfig.getDestinationFolder());
-			deleteConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
+			deleteConfig.put(SADelete.PARAM_DELETEOPTION,
 					jobConfig.getDeleteOption().toString());
 			pipeline.add(new PipelineStep(deleteAction, deleteConfig,
 					null, errorHandler, new ActionExecutor(
@@ -570,7 +570,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			}
 			else{
 				listAction = new SAList(sink, sinkConfig);
-				listConfig.put(SAUpload.PARAM_PATH,
+				listConfig.put(SAList.PARAM_PATH,
 						jobConfig.getDestinationFolder());			
 			}
 			pipeline.add(new PipelineStep(listAction, listConfig,

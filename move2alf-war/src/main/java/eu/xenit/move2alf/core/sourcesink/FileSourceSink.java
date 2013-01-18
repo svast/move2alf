@@ -80,7 +80,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
-			final String remotePath, final String name) {
+			final String remotePath, final String name, DeleteOption option) {
 		// TODO Auto-generated method stub
 
 	}

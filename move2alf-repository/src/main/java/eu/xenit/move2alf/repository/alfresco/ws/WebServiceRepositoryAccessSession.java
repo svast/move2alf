@@ -59,6 +59,7 @@ import org.alfresco.webservice.util.WebServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.repository.DocumentNotFoundException;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.IllegalDuplicateException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
@@ -415,7 +416,7 @@ RepositoryAccessSession {
 	}
 
 	public void deleteByDocNameAndSpace(String spacePath, String docName)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException {
 		Reference pathRef = new Reference(store, null, companyHomePath
 				+ getXPathEscape(spacePath));
 		deleteByDocNameAndSpace(pathRef, docName);
@@ -1102,7 +1103,7 @@ RepositoryAccessSession {
 	}
 
 	private void deleteByDocNameAndSpace(Reference parent, String docName)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException {
 		Reference ref = locateByFileNameAndSpace(parent, docName);
 		// acquire a content reference ...
 		if (ref != null) {
@@ -1131,7 +1132,7 @@ RepositoryAccessSession {
 		} else {
 			logger.info("File {} is not present in {}", docName,
 					parent.getPath());
-			throw new RepositoryException("File " + docName
+			throw new DocumentNotFoundException("File " + docName
 					+ " is not present in " + parent.getPath());
 		}
 

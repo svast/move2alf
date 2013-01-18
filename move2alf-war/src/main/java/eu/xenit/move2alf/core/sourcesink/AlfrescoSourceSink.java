@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.DocumentNotFoundException;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
@@ -302,12 +303,18 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
-			final String remotePath, final String name) {
-		new RepositoryOperation<Object>() {
+			final String remotePath, final String name, final DeleteOption option) {
+		new RepositoryOperation<Object>() { 
 
 			@Override
 			protected Object executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException {
-				ras.deleteByDocNameAndSpace(remotePath, name);
+				try {
+					ras.deleteByDocNameAndSpace(remotePath, name);
+				} catch (DocumentNotFoundException e) {
+					if(DeleteOption.SKIPANDREPORTFAILED == option){
+						throw new Move2AlfException(e);
+					}
+				}
 				return null;
 			}
 		}.execute(sinkConfig);

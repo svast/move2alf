@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.web.dto;
+package eu.xenit.move2alf.core.sourcesink;
 
 public enum DeleteOption {
 	
