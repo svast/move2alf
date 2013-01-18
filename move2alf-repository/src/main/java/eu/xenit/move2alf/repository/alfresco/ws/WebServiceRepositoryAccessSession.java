@@ -95,7 +95,7 @@ RepositoryAccessSession {
 
 	private static final int wsStubTimeout = 600000; // 10 minutes
 
-	protected static final String companyHomePath = "/app:company_home";
+	public static final String companyHomePath = "/app:company_home";
 
 	protected static final Set<String> auditablePropertyNameSet = new HashSet<String>(
 			Arrays.asList(new String[] { "created", "creator", "modified",
@@ -105,6 +105,7 @@ RepositoryAccessSession {
 	// threads in alfresco to block eachother)
 	// paths are lower case
 	private HashMap<String, Reference> referenceCache = new HashMap<String, Reference>();
+	
 	private static final int maxSizeReferenceCache = 1000;
 
 	// to optimize the method removeZeroSizedFromTree
@@ -119,7 +120,7 @@ RepositoryAccessSession {
 
 	protected static Map<String, Semaphore> folderCreationLocks = new HashMap<String, Semaphore>();
 	private static final boolean USE_FOLDER_CREATION_LOCKS = true;
-
+	
 	// CONSTRUCTOR
 
 	public WebServiceRepositoryAccessSession(URL alfrescoUrl) {
@@ -186,7 +187,7 @@ RepositoryAccessSession {
 	}
 
 	@Override
-	public HashMap<String,UploadResult> storeDocAndCreateParentSpaces(Document document)
+	public HashMap<String, UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
@@ -195,7 +196,7 @@ RepositoryAccessSession {
 
 
 	@Override
-	public HashMap<String,UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException {
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException {
 		HashMap<String, UploadResult> results = new HashMap<String, UploadResult>(); 
 
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
@@ -205,21 +206,21 @@ RepositoryAccessSession {
 
 		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs,optimistic);
 		UpdateResult[] updateResults = repositoryResult.getUpdateResultsNewDocuments();
-		List<Document> duplicates = repositoryResult.getDuplicates();
+		List<Reference> duplicates = repositoryResult.getDuplicates();
 
 		for(UpdateResult updateResult : updateResults) {
 			UploadResult result = new UploadResult();
 			result.setStatus(UploadResult.VALUE_OK);
 			result.setMessage(updateResult.getStatement());
 			result.setReference(this.protocol + this.host + ":" + this.port + "/" + this.webapp + this.pathDocumentDetails + updateResult.getDestination().getUuid());
-			results.put(this.getNameFromPath(updateResult.getDestination().getPath()),result);
+			results.put(updateResult.getDestination().getPath(),result);
 		}
 
-		for(Document duplicate : duplicates) {
+		for(Reference duplicate : duplicates) {
 			UploadResult result = new UploadResult();
 			result.setStatus(UploadResult.VALUE_FAILED);
 			result.setMessage("File already exists in the repository");
-			results.put(duplicate.file.getName(),result);
+			results.put(duplicate.getPath(),result);
 		}
 
 		setAuditableProperties(documents, updateResults);
@@ -229,7 +230,7 @@ RepositoryAccessSession {
 
 	class RepositoryResult {
 		UpdateResult[] updateResultsNewDocuments;
-		List<Document> duplicates;
+		List<Reference> duplicates;
 
 		public UpdateResult[] getUpdateResultsNewDocuments() {
 			return updateResultsNewDocuments;
@@ -238,10 +239,10 @@ RepositoryAccessSession {
 				UpdateResult[] updateResultsNewDocuments) {
 			this.updateResultsNewDocuments = updateResultsNewDocuments;
 		}
-		public List<Document> getDuplicates() {
+		public List<Reference> getDuplicates() {
 			return duplicates;
 		}
-		public void setDuplicates(List<Document> duplicates) {
+		public void setDuplicates(List<Reference> duplicates) {
 			this.duplicates = duplicates;
 		}
 	}
@@ -274,7 +275,7 @@ RepositoryAccessSession {
 
 	private RepositoryResult updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic) throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
 		RepositoryResult result = new RepositoryResult();
-		List<Document> duplicates = new ArrayList();
+		List<Reference> duplicates = new ArrayList();
 
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
@@ -283,8 +284,8 @@ RepositoryAccessSession {
 			if(!optimistic){
 				try {
 					pessimisticCML(allowOverwrite, updates, creates, doc);
-				} catch (IllegalDocumentException e) {
-					duplicates.add(e.getDocument());
+				} catch (IllegalDuplicateException e) {
+					duplicates.add(e.getRef());
 				}
 			}
 			// First try to upload
@@ -310,14 +311,14 @@ RepositoryAccessSession {
 
 
 	private void pessimisticCML(boolean allowOverwrite,
-			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
+			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
 		Reference ref = getReference(doc.getXpath());
 		if(ref!=null){
 			if(allowOverwrite){
 				updates.add(doc.toCMLUpdate(ref));
 			}
 			else{
-				throw new IllegalDuplicateException(doc.getDocument(), "File exists: " + doc.getXpath());
+				throw new IllegalDuplicateException(doc.getDocument(), "File exists: " + doc.getXpath(), ref);
 			}
 		}
 		else
@@ -326,7 +327,7 @@ RepositoryAccessSession {
 
 
 	@Override
-	public HashMap<String,UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
 	}
@@ -1426,7 +1427,7 @@ RepositoryAccessSession {
 	 * "/app:company_home/cm:My Space//*" will become
 	 * "/app:company_home/cm:My_x0020_Space//*"
 	 */
-	protected String getXPathEscape(String psToEncode) {
+	public static String getXPathEscape(String psToEncode) {
 		StringBuilder sbResult = new StringBuilder(psToEncode.length());
 
 		String sDelimiters = ":/_*";

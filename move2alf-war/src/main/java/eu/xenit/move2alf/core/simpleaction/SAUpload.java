@@ -25,6 +25,7 @@ import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 
@@ -116,7 +117,6 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		HashMap<String, UploadResult> results = null;
 		try {
 			results = upload(batch, config);
-			logger.info("results=" + results);
 
 			for (final ACL acl : acls) {
 				getSink().setACL(getSinkConfig(), acl);
@@ -137,8 +137,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
 			}
-			File file = (File) oldParameterMap.get(Parameters.PARAM_FILE);
-			UploadResult result = results.get(file.getName());
+			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + normalizeBasePath(config.get(PARAM_PATH)).substring(1) + "cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
+			UploadResult result = results.get(fullPath);
 			if(result != null) {
 				if(result.getStatus()==-1) {
 					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
@@ -149,7 +149,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 					newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
 				}
 			} else {
-				logger.error("File " + file.getName() + " does not have an upload result");
+				logger.error("File " + fullPath + " does not have an upload result");
+				throw new RuntimeException("File " + fullPath + " does not have an upload result");
 			}
 			output.add(newParameterMap);
 		}
