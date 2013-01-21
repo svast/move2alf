@@ -113,7 +113,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	private List<FileInfo> uploadAndSetACLs(final ActionConfig config, final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
 		String errorMessage = "";
-		HashMap<String, UploadResult> results = null;
+		Map<String, UploadResult> results = null;
 		try {
 			results = upload(batch, config);
 
@@ -195,7 +195,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		return (List<ACL>) state.get(STATE_ACL_BATCH);
 	}
 
-	private HashMap<String, UploadResult> upload(final Batch batch,
+	private Map<String, UploadResult> upload(final Batch batch,
 			final ActionConfig config) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));

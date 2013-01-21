@@ -21,7 +21,7 @@ public abstract class SourceSink extends ConfigurableObject {
 			Map<String, String> multiValueMetadata,
 			File document) throws IllegalDocumentException;
 
-	public abstract HashMap<String, UploadResult> sendBatch(ConfiguredSourceSink configuredSourceSink,
+	public abstract Map<String, UploadResult> sendBatch(ConfiguredSourceSink configuredSourceSink,
 			WriteOption docExistsMode, List<Document> documents);
 
 	public abstract void setACL(ConfiguredSourceSink configuredSourceSink,

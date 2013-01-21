@@ -106,7 +106,7 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+	public Map<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final WriteOption docExistsMode, final List<Document> documents) {
 		HashMap<String, UploadResult> results = null;
 		try {
