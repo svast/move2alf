@@ -142,7 +142,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
 			UploadResult result = results.get(fullPath);
 			if(result != null) {
-				if(result.getStatus()==-1) {
+				if(result.getStatus()==UploadResult.VALUE_FAILED) {
 					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 					newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
 					newParameterMap.put(Parameters.PARAM_REFERENCE, "");
