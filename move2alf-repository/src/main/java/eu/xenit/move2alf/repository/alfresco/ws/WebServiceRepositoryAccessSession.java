@@ -219,7 +219,7 @@ RepositoryAccessSession {
 			UploadResult result = new UploadResult();
 			result.setStatus(UploadResult.VALUE_OK);
 			result.setMessage(updateResult.getStatement());
-			result.setReference(this.protocol + this.host + ":" + this.port + "/" + this.webapp + this.pathDocumentDetails + updateResult.getDestination().getUuid());
+			result.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
 			results.put(updateResult.getDestination().getPath(),result);
 		}
 
@@ -232,6 +232,7 @@ RepositoryAccessSession {
 				result.setStatus(UploadResult.VALUE_FAILED);
 			}
 			result.setMessage("File already exists in the repository");
+			result.setReference(constructReferenceLink(duplicate.getUuid()));
 			results.put(duplicate.getPath(),result);
 		}
 
@@ -240,6 +241,11 @@ RepositoryAccessSession {
 		return results;
 	}
 
+	private String constructReferenceLink(String uuid) {
+		return this.protocol + this.host + ":" + this.port + "/" + this.webapp + this.pathDocumentDetails + uuid;
+
+	}
+	
 	class RepositoryResult {
 		UpdateResult[] updateResultsNewDocuments;
 		List<Reference> duplicates;
