@@ -5,13 +5,12 @@
 	<groupId>eu.xenit</groupId>
 	<artifactId>move2alf-war</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-SNAPSHOT</version>
 	<name>move2alf war</name>
 	<url>http://maven.apache.org</url>
 	<parent>
 		<groupId>eu.xenit</groupId>
 		<artifactId>move2alf</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 	</parent>
     <properties>
         <spring.version>3.1.3.RELEASE</spring.version>
@@ -112,7 +111,7 @@
 		<dependency>
 			<groupId>eu.xenit</groupId>
 			<artifactId>move2alf-repository</artifactId>
-			<version>1.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
