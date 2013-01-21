@@ -137,7 +137,10 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
 			}
-			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + normalizeBasePath(config.get(PARAM_PATH)).substring(1) + "cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
+			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + 
+							WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + 
+							normalizeBasePath(config.get(PARAM_PATH)).substring(1) + 
+							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
 			UploadResult result = results.get(fullPath);
 			if(result != null) {
 				if(result.getStatus()==-1) {
