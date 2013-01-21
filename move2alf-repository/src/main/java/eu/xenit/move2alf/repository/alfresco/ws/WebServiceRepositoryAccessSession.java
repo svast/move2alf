@@ -1481,7 +1481,12 @@ RepositoryAccessSession {
 
 	@Override
 	public boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException {
-		return locateByFileName(name) != null;
+		try{
+			locateByFileName(name);
+			return true;
+		}catch(RepositoryException e){
+			return false;
+		}
 	}
 
 }

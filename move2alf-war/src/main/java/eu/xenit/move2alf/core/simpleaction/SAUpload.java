@@ -21,9 +21,8 @@ import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
-import eu.xenit.move2alf.repository.IllegalDocumentException;
-import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 
