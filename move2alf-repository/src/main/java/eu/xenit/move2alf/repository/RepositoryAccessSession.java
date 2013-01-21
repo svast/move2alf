@@ -190,4 +190,9 @@ public interface RepositoryAccessSession {
 
 	public abstract boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException;
 
+	public abstract HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+			List<Document> documents, boolean allowOverwrite,
+			boolean optimistic, boolean acceptDuplicates)
+			throws RepositoryAccessException, RepositoryException;
+
 }

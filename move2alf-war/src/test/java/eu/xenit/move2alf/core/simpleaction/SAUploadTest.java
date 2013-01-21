@@ -33,6 +33,7 @@ import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.Licensee;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
@@ -61,7 +62,7 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(1, result1.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(1, documentsCaptor.getValue().size());
 
 		// file 2
@@ -70,7 +71,7 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(1, result2.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(1, documentsCaptor.getValue().size());
 
 		verifyNoMoreInteractions(mockSink);
@@ -106,7 +107,7 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(3, result3.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(3, documentsCaptor.getValue().size());
 
 		// batch 2, three files
@@ -123,7 +124,7 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(3, result6.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(3, documentsCaptor.getValue().size());
 
 		verifyNoMoreInteractions(mockSink);
@@ -157,7 +158,7 @@ public class SAUploadTest {
 		assertEquals(2, result2.size());
 		final InOrder inOrder = Mockito.inOrder(mockSink);
 		inOrder.verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(2, documentsCaptor.getValue().size());
 		inOrder.verify(mockSink, times(2)).setACL(
 				any(ConfiguredSourceSink.class), any(ACL.class));
@@ -172,7 +173,7 @@ public class SAUploadTest {
 				dummyFileInfoWithACL, config, state);
 		assertEquals(2, result4.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(2, documentsCaptor.getValue().size());
 		verify(mockSink)
 				.setACL(any(ConfiguredSourceSink.class), any(ACL.class));

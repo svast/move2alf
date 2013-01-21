@@ -193,10 +193,17 @@ RepositoryAccessSession {
 		documents.add(document);
 		return storeDocsAndCreateParentSpaces(documents, false);
 	}
+	
+	@Override
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+			List<Document> documents, boolean allowOverwrite, boolean optimistic)
+			throws RepositoryAccessException, RepositoryException {
+		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, optimistic, false);
+	}
 
 
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException {
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic, boolean acceptDuplicates) throws RepositoryAccessException, RepositoryException {
 		HashMap<String, UploadResult> results = new HashMap<String, UploadResult>(); 
 
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
@@ -218,7 +225,12 @@ RepositoryAccessSession {
 
 		for(Reference duplicate : duplicates) {
 			UploadResult result = new UploadResult();
-			result.setStatus(UploadResult.VALUE_FAILED);
+			if(acceptDuplicates){
+				result.setStatus(UploadResult.VALUE_OK);
+			}
+			else{
+				result.setStatus(UploadResult.VALUE_FAILED);
+			}
 			result.setMessage("File already exists in the repository");
 			results.put(duplicate.getPath(),result);
 		}

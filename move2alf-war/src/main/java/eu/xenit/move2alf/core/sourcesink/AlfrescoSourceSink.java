@@ -166,10 +166,11 @@ public class AlfrescoSourceSink extends SourceSink {
 		boolean overwrite = WriteOption.OVERWRITE == docExistsMode;
 		// if overwrite=true, try directly pessimistic upload, which has a small performance penalty due to checks in the repository
 		// if overwrite=false, try optimistic upload, which falls back to pessimistic in case of duplicates; in this mode, documents are uploaded twice
+		boolean acceptDuplicate = WriteOption.SKIPANDIGNORE == docExistsMode;
 		if(overwrite)
 			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, PESSIMISTIC);
 		else
-			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC);
+			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC, acceptDuplicate);
 	}
 
 	private HashMap<String, UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,

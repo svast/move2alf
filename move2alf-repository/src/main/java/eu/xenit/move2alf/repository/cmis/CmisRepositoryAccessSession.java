@@ -123,4 +123,13 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		return false;
 	}
 
+	@Override
+	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+			List<Document> documents, boolean allowOverwrite,
+			boolean optimistic, boolean acceptDuplicates)
+			throws RepositoryAccessException, RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
