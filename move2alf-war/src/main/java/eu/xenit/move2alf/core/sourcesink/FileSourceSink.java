@@ -46,7 +46,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -80,7 +80,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
-			final String remotePath, final String name) {
+			final String remotePath, final String name, DeleteOption option) {
 		// TODO Auto-generated method stub
 
 	}
@@ -92,7 +92,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) {
+			final WriteOption docExistsMode, final List<Document> documents) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -102,5 +102,11 @@ public class FileSourceSink extends SourceSink {
 			final ACL acls) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public boolean fileNameExists(ConfiguredSourceSink sinkConfig, String name) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

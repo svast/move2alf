@@ -3,12 +3,7 @@ package eu.xenit.move2alf.core.simpleaction;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.Serializable;
@@ -18,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.xenit.move2alf.repository.UploadResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +29,7 @@ import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.Licensee;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
@@ -49,28 +46,42 @@ public class SAUploadTest {
 	@Test
 	public void testSingleFileUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
+		final Map<String, UploadResult> mockResults = mock(Map.class);
+		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
+			public int getStatus() {
+				return UploadResult.VALUE_OK;
+			}
+		});
+
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
+
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(1);
 		final FileInfo dummyFileInfo = dummyFileInfo();
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 
 		// file 1
 		final List<FileInfo> result1 = actionUnderTest.execute(dummyFileInfo,
 				config, state);
 		assertEquals(1, result1.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(1, documentsCaptor.getValue().size());
 
 		// file 2
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 		final List<FileInfo> result2 = actionUnderTest.execute(dummyFileInfo,
 				config, state);
 		assertEquals(1, result2.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(1, documentsCaptor.getValue().size());
 
 		verifyNoMoreInteractions(mockSink);
@@ -86,12 +97,23 @@ public class SAUploadTest {
 	@Test
 	public void testBatchUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
+		final Map<String, UploadResult> mockResults = mock(Map.class);
+		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
+			public int getStatus() {
+				return UploadResult.VALUE_OK;
+			}
+		});
+
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(3);
 		final FileInfo dummyFileInfo = dummyFileInfo();
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 
 		// batch 1, three files
 		final List<FileInfo> result1 = actionUnderTest.execute(dummyFileInfo,
@@ -106,11 +128,13 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(3, result3.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(3, documentsCaptor.getValue().size());
 
 		// batch 2, three files
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 		final List<FileInfo> result4 = actionUnderTest.execute(dummyFileInfo,
 				config, state);
 		assertEquals(0, result4.size());
@@ -123,7 +147,7 @@ public class SAUploadTest {
 				config, state);
 		assertEquals(3, result6.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(3, documentsCaptor.getValue().size());
 
 		verifyNoMoreInteractions(mockSink);
@@ -139,6 +163,15 @@ public class SAUploadTest {
 	@Test
 	public void testUploadWithACL() {
 		final SourceSink mockSink = mock(SourceSink.class);
+		final Map<String, UploadResult> mockResults = mock(Map.class);
+		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
+			public int getStatus() {
+				return UploadResult.VALUE_OK;
+			}
+		});
+
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(2);
 		final FileInfo dummyFileInfoWithoutACL = dummyFileInfo();
@@ -146,6 +179,8 @@ public class SAUploadTest {
 		final Map<String, Serializable> state = new HashMap<String, Serializable>();
 		actionUnderTest.initializeState(config, state);
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 
 		// batch 1, 2 acls
 		final List<FileInfo> result1 = actionUnderTest.execute(
@@ -157,13 +192,15 @@ public class SAUploadTest {
 		assertEquals(2, result2.size());
 		final InOrder inOrder = Mockito.inOrder(mockSink);
 		inOrder.verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(2, documentsCaptor.getValue().size());
 		inOrder.verify(mockSink, times(2)).setACL(
 				any(ConfiguredSourceSink.class), any(ACL.class));
 
 		// batch 2, 1 acl
 		reset(mockSink);
+		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
+				.thenReturn(mockResults);
 		final List<FileInfo> result3 = actionUnderTest.execute(
 				dummyFileInfoWithoutACL, config, state);
 		assertEquals(0, result3.size());
@@ -172,7 +209,7 @@ public class SAUploadTest {
 				dummyFileInfoWithACL, config, state);
 		assertEquals(2, result4.size());
 		verify(mockSink).sendBatch(any(ConfiguredSourceSink.class),
-				anyString(), documentsCaptor.capture());
+				any(WriteOption.class), documentsCaptor.capture());
 		assertEquals(2, documentsCaptor.getValue().size());
 		verify(mockSink)
 				.setACL(any(ConfiguredSourceSink.class), any(ACL.class));
@@ -242,6 +279,7 @@ public class SAUploadTest {
 		final ActionConfig config = new ActionConfig();
 		config.put(SAUpload.PARAM_BATCH_SIZE, Integer.toString(batchSize));
 		config.put(SAUpload.PARAM_PATH, "/");
+		config.put(SAUpload.PARAM_DOCUMENT_EXISTS, WriteOption.OVERWRITE.toString());
 		return config;
 	}
 }

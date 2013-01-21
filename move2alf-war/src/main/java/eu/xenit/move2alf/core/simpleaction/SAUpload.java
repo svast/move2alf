@@ -20,10 +20,11 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.repository.IllegalDocumentException;
-import eu.xenit.move2alf.repository.UploadResult;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 
 public class SAUpload extends SimpleActionWithSourceSink {
 
@@ -112,10 +113,9 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	private List<FileInfo> uploadAndSetACLs(final ActionConfig config, final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
 		String errorMessage = "";
-		HashMap<String, UploadResult> results = null;
+		Map<String, UploadResult> results = null;
 		try {
 			results = upload(batch, config);
-			logger.info("results=" + results);
 
 			for (final ACL acl : acls) {
 				getSink().setACL(getSinkConfig(), acl);
@@ -136,10 +136,13 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
 			}
-			File file = (File) oldParameterMap.get(Parameters.PARAM_FILE);
-			UploadResult result = results.get(file.getName());
+			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + 
+							WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + 
+							normalizeBasePath(config.get(PARAM_PATH)).substring(1) + 
+							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
+			UploadResult result = results.get(fullPath);
 			if(result != null) {
-				if(result.getStatus()==-1) {
+				if(result.getStatus()==UploadResult.VALUE_FAILED) {
 					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 					newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
 					newParameterMap.put(Parameters.PARAM_REFERENCE, "");
@@ -148,7 +151,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 					newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
 				}
 			} else {
-				logger.error("File " + file.getName() + " does not have an upload result");
+				logger.error("File " + fullPath + " does not have an upload result");
+				throw new RuntimeException("File " + fullPath + " does not have an upload result");
 			}
 			output.add(newParameterMap);
 		}
@@ -191,7 +195,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		return (List<ACL>) state.get(STATE_ACL_BATCH);
 	}
 
-	private HashMap<String, UploadResult> upload(final Batch batch,
+	private Map<String, UploadResult> upload(final Batch batch,
 			final ActionConfig config) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
@@ -225,7 +229,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			documentFileInfoMapping.put(document, parameterMap);
 		}
 
-		return getSink().sendBatch(getSinkConfig(), config.get(PARAM_DOCUMENT_EXISTS),
+		return getSink().sendBatch(getSinkConfig(), WriteOption.valueOf(config.get(PARAM_DOCUMENT_EXISTS)),
 				documentsToUpload);
 	}
 

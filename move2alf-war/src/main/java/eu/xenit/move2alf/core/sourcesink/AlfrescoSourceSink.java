@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.DocumentNotFoundException;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
@@ -46,7 +47,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -105,8 +106,8 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) {
+	public Map<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final WriteOption docExistsMode, final List<Document> documents) {
 		HashMap<String, UploadResult> results = null;
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
@@ -158,21 +159,22 @@ public class AlfrescoSourceSink extends SourceSink {
 		return results;
 	}
 
-	private HashMap<String, UploadResult> uploadBatch(final String docExistsMode,
+	private HashMap<String, UploadResult> uploadBatch(final WriteOption docExistsMode,
 		final RepositoryAccessSession ras, final List<Document> documents)
 		throws RepositoryAccessException, RepositoryException {
 		
-		boolean overwrite = MODE_OVERWRITE.equals(docExistsMode);
+		boolean overwrite = WriteOption.OVERWRITE == docExistsMode;
 		// if overwrite=true, try directly pessimistic upload, which has a small performance penalty due to checks in the repository
 		// if overwrite=false, try optimistic upload, which falls back to pessimistic in case of duplicates; in this mode, documents are uploaded twice
+		boolean acceptDuplicate = WriteOption.SKIPANDIGNORE == docExistsMode;
 		if(overwrite)
 			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, PESSIMISTIC);
 		else
-			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC);
+			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC, acceptDuplicate);
 	}
 
 	private HashMap<String, UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents)
+			final WriteOption docExistsMode, final List<Document> documents)
 			throws RepositoryAccessException, RepositoryException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
@@ -219,7 +221,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 	private static void retryUpload(
 			final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -236,7 +238,7 @@ public class AlfrescoSourceSink extends SourceSink {
 				multiValueMetadata, document);
 	}
 
-	private static void uploadFile(final String docExistsMode,
+	private static void uploadFile(final WriteOption docExistsMode,
 			final RepositoryAccessSession ras,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
@@ -260,15 +262,15 @@ public class AlfrescoSourceSink extends SourceSink {
 			final String stackTrace = result.toString();
 			if (stackTrace
 					.contains("org.alfresco.service.cmr.repository.DuplicateChildNodeNameException")) {
-				if (MODE_SKIP.equals(docExistsMode)) {
+				if (WriteOption.SKIPANDIGNORE == docExistsMode) {
 					// ignore
-				} else if (MODE_SKIP_AND_LOG.equals(docExistsMode)) {
+				} else if (WriteOption.SKIPANDREPORTFAILED == docExistsMode) {
 					logger.warn("Document " + document.getName()
 							+ " already exists in " + remotePath);
 					throw new Move2AlfException("Document "
 							+ document.getName() + " already exists in "
 							+ remotePath);
-				} else if (MODE_OVERWRITE.equals(docExistsMode)) {
+				} else if (WriteOption.OVERWRITE == docExistsMode) {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
 					ras.updateContentByDocNameAndPath(remotePath,
@@ -289,66 +291,47 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public boolean exists(final ConfiguredSourceSink sinkConfig,
 			final String remotePath, final String name) {
-		try {
-			try {
-				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+		
+		return new RepositoryOperation<Boolean>() {
+
+			@Override
+			protected Boolean executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException {
 				return ras.doesDocExist(name, remotePath);
-			} catch (final RepositoryAccessException e) {
-				if (!(e.getMessage() == null)
-						&& (e.getMessage()
-								.indexOf("security processing failed") != -1)) {
-					// retry
-					destroyRepositoryAccessSession();
-					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-					try {
-						return ras.doesDocExist(name, remotePath);
-					} catch (final RepositoryAccessException e2) {
-						logger.error(e2.getMessage(), e2);
-						throw new Move2AlfException(e2.getMessage(), e2);
-					}
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
-				}
 			}
-		} catch (final RuntimeException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		}
+		}.execute(sinkConfig);
+
 	}
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
-			final String remotePath, final String name) {
-		try {
-			try {
-				final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-				ras.deleteByDocNameAndSpace(remotePath, name);
-			} catch (final RepositoryAccessException e) {
-				if (!(e.getMessage() == null)
-						&& (e.getMessage()
-								.indexOf("security processing failed") != -1)) {
-					// retry
-					destroyRepositoryAccessSession();
-					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
-					try {
-						ras.deleteByDocNameAndSpace(remotePath, name);
-					} catch (final RepositoryAccessException e2) {
-						logger.error(e.getMessage(), e);
-						throw new Move2AlfException(e.getMessage(), e);
+			final String remotePath, final String name, final DeleteOption option) {
+		new RepositoryOperation<Object>() { 
+
+			@Override
+			protected Object executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException {
+				try {
+					ras.deleteByDocNameAndSpace(remotePath, name);
+				} catch (DocumentNotFoundException e) {
+					if(DeleteOption.SKIPANDREPORTFAILED == option){
+						throw new Move2AlfException(e);
 					}
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
 				}
+				return null;
 			}
-		} catch (final RepositoryException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		} catch (final RuntimeException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		}
+		}.execute(sinkConfig);
+	}
+	
+	@Override
+	public boolean fileNameExists(final ConfiguredSourceSink sinkConfig, final String name) {
+		return new RepositoryOperation<Boolean>(){
+
+			@Override
+			protected Boolean executeImpl(RepositoryAccessSession ras)
+					throws RepositoryAccessException, RepositoryException {
+				return ras.doesFileNameExists(name);
+			}
+			
+		}.execute(sinkConfig);
 	}
 
 	@Override
@@ -412,5 +395,43 @@ public class AlfrescoSourceSink extends SourceSink {
 	@Override
 	public String getName() {
 		return "Alfresco";
+	}
+
+	private abstract class RepositoryOperation<T>{
+		
+		protected abstract T executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException;
+		
+		public T execute(final ConfiguredSourceSink sinkConfig){
+			try {
+				try {
+					final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+					return executeImpl(ras);
+				} catch (final RepositoryAccessException e) {
+					if (!(e.getMessage() == null)
+							&& (e.getMessage().indexOf(
+									"security processing failed") != -1)) {
+						// retry
+						destroyRepositoryAccessSession();
+						final RepositoryAccessSession ras = createRepositoryAccessSession(sinkConfig);
+						try {
+							return executeImpl(ras);
+						} catch (final RepositoryAccessException e2) {
+							logger.error(e2.getMessage(), e2);
+							throw new Move2AlfException(e2.getMessage(), e2);
+						}
+					} else {
+						logger.error(e.getMessage(), e);
+						throw new Move2AlfException(e.getMessage(), e);
+					}
+				}
+			} catch (final RuntimeException e) {
+				logger.error(e.getMessage(), e);
+				throw new Move2AlfException(e.getMessage(), e);
+			} catch (RepositoryException e) {
+	            logger.error(e.getMessage(), e);
+	            throw new Move2AlfException(e.getMessage(), e);
+	
+			}
+		}
 	}
 }

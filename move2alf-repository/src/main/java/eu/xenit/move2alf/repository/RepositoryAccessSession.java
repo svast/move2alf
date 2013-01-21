@@ -110,9 +110,10 @@ public interface RepositoryAccessSession {
 	 * @throws RepositoryAccessException : exception thrown when there is
 	 * a connectivity problem to the repository.
 	 * @throws RepositoryException : exception thrown when the repository can not execute the request.
+	 * @throws DocumentNotFoundException 
 	 */
 	public void deleteByDocNameAndSpace(String spacePath, String docName)
-			throws RepositoryAccessException, RepositoryException;
+			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException;
 
 	/**
 	 * Delete the space named <code>spacePath</code>.
@@ -186,5 +187,12 @@ public interface RepositoryAccessSession {
     public abstract HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents,
                     boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException,
                     RepositoryException;
+
+	public abstract boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException;
+
+	public abstract HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+			List<Document> documents, boolean allowOverwrite,
+			boolean optimistic, boolean acceptDuplicates)
+			throws RepositoryAccessException, RepositoryException;
 
 }
