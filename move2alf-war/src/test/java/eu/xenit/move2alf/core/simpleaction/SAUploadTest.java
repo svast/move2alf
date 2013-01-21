@@ -243,6 +243,7 @@ public class SAUploadTest {
 		final ActionConfig config = new ActionConfig();
 		config.put(SAUpload.PARAM_BATCH_SIZE, Integer.toString(batchSize));
 		config.put(SAUpload.PARAM_PATH, "/");
+		config.put(SAUpload.PARAM_DOCUMENT_EXISTS, WriteOption.OVERWRITE.toString());
 		return config;
 	}
 }
