@@ -142,14 +142,9 @@ public class SAUpload extends SimpleActionWithSourceSink {
 							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
 			UploadResult result = results.get(fullPath);
 			if(result != null) {
-				if(result.getStatus()==UploadResult.VALUE_FAILED) {
-					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-					newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
-					newParameterMap.put(Parameters.PARAM_REFERENCE, "");
-				} else {
-					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-					newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
-				}
+				newParameterMap.put(Parameters.PARAM_STATUS, (result.getStatus()==UploadResult.VALUE_OK) ? Parameters.VALUE_OK : Parameters.VALUE_FAILED);
+				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
+				newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
 			} else {
 				logger.error("File " + fullPath + " does not have an upload result");
 				throw new RuntimeException("File " + fullPath + " does not have an upload result");
