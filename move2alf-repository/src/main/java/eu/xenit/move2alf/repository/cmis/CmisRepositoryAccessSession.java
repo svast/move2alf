@@ -93,14 +93,14 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> storeDocAndCreateParentSpaces(Document document)
+	public List<UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		// TODO
 		throw new RuntimeException("not implemented");
@@ -112,7 +112,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		throw new RuntimeException("not implemented");
 	}
 
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
 			boolean optimistic) throws RepositoryAccessException, RepositoryException {
 		throw new RuntimeException("not implemented");
 	}
@@ -124,7 +124,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+	public List<UploadResult> storeDocsAndCreateParentSpaces(
 			List<Document> documents, boolean allowOverwrite,
 			boolean optimistic, boolean acceptDuplicates)
 			throws RepositoryAccessException, RepositoryException {

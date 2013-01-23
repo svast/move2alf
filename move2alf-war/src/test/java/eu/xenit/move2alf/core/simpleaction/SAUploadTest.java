@@ -46,12 +46,7 @@ public class SAUploadTest {
 	@Test
 	public void testSingleFileUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
-		final Map<String, UploadResult> mockResults = mock(Map.class);
-		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
-			public int getStatus() {
-				return UploadResult.VALUE_OK;
-			}
-		});
+		final List<UploadResult> mockResults = getMockUploadResults(1);
 
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
 				.thenReturn(mockResults);
@@ -87,6 +82,31 @@ public class SAUploadTest {
 		verifyNoMoreInteractions(mockSink);
 	}
 
+	private List<UploadResult> getMockUploadResults(int size) {
+		final List<UploadResult> mockResults = new ArrayList<UploadResult>();
+		for (int i = 0; i < size; i++) {
+			mockResults.add(new UploadResult() {
+				public int getStatus() {
+					return UploadResult.VALUE_OK;
+				}
+
+				public String getReference() {
+					return "";
+				}
+
+				public String getMessage() {
+					return "";
+				}
+
+				public Document getDocument() {
+					return new Document(new File("foo"), "", "", "", "", "", new HashMap<String, String>(),
+							new HashMap<String, String>());
+				}
+			});
+		}
+		return mockResults;
+	}
+
 	private Map<String, Serializable> initializeState() {
 		Map<String, Serializable> state = new HashMap<String, Serializable>();
 		state.put(SAUpload.STATE_BATCH, new Batch());
@@ -97,15 +117,9 @@ public class SAUploadTest {
 	@Test
 	public void testBatchUpload() {
 		final SourceSink mockSink = mock(SourceSink.class);
-		final Map<String, UploadResult> mockResults = mock(Map.class);
-		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
-			public int getStatus() {
-				return UploadResult.VALUE_OK;
-			}
-		});
 
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(3));
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(3);
 		final FileInfo dummyFileInfo = dummyFileInfo();
@@ -113,7 +127,7 @@ public class SAUploadTest {
 		actionUnderTest.initializeState(config, state);
 		reset(mockSink);
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(3));
 
 		// batch 1, three files
 		final List<FileInfo> result1 = actionUnderTest.execute(dummyFileInfo,
@@ -134,7 +148,7 @@ public class SAUploadTest {
 		// batch 2, three files
 		reset(mockSink);
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(3));
 		final List<FileInfo> result4 = actionUnderTest.execute(dummyFileInfo,
 				config, state);
 		assertEquals(0, result4.size());
@@ -163,15 +177,9 @@ public class SAUploadTest {
 	@Test
 	public void testUploadWithACL() {
 		final SourceSink mockSink = mock(SourceSink.class);
-		final Map<String, UploadResult> mockResults = mock(Map.class);
-		when(mockResults.get(anyString())).thenReturn(new UploadResult() {
-			public int getStatus() {
-				return UploadResult.VALUE_OK;
-			}
-		});
 
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(2));
 		final SAUpload actionUnderTest = actionUnderTest(mockSink);
 		final ActionConfig config = actionConfigWithBatchSize(2);
 		final FileInfo dummyFileInfoWithoutACL = dummyFileInfo();
@@ -180,7 +188,7 @@ public class SAUploadTest {
 		actionUnderTest.initializeState(config, state);
 		reset(mockSink);
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(2));
 
 		// batch 1, 2 acls
 		final List<FileInfo> result1 = actionUnderTest.execute(
@@ -200,7 +208,7 @@ public class SAUploadTest {
 		// batch 2, 1 acl
 		reset(mockSink);
 		when(mockSink.sendBatch(any(ConfiguredSourceSink.class), any(WriteOption.class), anyListOf(Document.class)))
-				.thenReturn(mockResults);
+				.thenReturn(getMockUploadResults(2));
 		final List<FileInfo> result3 = actionUnderTest.execute(
 				dummyFileInfoWithoutACL, config, state);
 		assertEquals(0, result3.size());

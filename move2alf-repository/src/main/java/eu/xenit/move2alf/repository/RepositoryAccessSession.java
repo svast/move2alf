@@ -158,7 +158,7 @@ public interface RepositoryAccessSession {
 	public long removeZeroSizedFromTree(String spacePath)
 			throws RepositoryAccessException, RepositoryException;
 
-	public HashMap<String, UploadResult> storeDocAndCreateParentSpaces(Document document)
+	public List<UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException;
 
 	/**
@@ -168,7 +168,7 @@ public interface RepositoryAccessSession {
 	 * @throws RepositoryAccessException
 	 * @throws RepositoryException
 	 */
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException;
 
 	/**
@@ -184,13 +184,13 @@ public interface RepositoryAccessSession {
      * @throws RepositoryException 
      * @throws RepositoryAccessException 
      */
-    public abstract HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents,
+    public abstract List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents,
                     boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException,
                     RepositoryException;
 
 	public abstract boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException;
 
-	public abstract HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+	public abstract List<UploadResult> storeDocsAndCreateParentSpaces(
 			List<Document> documents, boolean allowOverwrite,
 			boolean optimistic, boolean acceptDuplicates)
 			throws RepositoryAccessException, RepositoryException;

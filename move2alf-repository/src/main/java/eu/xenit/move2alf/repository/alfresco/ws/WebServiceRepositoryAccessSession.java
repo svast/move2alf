@@ -187,7 +187,7 @@ RepositoryAccessSession {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> storeDocAndCreateParentSpaces(Document document)
+	public List<UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
@@ -195,7 +195,7 @@ RepositoryAccessSession {
 	}
 	
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(
+	public List<UploadResult> storeDocsAndCreateParentSpaces(
 			List<Document> documents, boolean allowOverwrite, boolean optimistic)
 			throws RepositoryAccessException, RepositoryException {
 		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, optimistic, false);
@@ -203,38 +203,32 @@ RepositoryAccessSession {
 
 
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic, boolean acceptDuplicates) throws RepositoryAccessException, RepositoryException {
-		HashMap<String, UploadResult> results = new HashMap<String, UploadResult>(); 
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
+															 boolean optimistic, boolean acceptDuplicates)
+			throws RepositoryAccessException, RepositoryException {
+		List<UploadResult> results = new ArrayList<UploadResult>();
 
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
-		for(Document doc: documents){
-			cmlDocs.add(new CMLDocument(this, doc));
+		for (int i = 0; i<documents.size(); i++) {
+			cmlDocs.add(new CMLDocument(this, documents.get(i), Integer.toString(i)));
 		}
 
-		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, optimistic);
+		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, optimistic,
+				acceptDuplicates);
 		UpdateResult[] updateResults = repositoryResult.getUpdateResultsNewDocuments();
-		List<Reference> duplicates = repositoryResult.getDuplicates();
+		List<UploadResult> duplicates = repositoryResult.getDuplicates();
 
 		for(UpdateResult updateResult : updateResults) {
 			UploadResult result = new UploadResult();
 			result.setStatus(UploadResult.VALUE_OK);
 			result.setMessage(updateResult.getStatement());
 			result.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
-			results.put(updateResult.getDestination().getPath(),result);
+			logger.debug("******* SOURCE ID = " + updateResult.getSourceId());
+			result.setDocument(documents.get(Integer.parseInt(updateResult.getSourceId())));
+			results.add(result);
 		}
 
-		for(Reference duplicate : duplicates) {
-			UploadResult result = new UploadResult();
-			if(acceptDuplicates){
-				result.setStatus(UploadResult.VALUE_OK);
-			}
-			else{
-				result.setStatus(UploadResult.VALUE_FAILED);
-			}
-			result.setMessage("File already exists in the repository");
-			result.setReference(constructReferenceLink(duplicate.getUuid()));
-			results.put(duplicate.getPath(),result);
-		}
+		results.addAll(duplicates);
 
 		setAuditableProperties(documents, updateResults);
 
@@ -248,7 +242,7 @@ RepositoryAccessSession {
 	
 	class RepositoryResult {
 		UpdateResult[] updateResultsNewDocuments;
-		List<Reference> duplicates;
+		List<UploadResult> duplicates;
 
 		public UpdateResult[] getUpdateResultsNewDocuments() {
 			return updateResultsNewDocuments;
@@ -257,23 +251,23 @@ RepositoryAccessSession {
 				UpdateResult[] updateResultsNewDocuments) {
 			this.updateResultsNewDocuments = updateResultsNewDocuments;
 		}
-		public List<Reference> getDuplicates() {
+		public List<UploadResult> getDuplicates() {
 			return duplicates;
 		}
-		public void setDuplicates(List<Reference> duplicates) {
+		public void setDuplicates(List<UploadResult> duplicates) {
 			this.duplicates = duplicates;
 		}
 	}
 
 	private RepositoryResult updateRepositoryAndHandleErrors(
 			boolean allowOverwrite, List<CMLDocument> cmlDocs,
-			boolean optimistic) throws RepositoryAccessException,
+			boolean optimistic, boolean acceptDuplicates) throws RepositoryAccessException,
 			RepositoryException {
 		RepositoryResult result = null;
 
 		try {
 			logger.debug("Trying to upload, optimistic=" + optimistic);
-			result = updateRepository(cmlDocs, allowOverwrite, optimistic);
+			result = updateRepository(cmlDocs, allowOverwrite, optimistic, acceptDuplicates);
 		} catch (RepositoryFault e1) {
 			if(isDuplicateChildFault(e1)){
 				logger.debug("Caught duplicate exception");
@@ -281,7 +275,7 @@ RepositoryAccessSession {
 					logger.error("Duplicatefault in pessimistic upload!", e1);
 					throw new RepositoryException("Another process could be interfering with the same nodes on Alfresco");
 				} else {
-					result = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, false);
+					result = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, false, acceptDuplicates);
 				}
 			}
 		} catch (RemoteException e1) {
@@ -292,9 +286,11 @@ RepositoryAccessSession {
 	}
 
 
-	private RepositoryResult updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic) throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
+	private RepositoryResult updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic,
+											  boolean acceptDuplicates)
+			throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
 		RepositoryResult result = new RepositoryResult();
-		List<Reference> duplicates = new ArrayList();
+		List<UploadResult> duplicates = new ArrayList();
 
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
@@ -304,7 +300,16 @@ RepositoryAccessSession {
 				try {
 					pessimisticCML(allowOverwrite, updates, creates, doc);
 				} catch (IllegalDuplicateException e) {
-					duplicates.add(e.getRef());
+					final UploadResult duplicate = new UploadResult();
+					duplicate.setDocument(e.getDocument());
+					duplicate.setReference(constructReferenceLink(e.getRef().getUuid()));
+					duplicate.setMessage("File already exists in the repository");
+					if (acceptDuplicates) {
+						duplicate.setStatus(UploadResult.VALUE_OK);
+					} else {
+						duplicate.setStatus(UploadResult.VALUE_FAILED);
+					}
+					duplicates.add(duplicate);
 				}
 			}
 			// First try to upload
@@ -346,7 +351,7 @@ RepositoryAccessSession {
 
 
 	@Override
-	public HashMap<String, UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
 			throws RepositoryAccessException, RepositoryException {
 		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
 	}

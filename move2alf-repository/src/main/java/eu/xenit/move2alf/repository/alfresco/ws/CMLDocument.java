@@ -27,12 +27,18 @@ public class CMLDocument {
 		return doc;
 	}
 
+	private String id;
+	public String getId() {
+		return id;
+	}
+
 	private String contentDetails;
 	private WebServiceRepositoryAccessSession session;
 
-	public CMLDocument(WebServiceRepositoryAccessSession session, Document doc) {
+	public CMLDocument(WebServiceRepositoryAccessSession session, Document doc, String id) {
 		this.session = session;
 		this.doc = doc;
+		this.id = id;
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {
@@ -51,7 +57,7 @@ public class CMLDocument {
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
 				+ doc.file.getName());
 
-		return new CMLCreate(String.valueOf(this.hashCode()), parentRef, parentSpace.getUuid(),
+		return new CMLCreate(this.getId(), parentRef, parentSpace.getUuid(),
 				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
 				doc.contentModelNamespace + doc.contentModelType, getContentPropsAndCreateIfNotExists());	
 	}
