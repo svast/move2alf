@@ -223,7 +223,6 @@ RepositoryAccessSession {
 			result.setStatus(UploadResult.VALUE_OK);
 			result.setMessage(updateResult.getStatement());
 			result.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
-			logger.debug("******* SOURCE ID = " + updateResult.getSourceId());
 			result.setDocument(documents.get(Integer.parseInt(updateResult.getSourceId())));
 			results.add(result);
 		}
