@@ -211,7 +211,7 @@ RepositoryAccessSession {
 			cmlDocs.add(new CMLDocument(this, doc));
 		}
 
-		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs,optimistic);
+		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, optimistic);
 		UpdateResult[] updateResults = repositoryResult.getUpdateResultsNewDocuments();
 		List<Reference> duplicates = repositoryResult.getDuplicates();
 
@@ -280,8 +280,9 @@ RepositoryAccessSession {
 				if(!optimistic) {
 					logger.error("Duplicatefault in pessimistic upload!", e1);
 					throw new RepositoryException("Another process could be interfering with the same nodes on Alfresco");
-				} else
+				} else {
 					result = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, false);
+				}
 			}
 		} catch (RemoteException e1) {
 			throw new RepositoryAccessException(e1.getMessage(), e1);

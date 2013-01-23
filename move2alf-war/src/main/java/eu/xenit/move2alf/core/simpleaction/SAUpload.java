@@ -135,24 +135,25 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			if (batchFailed) {
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
-			}
-			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + 
-							WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + 
-							normalizeBasePath(config.get(PARAM_PATH)).substring(1) + 
-							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
-			UploadResult result = results.get(fullPath);
-			if(result != null) {
-				if(result.getStatus()==UploadResult.VALUE_FAILED) {
-					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
-					newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
-					newParameterMap.put(Parameters.PARAM_REFERENCE, "");
-				} else {
-					newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
-					newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
-				}
 			} else {
-				logger.error("File " + fullPath + " does not have an upload result");
-				throw new RuntimeException("File " + fullPath + " does not have an upload result");
+				String fullPath = WebServiceRepositoryAccessSession.companyHomePath +
+						WebServiceRepositoryAccessSession.getXPathEscape("/cm:" +
+								normalizeBasePath(config.get(PARAM_PATH)).substring(1) +
+								"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
+				UploadResult result = results.get(fullPath);
+				if (result != null) {
+					if (result.getStatus() == UploadResult.VALUE_FAILED) {
+						newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
+						newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
+						newParameterMap.put(Parameters.PARAM_REFERENCE, "");
+					} else {
+						newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK);
+						newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
+					}
+				} else {
+					logger.error("File " + fullPath + " does not have an upload result");
+					throw new RuntimeException("File " + fullPath + " does not have an upload result");
+				}
 			}
 			output.add(newParameterMap);
 		}

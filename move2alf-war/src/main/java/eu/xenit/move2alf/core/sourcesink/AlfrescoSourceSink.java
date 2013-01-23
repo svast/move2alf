@@ -129,7 +129,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			} catch (final RuntimeException e) {
 				if ("Error writing content to repository server".equals(e
 						.getMessage())) {
-					retryBatch(configuredSourceSink, docExistsMode, documents);
+					results = retryBatch(configuredSourceSink, docExistsMode, documents);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
