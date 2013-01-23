@@ -115,8 +115,7 @@
 		<span id="DELETE-options" class="options<#if !job.mode?? | job.mode!="DELETE" > hidden</#if>">
 		<@labeledInput label="If content does not exists in destination" forId="docNotExists" helpText="What should happen when the document does not exists in the destination?">
 			<@radios name="deleteOption" options=[
-			 ["SKIPANDREPORTFAILED", (!job.deleteOption?? | job.deleteOption=="SKIPANDREPORTFAILED"),"Skip document and log error"],
-			 ["SKIPANDIGNORE", job.deleteOption?? && job.deleteOption=="SKIPANDIGNORE", "Skip document silently"]
+			 ["SKIPANDIGNORE", !job.deleteOption?? | job.deleteOption=="SKIPANDIGNORE", "Skip document silently"]
 			 ] />
 		</@labeledInput>
 		</span>
