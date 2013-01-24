@@ -347,7 +347,7 @@ RepositoryAccessSession {
 
 	private Reference pessimisticCML(boolean allowOverwrite,
 			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
-		Reference ref = getReference(doc.getXpath());
+		Reference ref = getReference(doc.getPath(), false);
 		if(ref!=null){
 			if(allowOverwrite){
 				updates.add(doc.toCMLUpdate(ref));
@@ -812,11 +812,19 @@ RepositoryAccessSession {
 
 	}
 
-	private Reference getReference(String path)
+	private Reference getReference(String path) throws RepositoryAccessException {
+		return getReference(path, true);
+	}
+	
+	private Reference getReference(String path, boolean escaped)
 			throws RepositoryAccessException {
 		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path,(new Date()).getTime());
-
-		Reference reference = referenceCache.get(path.toLowerCase());
+		String escapedPath = new String(path);
+		
+		if(!escaped)
+			escapedPath = getXPathEscape(path);
+		
+		Reference reference = referenceCache.get(escapedPath.toLowerCase());
 
 		if (reference == null) {
 			if (referenceCache.size() > maxSizeReferenceCache) {
@@ -825,7 +833,7 @@ RepositoryAccessSession {
 				referenceCache.clear();
 			}
 
-			Reference uncheckedReference = new Reference(store, null,path);
+			Reference uncheckedReference = new Reference(store, null,escapedPath);
 			// can throw:
 			// java.rmi.RemoteException: when connection problem?
 			// org.alfresco.webservice.repository.RepositoryFault: this will
@@ -841,8 +849,8 @@ RepositoryAccessSession {
 				nodes = repositoryService.get(new Predicate(new Reference[] { uncheckedReference }, store, null));
 				reference = nodes[0].getReference();
 
-				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), path);
-				referenceCache.put(path.toLowerCase(), reference);
+				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
+				referenceCache.put(escapedPath.toLowerCase(), reference);
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
 				logger.debug("Could not get results from reference query for path {}, falling to lucene query", path);
@@ -858,8 +866,8 @@ RepositoryAccessSession {
 				}
 				if(references.size()>0) {
 					for(int i=0; i<references.size(); i++) {
-						logger.info("Comparing " + references.get(i).getPath() + " with " + path);
-						if(equalPaths(references.get(i).getPath(),path)) {
+						logger.info("Comparing " + references.get(i).getPath() + " with " + escapedPath);
+						if(equalPaths(references.get(i).getPath(),escapedPath)) {
 							logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
 							return references.get(i);
 						}
@@ -872,7 +880,7 @@ RepositoryAccessSession {
 				throw new RepositoryAccessException(e.getMessage(), e);
 			}
 		} else {
-			logger.info("Obtained reference from cache {}", path);
+			logger.info("Obtained reference from cache {}", escapedPath);
 		}
 		return reference;
 	}

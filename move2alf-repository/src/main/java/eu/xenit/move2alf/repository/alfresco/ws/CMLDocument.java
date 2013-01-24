@@ -96,6 +96,12 @@ public class CMLDocument {
 		return WebServiceRepositoryAccessSession.companyHomePath+session.getXPathEscape(doc.spacePath+"/cm:"+doc.file.getName());
 	}
 	
+	public String getPath() {
+		return WebServiceRepositoryAccessSession.companyHomePath +
+					doc.spacePath +
+					"/cm:"+doc.file.getName();
+	}
+	
 	public String getContentDetails(){
 		return this.contentDetails;
 	}
