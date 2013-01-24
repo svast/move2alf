@@ -120,6 +120,8 @@ RepositoryAccessSession {
 
 	protected static Map<String, Semaphore> folderCreationLocks = new HashMap<String, Semaphore>();
 	private static final boolean USE_FOLDER_CREATION_LOCKS = true;
+	private static final String STATEMENT_UPDATE = "update";
+	private static final String STATEMENT_CREATE = "create";
 	
 	// CONSTRUCTOR
 
@@ -277,6 +279,7 @@ RepositoryAccessSession {
 			throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
 		RepositoryResult result = new RepositoryResult();
 		List<UploadResult> duplicates = new ArrayList();
+		Map<String,Document> uuids = new HashMap(); // keep a map from existing uuids to Document objects, to be able to construct UploadResult later
 
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
@@ -284,8 +287,10 @@ RepositoryAccessSession {
 			// Check if the document exists
 			if(!optimistic){
 				try {
-					pessimisticCML(allowOverwrite, updates, creates, doc);
+					Reference ref = pessimisticCML(allowOverwrite, updates, creates, doc);
+					if(ref!=null) uuids.put(ref.getUuid(), doc.getDocument());
 				} catch (IllegalDuplicateException e) {
+					uuids.put(e.getRef().getUuid(), doc.getDocument());
 					final UploadResult duplicate = new UploadResult();
 					duplicate.setDocument(e.getDocument());
 					duplicate.setReference(constructReferenceLink(e.getRef().getUuid()));
@@ -303,6 +308,7 @@ RepositoryAccessSession {
 				creates.add(doc.toCMLCreate());
 			}
 		}
+		
 
 		CML cml = new CML();
 		cml.setCreate(creates.toArray(new CMLCreate[0]));
@@ -319,8 +325,13 @@ RepositoryAccessSession {
 			newDocument.setMessage(updateResult.getStatement());
 			newDocument.setStatus(UploadResult.VALUE_OK);
 			newDocument.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
-			newDocument.setDocument(cmlDocs.get(Integer.parseInt(updateResult.getSourceId())).getDocument());
-	
+			if(STATEMENT_UPDATE.equals(updateResult.getStatement()))
+				newDocument.setDocument(uuids.get(updateResult.getDestination().getUuid()));
+			else if(STATEMENT_CREATE.equals(updateResult.getStatement()))
+				newDocument.setDocument(cmlDocs.get(Integer.parseInt(updateResult.getSourceId())).getDocument());
+			else
+				throw new RepositoryException("unknown statement: " + updateResult.getStatement());
+			
 			newDocuments.add(newDocument);
 		}
 		List<UploadResult> allResults = new ArrayList();
@@ -334,7 +345,7 @@ RepositoryAccessSession {
 	}
 
 
-	private void pessimisticCML(boolean allowOverwrite,
+	private Reference pessimisticCML(boolean allowOverwrite,
 			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
 		Reference ref = getReference(doc.getXpath());
 		if(ref!=null){
@@ -347,6 +358,8 @@ RepositoryAccessSession {
 		}
 		else
 			creates.add(doc.toCMLCreate());
+		
+		return ref;
 	}
 
 
