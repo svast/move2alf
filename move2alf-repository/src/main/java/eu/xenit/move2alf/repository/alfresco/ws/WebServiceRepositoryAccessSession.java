@@ -206,7 +206,6 @@ RepositoryAccessSession {
 	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
 															 boolean optimistic, boolean acceptDuplicates)
 			throws RepositoryAccessException, RepositoryException {
-		List<UploadResult> results = new ArrayList<UploadResult>();
 
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
 		for (int i = 0; i<documents.size(); i++) {
@@ -215,23 +214,10 @@ RepositoryAccessSession {
 
 		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, optimistic,
 				acceptDuplicates);
-		UpdateResult[] updateResults = repositoryResult.getUpdateResultsNewDocuments();
-		List<UploadResult> duplicates = repositoryResult.getDuplicates();
 
-		for(UpdateResult updateResult : updateResults) {
-			UploadResult result = new UploadResult();
-			result.setStatus(UploadResult.VALUE_OK);
-			result.setMessage(updateResult.getStatement());
-			result.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
-			result.setDocument(documents.get(Integer.parseInt(updateResult.getSourceId())));
-			results.add(result);
-		}
+		setAuditableProperties(documents, repositoryResult.getUpdateResults());
 
-		results.addAll(duplicates);
-
-		setAuditableProperties(documents, updateResults);
-
-		return results;
+		return repositoryResult.getAllResults();
 	}
 
 	private String constructReferenceLink(String uuid) {
@@ -240,21 +226,20 @@ RepositoryAccessSession {
 	}
 	
 	class RepositoryResult {
-		UpdateResult[] updateResultsNewDocuments;
-		List<UploadResult> duplicates;
-
-		public UpdateResult[] getUpdateResultsNewDocuments() {
-			return updateResultsNewDocuments;
+		List<UploadResult> allResults;
+		UpdateResult[] updateResults; // needed for setting auditable properties
+		
+		public UpdateResult[] getUpdateResults() {
+			return updateResults;
 		}
-		public void setUpdateResultsNewDocuments(
-				UpdateResult[] updateResultsNewDocuments) {
-			this.updateResultsNewDocuments = updateResultsNewDocuments;
+		public void setUpdateResults(UpdateResult[] updateResults) {
+			this.updateResults = updateResults;
 		}
-		public List<UploadResult> getDuplicates() {
-			return duplicates;
+		public List<UploadResult> getAllResults() {
+			return allResults;
 		}
-		public void setDuplicates(List<UploadResult> duplicates) {
-			this.duplicates = duplicates;
+		public void setAllResults(List<UploadResult> allResults) {
+			this.allResults = allResults;
 		}
 	}
 
@@ -276,6 +261,8 @@ RepositoryAccessSession {
 				} else {
 					result = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, false, acceptDuplicates);
 				}
+			} else {
+				throw new RepositoryException(e1.getMessage(), e1);
 			}
 		} catch (RemoteException e1) {
 			throw new RepositoryAccessException(e1.getMessage(), e1);
@@ -326,8 +313,22 @@ RepositoryAccessSession {
 		if(updateResults==null)
 			updateResults = new UpdateResult[0];
 
-		result.setUpdateResultsNewDocuments(updateResults);
-		result.setDuplicates(duplicates);
+		List<UploadResult> newDocuments = new ArrayList();
+		for(UpdateResult updateResult : updateResults) {
+			UploadResult newDocument = new UploadResult();
+			newDocument.setMessage(updateResult.getStatement());
+			newDocument.setStatus(UploadResult.VALUE_OK);
+			newDocument.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
+			newDocument.setDocument(cmlDocs.get(Integer.parseInt(updateResult.getSourceId())).getDocument());
+	
+			newDocuments.add(newDocument);
+		}
+		List<UploadResult> allResults = new ArrayList();
+		allResults.addAll(newDocuments);
+		allResults.addAll(duplicates);
+
+		result.setAllResults(allResults);
+		result.setUpdateResults(updateResults);
 
 		return result;
 	}
