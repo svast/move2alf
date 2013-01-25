@@ -3,10 +3,14 @@ package eu.xenit.move2alf.web.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import eu.xenit.move2alf.core.sourcesink.DeleteOption;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
+import eu.xenit.move2alf.logic.Mode;
 import eu.xenit.move2alf.validation.CSVsize;
 import eu.xenit.move2alf.validation.ParamList;
 
@@ -49,9 +53,17 @@ public class JobConfig {
 
 	@NotEmpty
 	private String transform;
+	
+	@NotNull(message="mode is null")
+	private Mode mode;
 
-	@NotEmpty
-	private String docExist;
+	@NotNull(message="writeOption is null")
+	private WriteOption writeOption;	
+	
+	@NotNull(message="deleteOption is null")
+	private DeleteOption deleteOption;
+	
+	private boolean listIgnorePath;
 
 	private Boolean moveBeforeProc = false;
 
@@ -187,13 +199,21 @@ public class JobConfig {
 	public String getTransform() {
 		return transform;
 	}
-
-	public void setDocExist(String docExist) {
-		this.docExist = docExist;
+	
+	public Mode getMode(){
+		return this.mode;
+	}
+	
+	public void setMode(Mode mode){
+		this.mode = mode;
 	}
 
-	public String getDocExist() {
-		return docExist;
+	public void setWriteOption(WriteOption writeOption) {
+		this.writeOption = writeOption;
+	}
+
+	public WriteOption getWriteOption() {
+		return writeOption;
 	}
 
 	public void setMoveBeforeProc(String moveBeforeProc) {
@@ -425,6 +445,21 @@ public class JobConfig {
 
 	public int getEmailMaxLength() {
 		return emailMaxLength;
+	}
+
+	public void setDeleteOption(DeleteOption deleteOption){
+		this.deleteOption = deleteOption;
+	}
+	public DeleteOption getDeleteOption() {
+		return this.deleteOption;
+	}
+
+	public void setListIgnorePath(boolean listIgnorePath){
+		this.listIgnorePath = listIgnorePath;
+	}
+	
+	public boolean getListIgnorePath() {
+		return this.listIgnorePath;
 	}
 
 }

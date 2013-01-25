@@ -99,7 +99,7 @@ public class JobServiceImplTest {
 	@Test
 	public final void testCreateProcessedDocument_successful() {
 		try {
-			jobService.createProcessedDocument(1, "test", new Date(), EProcessedDocumentStatus.OK.toString(), new HashSet<ProcessedDocumentParameter>());
+			jobService.createProcessedDocument(1, "test", new Date(), EProcessedDocumentStatus.OK.toString(), new HashSet<ProcessedDocumentParameter>(), "");
 			assertEquals(DOCUMENT_COUNTER - 1, getDocumentCounter());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -109,7 +109,7 @@ public class JobServiceImplTest {
 	@Test
 	public final void testCreateProcessedDocument_mySqlException() {
 		try {
-			jobService.createProcessedDocument(2, "test", new Date(), EProcessedDocumentStatus.OK.toString(), new HashSet<ProcessedDocumentParameter>());
+			jobService.createProcessedDocument(2, "test", new Date(), EProcessedDocumentStatus.OK.toString(), new HashSet<ProcessedDocumentParameter>(), "");
 			assertEquals(DOCUMENT_COUNTER, getDocumentCounter());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,7 +119,7 @@ public class JobServiceImplTest {
 	@Test
 	public final void testCreateProcessedDocument_UploadStateIsFailed() {
 		try {
-			jobService.createProcessedDocument(1, "test", new Date(), EProcessedDocumentStatus.FAILED.toString(), new HashSet<ProcessedDocumentParameter>());
+			jobService.createProcessedDocument(1, "test", new Date(), EProcessedDocumentStatus.FAILED.toString(), new HashSet<ProcessedDocumentParameter>(), "");
 			assertEquals(DOCUMENT_COUNTER, getDocumentCounter());
 		} catch (Exception e) {
 			e.printStackTrace();

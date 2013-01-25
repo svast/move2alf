@@ -46,7 +46,7 @@ public class SuccessHandler {
 						.getJob().getFirstConfiguredAction());
 		getJobService().getReportActor().sendOneWay(
 				new ReportMessage(cycle.getId(), file.getName(),
-						new Date(), Parameters.VALUE_OK, params));
+						new Date(), Parameters.VALUE_OK, params, (String)parameterMap.get(Parameters.PARAM_REFERENCE)));
 
 		// move
 		if (jobConfig.getMoveAfterLoad()) {

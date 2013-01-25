@@ -107,9 +107,9 @@
 <#macro radio name value checked description>
 	<label class="radio">
 		<#if checked>
-			<input type="radio" name="${name}" checked="true" value="${value}" />
+			<input type="radio" id="${name}-${value}" name="${name}" checked="true" value="${value}" />
 		<#else>
-			<input type="radio" name="${name}" value="${value}" />
+			<input type="radio" id="${name}-${value}" name="${name}" value="${value}" />
 		</#if>
 		${description}
 	</label>
@@ -133,10 +133,8 @@
 <#assign name=binding?split('.')?last />
 <div class="line" id="<#--{name}-->-container">
 	<label class="checkbox">
-		<#-- <input id="${name}" name="${name}" value="true" <#if checked>checked="checked" </#if>type="checkbox" /> ${label}: -->
 		<@formCheckbox binding />${label}:
 	</label>
-	<#-- <input type="text" id="${name}Text" name="${name}Text" value="${textboxValue!}"<#if !checked> disabled="disabled"</#if> /> -->
 	<@spring.formInput (binding+"Text"), attributes />
 </div>
 
@@ -147,4 +145,13 @@ $("#${name}").change(function(){
 });
 </script>
 
+</#macro>
+
+<#macro checkboxWithText binding label checked=false >
+<#assign name=binding?split('.')?last />
+<div class="line" id="<#--{name}-->-container">
+	<label class="checkbox">
+		<@formCheckbox binding />${label}
+	</label>
+</div>
 </#macro>

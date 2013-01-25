@@ -18,10 +18,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
-import org.apache.lucene.queryParser.QueryParser;
+import javax.management.RuntimeErrorException;
+
 import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
-import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
-import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.webservice.accesscontrol.ACE;
@@ -62,16 +61,16 @@ import org.alfresco.webservice.util.WebServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.xenit.move2alf.repository.DocumentNotFoundException;
 import eu.xenit.move2alf.repository.IllegalDocumentException;
 import eu.xenit.move2alf.repository.IllegalDuplicateException;
-import eu.xenit.move2alf.repository.PartialUploadFailureException;
 import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryAccessSession;
 import eu.xenit.move2alf.repository.RepositoryException;
 import eu.xenit.move2alf.repository.RepositoryFatalException;
+import eu.xenit.move2alf.repository.UploadResult;
 
-public class WebServiceRepositoryAccessSession implements
-RepositoryAccessSession {
+public class WebServiceRepositoryAccessSession implements RepositoryAccessSession {
 
 	// FIELDS
 	private static int MAX_LUCENE_RESULTS = 1000;
@@ -97,16 +96,17 @@ RepositoryAccessSession {
 
 	private static final int wsStubTimeout = 600000; // 10 minutes
 
-	protected static final String companyHomePath = "/app:company_home";
+	public static final String companyHomePath = "/app:company_home";
 
 	protected static final Set<String> auditablePropertyNameSet = new HashSet<String>(
-			Arrays.asList(new String[] { "created", "creator", "modified",
-					"modifier", "accessed" }));
+			Arrays.asList(new String[] {"created", "creator", "modified",
+					"modifier", "accessed"}));
 
 	// to reduce the number of queries to alfresco (lucene queries cause the
 	// threads in alfresco to block eachother)
 	// paths are lower case
 	private HashMap<String, Reference> referenceCache = new HashMap<String, Reference>();
+
 	private static final int maxSizeReferenceCache = 1000;
 
 	// to optimize the method removeZeroSizedFromTree
@@ -116,8 +116,13 @@ RepositoryAccessSession {
 	private int port;
 	private String webapp;
 
+	public static final String protocol = "http://";
+	public static final String pathDocumentDetails = "/n/showDocDetails/workspace/SpacesStore/";
+
 	protected static Map<String, Semaphore> folderCreationLocks = new HashMap<String, Semaphore>();
 	private static final boolean USE_FOLDER_CREATION_LOCKS = true;
+	private static final String STATEMENT_UPDATE = "update";
+	private static final String STATEMENT_CREATE = "create";
 
 	// CONSTRUCTOR
 
@@ -168,16 +173,16 @@ RepositoryAccessSession {
 	}
 
 	/**
-	 * @throws IllegalDocumentException 
+	 * @throws IllegalDocumentException
 	 * @deprecated as of Move2Alf 1.2, replaced by {@see
 	 *             void storeDocAndCreateParentSpaces(Document)}
 	 */
 	@Override
 	public void storeDocAndCreateParentSpaces(File file, String mimeType,
-			String spacePath, String description, String contentModelNamespace,
-			String contentModelType, Map<String, String> meta,
-			Map<String, String> multiValueMeta)
-					throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
+											  String spacePath, String description, String contentModelNamespace,
+											  String contentModelType, Map<String, String> meta,
+											  Map<String, String> multiValueMeta)
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		Document document = new Document(file, mimeType, spacePath,
 				description, contentModelNamespace, contentModelType, meta,
 				multiValueMeta);
@@ -185,117 +190,201 @@ RepositoryAccessSession {
 	}
 
 	@Override
-	public void storeDocAndCreateParentSpaces(Document document)
+	public List<UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		List<Document> documents = new ArrayList<Document>();
 		documents.add(document);
-		try {
-			storeDocsAndCreateParentSpaces(documents, false);
-		} catch (PartialUploadFailureException e) {
-			throw e.getExceptions().get(0);
-		}
+		return storeDocsAndCreateParentSpaces(documents, false);
+	}
+
+	@Override
+	public List<UploadResult> storeDocsAndCreateParentSpaces(
+			List<Document> documents, boolean allowOverwrite, boolean optimistic)
+			throws RepositoryAccessException, RepositoryException {
+		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, optimistic, false);
 	}
 
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite, boolean optimistic) throws RepositoryAccessException, RepositoryException, PartialUploadFailureException{
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite,
+															 boolean optimistic, boolean acceptDuplicates)
+			throws RepositoryAccessException, RepositoryException {
+
 		List<CMLDocument> cmlDocs = new ArrayList<CMLDocument>();
-		for(Document doc: documents){
-			cmlDocs.add(new CMLDocument(this, doc));
+		for (int i = 0; i < documents.size(); i++) {
+			cmlDocs.add(new CMLDocument(this, documents.get(i), Integer.toString(i)));
 		}
 
-		List<IllegalDocumentException> exceptions = new ArrayList<IllegalDocumentException>();
+		RepositoryResult repositoryResult = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, optimistic,
+				acceptDuplicates);
 
-		UpdateResult[] results = updateRepositoryAndHandleErrors(allowOverwrite,
-				cmlDocs, exceptions, optimistic);
+		setAuditableProperties(documents, repositoryResult.getUpdateResults());
 
-		setAuditableProperties(documents, results);
-		if(!exceptions.isEmpty()){
-			throw new PartialUploadFailureException(exceptions);
+		return repositoryResult.getAllResults();
+	}
+
+	private String constructReferenceLink(String uuid) {
+		return this.protocol + this.host + ":" + this.port + "/" + this.webapp + this.pathDocumentDetails + uuid;
+	}
+
+	class RepositoryResult {
+		List<UploadResult> allResults;
+		UpdateResult[] updateResults; // needed for setting auditable properties
+
+		public UpdateResult[] getUpdateResults() {
+			return updateResults;
+		}
+
+		public void setUpdateResults(UpdateResult[] updateResults) {
+			this.updateResults = updateResults;
+		}
+
+		public List<UploadResult> getAllResults() {
+			return allResults;
+		}
+
+		public void setAllResults(List<UploadResult> allResults) {
+			this.allResults = allResults;
 		}
 	}
 
-	private UpdateResult[] updateRepositoryAndHandleErrors(
+	private RepositoryResult updateRepositoryAndHandleErrors(
 			boolean allowOverwrite, List<CMLDocument> cmlDocs,
-			List<IllegalDocumentException> exceptions,
-			boolean optimistic) throws RepositoryAccessException,
+			boolean optimistic, boolean acceptDuplicates) throws RepositoryAccessException,
 			RepositoryException {
-		UpdateResult[] results = null;
+		RepositoryResult result = null;
+
 		try {
-			results = updateRepository(cmlDocs, allowOverwrite, optimistic, exceptions);
+			logger.debug("Trying to upload, optimistic=" + optimistic);
+			result = updateRepository(cmlDocs, allowOverwrite, optimistic, acceptDuplicates);
 		} catch (RepositoryFault e1) {
-			if(isDuplicateChildFault(e1)){
-				if(!optimistic){
+			if (isDuplicateChildFault(e1)) {
+				logger.debug("Caught duplicate exception");
+				if (!optimistic) {
 					logger.error("Duplicatefault in pessimistic upload!", e1);
-					throw new RepositoryException("An other process could be interfering with the same nodes on Alfresco");
+					throw new RepositoryException("Another process could be interfering with the same nodes on Alfresco");
+				} else {
+					result = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, false, acceptDuplicates);
 				}
-				exceptions = new ArrayList<IllegalDocumentException>();
-				results = updateRepositoryAndHandleErrors(allowOverwrite, cmlDocs, exceptions, false);
-			} 
+			} else {
+				throw new RepositoryException(e1.getMessage(), e1);
+			}
 		} catch (RemoteException e1) {
 			throw new RepositoryAccessException(e1.getMessage(), e1);
 		}
-		return results;
+
+		return result;
 	}
 
-	private UpdateResult[] updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic, List<IllegalDocumentException> duplicateExceptions) throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
+
+	private RepositoryResult updateRepository(List<CMLDocument> cmlDocs, boolean allowOverwrite, boolean optimistic,
+											  boolean acceptDuplicates)
+			throws RepositoryFault, RemoteException, RepositoryAccessException, RepositoryException {
+		RepositoryResult result = new RepositoryResult();
+		List<UploadResult> duplicates = new ArrayList();
+		Map<String, Document> uuids = new HashMap(); // keep a map from existing uuids to Document objects, to be able to construct UploadResult later
+
 		List<CMLUpdate> updates = new ArrayList<CMLUpdate>();
 		List<CMLCreate> creates = new ArrayList<CMLCreate>();
-		for(CMLDocument doc : cmlDocs){
-
+		for (CMLDocument doc : cmlDocs) {
 			// Check if the document exists
-			if(!optimistic){
+			if (!optimistic) {
 				try {
-					pessimisticCML(allowOverwrite, updates, creates, doc);
-				} catch (IllegalDocumentException e) {
-					duplicateExceptions.add(e);
+					Reference ref = pessimisticCML(allowOverwrite, updates, creates, doc);
+					if (ref != null) {
+						uuids.put(ref.getUuid(), doc.getDocument());
+					}
+				} catch (IllegalDuplicateException e) {
+					uuids.put(e.getRef().getUuid(), doc.getDocument());
+					final UploadResult duplicate = new UploadResult();
+					duplicate.setDocument(e.getDocument());
+					duplicate.setReference(constructReferenceLink(e.getRef().getUuid()));
+					duplicate.setMessage("File already exists in the repository");
+					if (acceptDuplicates) {
+						duplicate.setStatus(UploadResult.VALUE_OK);
+					} else {
+						duplicate.setStatus(UploadResult.VALUE_FAILED);
+					}
+					duplicates.add(duplicate);
 				}
-			}
-			// First try to upload
-			else {
+			} else {
+				// First try to upload
 				creates.add(doc.toCMLCreate());
 			}
 		}
+
 		CML cml = new CML();
 		cml.setCreate(creates.toArray(new CMLCreate[0]));
 		cml.setUpdate(updates.toArray(new CMLUpdate[0]));
-		return repositoryService.update(cml);
+
+		UpdateResult[] updateResults = repositoryService.update(cml);
+
+		if (updateResults == null) {
+			updateResults = new UpdateResult[0];
+		}
+
+		List<UploadResult> newDocuments = new ArrayList();
+		for (UpdateResult updateResult : updateResults) {
+			UploadResult newDocument = new UploadResult();
+			newDocument.setMessage(updateResult.getStatement());
+			newDocument.setStatus(UploadResult.VALUE_OK);
+			newDocument.setReference(constructReferenceLink(updateResult.getDestination().getUuid()));
+			if (STATEMENT_UPDATE.equals(updateResult.getStatement())) {
+				newDocument.setDocument(uuids.get(updateResult.getDestination().getUuid()));
+			} else if (STATEMENT_CREATE.equals(updateResult.getStatement())) {
+				newDocument.setDocument(cmlDocs.get(Integer.parseInt(updateResult.getSourceId())).getDocument());
+			} else {
+				throw new RepositoryException("unknown statement: " + updateResult.getStatement());
+			}
+
+			newDocuments.add(newDocument);
+		}
+		List<UploadResult> allResults = new ArrayList();
+		allResults.addAll(newDocuments);
+		allResults.addAll(duplicates);
+
+		result.setAllResults(allResults);
+		result.setUpdateResults(updateResults);
+
+		return result;
 	}
 
-	private void pessimisticCML(boolean allowOverwrite,
-			List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc) throws IllegalDocumentException, RepositoryAccessException, RepositoryException {
-		Reference ref = getReference(doc.getXpath());
-		if(ref!=null){
-			if(allowOverwrite){
+	private Reference pessimisticCML(boolean allowOverwrite,
+									 List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc)
+			throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
+		Reference ref = getReference(doc.getPath(), false);
+		if (ref != null) {
+			if (allowOverwrite) {
 				updates.add(doc.toCMLUpdate(ref));
+			} else {
+				throw new IllegalDuplicateException(doc.getDocument(), "File exists: " + doc.getXpath(), ref);
 			}
-			else{
-				throw new IllegalDuplicateException(doc.getDocument(), "File exists: "+doc.getXpath());
-			}
-		}
-		else
+		} else {
 			creates.add(doc.toCMLCreate());
+		}
+
+		return ref;
 	}
 
 
 	@Override
-	public void storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
-			throws RepositoryAccessException, RepositoryException, PartialUploadFailureException {
-		storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
+	public List<UploadResult> storeDocsAndCreateParentSpaces(List<Document> documents, boolean allowOverwrite)
+			throws RepositoryAccessException, RepositoryException {
+		return storeDocsAndCreateParentSpaces(documents, allowOverwrite, true);
 	}
 
+
 	private void setAuditableProperties(List<Document> documents,
-			UpdateResult[] results) {
+										UpdateResult[] results) {
 		Iterator<Document> documentsIterator = documents.iterator();
-		try{
-			for(UpdateResult result : results) {
+		try {
+			for (UpdateResult result : results) {
 				if ("addAspect".equals(result.getStatement())) {
 					continue;
 				}
 
 				Reference content = result.getDestination();
-				logger.debug("Reference:  {} {}", content.getStore().getAddress(),
-						content.getPath());
+				//logger.debug("Reference:  {} {}", content.getStore().getAddress(), content.getPath());
 
 				if (documentsIterator.hasNext()) {
 					Document doc = documentsIterator.next();
@@ -315,8 +404,7 @@ RepositoryAccessSession {
 					}
 				}
 			}
-		}
-		catch(WebServiceException e){
+		} catch (WebServiceException e) {
 			if ("Unable to execute action".equals(e.getMessage())) {
 				logger.warn("Trying to set auditable properties but edit-auditable-aspect action not found. "
 						+ "Please install move2alf-amp on the Alfresco server.");
@@ -343,9 +431,9 @@ RepositoryAccessSession {
 		this.referenceCache.clear();
 	}
 
-	public boolean doesDocExist(String docName, String spacePath)
+	public boolean doesDocExist(String docName, String spacePath, boolean useCache)
 			throws RepositoryAccessException {
-		if (locateByFileNameAndPath(spacePath, docName) != null) {
+		if (locateByFileNameAndPath(spacePath, docName, useCache) != null) {
 			return true;
 		} else {
 			return false;
@@ -353,8 +441,8 @@ RepositoryAccessSession {
 	}
 
 	public void updateContentByDocNameAndPath(String spacePath, String docName,
-			File docNewContent, String mimeType, boolean checkSize)
-					throws RepositoryAccessException, RepositoryException {
+											  File docNewContent, String mimeType, boolean checkSize)
+			throws RepositoryAccessException, RepositoryException {
 		Reference pathRef = new Reference(store, null, companyHomePath
 				+ getXPathEscape(spacePath));
 		updateContentByDocNameAndSpace(pathRef, docName, docNewContent,
@@ -362,14 +450,14 @@ RepositoryAccessSession {
 	}
 
 	public void updateMetaDataByDocNameAndPath(String spacePath,
-			String docName, String nameSpace, Map<String, String> meta)
-					throws RepositoryAccessException, RepositoryException {
-		Reference ref = locateByFileNameAndPath(spacePath, docName);
+											   String docName, String nameSpace, Map<String, String> meta)
+			throws RepositoryAccessException, RepositoryException {
+		Reference ref = locateByFileNameAndPath(spacePath, docName, true);
 		updateMetaData(ref, nameSpace, meta);
 	}
 
 	public void deleteByDocNameAndSpace(String spacePath, String docName)
-			throws RepositoryAccessException, RepositoryException {
+			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException {
 		Reference pathRef = new Reference(store, null, companyHomePath
 				+ getXPathEscape(spacePath));
 		deleteByDocNameAndSpace(pathRef, docName);
@@ -399,13 +487,13 @@ RepositoryAccessSession {
 					}
 				}
 				logger.info("Reference {}", spaceRef.getPath());
-				Predicate p = new Predicate(new Reference[] { spaceRef },
+				Predicate p = new Predicate(new Reference[] {spaceRef},
 						store, null);
 
 				CMLDelete delete = new CMLDelete(p);
 
 				CML cml = new CML();
-				cml.setDelete(new CMLDelete[] { delete });
+				cml.setDelete(new CMLDelete[] {delete});
 
 				UpdateResult[] results;
 				results = repositoryService.update(cml);
@@ -418,13 +506,12 @@ RepositoryAccessSession {
 			} catch (RemoteException e) {
 				throw new RepositoryAccessException(e.getMessage(), e);
 			}
-
 		}
 	}
 
 	public void setAccessControlList(String path, boolean inheritPermissions,
-			Map<String, String> accessControl)
-					throws RepositoryAccessException, RepositoryException {
+									 Map<String, String> accessControl)
+			throws RepositoryAccessException, RepositoryException {
 
 		Reference ref = new Reference(store, null, (new StringBuilder(
 				companyHomePath)).append(getXPathEscape(path)).toString());
@@ -470,14 +557,14 @@ RepositoryAccessSession {
 						if (!node.getType().endsWith("systemfolder")) {
 							count = count
 									+ removeZeroSizedFromTree(spacePath
-											+ "/cm:" + name);
+									+ "/cm:" + name);
 						}
 					} else {
 
 						String id = node.getId();
 						Reference ref = new Reference(store, id, null);
 						Predicate predicate = new Predicate(
-								new Reference[] { ref }, store, null);
+								new Reference[] {ref}, store, null);
 						Content[] theContents = contentService.read(predicate,
 								Constants.PROP_CONTENT);
 
@@ -487,7 +574,7 @@ RepositoryAccessSession {
 								// delete it now
 								CMLDelete delete = new CMLDelete(predicate);
 								CML cml = new CML();
-								cml.setDelete(new CMLDelete[] { delete });
+								cml.setDelete(new CMLDelete[] {delete});
 								UpdateResult[] results = repositoryService
 										.update(cml);
 								for (UpdateResult result : results) {
@@ -534,22 +621,22 @@ RepositoryAccessSession {
 	 * Method that returns a reference to an alfresco space. If the space does
 	 * not exist, it will try to create the space (and the required parent
 	 * spaces).
-	 * 
+	 * <p/>
 	 * To optimize performance it builds and uses a space cache.
-	 * 
+	 * <p/>
 	 * This method contains a mechanism to handle the case that another thread
 	 * has created a space while this thread was attempting to create the same
 	 * space (sleep and try again).
-	 * 
+	 * <p/>
 	 * It can return null if: - invalid space name - above mechanism does not
 	 * work after 1 sleep period - other RepositoryFaults
-	 * 
+	 * <p/>
 	 * It will force an exit when an unexpected condition occurs (to allow that
 	 * this condition can be investigated).
-	 * 
-	 * @param path
-	 *            : path below 'Company Home', formatted as
-	 *            /cm:Space1/cm:Space2/cm:Space3
+	 *
+	 * @param path : path below 'Company Home', formatted as
+	 *             /cm:Space1/cm:Space2/cm:Space3
+	 * @throws RepositoryException
 	 */
 
 	protected Reference createSpaceIfNotExists(String path)
@@ -577,7 +664,7 @@ RepositoryAccessSession {
 
 		Reference reference;
 		try {
-			reference = getReference(companyHomePath+getXPathEscape(path));
+			reference = getReference(companyHomePath + getXPathEscape(path), true);
 		} catch (RepositoryAccessException e) {
 			if (USE_FOLDER_CREATION_LOCKS) {
 				logger.debug("Releasing folder creation lock for " + path);
@@ -619,17 +706,17 @@ RepositoryAccessSession {
 				// IngresTutorial_Alfresco_Web_Service_API_for_Java
 				ParentReference parentReference = new ParentReference(store, parentSpaceReference.getUuid(), null,
 						Constants.ASSOC_CONTAINS, Constants.createQNameString(
-								Constants.NAMESPACE_CONTENT_MODEL, spaceName));
+						Constants.NAMESPACE_CONTENT_MODEL, spaceName));
 
 				logger.info("TIMESTAMP: Creating folder {} at {}", spaceName,
 						(new Date()).getTime());
 				// Create space
-				NamedValue[] properties = new NamedValue[] { Utils
-						.createNamedValue(Constants.PROP_NAME, spaceName) };
+				NamedValue[] properties = new NamedValue[] {Utils
+						.createNamedValue(Constants.PROP_NAME, spaceName)};
 				CMLCreate create = new CMLCreate("1", parentReference, null,
 						null, null, Constants.TYPE_FOLDER, properties);
 				CML cml = new CML();
-				cml.setCreate(new CMLCreate[] { create });
+				cml.setCreate(new CMLCreate[] {create});
 
 				try {
 					UpdateResult[] results = repositoryService.update(cml);
@@ -646,7 +733,6 @@ RepositoryAccessSession {
 						throw new RepositoryException(
 								"Did not get result from repositoryService.update");
 					}
-
 				} catch (RepositoryFault e) {
 					// we can end up here when:
 					// 1. trying to create space with invalid name =>
@@ -676,7 +762,7 @@ RepositoryAccessSession {
 									e1);
 						}
 						// try to get it again (instead of creating)
-						return getReference(path);
+						return getReference(path, true);
 					} else if (stackTrace
 							.contains("IllegalMonitorStateException")) {
 						// concurrency problem at server side?
@@ -690,7 +776,7 @@ RepositoryAccessSession {
 									e1);
 						}
 						// try to get it again (instead of creating)
-						return getReference(path);
+						return getReference(path, true);
 					} else {
 						logger.warn("Exception without special handling", e);
 						throw new RepositoryException(e.getMessage(), e);
@@ -705,7 +791,6 @@ RepositoryAccessSession {
 						lock.release();
 					}
 				}
-
 			} else {
 				if (USE_FOLDER_CREATION_LOCKS) {
 					logger.debug("Releasing folder creation lock for " + path);
@@ -723,23 +808,35 @@ RepositoryAccessSession {
 			}
 			return reference;
 		}
-
 	}
 
-	private Reference getReference(String path)
-			throws RepositoryAccessException {
-		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path,(new Date()).getTime());
+	private Reference getReference(String path, boolean useCache) throws RepositoryAccessException {
+		return getReference(path, true, useCache);
+	}
 
-		Reference reference = referenceCache.get(path.toLowerCase());
+	private Reference getReference(String path, boolean escaped, boolean useCache)
+			throws RepositoryAccessException {
+		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path, (new Date()).getTime());
+		String escapedPath = new String(path);
+
+		if (!escaped)
+			escapedPath = getXPathEscape(path);
+
+		Reference reference = null;
+		if (useCache) {
+			reference = referenceCache.get(escapedPath.toLowerCase());
+		}
 
 		if (reference == null) {
-			if (referenceCache.size() > maxSizeReferenceCache) {
-				// avoid cache becoming too large
-				logger.info("Clearing Space Cache");
-				referenceCache.clear();
+			if (useCache) {
+				if (referenceCache.size() > maxSizeReferenceCache) {
+					// avoid cache becoming too large
+					logger.info("Clearing Space Cache");
+					referenceCache.clear();
+				}
 			}
 
-			Reference uncheckedReference = new Reference(store, null,path);
+			Reference uncheckedReference = new Reference(store, null, escapedPath);
 			// can throw:
 			// java.rmi.RemoteException: when connection problem?
 			// org.alfresco.webservice.repository.RepositoryFault: this will
@@ -752,11 +849,13 @@ RepositoryAccessSession {
 
 			Node[] nodes;
 			try {
-				nodes = repositoryService.get(new Predicate(new Reference[] { uncheckedReference }, store, null));
+				nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
 				reference = nodes[0].getReference();
 
-				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), path);
-				referenceCache.put(path.toLowerCase(), reference);
+				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
+				if (useCache) {
+					referenceCache.put(escapedPath.toLowerCase(), reference);
+				}
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
 				logger.debug("Could not get results from reference query for path {}, falling to lucene query", path);
@@ -768,25 +867,25 @@ RepositoryAccessSession {
 					references = locateByLuceneQuery(luceneQuery, MAX_LUCENE_RESULTS);
 				} catch (RepositoryException e1) {
 					logger.error("Could not get lucene reference for path {}", path);
-					return null;
+					throw new RuntimeException(e1);
 				}
-				if(references.size()>0) {
-					for(int i=0; i<references.size(); i++) {
-						logger.info("Comparing " + references.get(i).getPath() + " with " + path);
-						if(equalPaths(references.get(i).getPath(),path)) {
+				if (references.size() > 0) {
+					for (int i = 0; i < references.size(); i++) {
+						logger.info("Comparing " + references.get(i).getPath() + " with " + escapedPath);
+						if (equalPaths(references.get(i).getPath(), escapedPath)) {
 							logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
 							return references.get(i);
 						}
 					}
 				}
-				logger.error("Could not get lucene reference for path {}", path);
+				logger.debug("Could not get lucene reference for path {}", path);
 				return null;
 			} catch (RemoteException e) {
 				// connectivity problem
 				throw new RepositoryAccessException(e.getMessage(), e);
 			}
 		} else {
-			logger.info("Obtained reference from cache {}", path);
+			logger.info("Obtained reference from cache {}", escapedPath);
 		}
 		return reference;
 	}
@@ -800,11 +899,10 @@ RepositoryAccessSession {
 		newPath2 = newPath2.replaceAll("/app:", "/{" + Constants.NAMESPACE_APPLICATION_MODEL + "}");
 
 		//logger.info("path=" + String.valueOf(path) + " and newPath2=" + String.valueOf(newPath2) + " and equality=" + String.valueOf(path).compareTo(String.valueOf(newPath2)));
-		return (path.toLowerCase().compareTo(newPath2.toLowerCase())==0);
+		return (path.toLowerCase().compareTo(newPath2.toLowerCase()) == 0);
 	}
 
-	private String escapeQName(QName qname)
-	{
+	private String escapeQName(QName qname) {
 		return LuceneQueryParser.escape(qname.toString());
 	}
 
@@ -821,10 +919,10 @@ RepositoryAccessSession {
 	}
 
 	private void addDocumentToCML(File file, String mimeType,
-			Reference parentSpace, String description,
-			String contentModelNamespace, String contentModelType,
-			Map<String, String> meta, Map<String, String> multiValueMeta, CML cml, String cmlId)
-					throws RepositoryAccessException, RepositoryException {
+								  Reference parentSpace, String description,
+								  String contentModelNamespace, String contentModelType,
+								  Map<String, String> meta, Map<String, String> multiValueMeta, CML cml, String cmlId)
+			throws RepositoryAccessException, RepositoryException {
 		if (parentSpace == null) {
 			logger.warn("ParentSpace is null, can not store {}", file.getName());
 			throw new RepositoryException("ParentSpace is null");
@@ -918,10 +1016,10 @@ RepositoryAccessSession {
 	}
 
 	protected void processMultiValuedMetadata(String contentModelNamespace,
-			Map<String, String> multiValueMeta, List<NamedValue> contentProps) {
+											  Map<String, String> multiValueMeta, List<NamedValue> contentProps) {
 		for (String key : multiValueMeta.keySet()) {
 			String val = multiValueMeta.get(key);
-			logger.debug("Prop - Value:  {} - {}", key, val);
+			//logger.debug("Prop - Value:  {} - {}", key, val);
 			List<String> valList = new ArrayList<String>();
 			StringTokenizer tokenizer = new StringTokenizer(val, ",");
 			while (tokenizer.hasMoreElements()) {
@@ -944,10 +1042,10 @@ RepositoryAccessSession {
 	}
 
 	protected void processMetadata(String contentModelNamespace,
-			Map<String, String> meta, List<NamedValue> contentProps) {
+								   Map<String, String> meta, List<NamedValue> contentProps) {
 		for (String key : meta.keySet()) {
 			String value = meta.get(key);
-			logger.debug("Prop - Value:  {} - {}", key, value);
+			//logger.debug("Prop - Value:  {} - {}", key, value);
 			if (!auditablePropertyNameSet.contains(key)) {
 				if (!key.startsWith("{")) {
 					key = contentModelNamespace + key;
@@ -966,11 +1064,10 @@ RepositoryAccessSession {
 		Node[] nodes;
 		try {
 			nodes = repositoryService.get(new Predicate(
-					new Reference[] { pathref }, store, null));
+					new Reference[] {pathref}, store, null));
 			if (nodes.length > 0) {
 
 				return nodes[0].getReference();
-
 			} else {
 				return null;
 			}
@@ -981,25 +1078,23 @@ RepositoryAccessSession {
 			// connectivity problem
 			throw new RepositoryAccessException(e.getMessage(), e);
 		}
-
 	}
 
-	private Reference locateByFileNameAndPath(String parentPath, String name)
+	private Reference locateByFileNameAndPath(String parentPath, String name, boolean useCache)
 			throws RepositoryAccessException {
 
 		String path = getXPathEscape(companyHomePath
-				+ parentPath + "/cm:"+name);
+				+ parentPath + "/cm:" + name);
 
-		return getReference(path);
-
+		return getReference(path, useCache);
 	}
 
-	private Reference locateByFileNameAndSpace(Reference parent, String name)
+	private Reference locateByFileNameAndSpace(Reference parent, String name, boolean useCache)
 			throws RepositoryAccessException {
-		String path = parent.getPath()+"/cm:"+getXPathEscape(name);
-		logger.info("Locating document: "+path);
+		String path = parent.getPath() + "/cm:" + getXPathEscape(name);
+		logger.info("Locating document: " + path);
 
-		return getReference(path);
+		return getReference(path, useCache);
 	}
 
 	// note that this can be unsafe when the filename is not unique
@@ -1033,7 +1128,6 @@ RepositoryAccessSession {
 			// connectivity problem
 			throw new RepositoryAccessException(e.getMessage(), e);
 		}
-
 	}
 
 	private long getSize(Reference ref) throws RepositoryAccessException {
@@ -1042,7 +1136,7 @@ RepositoryAccessSession {
 		Content[] theContents;
 		try {
 			theContents = contentService.read(new Predicate(
-					new Reference[] { ref }, store, null),
+					new Reference[] {ref}, store, null),
 					Constants.PROP_CONTENT);
 			if (theContents != null)
 				size = theContents[0].getLength();
@@ -1055,17 +1149,17 @@ RepositoryAccessSession {
 	}
 
 	private void deleteByDocNameAndSpace(Reference parent, String docName)
-			throws RepositoryAccessException, RepositoryException {
-		Reference ref = locateByFileNameAndSpace(parent, docName);
+			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException {
+		Reference ref = locateByFileNameAndSpace(parent, docName, true);
 		// acquire a content reference ...
 		if (ref != null) {
 			logger.info("Reference {}", ref.getPath());
-			Predicate p = new Predicate(new Reference[] { ref }, store, null);
+			Predicate p = new Predicate(new Reference[] {ref}, store, null);
 
 			CMLDelete delete = new CMLDelete(p);
 
 			CML cml = new CML();
-			cml.setDelete(new CMLDelete[] { delete });
+			cml.setDelete(new CMLDelete[] {delete});
 
 			UpdateResult[] results;
 			try {
@@ -1084,21 +1178,20 @@ RepositoryAccessSession {
 		} else {
 			logger.info("File {} is not present in {}", docName,
 					parent.getPath());
-			throw new RepositoryException("File " + docName
+			throw new DocumentNotFoundException("File " + docName
 					+ " is not present in " + parent.getPath());
 		}
-
 	}
 
 	private void deleteByReference(Reference reference)
 			throws RepositoryAccessException, RepositoryException {
 		logger.info("Reference {}", reference.getPath());
-		Predicate p = new Predicate(new Reference[] { reference }, store, null);
+		Predicate p = new Predicate(new Reference[] {reference}, store, null);
 
 		CMLDelete delete = new CMLDelete(p);
 
 		CML cml = new CML();
-		cml.setDelete(new CMLDelete[] { delete });
+		cml.setDelete(new CMLDelete[] {delete});
 		try {
 			UpdateResult[] results = repositoryService.update(cml);
 			for (UpdateResult result : results) {
@@ -1115,10 +1208,10 @@ RepositoryAccessSession {
 	}
 
 	private Reference updateContentByDocNameAndSpace(Reference parent,
-			String docName, File docNewContent, String mimeType,
-			boolean checkSize) throws RepositoryAccessException,
+													 String docName, File docNewContent, String mimeType,
+													 boolean checkSize) throws RepositoryAccessException,
 			RepositoryException {
-		Reference contentReference = locateByFileNameAndSpace(parent, docName);
+		Reference contentReference = locateByFileNameAndSpace(parent, docName, true);
 
 		if (contentReference == null) {
 			logger.warn("Document {} not known in space {}", docName,
@@ -1151,12 +1244,12 @@ RepositoryAccessSession {
 
 		contentProps[0] = Utils.createNamedValue(Constants.PROP_CONTENT,
 				contentDetails);
-		Predicate pred = new Predicate(new Reference[] { contentReference },
+		Predicate pred = new Predicate(new Reference[] {contentReference},
 				store, null);
 
 		CMLUpdate cmlUpdate = new CMLUpdate(contentProps, pred, null);
 		CML cml = new CML();
-		cml.setUpdate(new CMLUpdate[] { cmlUpdate });
+		cml.setUpdate(new CMLUpdate[] {cmlUpdate});
 
 		try {
 			repositoryService.update(cml);
@@ -1179,14 +1272,14 @@ RepositoryAccessSession {
 
 		processMetadata(nameSpace, meta, contentProps);
 
-		Predicate predicate = new Predicate(new Reference[] { reference },
+		Predicate predicate = new Predicate(new Reference[] {reference},
 				store, null);
 
 		CMLUpdate update = new CMLUpdate(contentProps.toArray(new NamedValue[0]), predicate, null);
 
 		CML cml = new CML();
 
-		cml.setUpdate(new CMLUpdate[] { update });
+		cml.setUpdate(new CMLUpdate[] {update});
 
 		try {
 			repositoryService.update(cml);
@@ -1200,10 +1293,10 @@ RepositoryAccessSession {
 	}
 
 	private void setAccessControlList(Reference ref,
-			boolean inheritPermissions, Map<String, String> accessControl)
-					throws RepositoryAccessException, RepositoryException {
+									  boolean inheritPermissions, Map<String, String> accessControl)
+			throws RepositoryAccessException, RepositoryException {
 		try {
-			Predicate predicate = new Predicate(new Reference[] { ref }, store,
+			Predicate predicate = new Predicate(new Reference[] {ref}, store,
 					null);
 
 			ACE[] aces = new ACE[accessControl.size()];
@@ -1267,7 +1360,6 @@ RepositoryAccessSession {
 			NamedValue[] properties = rows[0].getColumns();
 			String propertyval = getNamedValue(properties, property);
 			return propertyval;
-
 		} catch (RepositoryFault e) {
 			logger.warn(e.getMessage() + " file : " + filename, e);
 			throw new RepositoryException(e.getMessage(), e);
@@ -1277,7 +1369,7 @@ RepositoryAccessSession {
 	}
 
 	private List<Reference> locateByLuceneQuery(String luceneQueryString,
-			int maxNbrOfResults) throws RepositoryAccessException,
+												int maxNbrOfResults) throws RepositoryAccessException,
 			RepositoryException {
 		Query query = new Query(Constants.QUERY_LANG_LUCENE, luceneQueryString);
 		logger.info("Query {}", query.getStatement());
@@ -1289,8 +1381,8 @@ RepositoryAccessSession {
 
 		try {
 			repositoryService.setHeader(new RepositoryServiceLocator()
-			.getServiceName().getNamespaceURI(), "QueryHeader",
-			queryCfg);
+					.getServiceName().getNamespaceURI(), "QueryHeader",
+					queryCfg);
 
 			logger.info("Store {}", store.getAddress());
 			QueryResult queryResult = repositoryService.query(store, query,
@@ -1307,15 +1399,15 @@ RepositoryAccessSession {
 					String resultId = row.getNode().getId();
 					NamedValue[] columns = row.getColumns();
 					String resultPath = "";
-					for(int i=0; i<columns.length; i++) {
-						if("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
+					for (int i = 0; i < columns.length; i++) {
+						if ("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
 							resultPath = columns[i].getValue();
 					}
 					Reference reference = new Reference(store, resultId, resultPath);
 					referenceList.add(reference);
 				}
 				// if there are still results; is there a better way to do this?
-				while(rows.length==maxNbrOfResults) {
+				while (rows.length == maxNbrOfResults) {
 					String querySession = queryResult.getQuerySession();
 					queryResult = repositoryService.fetchMore(querySession);
 
@@ -1330,8 +1422,8 @@ RepositoryAccessSession {
 							String resultId = row.getNode().getId();
 							NamedValue[] columns = row.getColumns();
 							String resultPath = "";
-							for(int i=0; i<columns.length; i++) {
-								if("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
+							for (int i = 0; i < columns.length; i++) {
+								if ("{http://www.alfresco.org/model/content/1.0}path".equals(columns[i].getName()))
 									resultPath = columns[i].getValue();
 							}
 							Reference reference = new Reference(store, resultId, resultPath);
@@ -1351,11 +1443,11 @@ RepositoryAccessSession {
 	}
 
 	// helper methods
+
 	/**
 	 * Helper method to output the rows contained within a result set
-	 * 
-	 * @param rows
-	 *            an array of rows
+	 *
+	 * @param rows an array of rows
 	 */
 	private void outputResultSet(ResultSetRow[] rows) {
 		if (rows != null) {
@@ -1378,7 +1470,7 @@ RepositoryAccessSession {
 	 * "/app:company_home/cm:My Space//*" will become
 	 * "/app:company_home/cm:My_x0020_Space//*"
 	 */
-	protected String getXPathEscape(String psToEncode) {
+	public static String getXPathEscape(String psToEncode) {
 		StringBuilder sbResult = new StringBuilder(psToEncode.length());
 
 		String sDelimiters = ":/_*";
@@ -1412,4 +1504,13 @@ RepositoryAccessSession {
 		return value;
 	}
 
+	@Override
+	public boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException {
+		try {
+			locateByFileName(name);
+			return true;
+		} catch (RepositoryException e) {
+			return false;
+		}
+	}
 }

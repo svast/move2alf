@@ -262,7 +262,7 @@ public class ContentUtils
                             }
                             else if (responseLine.contains("403") == true)
                             {
-                                throw new RuntimeException("Content could not be uploaded because user does not have sufficient priveledges.");
+                                throw new RuntimeException("Content could not be uploaded because user does not have sufficient privileges.");
                             }
                             else
                             {

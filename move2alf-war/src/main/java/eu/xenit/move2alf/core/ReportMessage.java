@@ -14,13 +14,15 @@ public class ReportMessage {
 	String name;
 	Date date;
 	String state;
+	String reference;
 	Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
 	
-	public ReportMessage(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params) {
+	public ReportMessage(int cycleId, String name, Date date, String state, Set<ProcessedDocumentParameter> params, String reference) {
 		this.cycleId = cycleId;
 		this.name = name;
 		this.date = date;
 		this.state = state;
 		this.params = params;
+		this.reference = reference;
 	}
 }

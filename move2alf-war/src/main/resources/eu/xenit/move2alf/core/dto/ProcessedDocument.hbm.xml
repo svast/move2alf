@@ -10,6 +10,7 @@
     </id>
     <property name="name"/>
     <property name="processedDateTime" column="processingDateTime"/>
+    <property name="reference"/>
     <property name="status">
     	<type name="org.hibernate.type.EnumType">
 			<param name="enumClass">eu.xenit.move2alf.core.enums.EProcessedDocumentStatus</param>

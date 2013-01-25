@@ -34,7 +34,7 @@ public class ReportActor extends UntypedActor {
 			ReportMessage reportMessage = (ReportMessage) message;
 			getJobService().createProcessedDocument(reportMessage.cycleId,
 					reportMessage.name, reportMessage.date,
-					reportMessage.state, reportMessage.params);
+					reportMessage.state, reportMessage.params, reportMessage.reference);
 		} else if (message instanceof SendMailMessage) {
 			SendMailMessage sendMailMessage = (SendMailMessage) message;
 			int cycleId = sendMailMessage.getCycleId();

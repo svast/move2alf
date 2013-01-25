@@ -75,7 +75,11 @@
 	<tbody>
 		<#list processedDocuments as item>
 			<tr>
-				<td>${item.name}</td>
+                <#if item.reference?has_content>
+				    <td><a href="${item.reference!}">${item.name}</a></td>
+				<#else>
+				    <td>${item.name}</td>
+				</#if>
 				<td>${item.processedDateTime}</td>
 				<td>${item.status.displayName}</td>
 				<td>

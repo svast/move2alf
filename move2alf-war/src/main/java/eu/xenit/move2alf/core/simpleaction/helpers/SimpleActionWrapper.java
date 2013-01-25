@@ -122,18 +122,12 @@ public class SimpleActionWrapper extends SimpleAction {
 				final Map<String, Object> parameterMap) {
 			final FileInfo fileInfo = new FileInfo();
 			fileInfo.putAll(parameterMap);
-			if (VALUE_FAILED.equals(fileInfo.get(PARAM_STATUS))) {
-				logger.debug("STATUS FAILED");
-				throw new Move2AlfException(
-						(String) fileInfo.get(PARAM_ERROR_MESSAGE));
-			} else {
-				logger.debug("Adding fileInfo to result list");
-				if (results.get() == null) {
-					results.set(new ArrayList<FileInfo>());
-				}
-				this.results.get().add(fileInfo);
-				logger.debug("Number of results: {}", results.get().size());
+			logger.debug("Adding fileInfo to result list");
+			if (results.get() == null) {
+				results.set(new ArrayList<FileInfo>());
 			}
+			this.results.get().add(fileInfo);
+			logger.debug("Number of results: {}", results.get().size());
 		}
 
 		// //////////////////////////////////////////////////////////////
@@ -176,7 +170,7 @@ public class SimpleActionWrapper extends SimpleAction {
 		@Override
 		public void createProcessedDocument(final int cycleId,
 				final String name, final Date date, final String state,
-				final Set<ProcessedDocumentParameter> params) {
+				final Set<ProcessedDocumentParameter> params, String reference) {
 		}
 
 		@Override

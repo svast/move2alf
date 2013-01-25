@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.sourcesink;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public class FileSourceSink extends SourceSink {
@@ -44,7 +46,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void send(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode,
+			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -78,7 +80,7 @@ public class FileSourceSink extends SourceSink {
 
 	@Override
 	public void delete(final ConfiguredSourceSink sinkConfig,
-			final String remotePath, final String name) {
+			final String remotePath, final String name, DeleteOption option) {
 		// TODO Auto-generated method stub
 
 	}
@@ -89,10 +91,10 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public void sendBatch(final ConfiguredSourceSink configuredSourceSink,
-			final String docExistsMode, final List<Document> documents) {
+	public List<UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+			final WriteOption docExistsMode, final List<Document> documents) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override
@@ -100,5 +102,11 @@ public class FileSourceSink extends SourceSink {
 			final ACL acls) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public boolean fileNameExists(ConfiguredSourceSink sinkConfig, String name) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

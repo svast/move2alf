@@ -93,15 +93,53 @@
 	<fieldset>
 		<legend>Options</legend>
 		
-		<@labeledInput label="If content exists in destination" forId="docExists" helpText="What should happen when the document already exists in the destination?">
-			<@radios name="docExist" options=[
-			 ["SkipAndLog", (!job.docExist?? | job.docExist=="SkipAndLog"),"Skip document and log error"],
-			 ["Skip", job.docExist?? && job.docExist=="Skip", "Skip document silently"],
-			 ["Overwrite", job.docExist?? && job.docExist=="Overwrite", "Overwrite document"],
-			 ["Delete", job.docExist?? && job.docExist=="Delete", "Delete document"],
-			 ["ListPresence", job.docExist?? && job.docExist=="ListPresence", "List presence"]
+		<@labeledInput label="Mode" forId="mode" helpText="What should Move2Alf do with the documents?">
+			<@radios name="mode" options=[
+				["WRITE", (!job.mode?? | job.mode=="WRITE"), "Write"],
+				["DELETE", job.mode?? && job.mode=="DELETE", "Delete"],
+				["LIST", job.mode?? && job.mode=="LIST", "List presence"]
+			] />
+		</@labeledInput>
+		
+		<span id="WRITE-options" class="options<#if job.mode?? && job.mode!="WRITE" > hidden</#if>">
+
+		<@labeledInput label="If content exists in destination" forId="writeOption" helpText="What should happen when the document already exists in the destination?">
+			<@radios name="writeOption" options=[
+			 ["SKIPANDREPORTFAILED", (!job.writeOption?? | job.writeOption=="SKIPANDREPORTFAILED"),"Skip document and log error"],
+			 ["SKIPANDIGNORE", job.writeOption?? && job.writeOption=="SKIPANDIGNORE", "Skip document silently"],
+			 ["OVERWRITE", job.writeOption?? && job.writeOption=="OVERWRITE", "Overwrite document"]
 			 ] />
 		</@labeledInput>
+		</span>
+		
+		<span id="DELETE-options" class="options<#if !job.mode?? | job.mode!="DELETE" > hidden</#if>">
+		<@labeledInput label="If content does not exists in destination" forId="docNotExists" helpText="What should happen when the document does not exists in the destination?">
+			<@radios name="deleteOption" options=[
+			 ["SKIPANDIGNORE", !job.deleteOption?? | job.deleteOption=="SKIPANDIGNORE", "Skip document silently"]
+			 ] />
+		</@labeledInput>
+		</span>
+
+		<span id="LIST-options" class="options<#if !job.mode?? | job.mode!="LIST" > hidden</#if>">
+		<@unLabeledInput>
+			<@checkboxWithText binding="job.listIgnorePath" label="Ignore path" />
+		</@unLabeledInput>
+		</span>
+		
+		<script>
+			$('input:radio[name="mode"]').each(function(){
+				$( this ).change(function(){
+					$('input:radio[name="mode"]').each(function(){
+						if($( this ).attr('checked') != "undefined" && $( this ).attr('checked') == "checked"){
+							$('span#'+$( this ).val()+'-options').removeClass('hidden');
+						}
+						else{
+							$('span#'+$( this ).val()+'-options').addClass('hidden');
+						}							
+					});
+				});
+			});
+		</script>
 		
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/checkboxWithText.js" />"> </script>
 		<@unLabeledInput>

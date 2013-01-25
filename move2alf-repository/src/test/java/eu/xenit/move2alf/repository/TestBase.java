@@ -37,29 +37,29 @@ public class TestBase extends TestCase {
 			String spacePath = "";
 			String description = "description test1";
 
-			assertFalse(ras.doesDocExist("test1.txt", spacePath));
+			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
 			File document = new File(pathOffset + "test1.txt");
 			ras.storeDocAndCreateParentSpaces(document, SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
-			assertTrue(ras.doesDocExist("test1.txt", spacePath));
+			assertTrue(ras.doesDocExist("test1.txt", spacePath, true));
 
-			assertFalse(ras.doesDocExist("test1.pdf", spacePath));
+			assertFalse(ras.doesDocExist("test1.pdf", spacePath, true));
 			document = new File(pathOffset + "test1.pdf");
 			ras.storeDocAndCreateParentSpaces(document, SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
-			assertTrue(ras.doesDocExist("test1.pdf", spacePath));
+			assertTrue(ras.doesDocExist("test1.pdf", spacePath, true));
 
-			assertFalse(ras.doesDocExist("test1.doc", spacePath));
+			assertFalse(ras.doesDocExist("test1.doc", spacePath, true));
 			document = new File(pathOffset + "test1.doc");
 			ras.storeDocAndCreateParentSpaces(document, SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
-			assertTrue(ras.doesDocExist("test1.doc", spacePath));
+			assertTrue(ras.doesDocExist("test1.doc", spacePath, true));
 
 			ras.closeSession();
 		} catch (Exception e) {
@@ -73,17 +73,17 @@ public class TestBase extends TestCase {
 			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			String spacePath = "";
 
-			assertTrue(ras.doesDocExist("test1.txt", spacePath));
-			assertTrue(ras.doesDocExist("test1.pdf", spacePath));
-			assertTrue(ras.doesDocExist("test1.doc", spacePath));
+			assertTrue(ras.doesDocExist("test1.txt", spacePath, true));
+			assertTrue(ras.doesDocExist("test1.pdf", spacePath, true));
+			assertTrue(ras.doesDocExist("test1.doc", spacePath, true));
 
 			ras.deleteByDocNameAndSpace(spacePath, "test1.txt");
 			ras.deleteByDocNameAndSpace(spacePath, "test1.doc");
 			ras.deleteByDocNameAndSpace(spacePath, "test1.pdf");
 
-			assertFalse(ras.doesDocExist("test1.txt", spacePath));
-			assertFalse(ras.doesDocExist("test1.pdf", spacePath));
-			assertFalse(ras.doesDocExist("test1.doc", spacePath));
+			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
+			assertFalse(ras.doesDocExist("test1.pdf", spacePath, true));
+			assertFalse(ras.doesDocExist("test1.doc", spacePath, true));
 
 			ras.closeSession();
 		} catch (Exception e) {
@@ -157,7 +157,7 @@ public class TestBase extends TestCase {
 			String spacePath = "/cm:test";
 			String description = "description test1";
 
-			assertFalse(ras.doesDocExist("test1.txt", spacePath));
+			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
 
 			File document = new File(pathOffset + "test1.txt");
 			ras.storeDocAndCreateParentSpaces(document, SourceParser
@@ -165,7 +165,7 @@ public class TestBase extends TestCase {
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
 
-			assertTrue(ras.doesDocExist("test1.txt", spacePath));
+			assertTrue(ras.doesDocExist("test1.txt", spacePath, true));
 
 			ras.closeSession();
 		} catch (Exception e) {
@@ -179,12 +179,12 @@ public class TestBase extends TestCase {
 			RepositoryAccessSession ras = ra.createSessionAndRetry();
 			String spacePath = "/cm:test";
 
-			assertTrue(ras.doesDocExist("test1.txt", spacePath));
+			assertTrue(ras.doesDocExist("test1.txt", spacePath, true));
 
 			ras.deleteByDocNameAndSpace(spacePath, "test1.txt");
 			ras.deleteSpace(spacePath, true);
 
-			assertFalse(ras.doesDocExist("test1.txt", spacePath));
+			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
 
 			ras.closeSession();
 		} catch (Exception e) {
@@ -238,11 +238,11 @@ public class TestBase extends TestCase {
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
 
-			assertTrue(ras.doesDocExist(document.getName(), spacePath));
+			assertTrue(ras.doesDocExist(document.getName(), spacePath, true));
 
 			ras.deleteByDocNameAndSpace(spacePath, document.getName());
 
-			assertFalse(ras.doesDocExist(document.getName(), spacePath));
+			assertFalse(ras.doesDocExist(document.getName(), spacePath, true));
 
 			ras.closeSession();
 		} catch (Exception e) {

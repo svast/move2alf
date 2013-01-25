@@ -15,6 +15,8 @@ public class ProcessedDocument extends IdObject {
 	
 	private Set<ProcessedDocumentParameter> processedDocumentParameterSet;
 	
+	private String reference;
+	
 	private Cycle cycle;
 	
 	public ProcessedDocument() {
@@ -52,6 +54,14 @@ public class ProcessedDocument extends IdObject {
 	public void setProcessedDocumentParameterSet(
 			Set<ProcessedDocumentParameter> processedDocumentParameterSet) {
 		this.processedDocumentParameterSet = processedDocumentParameterSet;
+	}
+
+	public String getReference() {
+		return reference;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	public void setCycle(Cycle cycle) {
