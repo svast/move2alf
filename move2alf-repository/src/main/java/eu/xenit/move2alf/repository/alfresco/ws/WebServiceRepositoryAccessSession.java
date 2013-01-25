@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Semaphore;
 
+import javax.management.RuntimeErrorException;
+
 import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
@@ -862,7 +864,7 @@ RepositoryAccessSession {
 					references = locateByLuceneQuery(luceneQuery, MAX_LUCENE_RESULTS);
 				} catch (RepositoryException e1) {
 					logger.error("Could not get lucene reference for path {}", path);
-					return null;
+					throw new RuntimeException(e1);
 				}
 				if(references.size()>0) {
 					for(int i=0; i<references.size(); i++) {
@@ -873,7 +875,7 @@ RepositoryAccessSession {
 						}
 					}
 				}
-				logger.error("Could not get lucene reference for path {}", path);
+				logger.debug("Could not get lucene reference for path {}", path);
 				return null;
 			} catch (RemoteException e) {
 				// connectivity problem
