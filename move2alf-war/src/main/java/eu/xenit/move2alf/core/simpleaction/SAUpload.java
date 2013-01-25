@@ -51,8 +51,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
-			final ActionConfig config, final Map<String, Serializable> state) {
-		if ( usageService.isBlockedByDocumentCounter() ) {
+								  final ActionConfig config, final Map<String, Serializable> state) {
+		if (usageService.isBlockedByDocumentCounter()) {
 			throw new Move2AlfException("Document counter is 0.");
 		}
 
@@ -190,7 +190,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	}
 
 	private List<UploadResult> upload(final Batch batch,
-			final ActionConfig config) {
+									  final ActionConfig config) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
 
@@ -242,7 +242,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	// TODO: part (or all?) of this should move back to AlfrescoSourceSink: the
 	// "cm:" prefix is Alfresco specific
 	private static String normalizeRemotePath(final String basePath,
-			final String relativePathInput) {
+											  final String relativePathInput) {
 		String relativePath = relativePathInput.replace("\\", "/");
 
 		if (relativePath.startsWith("/")) {
@@ -262,7 +262,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				remotePath += "cm:" + component + "/";
 			}
 		}
-		if(remotePath.length() > 0){
+		if (remotePath.length() > 0) {
 			remotePath = remotePath.substring(0, remotePath.length() - 1);
 		}
 		return remotePath;
