@@ -49,7 +49,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 
 	}
 
-	public boolean doesDocExist(String docName, String spacePath)
+	public boolean doesDocExist(String docName, String spacePath, boolean useCache)
 			throws RepositoryAccessException {
 		// TODO Auto-generated method stub
 		return false;

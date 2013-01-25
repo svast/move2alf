@@ -296,7 +296,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			@Override
 			protected Boolean executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException {
-				return ras.doesDocExist(name, remotePath);
+				return ras.doesDocExist(name, remotePath, false);
 			}
 		}.execute(sinkConfig);
 

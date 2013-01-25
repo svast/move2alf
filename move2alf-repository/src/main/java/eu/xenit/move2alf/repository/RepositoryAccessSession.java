@@ -67,7 +67,7 @@ public interface RepositoryAccessSession {
 	 * @throws RepositoryAccessException : exception thrown when there is
 	 * a connectivity problem to the repository.
 	 */
-	public abstract boolean doesDocExist(String docName, String spacePath)
+	public abstract boolean doesDocExist(String docName, String spacePath, boolean useCache)
 			throws RepositoryAccessException;
 
 	/**

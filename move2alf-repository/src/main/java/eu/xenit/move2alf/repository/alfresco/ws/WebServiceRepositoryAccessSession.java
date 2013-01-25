@@ -431,9 +431,9 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		this.referenceCache.clear();
 	}
 
-	public boolean doesDocExist(String docName, String spacePath)
+	public boolean doesDocExist(String docName, String spacePath, boolean useCache)
 			throws RepositoryAccessException {
-		if (locateByFileNameAndPath(spacePath, docName) != null) {
+		if (locateByFileNameAndPath(spacePath, docName, useCache) != null) {
 			return true;
 		} else {
 			return false;
@@ -452,7 +452,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 	public void updateMetaDataByDocNameAndPath(String spacePath,
 											   String docName, String nameSpace, Map<String, String> meta)
 			throws RepositoryAccessException, RepositoryException {
-		Reference ref = locateByFileNameAndPath(spacePath, docName);
+		Reference ref = locateByFileNameAndPath(spacePath, docName, true);
 		updateMetaData(ref, nameSpace, meta);
 	}
 
@@ -664,7 +664,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 		Reference reference;
 		try {
-			reference = getReference(companyHomePath + getXPathEscape(path));
+			reference = getReference(companyHomePath + getXPathEscape(path), true);
 		} catch (RepositoryAccessException e) {
 			if (USE_FOLDER_CREATION_LOCKS) {
 				logger.debug("Releasing folder creation lock for " + path);
@@ -762,7 +762,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 									e1);
 						}
 						// try to get it again (instead of creating)
-						return getReference(path);
+						return getReference(path, true);
 					} else if (stackTrace
 							.contains("IllegalMonitorStateException")) {
 						// concurrency problem at server side?
@@ -776,7 +776,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 									e1);
 						}
 						// try to get it again (instead of creating)
-						return getReference(path);
+						return getReference(path, true);
 					} else {
 						logger.warn("Exception without special handling", e);
 						throw new RepositoryException(e.getMessage(), e);
@@ -810,11 +810,11 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		}
 	}
 
-	private Reference getReference(String path) throws RepositoryAccessException {
-		return getReference(path, true);
+	private Reference getReference(String path, boolean useCache) throws RepositoryAccessException {
+		return getReference(path, true, useCache);
 	}
 
-	private Reference getReference(String path, boolean escaped)
+	private Reference getReference(String path, boolean escaped, boolean useCache)
 			throws RepositoryAccessException {
 		logger.debug("TIMESTAMP: Check existence space |{}| at {}", path, (new Date()).getTime());
 		String escapedPath = new String(path);
@@ -822,13 +822,18 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		if (!escaped)
 			escapedPath = getXPathEscape(path);
 
-		Reference reference = referenceCache.get(escapedPath.toLowerCase());
+		Reference reference = null;
+		if (useCache) {
+			reference = referenceCache.get(escapedPath.toLowerCase());
+		}
 
 		if (reference == null) {
-			if (referenceCache.size() > maxSizeReferenceCache) {
-				// avoid cache becoming too large
-				logger.info("Clearing Space Cache");
-				referenceCache.clear();
+			if (useCache) {
+				if (referenceCache.size() > maxSizeReferenceCache) {
+					// avoid cache becoming too large
+					logger.info("Clearing Space Cache");
+					referenceCache.clear();
+				}
 			}
 
 			Reference uncheckedReference = new Reference(store, null, escapedPath);
@@ -848,7 +853,9 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				reference = nodes[0].getReference();
 
 				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
-				referenceCache.put(escapedPath.toLowerCase(), reference);
+				if (useCache) {
+					referenceCache.put(escapedPath.toLowerCase(), reference);
+				}
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
 				logger.debug("Could not get results from reference query for path {}, falling to lucene query", path);
@@ -1073,21 +1080,21 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		}
 	}
 
-	private Reference locateByFileNameAndPath(String parentPath, String name)
+	private Reference locateByFileNameAndPath(String parentPath, String name, boolean useCache)
 			throws RepositoryAccessException {
 
 		String path = getXPathEscape(companyHomePath
 				+ parentPath + "/cm:" + name);
 
-		return getReference(path);
+		return getReference(path, useCache);
 	}
 
-	private Reference locateByFileNameAndSpace(Reference parent, String name)
+	private Reference locateByFileNameAndSpace(Reference parent, String name, boolean useCache)
 			throws RepositoryAccessException {
 		String path = parent.getPath() + "/cm:" + getXPathEscape(name);
 		logger.info("Locating document: " + path);
 
-		return getReference(path);
+		return getReference(path, useCache);
 	}
 
 	// note that this can be unsafe when the filename is not unique
@@ -1143,7 +1150,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 	private void deleteByDocNameAndSpace(Reference parent, String docName)
 			throws RepositoryAccessException, RepositoryException, DocumentNotFoundException {
-		Reference ref = locateByFileNameAndSpace(parent, docName);
+		Reference ref = locateByFileNameAndSpace(parent, docName, true);
 		// acquire a content reference ...
 		if (ref != null) {
 			logger.info("Reference {}", ref.getPath());
@@ -1204,7 +1211,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 													 String docName, File docNewContent, String mimeType,
 													 boolean checkSize) throws RepositoryAccessException,
 			RepositoryException {
-		Reference contentReference = locateByFileNameAndSpace(parent, docName);
+		Reference contentReference = locateByFileNameAndSpace(parent, docName, true);
 
 		if (contentReference == null) {
 			logger.warn("Document {} not known in space {}", docName,

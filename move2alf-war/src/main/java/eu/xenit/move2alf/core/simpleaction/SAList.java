@@ -79,4 +79,10 @@ public class SAList extends SimpleActionWithSourceSink {
 		output.add(newParameterMap);
 		return output;
 	}
+
+	@Override
+	public List<FileInfo> initializeState(final ActionConfig config, final Map<String, Serializable> state) {
+		getSink().clearCaches(getSinkConfig());
+		return null;
+	}
 }
