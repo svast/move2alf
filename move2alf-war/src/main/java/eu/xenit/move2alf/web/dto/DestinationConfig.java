@@ -19,7 +19,7 @@ public class DestinationConfig {
 	@NotEmpty
 	private String alfPswd;
 
-	private int nbrThreads = 5;
+	private int nbrThreads = 1;
 
 	public void setDestinationName(String destinationName) {
 		this.destinationName = destinationName;
