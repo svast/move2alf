@@ -91,7 +91,7 @@ public class FileSourceSink extends SourceSink {
 	}
 
 	@Override
-	public HashMap<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+	public List<UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final WriteOption docExistsMode, final List<Document> documents) {
 		// TODO Auto-generated method stub
 		return null;

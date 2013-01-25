@@ -51,8 +51,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 	@Override
 	public List<FileInfo> execute(final FileInfo parameterMap,
-			final ActionConfig config, final Map<String, Serializable> state) {
-		if ( usageService.isBlockedByDocumentCounter() ) {
+								  final ActionConfig config, final Map<String, Serializable> state) {
+		if (usageService.isBlockedByDocumentCounter()) {
 			throw new Move2AlfException("Document counter is 0.");
 		}
 
@@ -113,7 +113,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	private List<FileInfo> uploadAndSetACLs(final ActionConfig config, final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
 		String errorMessage = "";
-		Map<String, UploadResult> results = null;
+		List<UploadResult> results = null;
 		try {
 			results = upload(batch, config);
 
@@ -128,29 +128,28 @@ public class SAUpload extends SimpleActionWithSourceSink {
 
 		final List<FileInfo> output = new ArrayList<FileInfo>();
 
-		for (final FileInfo oldParameterMap : batch) {
-
-			final FileInfo newParameterMap = new FileInfo();
-			newParameterMap.putAll(oldParameterMap);
-			if (batchFailed) {
+		if (batchFailed) {
+			for (final FileInfo oldParameterMap : batch) {
+				final FileInfo newParameterMap = new FileInfo();
+				newParameterMap.putAll(oldParameterMap);
 				newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, errorMessage);
+				output.add(newParameterMap);
 			}
-			String fullPath = WebServiceRepositoryAccessSession.companyHomePath + 
-							WebServiceRepositoryAccessSession.getXPathEscape("/cm:" + 
-							normalizeBasePath(config.get(PARAM_PATH)).substring(1) + 
-							"cm:" + ((File) oldParameterMap.get(Parameters.PARAM_FILE)).getName());
-			UploadResult result = results.get(fullPath);
-			if(result != null) {
-				newParameterMap.put(Parameters.PARAM_STATUS, (result.getStatus()==UploadResult.VALUE_OK) ? Parameters.VALUE_OK : Parameters.VALUE_FAILED);
+		} else {
+			final String inputPath = (batch.size() > 0) ? (String) batch.get(0).get(Parameters.PARAM_INPUT_PATH) : "";
+			for (final UploadResult result : results) {
+				final FileInfo newParameterMap = new FileInfo();
+				newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath);
+				newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file);
+				newParameterMap.put(Parameters.PARAM_STATUS, (result.getStatus() == UploadResult.VALUE_OK) ?
+						Parameters.VALUE_OK : Parameters.VALUE_FAILED);
 				newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
 				newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
-			} else {
-				logger.error("File " + fullPath + " does not have an upload result");
-				throw new RuntimeException("File " + fullPath + " does not have an upload result");
+				output.add(newParameterMap);
 			}
-			output.add(newParameterMap);
 		}
+
 		return output;
 	}
 
@@ -190,8 +189,8 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		return (List<ACL>) state.get(STATE_ACL_BATCH);
 	}
 
-	private Map<String, UploadResult> upload(final Batch batch,
-			final ActionConfig config) {
+	private List<UploadResult> upload(final Batch batch,
+									  final ActionConfig config) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
 		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
 
@@ -243,7 +242,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	// TODO: part (or all?) of this should move back to AlfrescoSourceSink: the
 	// "cm:" prefix is Alfresco specific
 	private static String normalizeRemotePath(final String basePath,
-			final String relativePathInput) {
+											  final String relativePathInput) {
 		String relativePath = relativePathInput.replace("\\", "/");
 
 		if (relativePath.startsWith("/")) {
@@ -263,7 +262,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 				remotePath += "cm:" + component + "/";
 			}
 		}
-		if(remotePath.length() > 0){
+		if (remotePath.length() > 0) {
 			remotePath = remotePath.substring(0, remotePath.length() - 1);
 		}
 		return remotePath;

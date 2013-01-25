@@ -18,26 +18,34 @@ import eu.xenit.move2alf.repository.RepositoryAccessException;
 import eu.xenit.move2alf.repository.RepositoryException;
 
 public class CMLDocument {
-	
+
 	private static Logger logger = LoggerFactory
 			.getLogger(CMLDocument.class);
 
 	private Document doc;
+
 	public Document getDocument() {
 		return doc;
+	}
+
+	private String id;
+
+	public String getId() {
+		return id;
 	}
 
 	private String contentDetails;
 	private WebServiceRepositoryAccessSession session;
 
-	public CMLDocument(WebServiceRepositoryAccessSession session, Document doc) {
+	public CMLDocument(WebServiceRepositoryAccessSession session, Document doc, String id) {
 		this.session = session;
 		this.doc = doc;
+		this.id = id;
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {
 		logger.debug("Converting doc to CMLUpdate: {}", doc.file.getName());
-		Predicate pred = new Predicate(new Reference[] { ref },
+		Predicate pred = new Predicate(new Reference[] {ref},
 				WebServiceRepositoryAccessSession.store, null);
 
 		return new CMLUpdate(getContentPropsAndCreateIfNotExists(), pred, null);
@@ -51,24 +59,25 @@ public class CMLDocument {
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
 				+ doc.file.getName());
 
-		return new CMLCreate(String.valueOf(this.hashCode()), parentRef, parentSpace.getUuid(),
+		return new CMLCreate(this.getId(), parentRef, parentSpace.getUuid(),
 				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
-				doc.contentModelNamespace + doc.contentModelType, getContentPropsAndCreateIfNotExists());	
+				doc.contentModelNamespace + doc.contentModelType, getContentPropsAndCreateIfNotExists());
 	}
 
 	private NamedValue[] contentProps;
+
 	private NamedValue[] getContentPropsAndCreateIfNotExists() {
-		if(contentProps != null){
+		if (contentProps != null) {
 			return contentProps;
 		}
-		
+
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
 
 		// these properties are always present
 		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, doc.file.getName()));
 		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,
 				getContentDetailsAndCreateIfNotExists()));
-		
+
 		if (doc.meta != null) {
 			// Enumeration<String> E = meta.;
 			// while (E.hasMoreElements()) {
@@ -77,7 +86,7 @@ public class CMLDocument {
 		if (doc.multiValueMeta != null) {
 			session.processMultiValuedMetadata(doc.contentModelNamespace, doc.multiValueMeta, contentProps);
 		}
-		
+
 		contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
 		contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
 /*		for(NamedValue value: contentProps){
@@ -85,24 +94,29 @@ public class CMLDocument {
 		}*/
 		return contentProps.toArray(new NamedValue[0]);
 	}
-	
+
 	public String getXpath() {
-		return WebServiceRepositoryAccessSession.companyHomePath+session.getXPathEscape(doc.spacePath+"/cm:"+doc.file.getName());
+		return WebServiceRepositoryAccessSession.companyHomePath + session.getXPathEscape(doc.spacePath + "/cm:" + doc.file.getName());
 	}
-	
-	public String getContentDetails(){
+
+	public String getPath() {
+		return WebServiceRepositoryAccessSession.companyHomePath +
+				doc.spacePath +
+				"/cm:" + doc.file.getName();
+	}
+
+	public String getContentDetails() {
 		return this.contentDetails;
 	}
 
 	public String getSpacePath() {
 		return doc.spacePath;
 	}
-	
-	private String getContentDetailsAndCreateIfNotExists(){
-		if(getContentDetails()==null){
+
+	private String getContentDetailsAndCreateIfNotExists() {
+		if (getContentDetails() == null) {
 			contentDetails = session.putContent(doc.file, doc.mimeType);
 		}
 		return getContentDetails();
 	}
-
 }

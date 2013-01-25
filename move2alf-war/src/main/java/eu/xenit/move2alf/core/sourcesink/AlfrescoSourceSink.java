@@ -106,9 +106,9 @@ public class AlfrescoSourceSink extends SourceSink {
 	}
 
 	@Override
-	public Map<String, UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
+	public List<UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final WriteOption docExistsMode, final List<Document> documents) {
-		HashMap<String, UploadResult> results = null;
+		List<UploadResult> results = null;
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession(configuredSourceSink);
 			try {
@@ -129,7 +129,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			} catch (final RuntimeException e) {
 				if ("Error writing content to repository server".equals(e
 						.getMessage())) {
-					retryBatch(configuredSourceSink, docExistsMode, documents);
+					results = retryBatch(configuredSourceSink, docExistsMode, documents);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -159,7 +159,7 @@ public class AlfrescoSourceSink extends SourceSink {
 		return results;
 	}
 
-	private HashMap<String, UploadResult> uploadBatch(final WriteOption docExistsMode,
+	private List<UploadResult> uploadBatch(final WriteOption docExistsMode,
 		final RepositoryAccessSession ras, final List<Document> documents)
 		throws RepositoryAccessException, RepositoryException {
 		
@@ -173,7 +173,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC, acceptDuplicate);
 	}
 
-	private HashMap<String, UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
+	private List<UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
 			final WriteOption docExistsMode, final List<Document> documents)
 			throws RepositoryAccessException, RepositoryException {
 		logger.debug("Authentication failure? Creating new RAS");
@@ -296,7 +296,7 @@ public class AlfrescoSourceSink extends SourceSink {
 
 			@Override
 			protected Boolean executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException {
-				return ras.doesDocExist(name, remotePath);
+				return ras.doesDocExist(name, remotePath, false);
 			}
 		}.execute(sinkConfig);
 

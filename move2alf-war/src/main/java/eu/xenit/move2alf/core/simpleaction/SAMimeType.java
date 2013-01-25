@@ -37,6 +37,9 @@ public class SAMimeType extends SimpleActionSingleResult {
 		String mimeType = null;        
 		try {
 			mimeType = tika.detect(file);
+			if(mimeType.contains(";")){
+				mimeType = mimeType.split(";")[0];
+			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			throw new Move2AlfException(e.getMessage(), e);
