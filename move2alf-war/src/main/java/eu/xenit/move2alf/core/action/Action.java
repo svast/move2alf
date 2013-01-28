@@ -73,6 +73,9 @@ public abstract class Action extends ConfigurableObject {
 		executeImpl(configuredAction, parameterMap);
 		ConfiguredAction nextAction = configuredAction
 				.getAppliedConfiguredActionOnSuccess();
+		if (parameterMap.isEmpty()){
+			return;
+		}
 		if (nextAction != null) {
 			getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, parameterMap);
 		}
