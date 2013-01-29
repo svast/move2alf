@@ -68,14 +68,14 @@
 		
 		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." attributes="maxlength='${job.commandMaxLength}'" />
 		
-		<@labeledSelectList label="Meta-data processor" name="metadata" options=metadataOptions helpText="Choose the meta-data processor."; processor>
+		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions helpText="Choose the metadata processor."; processor>
 			<option value="${processor.class.name}" <#if job.metadata?? && processor.class.name=job.metadata >selected="selected"</#if> >${processor.name} - ${processor.description}</option>
 		</@labeledSelectList>
 		
 				
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/parameterHandler2.js" />"> </script>
 		
-		<@labeledParamTableAndInput label="Meta-data parameters" baseId="paramMetadata" paramList=job.paramMetadata paramNameMaxLength="${job.paramNameMaxLength}" paramValueMaxLength="${job.paramValueMaxLength}" />
+		<@labeledParamTableAndInput label="Metadata parameters" baseId="paramMetadata" paramList=job.paramMetadata paramNameMaxLength="${job.paramNameMaxLength}" paramValueMaxLength="${job.paramValueMaxLength}" />
 		
 		<@labeledInput label="Transformation" forId="transformation">
 				<@radio name="transform" value="notransformation" checked=(jobTransform?? || !jobTransform?has_content || "No transformation"==jobTransform) description="No transformation" />
