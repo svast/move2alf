@@ -10,7 +10,7 @@ public class FilesystemMetadataAction extends MetadataAction {
 
 	@Override
 	public String getDescription() {
-		return "Read metadata from filesystem";
+		return "Read metadata from the filesystem";
 	}
 
 	@Override

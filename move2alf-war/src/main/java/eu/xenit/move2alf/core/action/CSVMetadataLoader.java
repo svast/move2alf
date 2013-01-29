@@ -136,12 +136,12 @@ public class CSVMetadataLoader extends Action {
 
 	@Override
 	public String getName() {
-		return "CSVMetadata Parser";
+		return "CSV metadata";
 	}
 
 	@Override
 	public String getDescription() {
-		return "CSVMetadata Parser";
+		return "Read metadata from a CSV file";
 	}
 
 	@Override

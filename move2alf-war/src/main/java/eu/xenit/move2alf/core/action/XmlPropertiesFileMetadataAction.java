@@ -12,11 +12,11 @@ public class XmlPropertiesFileMetadataAction extends MetadataAction {
 
 	@Override
 	public String getDescription() {
-		return "Read metadata from xml properties file";
+		return "Read metadata from an XML properties file";
 	}
 
 	@Override
 	public String getName() {
-		return "Xml properties file metadata";
+		return "XML properties file metadata";
 	}	
 }
