@@ -871,7 +871,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				}
 				if (references.size() > 0) {
 					for (int i = 0; i < references.size(); i++) {
-						logger.info("Comparing " + references.get(i).getPath() + " with " + escapedPath);
+						logger.debug("Comparing " + references.get(i).getPath() + " with " + escapedPath);
 						if (equalPaths(references.get(i).getPath(), escapedPath)) {
 							logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
 							return references.get(i);
