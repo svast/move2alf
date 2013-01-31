@@ -352,7 +352,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 	private Reference pessimisticCML(boolean allowOverwrite,
 									 List<CMLUpdate> updates, List<CMLCreate> creates, CMLDocument doc)
 			throws IllegalDuplicateException, RepositoryAccessException, RepositoryException {
-		Reference ref = getReference(doc.getPath(), false);
+		Reference ref = getReference(doc.getPath(), false, true);
 		if (ref != null) {
 			if (allowOverwrite) {
 				updates.add(doc.toCMLUpdate(ref));
