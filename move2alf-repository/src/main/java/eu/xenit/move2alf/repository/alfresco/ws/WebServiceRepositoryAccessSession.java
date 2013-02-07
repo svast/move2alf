@@ -73,7 +73,7 @@ import eu.xenit.move2alf.repository.UploadResult;
 public class WebServiceRepositoryAccessSession implements RepositoryAccessSession {
 
 	// FIELDS
-	private static int MAX_LUCENE_RESULTS = 1000;
+	private static int MAX_LUCENE_RESULTS = 999;
 	private static Logger logger = LoggerFactory
 			.getLogger(WebServiceRepositoryAccessSession.class);
 
@@ -1408,6 +1408,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				}
 				// if there are still results; is there a better way to do this?
 				while (rows.length == maxNbrOfResults) {
+					try {
 					String querySession = queryResult.getQuerySession();
 					queryResult = repositoryService.fetchMore(querySession);
 
@@ -1430,10 +1431,13 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 							referenceList.add(reference);
 						}
 					}
+					} catch (RepositoryFault e) {
+						 logger.info("Caught a repository exception when doing a fetchMore, aborting Lucene query. This is a workaround, we should not get a repository exception.");
+						 break;
+					}
 				}
 			}
 		} catch (RepositoryFault e) {
-			logger.warn("", e);
 			throw new RepositoryException(e.getMessage(), e);
 		} catch (RemoteException e) {
 			throw new RepositoryAccessException(e.getMessage(), e);
