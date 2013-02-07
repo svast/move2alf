@@ -1432,7 +1432,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 						}
 					}
 					} catch (RepositoryFault e) {
-						 logger.info("Caught a repository exception when doing a fetchMore, aborting Lucene query. This is a workaround, we should not get a repository exception.");
+						 logger.warn("Caught a repository exception when doing a fetchMore, aborting Lucene query. This is a workaround, we should not get a repository exception.");
 						 break;
 					}
 				}
