@@ -20,12 +20,15 @@ public class WebServiceRepositoryAccess extends RepositoryAccess {
 	protected String password;
 
 	protected String ticket=null;
+	
+	private boolean enableLuceneFallback;
 
 	public WebServiceRepositoryAccess(URL alfrescoUrl, String username,
-			String password) {
+			String password, boolean enableLuceneFallback) {
 		this.alfrescoUrl = alfrescoUrl;
 		this.username = username;
 		this.password = password;
+		this.enableLuceneFallback = enableLuceneFallback;
 	}
 
 //	public WebServiceRepositoryAccess(URL alfrescoUrl, String ticket)
@@ -56,7 +59,7 @@ public class WebServiceRepositoryAccess extends RepositoryAccess {
 				throw new RepositoryAccessException("Could not connect");
 			}
 		}
-		return new WebServiceRepositoryAccessSession(alfrescoUrl);
+		return new WebServiceRepositoryAccessSession(alfrescoUrl, enableLuceneFallback);
 	}
 
 }

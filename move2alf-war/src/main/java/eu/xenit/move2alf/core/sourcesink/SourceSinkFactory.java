@@ -5,8 +5,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import eu.xenit.move2alf.core.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +19,7 @@ import eu.xenit.move2alf.core.AbstractFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 
 @Service("sourceSinkFactory")
-public class SourceSinkFactory extends AbstractFactory<SourceSink> {
+public class SourceSinkFactory extends AbstractFactory<SourceSink> implements ApplicationContextAware {
 
 	private static final int DEFAULT_THREADS = 5;
 
@@ -22,16 +27,17 @@ public class SourceSinkFactory extends AbstractFactory<SourceSink> {
 			.getLogger(SourceSinkFactory.class);
 
 	private final Map<Integer, ExecutorService> threadPools = new HashMap<Integer, ExecutorService>();
+    private AutowireCapableBeanFactory applicationContext;
 
-	@Override
+    @Override
 	protected AssignableTypeFilter getTypeFilter() {
 		return new AssignableTypeFilter(SourceSink.class);
 	}
 
 	@Override
 	protected void initializeObject(final SourceSink object) {
-		// no initialization required for SourceSink objects
-	}
+        applicationContext.autowireBean(object);
+    }
 
 	public ExecutorService getThreadPool(final ConfiguredSourceSink sourceSink) {
 		synchronized (threadPools) {
@@ -53,4 +59,9 @@ public class SourceSinkFactory extends AbstractFactory<SourceSink> {
 			}
 		}
 	}
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext.getAutowireCapableBeanFactory();
+    }
 }

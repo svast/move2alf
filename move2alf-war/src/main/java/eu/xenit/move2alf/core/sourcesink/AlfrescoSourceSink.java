@@ -1,45 +1,54 @@
 package eu.xenit.move2alf.core.sourcesink;
 
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.ApplicationContextProvider;
+import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.repository.*;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
+import org.alfresco.webservice.util.WebServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.webservice.util.WebServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.repository.DocumentNotFoundException;
-import eu.xenit.move2alf.repository.IllegalDocumentException;
-import eu.xenit.move2alf.repository.RepositoryAccessException;
-import eu.xenit.move2alf.repository.RepositoryAccessSession;
-import eu.xenit.move2alf.repository.RepositoryException;
-import eu.xenit.move2alf.repository.RepositoryFatalException;
-import eu.xenit.move2alf.repository.UploadResult;
-import eu.xenit.move2alf.repository.alfresco.ws.Document;
-import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
-
 public class AlfrescoSourceSink extends SourceSink {
-
+	
 	private static final String PARAM_URL = "url";
 	private static final String PARAM_PASSWORD = "password";
 	private static final String PARAM_USER = "user";
-	private static final boolean OPTIMISTIC = true;
-	private static final boolean PESSIMISTIC = false;
 
-	private static ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
+    @Value(value = "#{'${repo.overwrite.optimistic}'}")
+    private boolean overwriteOptimistic;
+
+    @Value(value = "#{'${repo.create.optimistic}'}")
+    private boolean createOptimistic;
+
+    private static boolean luceneFallbackEnabled;
+
+    @Value(value = "#{'${repo.luceneFallback.enabled}'}")
+    public void setLuceneFallbackEnabled(boolean luceneFallbackEnabled){
+        AlfrescoSourceSink.luceneFallbackEnabled = luceneFallbackEnabled;
+    }
+
+    private static ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
 	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSourceSink.class);
 
-	@Override
+    @Override
 	public List<File> list(final ConfiguredSourceSink sourceConfig,
 			final String path, final boolean recursive) {
 		return null;
@@ -167,10 +176,12 @@ public class AlfrescoSourceSink extends SourceSink {
 		// if overwrite=true, try directly pessimistic upload, which has a small performance penalty due to checks in the repository
 		// if overwrite=false, try optimistic upload, which falls back to pessimistic in case of duplicates; in this mode, documents are uploaded twice
 		boolean acceptDuplicate = WriteOption.SKIPANDIGNORE == docExistsMode;
-		if(overwrite)
-			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, PESSIMISTIC);
+        ApplicationContext context = ApplicationContextProvider.getApplicationContext();
+        if(overwrite) {
+            return ras.storeDocsAndCreateParentSpaces(documents, overwrite, overwriteOptimistic);
+        }
 		else
-			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, OPTIMISTIC, acceptDuplicate);
+			return ras.storeDocsAndCreateParentSpaces(documents, overwrite, createOptimistic, acceptDuplicate);
 	}
 
 	private List<UploadResult> retryBatch(final ConfiguredSourceSink configuredSourceSink,
@@ -362,7 +373,7 @@ public class AlfrescoSourceSink extends SourceSink {
 			WebServiceRepositoryAccess ra = null;
 			try {
 				ra = new WebServiceRepositoryAccess(new URL(url), user,
-						password);
+						password, AlfrescoSourceSink.luceneFallbackEnabled);
 			} catch (final MalformedURLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

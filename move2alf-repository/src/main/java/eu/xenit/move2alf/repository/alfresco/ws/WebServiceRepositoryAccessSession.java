@@ -115,6 +115,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 	private String host;
 	private int port;
 	private String webapp;
+	private boolean enableLuceneFallback;
 
 	public static final String protocol = "http://";
 	public static final String pathDocumentDetails = "/n/showDocDetails/workspace/SpacesStore/";
@@ -126,8 +127,9 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 	// CONSTRUCTOR
 
-	public WebServiceRepositoryAccessSession(URL alfrescoUrl) {
+	public WebServiceRepositoryAccessSession(URL alfrescoUrl, boolean enableLuceneFallback) {
 		super();
+		this.enableLuceneFallback = enableLuceneFallback;
 		logger.debug("TICKET {}", AuthenticationUtils.getTicket());
 		repositoryService = WebServiceFactory.getRepositoryService(alfrescoUrl
 				.toString());
@@ -858,27 +860,31 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				}
 			} catch (RepositoryFault e) {
 				// space does not exist, return null
-				logger.debug("Could not get results from reference query for path {}, falling to lucene query", path);
-				// fallback to Lucene search
-				// happens when searching case sensitive for folder or file names
-				String luceneQuery = "\\@" + escapeQName(QName.createQName(Constants.NAMESPACE_CONTENT_MODEL, "name")) + ":\"" + getNameFromPath(path) + "\"";
-				List<Reference> references;
-				try {
-					references = locateByLuceneQuery(luceneQuery, MAX_LUCENE_RESULTS);
-				} catch (RepositoryException e1) {
-					logger.error("Could not get lucene reference for path {}", path);
-					throw new RuntimeException(e1);
-				}
-				if (references.size() > 0) {
-					for (int i = 0; i < references.size(); i++) {
-						logger.debug("Comparing " + references.get(i).getPath() + " with " + escapedPath);
-						if (equalPaths(references.get(i).getPath(), escapedPath)) {
-							logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
-							return references.get(i);
+				logger.debug("Could not get results from reference query for path {}", path);
+				
+				if(enableLuceneFallback){
+					logger.debug("Falling back to lucene search");
+					// fallback to Lucene search
+					// happens when searching case sensitive for folder or file names
+					String luceneQuery = "\\@" + escapeQName(QName.createQName(Constants.NAMESPACE_CONTENT_MODEL, "name")) + ":\"" + getNameFromPath(path) + "\"";
+					List<Reference> references;
+					try {
+						references = locateByLuceneQuery(luceneQuery, MAX_LUCENE_RESULTS);
+					} catch (RepositoryException e1) {
+						logger.error("Could not get lucene reference for path {}", path);
+						throw new RuntimeException(e1);
+					}
+					if (references.size() > 0) {
+						for (int i = 0; i < references.size(); i++) {
+							logger.debug("Comparing " + references.get(i).getPath() + " with " + escapedPath);
+							if (equalPaths(references.get(i).getPath(), escapedPath)) {
+								logger.info("Found lucene reference {} for path {}", references.get(i).getUuid(), references.get(i).getPath());
+								return references.get(i);
+							}
 						}
 					}
+					logger.debug("Could not get lucene reference for path {}", path);
 				}
-				logger.debug("Could not get lucene reference for path {}", path);
 				return null;
 			} catch (RemoteException e) {
 				// connectivity problem
@@ -1387,6 +1393,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			logger.info("Store {}", store.getAddress());
 			QueryResult queryResult = repositoryService.query(store, query,
 					false);
+			
 
 			ResultSet resultSet = queryResult.getResultSet();
 			ResultSetRow[] rows = resultSet.getRows();

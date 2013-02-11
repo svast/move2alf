@@ -24,7 +24,7 @@ public class TestWs extends TestBase {
 	protected void setUp() {
 		try {
 			alfrescoUrl = new URL("http://192.168.123.2:8080/alfresco/api/");
-			ra = new WebServiceRepositoryAccess(alfrescoUrl, user, password);
+			ra = new WebServiceRepositoryAccess(alfrescoUrl, user, password, false);
 		} catch (MalformedURLException e) {
 			logger.error("", e);
 			fail();
