@@ -56,13 +56,16 @@ function getCron(){
 }
 
 function activateScheduleType(rowId){
-	$("div.scheduleLine").addClass("inactive");
-	$("div.scheduleLine input[type!=radio]").attr("disabled","");
-	$("div.scheduleLine select").attr("disabled","");
-	$("div#"+rowId).removeClass("inactive");
-	$("div#"+rowId+" input").removeAttr("disabled");
-	$("div#"+rowId+" select").removeAttr("disabled");
-	$("#radio_"+rowId).prop('checked', true);
+    var radio = $("#radio_"+rowId);
+    if(!radio.prop('checked')){
+        $("div.scheduleLine").addClass("inactive");
+        $("div.scheduleLine input[type!=radio]").attr("disabled","");
+        $("div.scheduleLine select").attr("disabled","");
+        $("div#"+rowId).removeClass("inactive");
+        $("div#"+rowId+" input").removeAttr("disabled");
+        $("div#"+rowId+" select").removeAttr("disabled");
+        radio.prop('checked', true);
+    }
 
 }
 
