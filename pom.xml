@@ -5,7 +5,7 @@
 
 	<groupId>eu.xenit</groupId>
 	<artifactId>move2alf</artifactId>
-	<version>1.2.5-SNAPSHOT</version>
+	<version>1.2.5</version>
 	<packaging>pom</packaging>
 
 	<name>move2alf</name>
