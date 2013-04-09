@@ -49,31 +49,30 @@ public class Tiff2Pdf {
 	}
 
 	public void createSingleTiff(File singleTifFile) {
+        // jai approach
+        try {
+            OutputStream out = new FileOutputStream(singleTifFile);
+            // ByteArrayOutputStream out = new ByteArrayOutputStream();
+            TIFFEncodeParam param = new TIFFEncodeParam();
 
-		// jai approach
-		try {
-			OutputStream out = new FileOutputStream(singleTifFile);
-			// ByteArrayOutputStream out = new ByteArrayOutputStream();
-			TIFFEncodeParam param = new TIFFEncodeParam();
+            Vector<RenderedImage> vector = new Vector<RenderedImage>();
+            logger.debug("NbrOfImages {}", imageList.size());
+            for (int i = 1; i < imageList.size(); i++) {
+                vector.add(imageList.get(i));
+            }
+            param.setExtraImages(vector.iterator());
 
-			Vector<RenderedImage> vector = new Vector<RenderedImage>();
-			logger.debug("NbrOfImages {}", imageList.size());
-			for (int i = 1; i < imageList.size(); i++) {
-				vector.add(imageList.get(i));
-			}
-			param.setExtraImages(vector.iterator());
+            ImageEncoder encoder = ImageCodec.createImageEncoder("TIFF", out,
+                    param);
 
-			ImageEncoder encoder = ImageCodec.createImageEncoder("TIFF", out,
-					param);
-
-			encoder.encode(imageList.get(0));
-			// tempByteArray = out.toByteArray();
-			out.close();
-			logger.info("Single page tiff created");
-		} catch (Exception e) {
-			logger.error("Error creating single page tiff", e);
-		}
-	}
+            encoder.encode(imageList.get(0));
+            // tempByteArray = out.toByteArray();
+            out.close();
+            logger.info("Single page tiff created");
+        } catch (Exception e) {
+            logger.error("Error creating single page tiff", e);
+        }
+    }
 
 	public void tiff2Pdf(File singleTifFile, File pdfFile) {
 
