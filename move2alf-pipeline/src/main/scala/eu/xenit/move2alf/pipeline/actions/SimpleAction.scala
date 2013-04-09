@@ -1,5 +1,8 @@
 package eu.xenit.move2alf.pipeline.actions
 
+import eu.xenit.move2alf.pipeline.AbstractMessage
+import eu.xenit.move2alf.pipeline.actors.{SendingActor, ReceivingActor, AbstractM2AActor, M2AActor}
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,6 +11,6 @@ package eu.xenit.move2alf.pipeline.actions
  * Time: 9:58 AM
  * To change this template use File | Settings | File Templates.
  */
-abstract class SimpleAction[T <: AbstractMessage, U <: AbstractMessage] extends BasicAction[T,U] with SendingAction[T,U] with ReceivingAction[T,U]{
+abstract class SimpleAction[T <: AbstractMessage, V <: AbstractMessage] extends AbstractAction with ReceivingAction[T] with SendingAction[V]{
 
 }

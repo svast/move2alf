@@ -1,6 +1,7 @@
-package eu.xenit.move2alf.pipeline.actions;
+package eu.xenit.move2alf.pipeline;
 
 import eu.xenit.move2alf.pipeline.StringMessage;
+import eu.xenit.move2alf.pipeline.actions.SimpleAction;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,9 +12,12 @@ import eu.xenit.move2alf.pipeline.StringMessage;
  */
 public class JavaAction extends SimpleAction<StringMessage, StringMessage> {
 
+
+
     @Override
     public void executeImpl(StringMessage message) {
         System.out.println("This is a java action");
         sendMessage(new StringMessage("test123"));
+
     }
 }

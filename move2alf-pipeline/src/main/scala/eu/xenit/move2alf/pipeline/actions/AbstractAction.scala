@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import eu.xenit.move2alf.pipeline.actors.M2AActor
+import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, M2AActor}
 import eu.xenit.move2alf.pipeline.AbstractMessage
 
 
@@ -13,7 +13,12 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
  */
 abstract class AbstractAction {
 
-  private[actions] var actor: AbstractM2AActor = _
+  type U = AbstractM2AActor
+
+  private var _actor: U = _
+
+  private[actions] def actor: U = _actor
+  private[actions] def actor_= (value: U):Unit = _actor = value
 
   final protected def setStateValue(key:String, value:Any) {
     actor.setStateValue(key, value)

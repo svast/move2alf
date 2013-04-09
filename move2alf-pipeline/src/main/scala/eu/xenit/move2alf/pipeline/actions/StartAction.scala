@@ -1,5 +1,8 @@
 package eu.xenit.move2alf.pipeline.actions
 
+import eu.xenit.move2alf.pipeline.AbstractMessage
+import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, StartActor, SendingActor}
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,9 +11,9 @@ package eu.xenit.move2alf.pipeline.actions
  * Time: 7:56 PM
  * To change this template use File | Settings | File Templates.
  */
-trait StartAction[T <: AbstractMessage, U <: AbstractMessage] extends BasicAction[T,U] {
+trait StartAction[T <: AbstractMessage] extends SendingAction[T] {
 
-  def execute(act: M2AActor[T,U]) {
+  final def execute(act: StartActor[T]) {
     actor = act
     executeImpl()
   }
