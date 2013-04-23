@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import eu.xenit.move2alf.pipeline.AbstractMessage
-import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, StartActor, SendingActor}
+import eu.xenit.move2alf.pipeline.{Start, AbstractMessage}
 
 
 /**
@@ -13,10 +12,10 @@ import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, StartActor, SendingA
  */
 trait StartAction[T <: AbstractMessage] extends SendingAction[T] {
 
-  final def execute(act: StartActor[T]) {
-    actor = act
-    executeImpl()
+  override def receive = {
+    case Start => execute()
+    case s => super.receive(s)
   }
 
-  def executeImpl()
+  protected def execute()
 }

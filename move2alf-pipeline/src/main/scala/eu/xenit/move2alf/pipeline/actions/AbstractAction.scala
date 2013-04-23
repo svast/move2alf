@@ -1,7 +1,10 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, M2AActor}
-import eu.xenit.move2alf.pipeline.AbstractMessage
+import akka.actor.ActorRef
+import eu.xenit.move2alf.pipeline.state.JobContext
+import akka.routing.Broadcast
+import eu.xenit.move2alf.pipeline.{M2AMessage, EOC}
+import eu.xenit.move2alf.common.LogHelper
 
 
 /**
@@ -11,20 +14,29 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
  * Time: 2:54 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractAction {
+abstract class AbstractAction(protected val receiver: ActorRef, private val nmbSenders: Int)(implicit protected val jobContext: JobContext) extends LogHelper {
 
-  type U = AbstractM2AActor
+  def receive: PartialFunction[Any, Unit] = {
+    case EOC => eocMessage()
+  }
 
-  private var _actor: U = _
-
-  private[actions] def actor: U = _actor
-  private[actions] def actor_= (value: U):Unit = _actor = value
+  private var nmbOfEOC:Int = 0
 
   final protected def setStateValue(key:String, value:Any) {
-    actor.setStateValue(key, value)
+    jobContext.setStateValue(key, value)
   }
 
   final protected def getStateValue(key: String): Any = {
-    actor.getStateValue(key)
+    jobContext.getStateValue(key)
+  }
+
+  protected def eocMessage(){
+    logger.debug("Recieved EOC message")
+    nmbOfEOC += 1
+    if (nmbOfEOC == nmbSenders) {
+      nmbOfEOC = 0
+      logger.debug("Sending EOC message")
+      receiver ! Broadcast(EOC)
+    }
   }
 }

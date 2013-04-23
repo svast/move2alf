@@ -1,8 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import eu.xenit.move2alf.pipeline.AbstractMessage
-import eu.xenit.move2alf.pipeline.actors.{ReceivingActor, AbstractM2AActor}
-
+import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,10 +11,11 @@ import eu.xenit.move2alf.pipeline.actors.{ReceivingActor, AbstractM2AActor}
  */
 trait ReceivingAction[T <: AbstractMessage] extends AbstractAction {
 
-  final def execute(message: T, _actor: ReceivingActor[T]){
-    this.actor = _actor
-    executeImpl(message)
+  override def receive = {
+    case M2AMessage(message) => execute(message.asInstanceOf[T])
+    case s => super.receive(s)
   }
 
-  def executeImpl(message: T)
+  protected def execute(message: T)
+
 }

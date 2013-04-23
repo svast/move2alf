@@ -1,8 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import eu.xenit.move2alf.pipeline.AbstractMessage
-import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, SendingActor}
-
+import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,6 +12,6 @@ import eu.xenit.move2alf.pipeline.actors.{AbstractM2AActor, SendingActor}
 trait SendingAction[T <: AbstractMessage] extends AbstractAction {
 
   final protected def sendMessage(message: T){
-    actor.asInstanceOf[SendingActor[T]].sendMessage(message)
+    receiver ! M2AMessage(message)
   }
 }

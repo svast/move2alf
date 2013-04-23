@@ -1,7 +1,8 @@
 package eu.xenit.move2alf.pipeline.actions
 
 import eu.xenit.move2alf.pipeline.AbstractMessage
-import eu.xenit.move2alf.pipeline.actors.{SendingActor, ReceivingActor, AbstractM2AActor, M2AActor}
+import akka.actor.ActorRef
+import eu.xenit.move2alf.pipeline.state.JobContext
 
 
 /**
@@ -11,6 +12,6 @@ import eu.xenit.move2alf.pipeline.actors.{SendingActor, ReceivingActor, Abstract
  * Time: 9:58 AM
  * To change this template use File | Settings | File Templates.
  */
-abstract class SimpleAction[T <: AbstractMessage, V <: AbstractMessage] extends AbstractAction with ReceivingAction[T] with SendingAction[V]{
+abstract class SimpleAction[T <: AbstractMessage, V <: AbstractMessage](receiver: ActorRef, nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractAction(receiver, nmbSenders) with ReceivingAction[T] with SendingAction[V]{
 
 }
