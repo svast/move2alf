@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.pipeline.actions
+package eu.xenit.move2alf.pipeline.actions.context
 
 import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
 
@@ -9,7 +9,7 @@ import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
  * Time: 8:06 PM
  * To change this template use File | Settings | File Templates.
  */
-trait ReceivingAction[T <: AbstractMessage] extends AbstractAction {
+trait ReceivingActionContext[T <: AbstractMessage] extends AbstractActionContext {
 
   override def receive = {
     case M2AMessage(message) => execute(message.asInstanceOf[T])

@@ -1,0 +1,19 @@
+package eu.xenit.move2alf.pipeline.actions.context
+
+import eu.xenit.move2alf.pipeline.AbstractMessage
+import akka.actor.ActorRef
+import eu.xenit.move2alf.pipeline.state.JobContext
+import eu.xenit.move2alf.pipeline.actions.EndAction
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: thijs
+ * Date: 4/25/13
+ * Time: 12:02 PM
+ * To change this template use File | Settings | File Templates.
+ */
+class EndActionContext[T <: AbstractMessage](private val action: EndAction[T], receivers: Map[String, ActorRef], nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractActionContext(receivers, nmbSenders) with ReceivingActionContext[T] {
+  protected def execute(message: T) {
+    action.executeImpl(message: T, new StateContextImpl(this))
+  }
+}

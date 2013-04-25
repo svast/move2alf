@@ -1,11 +1,12 @@
 package eu.xenit.move2alf.pipeline.actors
 
-import eu.xenit.move2alf.pipeline.actions.{ActionWrapper, BasicAction}
+import eu.xenit.move2alf.pipeline.actions.{BasicAction}
 import java.lang.reflect.{ParameterizedType, Type}
 import scala.Function._
 import akka.actor._
 import eu.xenit.move2alf.pipeline.AbstractMessage
 import eu.xenit.move2alf.pipeline.state.JobContext
+import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,8 +26,8 @@ class BasicActionActorFactory(private val actionClass: String, private val param
     parameters foreach {
       case (key, value) => subClass.getMethod("set"+key.capitalize,classOf[String]).invoke(basicAction, value)
     }
-    val wrapper: ActionWrapper[AbstractMessage, AbstractMessage] = new ActionWrapper[AbstractMessage, AbstractMessage](basicAction, receiver, nmbOfSenders)
-    basicAction.setWrapper(wrapper)
+    val wrapper: BasicActionContext[AbstractMessage, AbstractMessage] = new BasicActionContext[AbstractMessage, AbstractMessage](basicAction, Map("default" -> receiver), nmbOfSenders)
+    //basicAction.setContext(wrapper)
 
     context.actorOf(Props(new M2AActor(wrapper)))
   }

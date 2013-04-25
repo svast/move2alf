@@ -3,13 +3,18 @@ package eu.xenit.move2alf.pipeline.actions
 import org.junit.{Before, Test}
 
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.StringMessage
+import eu.xenit.move2alf.pipeline.{M2AMessage, EOC, StringMessage}
 import org.mockito.Mockito._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers.{eq => the, any}
-import akka.actor.ActorRef
+import akka.actor.{Actor, Props, ActorSystem, ActorRef}
+import akka.testkit.{TestActor, TestActorRef, TestProbe}
+import akka.routing.Broadcast
+import eu.xenit.move2alf.pipeline.M2AMessage
+import akka.routing.Broadcast
+import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
 
 
 /**
@@ -19,18 +24,41 @@ import akka.actor.ActorRef
  * Time: 2:53 PM
  * To change this template use File | Settings | File Templates.
  */
-class ActionWrapperTest extends MockitoSugar {
+class ActionWrapperTest {
 
-  var actionWrapper: ActionWrapper[_,_] = _
+  var actionWrapper: BasicActionContext[StringMessage,StringMessage] = _
+  val nmbReceivers = 3
+  var mockedReceiver: TestActorRef[TestActor] = _
+  var action: BasicAction[StringMessage, StringMessage] = _
 
   @Before
   def before(){
+    implicit val system = ActorSystem("Test")
     implicit val jobContext = new JobContext
-    actionWrapper = new ActionWrapper[StringMessage, StringMessage](mock[BasicAction[StringMessage, StringMessage]], mock[ActorRef], 1)
+    mockedReceiver = mock(classOf[TestActorRef[TestActor]])
+    action = mock(classOf[BasicAction[StringMessage, StringMessage]])
+    actionWrapper = new BasicActionContext[StringMessage, StringMessage](action , Map("default" -> mockedReceiver), nmbReceivers)
   }
 
   @Test
   def testReceive(){
+    //Test EOC
+    val nmbTimes = 9
+    1 to (nmbReceivers * nmbTimes + nmbReceivers - 1) foreach { _ => actionWrapper.receive(EOC)}
+    verify(mockedReceiver, times(nmbTimes)) ! Broadcast(EOC)
+    actionWrapper.receive(EOC)
+    verify(mockedReceiver, times(nmbTimes+1)) ! Broadcast(EOC)
 
+    //Test execution invocation of BasicAction
+    val message = new StringMessage("Test")
+    actionWrapper.receive(M2AMessage(message))
+    //verify(action, times(1)).executeImpl(message)
+  }
+
+  @Test
+  def testSendMessage(){
+    val message = new StringMessage("Test")
+    actionWrapper.sendMessage(message)
+    verify(mockedReceiver, times(1)) ! M2AMessage(message)
   }
 }
