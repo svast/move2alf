@@ -11,6 +11,6 @@ import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
  * Time: 11:28 AM
  * To change this template use File | Settings | File Templates.
  */
-public interface BeginAction<T extends AbstractMessage>{
-    public void executeImpl(SendingContext<T> context);
+public interface BeginAction{
+    public void executeImpl(SendingContext context);
 }

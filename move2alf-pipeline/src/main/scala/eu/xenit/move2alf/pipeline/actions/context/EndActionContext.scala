@@ -3,7 +3,7 @@ package eu.xenit.move2alf.pipeline.actions.context
 import eu.xenit.move2alf.pipeline.AbstractMessage
 import akka.actor.ActorRef
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.EndAction
+import eu.xenit.move2alf.pipeline.actions.ReceivingAction
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,8 +12,8 @@ import eu.xenit.move2alf.pipeline.actions.EndAction
  * Time: 12:02 PM
  * To change this template use File | Settings | File Templates.
  */
-class EndActionContext[T <: AbstractMessage](private val action: EndAction[T], receivers: Map[String, ActorRef], nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractActionContext(receivers, nmbSenders) with ReceivingActionContext[T] {
+class EndActionContext[T <: AbstractMessage](private val action: ReceivingAction[T], receivers: Map[String, ActorRef], nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractActionContext(receivers, nmbSenders) with ReceivingActionContext[T] with StateActionContext {
   protected def execute(message: T) {
-    action.executeImpl(message: T, new StateContextImpl(this))
+    action.execute(message: T)
   }
 }

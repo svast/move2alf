@@ -12,8 +12,8 @@ import eu.xenit.move2alf.pipeline.actions.BeginAction
  * Time: 10:27 AM
  * To change this template use File | Settings | File Templates.
  */
-class BeginActionContext[T <: AbstractMessage](private val action: BeginAction[T], receivers: Map[String, ActorRef])(implicit jobContext: JobContext) extends AbstractActionContext(receivers, 1) with StartActionContext[T] {
+class BeginActionContext[T <: AbstractMessage](private val action: BeginAction, receivers: Map[String, ActorRef])(implicit jobContext: JobContext) extends AbstractActionContext(receivers, 1) with StartActionContext[T] with StateActionContext{
   protected def execute() {
-    action.executeImpl(new SendingContextImpl[T](this))
+    action.executeImpl(new SendingContextImpl(this))
   }
 }

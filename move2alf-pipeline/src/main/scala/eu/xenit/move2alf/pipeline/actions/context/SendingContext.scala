@@ -9,10 +9,10 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
  * Time: 3:55 PM
  * To change this template use File | Settings | File Templates.
  */
-trait SendingContext[T <: AbstractMessage] extends StateContext{
+trait SendingContext{
 
-  def sendMessage(message: T)
+  def sendMessage(message: AbstractMessage)
 
-  def sendMessage(message: T, receiver: String)
+  def sendMessage(message: AbstractMessage, receiver: String)
 
 }

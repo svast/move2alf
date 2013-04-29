@@ -22,14 +22,6 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
 
   private var nmbOfEOC:Int = 0
 
-  final def setStateValue(key:String, value:Any) {
-    jobContext.setStateValue(key, value)
-  }
-
-  final def getStateValue(key: String): Any = {
-    jobContext.getStateValue(key)
-  }
-
   protected def eocMessage(){
     logger.debug("Recieved EOC message")
     nmbOfEOC += 1

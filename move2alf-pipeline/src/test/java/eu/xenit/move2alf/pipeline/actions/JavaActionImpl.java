@@ -4,6 +4,7 @@ import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.StringMessage;
 import eu.xenit.move2alf.pipeline.actions.context.SendingActionContext;
 import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
+import eu.xenit.move2alf.pipeline.actions.context.StateContext;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,7 +13,12 @@ import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
  * Time: 10:08 AM
  * To change this template use File | Settings | File Templates.
  */
-public class JavaActionImpl<T extends AbstractMessage, U extends AbstractMessage> implements BasicAction<T, U> {
+public class JavaActionImpl<T extends AbstractMessage> implements ReceivingAction<T>, HasStateContext, HasSendingContext{
+
+    @Override
+    public void setStateContext(StateContext stateContext) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 
     private String param1;
     public void setParam1(String param1){
@@ -20,7 +26,12 @@ public class JavaActionImpl<T extends AbstractMessage, U extends AbstractMessage
     }
 
     @Override
-    public void executeImpl(T message, SendingContext<U> context) {
+    public void execute(T message) {
 
+    }
+
+    @Override
+    public void setSendingContext(SendingContext sendingContext) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

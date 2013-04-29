@@ -3,7 +3,7 @@ package eu.xenit.move2alf.pipeline.actions.context
 import eu.xenit.move2alf.pipeline.AbstractMessage
 import akka.actor.ActorRef
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.BasicAction
+import eu.xenit.move2alf.pipeline.actions.{ReceivingAction}
 
 
 /**
@@ -13,9 +13,9 @@ import eu.xenit.move2alf.pipeline.actions.BasicAction
  * Time: 9:58 AM
  * To change this template use File | Settings | File Templates.
  */
-class BasicActionContext[T <: AbstractMessage, V <: AbstractMessage](private val action: BasicAction[T,V], receivers: Map[String, ActorRef], nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractActionContext(receivers, nmbSenders) with ReceivingActionContext[T] with SendingActionContext[V]{
+class BasicActionContext[T <: AbstractMessage, V <: AbstractMessage](private val action: ReceivingAction[T], receivers: Map[String, ActorRef], nmbSenders: Int)(implicit jobContext: JobContext) extends AbstractActionContext(receivers, nmbSenders) with ReceivingActionContext[T] with SendingActionContext with StateActionContext{
 
   def execute(message: T) {
-    //action.executeImpl(message)
+    //action.execute(message)
   }
 }

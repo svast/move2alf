@@ -11,8 +11,8 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
  * Time: 12:05 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface EndAction<T extends AbstractMessage>{
+public interface ReceivingAction<T extends AbstractMessage>{
 
-    public void executeImpl(T message, StateContext context);
+    public void execute(T message);
 
 }

@@ -29,14 +29,14 @@ class ActionWrapperTest {
   var actionWrapper: BasicActionContext[StringMessage,StringMessage] = _
   val nmbReceivers = 3
   var mockedReceiver: TestActorRef[TestActor] = _
-  var action: BasicAction[StringMessage, StringMessage] = _
+  var action: ReceivingAction[StringMessage] = _
 
   @Before
   def before(){
     implicit val system = ActorSystem("Test")
     implicit val jobContext = new JobContext
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
-    action = mock(classOf[BasicAction[StringMessage, StringMessage]])
+    action = mock(classOf[ReceivingAction[StringMessage]])
     actionWrapper = new BasicActionContext[StringMessage, StringMessage](action , Map("default" -> mockedReceiver), nmbReceivers)
   }
 
@@ -52,7 +52,7 @@ class ActionWrapperTest {
     //Test execution invocation of BasicAction
     val message = new StringMessage("Test")
     actionWrapper.receive(M2AMessage(message))
-    //verify(action, times(1)).executeImpl(message)
+    //verify(action, times(1)).execute(message)
   }
 
   @Test

@@ -1,12 +1,14 @@
 package eu.xenit.move2alf.pipeline.actors
 
-import eu.xenit.move2alf.pipeline.actions.{BasicAction}
 import java.lang.reflect.{ParameterizedType, Type}
 import scala.Function._
 import akka.actor._
 import eu.xenit.move2alf.pipeline.AbstractMessage
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
+import eu.xenit.move2alf.pipeline.actions.context.{StateContextImpl, SendingContextImpl, BasicActionContext}
+import eu.xenit.move2alf.pipeline.actions.{HasStateContext, HasSendingContext, ReceivingAction}
+import eu.xenit.move2alf.common.LogHelper
+import akka.routing.SmallestMailboxRouter
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,39 +17,37 @@ import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
  * Time: 2:25 PM
  * To change this template use File | Settings | File Templates.
  */
-class BasicActionActorFactory(private val actionClass: String, private val parameters: Map[String, String], receiver: ActorRef, private val nmbOfSenders: Int)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActorFactory{
+class BasicActionActorFactory(private val actionClass: String, private val parameters: Map[String, String], receiver: ActorRef, private val nmbOfSenders: Int, private val nmbActors: Int = 1)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActorFactory with LogHelper{
 
 
   def createActor: ActorRef = {
     val subClass = Class.forName(actionClass)
     val constructor = subClass.getConstructor()
-    val basicAction: BasicAction[AbstractMessage,AbstractMessage] = constructor.newInstance().asInstanceOf[BasicAction[AbstractMessage,AbstractMessage]]
+    val basicAction: ReceivingAction[AbstractMessage] = constructor.newInstance().asInstanceOf[ReceivingAction[AbstractMessage]]
 
     parameters foreach {
       case (key, value) => subClass.getMethod("set"+key.capitalize,classOf[String]).invoke(basicAction, value)
     }
     val wrapper: BasicActionContext[AbstractMessage, AbstractMessage] = new BasicActionContext[AbstractMessage, AbstractMessage](basicAction, Map("default" -> receiver), nmbOfSenders)
-    //basicAction.setContext(wrapper)
 
-    context.actorOf(Props(new M2AActor(wrapper)))
-  }
-
-
-  def getGenericParamsOfSuperType(subClass: Class[_], baseClass: Class[_], mapping: Map[Type, Type] = Map()): Array[Type] = {
-    val newMapping: Map[Type,Type] = subClass.getGenericSuperclass match {
-      case genSuper: ParameterizedType => {
-        subClass.getSuperclass.getTypeParameters.zip(genSuper.getActualTypeArguments).map(tupled(
-          (typeVar, typeI) => (typeVar, mapping.get(typeI).getOrElse(typeI))
-        )).toMap
+    basicAction match {
+      case sa: HasSendingContext => {
+        logger.debug("Adding SendingContext")
+        sa.setSendingContext(new SendingContextImpl(wrapper))
       }
-      case _ => mapping
     }
 
-    val superClass = subClass.getSuperclass
-    if(superClass == baseClass){
-      return superClass.getTypeParameters.map(typeVar => newMapping.get(typeVar).get)
+    basicAction match {
+      case sa: HasStateContext => {
+        logger.debug("Adding StateContext")
+        sa.setStateContext(new StateContextImpl(wrapper))
+      }
+    }
+
+    if(nmbActors == 1){
+      return context.actorOf(Props(new M2AActor(wrapper)))
     } else {
-      return getGenericParamsOfSuperType(superClass, baseClass, newMapping)
+      return context.actorOf(Props(new M2AActor(wrapper)).withRouter(SmallestMailboxRouter(nmbActors)))
     }
   }
 }

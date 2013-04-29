@@ -13,3 +13,4 @@ case object EOC
 case class M2AMessage(message: AbstractMessage)
 abstract class AbstractMessage
 class StringMessage(val string: String) extends AbstractMessage
+class StringMessage2(val string: String) extends AbstractMessage
