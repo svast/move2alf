@@ -1,9 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,6 +10,16 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class ActionConfig {
+
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    private Map<String, Object> parameters = new TreeMap<String, Object>();
+
+    public void setParameter(String key, Object value){
+        parameters.put(key, value);
+    }
 
     public String getClazz() {
         return clazz;

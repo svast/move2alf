@@ -26,7 +26,7 @@ import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
  */
 class ActionWrapperTest {
 
-  var actionWrapper: BasicActionContext[StringMessage,StringMessage] = _
+  var actionWrapper: BasicActionContext[StringMessage] = _
   val nmbReceivers = 3
   var mockedReceiver: TestActorRef[TestActor] = _
   var action: ReceivingAction[StringMessage] = _
@@ -37,7 +37,7 @@ class ActionWrapperTest {
     implicit val jobContext = new JobContext
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     action = mock(classOf[ReceivingAction[StringMessage]])
-    actionWrapper = new BasicActionContext[StringMessage, StringMessage](action , Map("default" -> mockedReceiver), nmbReceivers)
+    actionWrapper = new BasicActionContext[StringMessage](action , Map("default" -> mockedReceiver), nmbReceivers)
   }
 
   @Test

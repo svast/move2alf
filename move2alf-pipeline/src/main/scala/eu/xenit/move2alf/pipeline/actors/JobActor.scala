@@ -7,6 +7,7 @@ import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.actions.ActionConfig
 import scala.collection.mutable
 import scala.collection.JavaConversions._
+import eu.xenit.move2alf.pipeline.state.JobContext
 
 
 sealed trait JobState
@@ -27,45 +28,18 @@ case class CycleData(data: HashMap[String, Any], counter: Int) extends Data
  * To change this template use File | Settings | File Templates.
  */
 class JobActor(private val config: ActionConfig) extends Actor with FSM[JobState, Data]{
+  implicit val jobContext = new JobContext
 
-  private val actorRefs = mutable.Map[String, ActorRef] = new mutable.HashMap[String, ActorRef]()
+  val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config)
 
-
-  private def generateActors(config: ActionConfig){
-    val countedActionConfigs = new mutable.HashMap[ActionConfig, Int]()
-
-    def countSenders(config: ActionConfig) {
-      config.getReceivers() foreach {
-        ac => {
-          val nmbSenders = countedActionConfigs.getOrElseUpdate(ac, 0)
-          countedActionConfigs.update(ac, nmbSenders + 1)
-          countSenders(ac)
-        }
-      }
-    }
-    countSenders(config)
-
-    def makeActors(config: ActionConfig) {
-      config.getReceivers() foreach {
-        ac => {
-          makeActors(ac)
-          //TODO
-        }
-      }
-    }
-
-
-  }
-
-  val firstActor:ActorRef = _
-  val nmbofSenders = 5
+  val firstActor:ActorRef = actorRefs.get(config.getId).get
 
   startWith(NotRunning, Uninitialized)
 
   when(NotRunning) {
     case Event(Start, Uninitialized) => {
       firstActor ! Start
-      goto(Running) using CycleData(data = new HashMap[String, Any], counter = nmbofSenders)
+      goto(Running) using CycleData(data = new HashMap[String, Any], counter = nmbOfSenders)
     }
   }
 

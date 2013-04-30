@@ -10,7 +10,7 @@ import eu.xenit.move2alf.pipeline.{Start, AbstractMessage}
  * Time: 7:56 PM
  * To change this template use File | Settings | File Templates.
  */
-trait StartActionContext[T <: AbstractMessage] extends SendingActionContext {
+trait StartActionContext extends SendingActionContext {
 
   override def receive = {
     case Start => execute()

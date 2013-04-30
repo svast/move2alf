@@ -4,7 +4,7 @@ import akka.actor._
 import eu.xenit.move2alf.pipeline.state.JobContext
 import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
 import eu.xenit.move2alf.common.LogHelper
-import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
+import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContext, BasicActionContext}
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +13,7 @@ import eu.xenit.move2alf.pipeline.actions.context.BasicActionContext
  * Time: 10:05 AM
  * To change this template use File | Settings | File Templates.
  */
-class M2AActor(protected val action: BasicActionContext[_,_]) extends Actor with LogHelper{
+class M2AActor(protected val action: AbstractActionContext) extends Actor with LogHelper{
 
   override def receive: PartialFunction[Any, Unit] = {
     action.receive
