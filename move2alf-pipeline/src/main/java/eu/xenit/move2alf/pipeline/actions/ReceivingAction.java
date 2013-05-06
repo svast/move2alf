@@ -1,8 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions;
 
 import eu.xenit.move2alf.pipeline.AbstractMessage;
-import eu.xenit.move2alf.pipeline.actions.context.EndActionContext;
-import eu.xenit.move2alf.pipeline.actions.context.StateContext;
 
 /**
  * Created with IntelliJ IDEA.

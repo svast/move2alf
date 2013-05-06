@@ -1,15 +1,13 @@
 package eu.xenit.move2alf.pipeline.actions;
 
 import eu.xenit.move2alf.pipeline.AbstractMessage;
-import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
 
 /**
  * Created with IntelliJ IDEA.
  * User: thijs
- * Date: 4/25/13
- * Time: 11:28 AM
+ * Date: 5/6/13
+ * Time: 4:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface BeginAction{
-    public void executeImpl();
+public abstract class AbstractEndingAction<T extends AbstractMessage> extends AbstractStateAction implements ReceivingAction<T> {
 }

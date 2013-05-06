@@ -5,6 +5,7 @@ import scala.collection.mutable
 import scala.collection.JavaConversions._
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
+import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContextFactory, EndActionContextFactory, BeginActionContextFactory, BasicActionContextFactory}
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +39,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
         }
       }
       if(!actorRefs.contains(config.getId)){
-        val nmbSenders = countedActionConfigs.get(config).get
+        val nmbSenders = countedActionConfigs.get(config).getOrElse(0)
 
         def receiversToMap = {
           config.getReceivers map {
@@ -46,17 +47,17 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
           } toMap
         }
 
-        val factory = {
+        val actionContextFactory: AbstractActionContextFactory = {
           if(nmbSenders == 0){
-            new BeginActionActorFactory(config.getClazz, config.getParameters.toMap, receiversToMap, config.getNmbOfWorkers)
+            new BeginActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap)
           } else if (config.getReceivers.isEmpty) {
-            new EndActionActorFactory(config.getClazz, config.getParameters.toMap, ("default", jobActor), nmbSenders, config.getNmbOfWorkers)
             nmbEndActions += 1
+            new EndActionContextFactory(config.getClazz, config.getParameters.toMap, ("default", jobActor), nmbSenders)
           } else {
-            new BasicActionActorFactory(config.getClazz, config.getParameters.toMap, receiversToMap, nmbSenders, config.getNmbOfWorkers)
+            new BasicActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap, nmbSenders)
           }
         }
-
+        val factory = new ActionActorFactory(actionContextFactory, config.getNmbOfWorkers)
         actorRefs.put(config.getId, factory.createActor)
       }
     }

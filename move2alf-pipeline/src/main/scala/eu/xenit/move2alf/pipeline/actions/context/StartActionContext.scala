@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
 import eu.xenit.move2alf.pipeline.{Start, AbstractMessage}
+import eu.xenit.move2alf.pipeline.actions.BeginAction
 
 
 /**
@@ -17,5 +18,8 @@ trait StartActionContext extends SendingActionContext {
     case s => super.receive(s)
   }
 
-  protected def execute()
+  val action: BeginAction
+  protected def execute() {
+    action.executeImpl()
+  }
 }

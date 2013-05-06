@@ -21,7 +21,7 @@ public class ActionConfig {
         parameters.put(key, value);
     }
 
-    public String getClazz() {
+    public Class getClazz() {
         return clazz;
     }
 
@@ -29,7 +29,7 @@ public class ActionConfig {
         return nmbOfWorkers;
     }
 
-    private String clazz;
+    private Class clazz;
     private int nmbOfWorkers;
 
     public String getId() {
@@ -38,7 +38,7 @@ public class ActionConfig {
 
     private String id;
 
-    public ActionConfig(String id, String clazz, int nmbOfWorkers){
+    public ActionConfig(String id, Class clazz, int nmbOfWorkers){
         this.id = id;
         this.clazz = clazz;
         this.nmbOfWorkers = nmbOfWorkers;

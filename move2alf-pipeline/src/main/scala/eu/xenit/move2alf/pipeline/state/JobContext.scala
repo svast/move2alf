@@ -13,7 +13,7 @@ class JobContext {
   private val states = TMap.empty[String, Any]
 
   def getStateValue(key: String): Any =  {
-    return states.single.get(key)
+    return states.single.get(key).get
   }
 
   def setStateValue(key: String, value: Any) = {

@@ -23,7 +23,7 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
   private var nmbOfEOC:Int = 0
 
   protected def eocMessage(){
-    logger.debug("Recieved EOC message")
+    logger.debug("Received EOC message")
     nmbOfEOC += 1
     if (nmbOfEOC == nmbSenders) {
       nmbOfEOC = 0
@@ -31,4 +31,5 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
       receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
     }
   }
+
 }

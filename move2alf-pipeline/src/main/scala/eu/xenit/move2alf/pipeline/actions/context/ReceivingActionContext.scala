@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
 import eu.xenit.move2alf.pipeline.{M2AMessage, AbstractMessage}
+import eu.xenit.move2alf.pipeline.actions.ReceivingAction
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,6 +17,9 @@ trait ReceivingActionContext[T <: AbstractMessage] extends AbstractActionContext
     case s => super.receive(s)
   }
 
-  protected def execute(message: T)
+  val action: ReceivingAction[T]
+  protected def execute(message: T){
+    action.execute(message)
+  }
 
 }
