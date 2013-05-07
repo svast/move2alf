@@ -9,12 +9,14 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers.{eq => the, any}
-import akka.actor.{Actor, Props, ActorSystem, ActorRef}
+import akka.actor._
 import akka.testkit.{TestActor, TestActorRef, TestProbe}
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.M2AMessage
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.actions.context.{ReceivingActionContext, SendingActionContext, AbstractActionContext}
+import eu.xenit.move2alf.pipeline.M2AMessage
+import akka.routing.Broadcast
 
 
 /**
@@ -37,6 +39,7 @@ class ActionWrapperTest {
     implicit val jobContext = new JobContext
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     _action = mock(classOf[ReceivingAction[StringMessage]])
+    implicit val context = mock(classOf[ActorContext])
     actionWrapper = new AbstractActionContext(Map("default" -> mockedReceiver), nmbReceivers) with ReceivingActionContext[StringMessage] with SendingActionContext{
       val action = _action
     }

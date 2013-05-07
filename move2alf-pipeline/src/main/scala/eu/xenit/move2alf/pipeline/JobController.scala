@@ -1,7 +1,7 @@
 package eu.xenit.move2alf.pipeline
 
 import eu.xenit.move2alf.pipeline.actions.ActionConfig
-import eu.xenit.move2alf.pipeline.actors.JobActor
+import eu.xenit.move2alf.pipeline.actors.{Running, JobActor}
 import concurrent.stm._
 import akka.actor._
 
@@ -16,10 +16,17 @@ object JobController {
 
   private val system = ActorSystem("Move2Alf")
   private val jobs = TMap.empty[String, ActorRef]
+  private val jobInfos = TMap.empty[String, JobInfo]
 
   def createJob(id: String, config: ActionConfig){
-    val actorRef = system.actorOf(Props(new JobActor(config)))
+    val jobInfo = new JobInfo
+    val actorRef = system.actorOf(Props(new JobActor(config, jobInfo)), name = id)
     jobs.single += id -> actorRef
+    jobInfos.single +=  id -> jobInfo
+  }
+
+  def isRunning(jobId: String): Boolean = {
+    jobInfos.single.get(jobId).get.state == Running
   }
 
   def deleteJob(id: String){

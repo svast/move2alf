@@ -20,13 +20,18 @@ object JobControllerTest {
     val jobName = "TestJob"
     JobController.createJob(jobName, config)
     JobController.startJob(jobName)
+
+    while(true) {
+      println("Is the job RUNNING: "+JobController.isRunning("TestJob"))
+      Thread.sleep(10)
+    }
   }
 
 }
 
 class StartAction extends AbstractBeginAction{
   def executeImpl() {
-    1 to 125 foreach { i => sendMessage("Middle", new StringMessage("Message number "+ i))}
+    1 to 100 foreach { i => sendMessage("Middle", new StringMessage("Message number "+ i))}
   }
 }
 
@@ -40,5 +45,6 @@ class MiddleAction extends AbstractBasicAction[StringMessage] {
 class EndAction extends AbstractEndingAction[StringMessage]{
   def execute(message: StringMessage) {
     println("EndAction: "+ message.string)
+    throw new Exception();
   }
 }

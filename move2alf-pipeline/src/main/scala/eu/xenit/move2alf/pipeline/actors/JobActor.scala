@@ -2,7 +2,7 @@ package eu.xenit.move2alf.pipeline.actors
 
 import akka.actor.{ActorRef, Actor, FSM}
 import scala.collection.immutable.HashMap
-import eu.xenit.move2alf.pipeline.{EOC, Start}
+import eu.xenit.move2alf.pipeline.{JobInfo, EOC, Start}
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.actions.ActionConfig
 import scala.collection.mutable
@@ -27,7 +27,7 @@ case class CycleData(data: HashMap[String, Any], counter: Int) extends Data
  * Time: 2:52 PM
  * To change this template use File | Settings | File Templates.
  */
-class JobActor(private val config: ActionConfig) extends Actor with FSM[JobState, Data]{
+class JobActor(private val config: ActionConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
   implicit val jobContext = new JobContext
 
   val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config)
@@ -49,6 +49,15 @@ class JobActor(private val config: ActionConfig) extends Actor with FSM[JobState
         case 1 => goto(NotRunning) using Uninitialized
         case _ => stay using data.copy(counter = data.counter - 1)
       }
+    }
+  }
+
+  onTransition {
+    case _ -> Running => {
+      jobInfo.state = Running
+    }
+    case _ -> NotRunning => {
+      jobInfo.state = NotRunning
     }
   }
 

@@ -21,5 +21,6 @@ trait StartActionContext extends SendingActionContext {
   val action: BeginAction
   protected def execute() {
     action.executeImpl()
+    broadCastEOC()
   }
 }

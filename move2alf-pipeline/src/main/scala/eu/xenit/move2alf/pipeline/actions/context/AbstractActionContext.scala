@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
-import akka.actor.ActorRef
+import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.{M2AMessage, EOC}
@@ -14,10 +14,10 @@ import eu.xenit.move2alf.common.LogHelper
  * Time: 2:54 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractActionContext(protected val receivers: Map[String, ActorRef], private val nmbSenders: Int)(implicit protected val jobContext: JobContext) extends LogHelper {
+abstract class AbstractActionContext(protected val receivers: Map[String, ActorRef], private val nmbSenders: Int)(implicit protected val jobContext: JobContext, implicit protected val context: ActorContext) extends LogHelper {
 
   def receive: PartialFunction[Any, Unit] = {
-    case EOC => eocMessage()
+    case EOC | Broadcast(EOC) => eocMessage()
   }
 
   private var nmbOfEOC:Int = 0
@@ -27,9 +27,13 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
     nmbOfEOC += 1
     if (nmbOfEOC == nmbSenders) {
       nmbOfEOC = 0
-      logger.debug("Sending EOC message")
-      receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
+      broadCastEOC()
     }
+  }
+
+  protected def broadCastEOC(){
+    logger.debug("Sending EOC message")
+    receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
   }
 
 }

@@ -39,14 +39,14 @@ class PipeLineFactoryTest {
     val endAction2 = new ActionConfig("endAction2", classOf[DummyEndAction], 3)
     middleAction.addReceiver(endAction2)
     val (actorRefs2, nmbOfEndActions2) = factory.generateActors(startAction)
-    assert(nmbOfEndActions2 ==2)
+    assert(nmbOfEndActions2 == 4)
     assert(actorRefs2.size == 4)
 
     val middleAction2 = new ActionConfig("middleAction2", classOf[JavaActionImpl[AbstractMessage]], 8)
     startAction.addReceiver(middleAction2)
     middleAction2.addReceiver(endAction)
     val (actorRefs3, nmbOfEndActions3) = factory.generateActors(startAction)
-    assert(nmbOfEndActions3 == 2)
+    assert(nmbOfEndActions3 == 4)
     assert(actorRefs3.size == 5)
   }
 

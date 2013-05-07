@@ -2,6 +2,7 @@ package eu.xenit.move2alf.pipeline.actions.context
 
 import eu.xenit.move2alf.pipeline.actions.{EOCBlockingAction, HasSendingContext, HasStateContext}
 import eu.xenit.move2alf.common.LogHelper
+import akka.actor.ActorContext
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,9 +11,10 @@ import eu.xenit.move2alf.common.LogHelper
  * Time: 3:36 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractActionContextFactory(private val actionClass: Class[_], private val parameters: Map[String, AnyRef]) extends LogHelper{
+abstract class AbstractActionContextFactory(val actionClass: Class[_], private val parameters: Map[String, AnyRef])(implicit val context: ActorContext) extends LogHelper{
 
   protected type T
+
 
   def createActionContext(): AbstractActionContext = {
     val basicAction: T = getAction

@@ -25,7 +25,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
       config.getReceivers() foreach {
         ac => {
           val nmbSenders = countedActionConfigs.getOrElseUpdate(ac, 0)
-          countedActionConfigs.update(ac, nmbSenders + 1)
+          countedActionConfigs.update(ac, nmbSenders + config.getNmbOfWorkers)
           countSenders(ac)
         }
       }
@@ -51,13 +51,13 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
           if(nmbSenders == 0){
             new BeginActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap)
           } else if (config.getReceivers.isEmpty) {
-            nmbEndActions += 1
+            nmbEndActions += config.getNmbOfWorkers
             new EndActionContextFactory(config.getClazz, config.getParameters.toMap, ("default", jobActor), nmbSenders)
           } else {
             new BasicActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap, nmbSenders)
           }
         }
-        val factory = new ActionActorFactory(actionContextFactory, config.getNmbOfWorkers)
+        val factory = new ActionActorFactory(config.getId, actionContextFactory, config.getNmbOfWorkers)
         actorRefs.put(config.getId, factory.createActor)
       }
     }

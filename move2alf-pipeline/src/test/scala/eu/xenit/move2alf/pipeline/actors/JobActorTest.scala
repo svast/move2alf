@@ -4,7 +4,7 @@ import akka.actor._
 import akka.testkit.{TestFSMRef, TestKit}
 import org.junit.Test
 import eu.xenit.move2alf.pipeline.actions.{DummyEndAction, JavaActionImpl, DummyStartAction, ActionConfig}
-import eu.xenit.move2alf.pipeline.{EOC, Start, AbstractMessage}
+import eu.xenit.move2alf.pipeline.{JobInfo, EOC, Start, AbstractMessage}
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +25,7 @@ class JobActorTest{
     startAction.addReceiver(middleAction)
     middleAction.addReceiver(endAction)
     implicit val system = ActorSystem("TestSystem")
-    val actorRef = TestFSMRef(new JobActor(startAction))
+    val actorRef = TestFSMRef(new JobActor(startAction, new JobInfo))
 
     assert(actorRef.stateName == NotRunning)
     assert(actorRef.stateData == Uninitialized)
