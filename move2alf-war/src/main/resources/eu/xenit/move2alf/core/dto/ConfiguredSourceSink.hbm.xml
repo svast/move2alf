@@ -8,7 +8,7 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<property name="className" column="sourceSinkClassName"/>
+		<property name="classId" column="classId"/>
     	<map name="parameters" table="configuredSourceSinkParameter" lazy="false">
 			<key column="configuredSourceSinkId" />
 			<map-key column="name" type="string" />
@@ -17,10 +17,6 @@
     	<set name="configuredActionSet" table="configuredActionConfiguredSourceSink" inverse="true" >
       		<key column="configuredSourceSinkId"/>
       		<many-to-many class="eu.xenit.move2alf.core.dto.ConfiguredAction" column="configuredActionId"/>
-    	</set>
-    	<set name="configuredReportSet" table="configuredReportConfiguredSourceSink" inverse="true">
-      		<key column="configuredSourceSinkId"/>
-      		<many-to-many class="eu.xenit.move2alf.core.dto.ConfiguredReport" column="configuredReportId"/>
     	</set>
     	
 	</class>

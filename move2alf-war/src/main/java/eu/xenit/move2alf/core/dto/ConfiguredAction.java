@@ -11,8 +11,17 @@ public class ConfiguredAction extends ConfiguredObject {
 	private ConfiguredAction appliedConfiguredActionOnFailure;
 
 	private Set<ConfiguredSourceSink> configuredSourceSinkSet;
+    private Set<Object> receivers;
 
-	public void setAppliedConfiguredActionOnSuccess(
+    public Set<Object> getReceivers() {
+        return receivers;
+    }
+
+    public void setReceivers(Set<Object> receivers) {
+        this.receivers = receivers;
+    }
+
+    public void setAppliedConfiguredActionOnSuccess(
 			ConfiguredAction appliedConfiguredActionOnSuccess) {
 		this.appliedConfiguredActionOnSuccess = appliedConfiguredActionOnSuccess;
 	}
