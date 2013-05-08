@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import eu.xenit.move2alf.core.simpleaction.*;
+import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +23,6 @@ import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.simpleaction.SADelete;
-import eu.xenit.move2alf.core.simpleaction.SAExistenceCheck;
-import eu.xenit.move2alf.core.simpleaction.SAFilter;
-import eu.xenit.move2alf.core.simpleaction.SAList;
-import eu.xenit.move2alf.core.simpleaction.SAMimeType;
-import eu.xenit.move2alf.core.simpleaction.SAMoveBeforeProcessing;
-import eu.xenit.move2alf.core.simpleaction.SAReport;
-import eu.xenit.move2alf.core.simpleaction.SASource;
-import eu.xenit.move2alf.core.simpleaction.SAUpload;
-import eu.xenit.move2alf.core.simpleaction.SimpleAction;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
-import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
@@ -76,12 +66,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	@Override
 	public void assemblePipeline(final JobConfig jobConfig) {
-		final List<ActionBuilder> actions = new ArrayList<ActionBuilder>();
+        final List<ActionBuilder> actions = new ArrayList<ActionBuilder>();
 
 		final Map<String, String> metadataParameterMap = metadataParameters(jobConfig);
 		final Map<String, String> transformParameterMap = transformParameters(jobConfig);
 
-		final List<String> inputPathList = jobConfig.getInputFolder();
+		final List<String> inputPathList = jobConfig.getInputFolders();
 		String inputPaths = "";
 		if (inputPathList != null) {
 			for (int i = 0; i < inputPathList.size(); i++) {
@@ -234,53 +224,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		assemble(jobConfig, actionsArray);
 	}
 
-	private ActionConfig transformParameters(final JobConfig jobConfig) {
-		final List<String> transformParameterList = jobConfig
-				.getParamTransform();
-		final ActionConfig transformParameterMap = new ActionConfig();
-
-		if (transformParameterList != null) {
-			String[] transformParameter = new String[2];
-			for (int i = 0; i < transformParameterList.size(); i++) {
-				transformParameter = transformParameterList.get(i).split("\\|");
-				if (transformParameter.length == 1) {
-					final String param = transformParameter[0];
-					transformParameter = new String[2];
-					transformParameter[0] = param;
-					transformParameter[1] = "";
-				}
-				logger.debug("transform parameter name: "
-						+ transformParameter[0] + " and value: "
-						+ transformParameter[1]);
-				transformParameterMap.put(transformParameter[0],
-						transformParameter[1]);
-			}
-		}
-		return transformParameterMap;
-	}
-
-	private ActionConfig metadataParameters(final JobConfig jobConfig) {
-		final List<String> metadataParameterList = jobConfig.getParamMetadata();
-		final ActionConfig metadataParameterMap = new ActionConfig();
-
-		if (metadataParameterList != null) {
-			String[] metadataParameter = new String[2];
-			for (int i = 0; i < metadataParameterList.size(); i++) {
-				metadataParameter = metadataParameterList.get(i).split("\\|");
-				if (metadataParameter.length == 1) {
-					final String param = metadataParameter[0];
-					metadataParameter = new String[2];
-					metadataParameter[0] = param;
-					metadataParameter[1] = "";
-				}
-				logger.debug("metadata parameter name: " + metadataParameter[0]
-						+ " and value: " + metadataParameter[1]);
-				metadataParameterMap.put(metadataParameter[0],
-						metadataParameter[1]);
-			}
-		}
-		return metadataParameterMap;
-	}
 
 	@Override
 	public JobConfig getJobConfigForJob(final int id) {
@@ -405,7 +348,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		inputFolder = Arrays.asList(inputPathArray);
 
-		jobConfig.setInputFolder(inputFolder);
+		jobConfig.setInputFolders(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);
 		jobConfig.setMode(mode);
@@ -466,56 +409,58 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 	}
 
 	@Override
-	public List<PipelineStep> getPipeline(final JobConfig jobConfig) {
-		final SuccessHandler successHandler = new SuccessHandler(
-				getJobService());
-		final ErrorHandler errorHandler = new DefaultErrorHandler(
-				getJobService());
+	public ActionConfig getPipeline(final JobConfig jobConfig) {
 
-		final List<PipelineStep> pipeline = new ArrayList<PipelineStep>();
-		pipeline.add(new PipelineStep(new SASource(), null, null, errorHandler));
+        ActionConfig start = new ActionConfig("Start",M2AlfStartAction.class, 1);
 
-		if (jobConfig.getMoveBeforeProc()) {
-			final ActionConfig moveBeforeConfig = new ActionConfig();
-			moveBeforeConfig.put(
-					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-					jobConfig.getMoveBeforeProcText());
-			pipeline.add(new PipelineStep(new SAMoveBeforeProcessing(),
-					moveBeforeConfig, null, errorHandler));
-		}
+        ActionConfig sourceAction = new ActionConfig("Source", SASource.class, 1);
+        sourceAction.setParameter("inputPaths", jobConfig.getInputFolders());
+        start.addReceiver("default", sourceAction);
+        ActionConfig end = sourceAction;
 
-		final ActionConfig filterConfig = new ActionConfig();
-		filterConfig.put(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
-		pipeline.add(new PipelineStep(new SAFilter(), filterConfig, null,
-				errorHandler));
+        if(jobConfig.getMoveBeforeProc()){
+            ActionConfig moveAction = new ActionConfig("MoveBefore", MoveAction.class, 1);
+            moveAction.setParameter("path", jobConfig.getMoveBeforeProcText());
+            end.addReceiver("default", moveAction);
+            end = moveAction;
+        }
 
-		final SimpleAction metadataAction = new SimpleActionWrapper(
-				getActionFactory().getObject(jobConfig.getMetadata()));
-		final ActionConfig metadataConfig = metadataParameters(jobConfig);
-		pipeline.add(new PipelineStep(metadataAction, metadataConfig, null,
-				errorHandler));
-		pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
+        ActionConfig filter = new ActionConfig("Filter", SAFilter.class, 1);
+        filter.setParameter("extension", jobConfig.getExtension());
+        end.addReceiver("default", filter);
+        end = filter;
+
+        try {
+            Class clazz = Class.forName(jobConfig.getMetadata());
+            ActionConfig metadataAction = new ActionConfig("MetadataAction", clazz, 1);
+            setParameters(jobConfig.getParamMetadata(), metadataAction);
+            end.addReceiver("default", metadataAction);
+            end = metadataAction;
+        } catch (ClassNotFoundException e) {
+           //TODO handle exception decently
+            logger.error("Class "+jobConfig.getMetadata()+ "not found", e);
+        }
+
 
 		if (!("notransformation".equals(jobConfig.getTransform()) || ""
 				.equals(jobConfig.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
-			final SimpleAction transformAction = new SimpleActionWrapper(
-					getActionFactory().getObject(jobConfig.getTransform()));
-			final ActionConfig transformConfig = transformParameters(jobConfig);
-			// TODO: configure number of transformer threads differently from
-			// number of Alfresco threads
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final ExecutorService executorService = getSourceSinkFactory()
-					.getThreadPool(sinkConfig);
-			pipeline.add(new PipelineStep(transformAction, transformConfig,
-					null, errorHandler, new ActionExecutor(executorService)));
-			pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
+
+            try {
+                Class clazz = Class.forName(jobConfig.getTransform());
+                ActionConfig transformAction = new ActionConfig("TransformAction", clazz, 1);
+                setParameters(jobConfig.getParamTransform(), transformAction);
+                end.addReceiver("default", transformAction);
+                end = transformAction;
+            } catch (ClassNotFoundException e) {
+                //TODO handle exception decently
+                logger.error("Class " + jobConfig.getTransform() + "not found", e);
+            }
 		}
 
-
-		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
-				errorHandler));
+        ActionConfig mimeTypeAction = new ActionConfig("MimeType", SAMimeType.class, 1);
+        end.addReceiver("default", mimeTypeAction);
+        end = mimeTypeAction;
 
 
 		if (Mode.WRITE == jobConfig.getMode()) {
@@ -582,4 +527,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		return pipeline;
 	}
+
+    private void setParameters(List<String> parameters, ActionConfig metadataAction) {
+        for(String param: parameters){
+            String[] keyValue = param.split("\\|");
+            metadataAction.setParameter(keyValue[0], keyValue[1]);
+        }
+    }
 }

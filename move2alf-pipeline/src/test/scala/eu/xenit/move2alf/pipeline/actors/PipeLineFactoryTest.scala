@@ -19,7 +19,7 @@ class PipeLineFactoryTest {
 
   @Test
   def testGeneratePipeLine(){
-    implicit val system = ActorSystem("Test")
+    implicit val system = ActorSystem("TestSystem4")
     implicit val jobContext = new JobContext
     implicit val context = mock(classOf[ActorContext])
 
@@ -28,8 +28,8 @@ class PipeLineFactoryTest {
     val startAction = new ActionConfig("startAction", classOf[DummyStartAction], 1)
     val middleAction = new ActionConfig("middleAction", classOf[JavaActionImpl[AbstractMessage]], 1)
     val endAction = new ActionConfig("endAction", classOf[DummyEndAction], 1)
-    startAction.addReceiver(middleAction)
-    middleAction.addReceiver(endAction)
+    startAction.addReceiver("default", middleAction)
+    middleAction.addReceiver("default", endAction)
 
     val (actorRefs, nmbOfEndActions) = factory.generateActors(startAction)
     assert(nmbOfEndActions==1)
@@ -37,14 +37,14 @@ class PipeLineFactoryTest {
     assert(actorRefs.size == 3)
 
     val endAction2 = new ActionConfig("endAction2", classOf[DummyEndAction], 3)
-    middleAction.addReceiver(endAction2)
+    middleAction.addReceiver("secondEnd", endAction2)
     val (actorRefs2, nmbOfEndActions2) = factory.generateActors(startAction)
     assert(nmbOfEndActions2 == 4)
     assert(actorRefs2.size == 4)
 
     val middleAction2 = new ActionConfig("middleAction2", classOf[JavaActionImpl[AbstractMessage]], 8)
-    startAction.addReceiver(middleAction2)
-    middleAction2.addReceiver(endAction)
+    startAction.addReceiver("default2", middleAction2)
+    middleAction2.addReceiver("default3", endAction)
     val (actorRefs3, nmbOfEndActions3) = factory.generateActors(startAction)
     assert(nmbOfEndActions3 == 4)
     assert(actorRefs3.size == 5)

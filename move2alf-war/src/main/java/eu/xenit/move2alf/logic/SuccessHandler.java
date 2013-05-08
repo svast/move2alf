@@ -25,7 +25,7 @@ public class SuccessHandler {
 	private final JobService jobService;
 
 	/**
-	 * @param jobExecutionServiceImpl
+	 * @param
 	 */
 	SuccessHandler(JobService jobService) {
 		this.jobService = jobService;
@@ -44,7 +44,7 @@ public class SuccessHandler {
 				(Map<String, String>) parameterMap
 						.get(Parameters.PARAM_REPORT_FIELDS), cycle
 						.getJob().getFirstConfiguredAction());
-		getJobService().getReportActor().sendOneWay(
+		getJobService().getReportActor().tell(
 				new ReportMessage(cycle.getId(), file.getName(),
 						new Date(), Parameters.VALUE_OK, params, (String)parameterMap.get(Parameters.PARAM_REFERENCE)));
 

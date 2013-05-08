@@ -11,7 +11,7 @@ import eu.xenit.move2alf.pipeline.actions.BeginAction
  * Time: 7:56 PM
  * To change this template use File | Settings | File Templates.
  */
-trait StartActionContext extends SendingActionContext {
+trait StartActionContext extends AbstractActionContext {
 
   override def receive = {
     case Start => execute()
@@ -20,7 +20,7 @@ trait StartActionContext extends SendingActionContext {
 
   val action: BeginAction
   protected def execute() {
-    action.executeImpl()
+    action.execute()
     broadCastEOC()
   }
 }

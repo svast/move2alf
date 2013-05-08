@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions
 
-import org.junit.{Before, Test}
+import org.junit.{After, Before, Test}
 
 import eu.xenit.move2alf.pipeline.state.JobContext
 import eu.xenit.move2alf.pipeline.{M2AMessage, EOC, StringMessage}
@@ -14,7 +14,7 @@ import akka.testkit.{TestActor, TestActorRef, TestProbe}
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.M2AMessage
 import akka.routing.Broadcast
-import eu.xenit.move2alf.pipeline.actions.context.{ReceivingActionContext, SendingActionContext, AbstractActionContext}
+import eu.xenit.move2alf.pipeline.actions.context.{ReceivingActionContext, AbstractActionContext}
 import eu.xenit.move2alf.pipeline.M2AMessage
 import akka.routing.Broadcast
 
@@ -28,21 +28,27 @@ import akka.routing.Broadcast
  */
 class ActionWrapperTest {
 
-  var actionWrapper: AbstractActionContext with SendingActionContext = _
+  var actionWrapper: AbstractActionContext= _
   val nmbReceivers = 3
   var mockedReceiver: TestActorRef[TestActor] = _
   var _action: ReceivingAction[StringMessage] = _
+  implicit var system: ActorSystem = _
 
   @Before
   def before(){
-    implicit val system = ActorSystem("Test")
+    system = ActorSystem("TestSystem1")
     implicit val jobContext = new JobContext
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     _action = mock(classOf[ReceivingAction[StringMessage]])
     implicit val context = mock(classOf[ActorContext])
-    actionWrapper = new AbstractActionContext(Map("default" -> mockedReceiver), nmbReceivers) with ReceivingActionContext[StringMessage] with SendingActionContext{
+    actionWrapper = new AbstractActionContext(Map("default" -> mockedReceiver), nmbReceivers) with ReceivingActionContext[StringMessage] {
       val action = _action
     }
+  }
+
+  @After
+  def after(){
+    system.shutdown()
   }
 
   @Test

@@ -40,7 +40,7 @@ public class JobConfig {
 
 	@NotEmpty(message="There should be at least one inputfolder!")
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
-	private List<String> inputFolder;
+	private List<String> inputFolders;
 
 	@Size(min=0, max=pathMaxLength, message="Max length of destination path is " + pathMaxLength)
 	@NotEmpty(message="Please enter a destination path.")
@@ -149,12 +149,12 @@ public class JobConfig {
 		return description;
 	}
 
-	public void setInputFolder(List<String> inputFolder) {
-		this.inputFolder = inputFolder;
+	public void setInputFolders(List<String> inputFolders) {
+		this.inputFolders = inputFolders;
 	}
 
-	public List<String> getInputFolder() {
-		return inputFolder;
+	public List<String> getInputFolders() {
+		return inputFolders;
 	}
 	
 	public void setInputPath(String inputPath) {

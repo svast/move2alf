@@ -3,6 +3,8 @@ package eu.xenit.move2alf.core.simpleaction;
 import java.io.File;
 import java.io.IOException;
 
+import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,7 @@ import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionSingleResult;
 
-public class SAMimeType extends SimpleActionSingleResult {
+public class SAMimeType extends Move2AlfAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SAMimeType.class);
 	private static final Tika tika = new Tika();
@@ -23,18 +25,8 @@ public class SAMimeType extends SimpleActionSingleResult {
 		return "Determining MIME types";
 	}
 
-	@Override
-	public FileInfo executeSingleResult(
-			final FileInfo parameterMap, final ActionConfig config) {
-		FileInfo output = new FileInfo();
-		output.putAll(parameterMap);
-		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
-		output.put(Parameters.PARAM_MIMETYPE, determineMimeType(file));
-		return output;
-	}
-
 	String determineMimeType (File file) {
-		String mimeType = null;        
+		String mimeType;
 		try {
 			mimeType = tika.detect(file);
 			if(mimeType.contains(";")){
@@ -46,4 +38,13 @@ public class SAMimeType extends SimpleActionSingleResult {
 		}
 		return mimeType;
 	}
+
+    @Override
+    public void execute(FileInfoMessage message) {
+        FileInfo output = new FileInfo();
+        output.putAll(message.fileInfo);
+        File file = (File) message.fileInfo.get(Parameters.PARAM_FILE);
+        output.put(Parameters.PARAM_MIMETYPE, determineMimeType(file));
+        sendMessage(new FileInfoMessage(output));
+    }
 }

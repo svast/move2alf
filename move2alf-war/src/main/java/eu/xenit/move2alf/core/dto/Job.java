@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Set;
 
 import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.Report;
 
 public class Job extends IdObject {
 	private int id;

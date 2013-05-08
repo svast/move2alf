@@ -16,9 +16,9 @@ class BasicActionContextFactory(actionClass: Class[_], parameters: Map[String, A
   protected type T = ReceivingAction[AbstractMessage]
 
   protected def constructActionContext(basicAction: T) = {
-    val actionContext = new AbstractActionContext(receivers, nmbOfSenders) with StateActionContext with SendingActionContext with ReceivingActionContext[AbstractMessage] with EOCBlockingActionContext{
+    val actionContext = new AbstractActionContext(receivers, nmbOfSenders) with ReceivingActionContext[AbstractMessage]{
         val action = basicAction
-      }
+     }
     addSendingContext(basicAction, actionContext)
     actionContext
   }

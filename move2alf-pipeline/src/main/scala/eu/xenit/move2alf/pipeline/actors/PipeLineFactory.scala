@@ -23,7 +23,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
     def countSenders(config: ActionConfig) {
       config.getReceivers() foreach {
-        ac => {
+        case (_, ac) => {
           val nmbSenders = countedActionConfigs.getOrElseUpdate(ac, 0)
           countedActionConfigs.update(ac, nmbSenders + config.getNmbOfWorkers)
           countSenders(ac)
@@ -34,7 +34,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
     def makeActors(config: ActionConfig) {
       config.getReceivers() foreach {
-        ac => {
+        case (_, ac) => {
           makeActors(ac)
         }
       }
@@ -43,7 +43,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
         def receiversToMap = {
           config.getReceivers map {
-            receiver => (receiver.getId, actorRefs.get(receiver.getId).get)
+            case (key, receiver) => (key, actorRefs.get(receiver.getId).get)
           } toMap
         }
 

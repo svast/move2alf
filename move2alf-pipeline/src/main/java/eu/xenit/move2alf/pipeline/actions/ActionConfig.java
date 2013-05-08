@@ -44,13 +44,16 @@ public class ActionConfig {
         this.nmbOfWorkers = nmbOfWorkers;
     }
 
-    private List<ActionConfig> receivers = new ArrayList<ActionConfig>();
+    private Map<String, ActionConfig> receivers = new TreeMap<String, ActionConfig>();
 
-    public void addReceiver(ActionConfig value){
-        receivers.add(value);
+    public void addReceiver(String key, ActionConfig value){
+        if(receivers.containsKey(key)){
+            throw new IllegalArgumentException("This config already has a receiver with key: "+key);
+        }
+        receivers.put(key, value);
     }
 
-    public List<ActionConfig> getReceivers(){
+    public Map<String, ActionConfig> getReceivers(){
         return receivers;
     }
 

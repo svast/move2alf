@@ -16,8 +16,6 @@ import javax.validation.Valid;
 
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.logic.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,6 @@ import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.PipelineAssembler;
-import eu.xenit.move2alf.logic.SchedulerImpl;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
@@ -223,7 +220,7 @@ public class JobController extends AbstractController{
 			}
 		}
 
-		List<String> inputFolder = job.getInputFolder();
+		List<String> inputFolder = job.getInputFolders();
 		Set<String> uniqueInputFolders = new HashSet<String>();
 		if (inputFolder != null) {
 			for (int i = 0; i < inputFolder.size(); i++) {

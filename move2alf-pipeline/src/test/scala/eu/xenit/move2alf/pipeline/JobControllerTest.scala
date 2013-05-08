@@ -15,8 +15,8 @@ object JobControllerTest {
     val middleAction = new ActionConfig("Middle", classOf[MiddleAction], 6)
     val endAction = new ActionConfig("End", classOf[EndAction], 3)
 
-    config.addReceiver(middleAction)
-    middleAction.addReceiver(endAction)
+    config.addReceiver("Middle", middleAction)
+    middleAction.addReceiver("End", endAction)
     val jobName = "TestJob"
     JobController.createJob(jobName, config)
     JobController.startJob(jobName)
@@ -30,7 +30,7 @@ object JobControllerTest {
 }
 
 class StartAction extends AbstractBeginAction{
-  def executeImpl() {
+  def execute() {
     1 to 100 foreach { i => sendMessage("Middle", new StringMessage("Message number "+ i))}
   }
 }
@@ -45,6 +45,5 @@ class MiddleAction extends AbstractBasicAction[StringMessage] {
 class EndAction extends AbstractEndingAction[StringMessage]{
   def execute(message: StringMessage) {
     println("EndAction: "+ message.string)
-    throw new Exception();
   }
 }

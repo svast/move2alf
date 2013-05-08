@@ -9,7 +9,7 @@
 		<legend>Import</legend>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/inputPathHandler2.js" />"> </script>
 		<@labeledInput label="Input paths" forId="inputTable" helpText="You can add multiple paths. Press enter or click the save button to confirm a path.">
-				<table id="inputPathTable" name="inputFolder" class="small inputTable table-striped">
+				<table id="inputPathTable" name="inputFolders" class="small inputTable table-striped">
 					<#assign lastIndex = 0>
 					<thead>
 						<tr>
@@ -19,10 +19,10 @@
 						</tr>
 					</thead>
 					<tbody>
-					<#list job.inputFolder! as folder>
+					<#list job.inputFolders! as folder>
 						<tr id="inputPath_${folder_index}">
 							<td>${folder_index+1}</td>
-							<td>${folder}<input name="inputFolder" type="hidden" value="${folder}" />
+							<td>${folder}<input name="inputFolders" type="hidden" value="${folder}" />
 							</td>
 							<td>
 								<img onclick="$('#inputPath_${folder_index}').remove()" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" class="clickable" />

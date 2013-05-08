@@ -351,8 +351,6 @@ public interface JobService {
 	public void sendMail(SimpleMailMessage message);
 
 	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
-	
-	public ActorRef getReportActor();
 
 	public List<HistoryInfo> getHistory(int jobId);
 	

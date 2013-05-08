@@ -41,9 +41,9 @@ abstract class AbstractActionContextFactory(val actionClass: Class[_], private v
   }
 
 
-  protected def constructActionContext(basicAction: T): AbstractActionContext with StateActionContext with EOCBlockingActionContext
+  protected def constructActionContext(basicAction: T): AbstractActionContext
 
-  protected def addSendingContext(basicAction: T, context: SendingActionContext) {
+  protected def addSendingContext(basicAction: T, context: AbstractActionContext) {
     basicAction match {
       case sa: HasSendingContext => {
         logger.debug("Adding SendingContext")

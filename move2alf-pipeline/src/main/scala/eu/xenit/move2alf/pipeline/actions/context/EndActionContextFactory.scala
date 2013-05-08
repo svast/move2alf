@@ -16,7 +16,7 @@ class EndActionContextFactory(actionClass: Class[_], parameters: Map[String, Any
    protected type T = ReceivingAction[AbstractMessage]
 
    protected def constructActionContext(basicAction: T) = {
-     val actionContext = new AbstractActionContext(Map(receiver), nmbOfSenders) with StateActionContext with ReceivingActionContext[AbstractMessage] with EOCBlockingActionContext{
+     val actionContext = new AbstractActionContext(Map(receiver), nmbOfSenders) with ReceivingActionContext[AbstractMessage]{
        val action = basicAction
      }
      actionContext

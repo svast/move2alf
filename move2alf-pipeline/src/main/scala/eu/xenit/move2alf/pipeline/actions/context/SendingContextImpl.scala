@@ -9,7 +9,7 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
  * Time: 4:23 PM
  * To change this template use File | Settings | File Templates.
  */
-class SendingContextImpl(private val ct: SendingActionContext) extends SendingContext{
+class SendingContextImpl(private val ct: AbstractActionContext) extends SendingContext{
   def sendMessage(message: AbstractMessage) {
     ct.sendMessage(message)
   }

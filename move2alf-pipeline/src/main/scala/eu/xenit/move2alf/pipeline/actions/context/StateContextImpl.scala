@@ -7,7 +7,7 @@ package eu.xenit.move2alf.pipeline.actions.context
  * Time: 4:18 PM
  * To change this template use File | Settings | File Templates.
  */
-class StateContextImpl(private val ct: StateActionContext) extends StateContext{
+class StateContextImpl(private val ct: AbstractActionContext) extends StateContext{
 
   def setStateValue(key: String, value: Any) {
     ct.setStateValue(key, value)

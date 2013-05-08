@@ -20,7 +20,7 @@ class ActionActorFactoryTest {
 
   @Test
   def testBasicActionActorFactory(){
-    implicit val system = ActorSystem("Test")
+    implicit val system = ActorSystem("TestSystem2")
     implicit val jobContext = new JobContext
     val mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     implicit val context = mock(classOf[ActorContext])

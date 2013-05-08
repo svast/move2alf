@@ -15,7 +15,7 @@ class BeginActionContextFactory(actionClass: Class[_], parameters: Map[String, A
   protected type T = BeginAction
 
   protected def constructActionContext(basicAction: T) = {
-    val actionContext = new AbstractActionContext(receivers, 1) with StateActionContext with StartActionContext with SendingActionContext with EOCBlockingActionContext{
+    val actionContext = new AbstractActionContext(receivers, 1) with StartActionContext {
       val action = basicAction
     }
     addSendingContext(basicAction, actionContext)

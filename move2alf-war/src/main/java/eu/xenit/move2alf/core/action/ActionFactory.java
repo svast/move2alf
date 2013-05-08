@@ -63,7 +63,7 @@ public class ActionFactory extends AbstractFactory<Action> {
 
 	public void execute(ConfiguredAction nextAction,
 			Map<String, Object> parameterMap) {
-		getObject(nextAction.getClassName()).execute(nextAction, parameterMap);
+		getObject(nextAction.getClassId()).execute(nextAction, parameterMap);
 	}
 
 }

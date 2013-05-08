@@ -22,9 +22,9 @@ class JobActorTest{
     val startAction = new ActionConfig("startAction", classOf[DummyStartAction], 1)
     val middleAction = new ActionConfig("middleAction", classOf[JavaActionImpl[AbstractMessage]], 1)
     val endAction = new ActionConfig("endAction", classOf[DummyEndAction], 1)
-    startAction.addReceiver(middleAction)
-    middleAction.addReceiver(endAction)
-    implicit val system = ActorSystem("TestSystem")
+    startAction.addReceiver("default",middleAction)
+    middleAction.addReceiver("default",endAction)
+    implicit val system = ActorSystem("TestSystem3")
     val actorRef = TestFSMRef(new JobActor(startAction, new JobInfo))
 
     assert(actorRef.stateName == NotRunning)
@@ -37,6 +37,8 @@ class JobActorTest{
     actorRef ! EOC
     assert(actorRef.stateName == NotRunning)
     assert(actorRef.stateData == Uninitialized)
+
+    system.shutdown()
   }
 
 

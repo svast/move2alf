@@ -7,7 +7,7 @@ package eu.xenit.move2alf.pipeline.actions.context
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-class EOCBlockingContextImpl(private val actionContext: EOCBlockingActionContext) extends EOCBlockingContext{
+class EOCBlockingContextImpl(private val actionContext: AbstractActionContext) extends EOCBlockingContext{
   def blockEOC() {
     actionContext.blockEOC()
   }

@@ -1,32 +1,23 @@
 package eu.xenit.move2alf.core.action;
 
-import java.io.BufferedReader;
+import au.com.bytecode.opencsv.CSVReader;
+import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import au.com.bytecode.opencsv.CSVReader;
-
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.action.Action;
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
 
-public class CSVMetadataLoader extends Action {
+public class CSVMetadataLoader extends Move2AlfAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
 	private static final char CSV_DELIMITER = '|';
@@ -37,71 +28,28 @@ public class CSVMetadataLoader extends Action {
 		return reader;
 	}
 
-	@Override
-	public void execute(ConfiguredAction configuredAction, Map<String, Object> parameterMap) {
-		File inputFile = (File)parameterMap.get(Parameters.PARAM_FILE);
-		String namespace = configuredAction.getParameter("NAMESPACE");
-		if(namespace!=null)
-			parameterMap.put(Parameters.PARAM_NAMESPACE, "{"+namespace+"}");
-		String type = configuredAction.getParameter("CONTENTTYPE");
-		if(type!=null)
-			parameterMap.put(Parameters.PARAM_CONTENTTYPE, type);
-		/*String mime = configuredAction.getParameter("MIMETYPE");
-		if(mime!=null)
-			parameterMap.put(Parameters.PARAM_MIMETYPE, mime);*/
-		
-		CSVReader reader = null;
-		String[] metadataFields = null;
-
-		try {
-			reader = createReader(inputFile);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			metadataFields = readMetadataFields(reader);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-		String[] nextLine;
-		try {
-			while ((nextLine = reader.readNext()) != null) {
-				processLine(nextLine,metadataFields,parameterMap);
-				//printMetadata(parameterMap);
-				dump(configuredAction,parameterMap);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			reader.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	public void processLine(String[] nextLine, String[] metadataFields, Map<String, Object> parameterMap) {
+	public FileInfo processLine(String[] nextLine, String[] metadataFields) {
 		if(nextLine.length != metadataFields.length)
 			throw new RuntimeException("Line " + nextLine + " does not have the same number of fields as the header line");
 
+        FileInfo fileInfo = new FileInfo();
+        if(nameSpace!=null)
+            fileInfo.put(Parameters.PARAM_NAMESPACE, "{"+nameSpace+"}");
+        if(contentType!=null)
+            fileInfo.put(Parameters.PARAM_CONTENTTYPE, contentType);
 
 		HashMap docMetadata = new HashMap();
 		for(int i=0;i<nextLine.length;i++) {
 			if(i==0) {
-				parameterMap.put(Parameters.PARAM_INPUT_FILE,nextLine[i]);
-				parameterMap.put(Parameters.PARAM_FILE,new File(nextLine[i]));
+				fileInfo.put(Parameters.PARAM_INPUT_FILE,nextLine[i]);
+				fileInfo.put(Parameters.PARAM_FILE,new File(nextLine[i]));
 			}
 			else
 				docMetadata.put(metadataFields[i], nextLine[i]);
 		}	
-		parameterMap.put(Parameters.PARAM_METADATA,docMetadata);
+		fileInfo.put(Parameters.PARAM_METADATA,docMetadata);
+
+        return fileInfo;
 	}
 
 	private void printMetadata(Map<String,Object> parameterMap) {
@@ -126,34 +74,61 @@ public class CSVMetadataLoader extends Action {
 		return metadataFields;
 	}
 
-
-	public void dump(ConfiguredAction configuredAction, Map<String, Object> parameterMap)  {
-		ConfiguredAction nextAction = configuredAction.getAppliedConfiguredActionOnSuccess();
-		if (nextAction != null) {
-			getJobService().executeAction((Integer) parameterMap.get("cycle"), nextAction, parameterMap);
-		}
-	}
-
-	@Override
-	public String getName() {
-		return "CSV metadata";
-	}
-
 	@Override
 	public String getDescription() {
 		return "Read metadata from a CSV file";
 	}
 
-	@Override
 	public String getCategory() {
 		return ConfigurableObject.CAT_METADATA;
 	}
 
-	@Override
-	protected void executeImpl(ConfiguredAction configuredAction,
-			Map<String, Object> parameterMap) {
-		// TODO Auto-generated method stub
 
-	}
+    private String nameSpace;
+    public void setNameSpace(String nameSpace){
+        this.nameSpace = nameSpace;
+    }
 
+    private String contentType;
+    public void setContentType(String contentType){
+        this.contentType = contentType;
+    }
+
+    @Override
+    public void execute(FileInfoMessage message) {
+        File inputFile = (File) message.fileInfo.get(Parameters.PARAM_FILE);
+
+        CSVReader reader = null;
+        String[] metadataFields = null;
+
+        try {
+            reader = createReader(inputFile);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            metadataFields = readMetadataFields(reader);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+        String[] nextLine;
+        try {
+            while ((nextLine = reader.readNext()) != null) {
+                sendMessage(new FileInfoMessage(processLine(nextLine, metadataFields)));
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            reader.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }

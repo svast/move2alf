@@ -13,7 +13,7 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
 public class DummyStartAction implements BeginAction, HasStateContext, HasSendingContext {
 
     @Override
-    public void executeImpl() {
+    public void execute() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

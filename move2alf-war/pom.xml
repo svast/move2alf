@@ -46,11 +46,6 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
-		<repository>
-			<id>Akka</id>
-			<name>Akka Maven2 Repository</name>
-			<url>http://repo.akka.io/releases/</url>
-		</repository>
 	</repositories>
     <dependencies>
         <dependency>
@@ -115,6 +110,13 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+        <dependency>
+            <groupId>eu.xenit</groupId>
+            <artifactId>move2alf-pipeline</artifactId>
+            <version>${project.parent.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -324,11 +326,11 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.4</version>
 		</dependency>
-		<dependency>
-			<groupId>se.scalablesolutions.akka</groupId>
-			<artifactId>akka-actor</artifactId>
-			<version>1.1.2</version>
-		</dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.10</artifactId>
+            <version>2.1.2</version>
+        </dependency>
 		<dependency>
 			<groupId>com.sun.media</groupId>
 			<artifactId>jai_imageio</artifactId>

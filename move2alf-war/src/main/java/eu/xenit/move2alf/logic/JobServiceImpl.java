@@ -1,7 +1,5 @@
 package eu.xenit.move2alf.logic;
 
-import static akka.actor.Actors.actorOf;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -64,8 +62,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private MailSender mailSender;
 
-	private final ActorRef reportActor;
-
 	@Autowired
 	public void setUserService(final UserService userService) {
 		this.userService = userService;
@@ -111,13 +107,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return mailSender;
 	}
 
-	@Override
-	public ActorRef getReportActor() {
-		return reportActor;
-	}
-
 	public JobServiceImpl() {
-		reportActor = actorOf(ReportActor.class).start();
 	}
 
 	@Override
@@ -326,7 +316,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			final String destinationType,
 			final HashMap<EDestinationParameter, Object> destinationParams) {
 		final ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
-		sourceSink.setClassName(destinationType);
+		sourceSink.setClassId(destinationType);
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
 		return sourceSink;
@@ -359,7 +349,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private void createSourceSink(final String destinationType,
 			final HashMap<EDestinationParameter, Object> destinationParams,
 			final ConfiguredSourceSink sourceSink) {
-		sourceSink.setClassName(destinationType);
+		sourceSink.setClassId(destinationType);
 
 		final Map<String, String> sourceSinkParameters = new HashMap<String, String>();
 		sourceSinkParameters.put("name",
@@ -464,7 +454,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final Cycle cycle = getCycle(cycleId);
 		ConfiguredAction action = cycle.getJob().getFirstConfiguredAction();
 		while (action != null) {
-			if (clazz.getName().equals(action.getClassName())) {
+			if (clazz.getName().equals(action.getClassId())) {
 				return action.getParameters();
 			}
 			action = action.getAppliedConfiguredActionOnSuccess();
@@ -483,7 +473,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void createAction(final String className,
 			final Map<String, String> parameters) {
 		final ConfiguredAction action = new ConfiguredAction();
-		action.setClassName(className);
+		action.setClassId(className);
 		action.setParameters(parameters);
 		getSessionFactory().getCurrentSession().save(action);
 	}
@@ -492,7 +482,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void createSourceSink(final String className,
 			final Map<String, String> parameters) {
 		final ConfiguredSourceSink ss = new ConfiguredSourceSink();
-		ss.setClassName(className);
+		ss.setClassId(className);
 		ss.setParameters(parameters);
 		getSessionFactory().getCurrentSession().save(ss);
 	}

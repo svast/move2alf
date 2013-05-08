@@ -50,7 +50,7 @@ public class DefaultErrorHandler implements ErrorHandler {
 				.getFirstConfiguredAction());
 		params.add(msg);
 		
-		getJobService().getReportActor().sendOneWay(
+		getJobService().getReportActor().tell(
 				new ReportMessage(cycle.getId(), file.getName(),
 						new Date(), Parameters.VALUE_FAILED, params, (String)parameterMap.get(Parameters.PARAM_REFERENCE)));
 
