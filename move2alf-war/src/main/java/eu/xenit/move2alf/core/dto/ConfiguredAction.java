@@ -1,50 +1,47 @@
 package eu.xenit.move2alf.core.dto;
 
+import java.util.Map;
 import java.util.Set;
 
 import eu.xenit.move2alf.core.ConfiguredObject;
 
 public class ConfiguredAction extends ConfiguredObject {
 
-	private ConfiguredAction appliedConfiguredActionOnSuccess;
+	private ConfiguredSourceSink configuredSourceSink;
+    private Map<String, ConfiguredAction> receivers;
+    private int nmbOfWorkers;
+    private String actionId;
 
-	private ConfiguredAction appliedConfiguredActionOnFailure;
+    public String getActionId() {
+        return actionId;
+    }
 
-	private Set<ConfiguredSourceSink> configuredSourceSinkSet;
-    private Set<Object> receivers;
+    public void setActionId(String actionId) {
+        this.actionId = actionId;
+    }
 
-    public Set<Object> getReceivers() {
+    public Map<String, ConfiguredAction> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(Set<Object> receivers) {
+    public void setReceivers(Map<String, ConfiguredAction> receivers) {
         this.receivers = receivers;
     }
 
-    public void setAppliedConfiguredActionOnSuccess(
-			ConfiguredAction appliedConfiguredActionOnSuccess) {
-		this.appliedConfiguredActionOnSuccess = appliedConfiguredActionOnSuccess;
+	public ConfiguredSourceSink getConfiguredSourceSink() {
+		return configuredSourceSink;
 	}
 
-	public ConfiguredAction getAppliedConfiguredActionOnSuccess() {
-		return appliedConfiguredActionOnSuccess;
+	public void setConfiguredSourceSink(
+			ConfiguredSourceSink configuredSourceSink) {
+		this.configuredSourceSink = configuredSourceSink;
 	}
 
-	public void setAppliedConfiguredActionOnFailure(
-			ConfiguredAction appliedConfiguredActionOnFailure) {
-		this.appliedConfiguredActionOnFailure = appliedConfiguredActionOnFailure;
-	}
+    public int getNmbOfWorkers(){
+        return nmbOfWorkers;
+    }
 
-	public ConfiguredAction getAppliedConfiguredActionOnFailure() {
-		return appliedConfiguredActionOnFailure;
-	}
-
-	public Set<ConfiguredSourceSink> getConfiguredSourceSinkSet() {
-		return configuredSourceSinkSet;
-	}
-
-	public void setConfiguredSourceSinkSet(
-			Set<ConfiguredSourceSink> configuredSourceSinkSet) {
-		this.configuredSourceSinkSet = configuredSourceSinkSet;
-	}
+    public void setNmbOfWorkers(int nmbOfWorkers){
+        this.nmbOfWorkers = nmbOfWorkers;
+    }
 }

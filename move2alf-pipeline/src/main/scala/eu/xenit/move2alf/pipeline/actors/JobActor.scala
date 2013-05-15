@@ -27,8 +27,8 @@ case class CycleData(data: HashMap[String, Any], counter: Int) extends Data
  * Time: 2:52 PM
  * To change this template use File | Settings | File Templates.
  */
-class JobActor(private val config: ActionConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
-  implicit val jobContext = new JobContext
+class JobActor(val id: String, private val config: ActionConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
+  implicit val jobContext = new JobContext(id)
 
   val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config)
 

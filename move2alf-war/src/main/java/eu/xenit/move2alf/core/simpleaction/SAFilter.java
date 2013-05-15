@@ -33,7 +33,7 @@ public class SAFilter extends Move2AlfAction<FileInfoMessage> {
     }
 
     @Override
-    public void execute(FileInfoMessage message) {
+    public void executeImpl(FileInfoMessage message) {
         File file = (File) message.fileInfo.get(Parameters.PARAM_FILE);
 
         if (extension != null && extension.startsWith("*")) {

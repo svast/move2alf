@@ -86,4 +86,8 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
     receivers.get(receiver).get ! M2AMessage(message)
   }
 
+  final def getJobId(): String = {
+    jobContext.jobId
+  }
+
 }

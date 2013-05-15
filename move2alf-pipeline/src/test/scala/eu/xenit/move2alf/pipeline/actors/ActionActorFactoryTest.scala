@@ -21,7 +21,7 @@ class ActionActorFactoryTest {
   @Test
   def testBasicActionActorFactory(){
     implicit val system = ActorSystem("TestSystem2")
-    implicit val jobContext = new JobContext
+    implicit val jobContext = new JobContext("TestJobContext")
     val mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     implicit val context = mock(classOf[ActorContext])
     val factory = new BasicActionContextFactory(classOf[JavaActionImpl[_]], Map("param1"->"Test123"), Map("default" -> mockedReceiver), 1)

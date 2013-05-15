@@ -12,9 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import akka.actor.ActorRef;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.action.Action;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -237,11 +235,6 @@ public interface JobService {
 	public void deleteDestination(int id);
 	
 	/**
-	 * @deprecated Use JobExecutionService
-	 */
-	public void executeAction(int cycleId, ConfiguredAction action, Map<String, Object> parameterMap);
-	
-	/**
 	 * 
 	 * @param className
 	 * @param parameters
@@ -325,11 +318,7 @@ public interface JobService {
 	 * @return
 	 */
 	public boolean checkDestinationExists(String destinationName);
-	
-	/**
-	 * @param category
-	 */
-	public List<Action> getActionsByCategory(String category);
+
 	
 	/**
 	 * @param category
@@ -350,12 +339,17 @@ public interface JobService {
 
 	public void sendMail(SimpleMailMessage message);
 
-	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
-
 	public List<HistoryInfo> getHistory(int jobId);
 	
 	public List<JobInfo> getAllJobInfo();
 
 	public void scheduleNow(int jobId);
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void closeCycle(Cycle cycle);
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    int openCycleForJob(Integer jobId);
+
+    Object getActionsByCategory(String catMetadata);
 }

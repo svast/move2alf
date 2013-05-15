@@ -18,14 +18,12 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import akka.actor.ActorRef;
 import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.ReportActor;
-import eu.xenit.move2alf.core.action.Action;
 import eu.xenit.move2alf.core.action.ActionFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -415,20 +413,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 				.list();
 
 		for (int i = 0; i < configuredActions.size(); i++) {
-			final Set<ConfiguredSourceSink> configuredSourceSinkForAction = configuredActions
-					.get(i).getConfiguredSourceSinkSet();
+			final ConfiguredSourceSink configuredSourceSinkForAction = configuredActions
+					.get(i).getConfiguredSourceSink();
 
-			for (int j = 0; j < configuredSourceSinkForAction.size(); j++) {
-				final Iterator<ConfiguredSourceSink> configuredSourceSinkIterator = configuredSourceSinkForAction
-						.iterator();
-
-				while (configuredSourceSinkIterator.hasNext()) {
-					if (((IdObject) configuredSourceSinkIterator.next())
+					if (configuredSourceSinkForAction
 							.getId() == sourceSinkId) {
 						return configuredActions.get(i);
 					}
-				}
-			}
 		}
 		return null;
 	}
@@ -439,27 +430,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);
-	}
-
-	@Override
-	public void executeAction(final int cycleId, final ConfiguredAction action,
-			final Map<String, Object> parameterMap) {
-		throw new UnsupportedOperationException(
-				"Use JobExecutionService instead");
-	}
-
-	@Override
-	public Map<String, String> getActionParameters(final int cycleId,
-			final Class<? extends Action> clazz) {
-		final Cycle cycle = getCycle(cycleId);
-		ConfiguredAction action = cycle.getJob().getFirstConfiguredAction();
-		while (action != null) {
-			if (clazz.getName().equals(action.getClassId())) {
-				return action.getParameters();
-			}
-			action = action.getAppliedConfiguredActionOnSuccess();
-		}
-		return null;
 	}
 
 	@Override
@@ -531,11 +501,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteAction(final int id) {
 		final Session s = getSessionFactory().getCurrentSession();
 		s.delete(s.get(ConfiguredAction.class, id));
-	}
-
-	@Override
-	public List<Action> getActionsByCategory(final String category) {
-		return getActionFactory().getObjectsByCategory(category);
 	}
 
 	@Override
@@ -670,5 +635,35 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 		return jobInfoList;
 	}
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void closeCycle(final Cycle cycle) {
+        final Session session = getSessionFactory().getCurrentSession();
+
+        cycle.setEndDateTime(new Date());
+        session.update(cycle);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int openCycleForJob(final Integer jobId) {
+        final Session session = getSessionFactory().getCurrentSession();
+
+        final Job job = getJob(jobId);
+        logger.debug("Executing job \"" + job.getName() + "\"");
+
+        final Cycle cycle = new Cycle();
+        cycle.setJob(job);
+        cycle.setStartDateTime(new Date());
+        session.save(cycle);
+
+        return cycle.getId();
+    }
+
+    @Override
+    public Object getActionsByCategory(String catMetadata) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
 }

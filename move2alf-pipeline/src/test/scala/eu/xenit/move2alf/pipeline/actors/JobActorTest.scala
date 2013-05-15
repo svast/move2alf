@@ -25,7 +25,7 @@ class JobActorTest{
     startAction.addReceiver("default",middleAction)
     middleAction.addReceiver("default",endAction)
     implicit val system = ActorSystem("TestSystem3")
-    val actorRef = TestFSMRef(new JobActor(startAction, new JobInfo))
+    val actorRef = TestFSMRef(new JobActor("TestId",startAction, new JobInfo))
 
     assert(actorRef.stateName == NotRunning)
     assert(actorRef.stateData == Uninitialized)

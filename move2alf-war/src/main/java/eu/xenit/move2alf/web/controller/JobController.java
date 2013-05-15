@@ -56,19 +56,9 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private JobExecutionService jobExecutionService;
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
-
-	public JobExecutionService getJobExecutionService() {
-		return jobExecutionService;
-	}
-
-	@Autowired
-	public void setJobExecutionService(final JobExecutionService jobExecutionService) {
-		this.jobExecutionService = jobExecutionService;
-	}
 
 	@Autowired
 	public void setJobService(JobService jobService) {
@@ -169,7 +159,9 @@ public class JobController extends AbstractController{
 
 		job.setId(jobId);
 		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
+		getPipelineAssembler().getPipeline(job);
+
+        //TODO START AND CREATE JOB
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
@@ -284,7 +276,8 @@ public class JobController extends AbstractController{
 
 		job.setId(jobId);
 		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
+		getPipelineAssembler().getPipeline(job);
+        //TODO SAVE AND CREATE JOB
 
 		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
 		if (firstAction != null) {
@@ -400,8 +393,8 @@ public class JobController extends AbstractController{
 
 		for (ConfiguredSourceSink destination : destinations) {
 			SourceSink sourceSink = getSourceSinkFactory().getObject(
-					destination.getClassName());
-			sourceSinkNames.put(destination.getClassName(), sourceSink
+					destination.getClassId());
+			sourceSinkNames.put(destination.getClassId(), sourceSink
 					.getName());
 		}
 
@@ -464,7 +457,7 @@ public class JobController extends AbstractController{
 		DestinationConfig destinationConfig = new DestinationConfig();
 		
 		destinationConfig.setDestinationName(destination.getParameter("name"));
-		destinationConfig.setDestinationType(destination.getClassName());
+		destinationConfig.setDestinationType(destination.getClassId());
 		destinationConfig.setDestinationURL(destination.getParameter("url"));
 		destinationConfig.setAlfUser(destination.getParameter("user"));
 		destinationConfig.setAlfPswd(destination.getParameter("password"));
@@ -598,7 +591,7 @@ public class JobController extends AbstractController{
 			}
 		}
 
-		final List<PipelineStepProgress> progress = getJobExecutionService().getProgress(cycleId);
+		//final List<PipelineStepProgress> progress = getJobExecutionService().getProgress(cycleId);
 
 		// easiest way to keep the pagination links, not the cleanest
 		PagedListHolder<ProcessedDocument> pagedListHolder = new PagedListHolder<ProcessedDocument>() {
@@ -656,7 +649,7 @@ public class JobController extends AbstractController{
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.addObject("nrOfFailedDocuments", nrOfFailedDocuments);
-		mav.addObject("progress", progress);
+		//mav.addObject("progress", progress);
 		mav.setViewName(viewName);
 		return mav;
 	}

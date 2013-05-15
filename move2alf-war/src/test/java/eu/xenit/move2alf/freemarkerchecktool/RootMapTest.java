@@ -69,18 +69,18 @@ public class RootMapTest {
 		final ConfiguredAction configuredAction = job
 				.getFirstConfiguredAction();
 		assertNotNull(configuredAction);
-		final ConfiguredAction appliedConfiguredActionOnSuccess = configuredAction
-				.getAppliedConfiguredActionOnSuccess();
-		assertNotNull(appliedConfiguredActionOnSuccess); // TODO check fields of
-															// appliedConfiguredActionOnSuccess
-		final ConfiguredAction appliedConfiguredActionOnFailure = configuredAction
-				.getAppliedConfiguredActionOnFailure();
-		assertNotNull(appliedConfiguredActionOnFailure); // TODO check fields of
-															// appliedConfiguredActionOnFailure
-		final Set<ConfiguredSourceSink> configuredSourceSinkSet = configuredAction
-				.getConfiguredSourceSinkSet();
-		assertEquals(1, configuredSourceSinkSet.size()); // TODO check
-															// configuredSourceSinkSet
+//		final ConfiguredAction appliedConfiguredActionOnSuccess = configuredAction
+//				.getAppliedConfiguredActionOnSuccess();
+//		assertNotNull(appliedConfiguredActionOnSuccess); // TODO check fields of
+//															// appliedConfiguredActionOnSuccess
+//		final ConfiguredAction appliedConfiguredActionOnFailure = configuredAction
+//				.getAppliedConfiguredActionOnFailure();
+//		assertNotNull(appliedConfiguredActionOnFailure); // TODO check fields of
+//															// appliedConfiguredActionOnFailure
+//		final Set<ConfiguredSourceSink> configuredSourceSinkSet = configuredAction
+//				.getConfiguredSourceSinkSet();
+//		assertEquals(1, configuredSourceSinkSet.size()); // TODO check
+//															// configuredSourceSinkSet
 
 		final Set<Schedule> schedules = job.getSchedules();
 		assertEquals(1, schedules.size()); // TODO check schedules
@@ -88,7 +88,7 @@ public class RootMapTest {
 		final Set<Cycle> cycles = job.getCycles();
 		assertEquals(1, cycles.size()); // TODO check cycles
 
-		final Set<Report> reports = job.getReports();
-		assertEquals(1, reports.size()); // TODO check reports
+//		final Set<Report> reports = job.getReports();
+//		assertEquals(1, reports.size()); // TODO check reports
 	}
 }

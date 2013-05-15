@@ -31,10 +31,10 @@ public class ReportActor extends UntypedActor {
 	@Override
 	public void onReceive(Object message) {
 		if (message instanceof ReportMessage) {
-			ReportMessage reportMessage = (ReportMessage) message;
-			getJobService().createProcessedDocument(reportMessage.cycleId,
-					reportMessage.name, reportMessage.date,
-					reportMessage.state, reportMessage.params, reportMessage.reference);
+//			ReportMessage reportMessage = (ReportMessage) message;
+//			getJobService().createProcessedDocument(reportMessage.cycleId,
+//					reportMessage.name, reportMessage.date,
+//					reportMessage.state, reportMessage.params, reportMessage.reference);
 		} else if (message instanceof SendMailMessage) {
 			SendMailMessage sendMailMessage = (SendMailMessage) message;
 			int cycleId = sendMailMessage.getCycleId();
@@ -117,6 +117,7 @@ public class ReportActor extends UntypedActor {
 	}
 
 	private Map<String, String> getEmailActionParameter(int cycleId) {
-		return getJobService().getActionParameters(cycleId, EmailAction.class);
+		//return getJobService().getActionParameters(cycleId, EmailAction.class);
+        return null;
 	}
 }

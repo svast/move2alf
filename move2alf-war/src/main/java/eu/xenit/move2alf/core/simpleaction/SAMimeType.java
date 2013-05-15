@@ -40,7 +40,7 @@ public class SAMimeType extends Move2AlfAction<FileInfoMessage> {
 	}
 
     @Override
-    public void execute(FileInfoMessage message) {
+    public void executeImpl(FileInfoMessage message) {
         FileInfo output = new FileInfo();
         output.putAll(message.fileInfo);
         File file = (File) message.fileInfo.get(Parameters.PARAM_FILE);

@@ -12,7 +12,7 @@ import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
  */
 public abstract class AbstractSendingAction extends AbstractStateAction implements HasSendingContext {
 
-    private SendingContext sendingContext;
+    protected SendingContext sendingContext;
     @Override
     public void setSendingContext(SendingContext sendingContext) {
         this.sendingContext = sendingContext;

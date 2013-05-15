@@ -20,7 +20,7 @@ object JobController {
 
   def createJob(id: String, config: ActionConfig){
     val jobInfo = new JobInfo
-    val actorRef = system.actorOf(Props(new JobActor(config, jobInfo)), name = id)
+    val actorRef = system.actorOf(Props(new JobActor(id, config, jobInfo)), name = id)
     jobs.single += id -> actorRef
     jobInfos.single +=  id -> jobInfo
   }

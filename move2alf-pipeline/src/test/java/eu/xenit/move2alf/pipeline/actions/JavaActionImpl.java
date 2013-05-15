@@ -1,8 +1,6 @@
 package eu.xenit.move2alf.pipeline.actions;
 
 import eu.xenit.move2alf.pipeline.AbstractMessage;
-import eu.xenit.move2alf.pipeline.StringMessage;
-import eu.xenit.move2alf.pipeline.actions.context.SendingActionContext;
 import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
 import eu.xenit.move2alf.pipeline.actions.context.StateContext;
 

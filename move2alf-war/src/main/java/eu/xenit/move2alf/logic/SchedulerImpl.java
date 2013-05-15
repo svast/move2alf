@@ -30,8 +30,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	private JobService jobService;
 	
-	private JobExecutionService jobExecutionService;
-	
 	private UsageService usageService;
 
 	private org.quartz.Scheduler scheduler;
@@ -52,15 +50,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 
 	public JobService getJobService() {
 		return jobService;
-	}
-
-	@Autowired
-	public void setJobExecutionService(JobExecutionService jobExecutionService) {
-		this.jobExecutionService = jobExecutionService;
-	}
-
-	public JobExecutionService getJobExecutionService() {
-		return jobExecutionService;
 	}
 
 	@Autowired
@@ -128,7 +117,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		JobDataMap jobData = new JobDataMap();
 		jobData.put(JOB_ID, jobId);
 		jobData.put(JOB_SERVICE, getJobService());
-		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
 		jobData.put(USAGE_SERVICE, getUsageService());
 		return jobData;
 	}

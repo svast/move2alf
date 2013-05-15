@@ -20,7 +20,7 @@ class PipeLineFactoryTest {
   @Test
   def testGeneratePipeLine(){
     implicit val system = ActorSystem("TestSystem4")
-    implicit val jobContext = new JobContext
+    implicit val jobContext = new JobContext("Testid")
     implicit val context = mock(classOf[ActorContext])
 
     val factory = new PipeLineFactory(mock(classOf[TestActorRef[TestActor]]))

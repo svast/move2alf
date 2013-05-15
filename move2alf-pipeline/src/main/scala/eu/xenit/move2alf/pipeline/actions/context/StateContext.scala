@@ -9,6 +9,8 @@ package eu.xenit.move2alf.pipeline.actions.context
  */
 trait StateContext {
 
+  def getJobId(): String
+
   /**
    * Save a variable that can be retrieved later in this cycle by an Action in the current Job.
    * @param key The key that will be used to retrieve the variable later.

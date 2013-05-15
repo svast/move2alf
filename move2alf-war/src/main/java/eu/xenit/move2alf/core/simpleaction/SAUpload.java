@@ -7,115 +7,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
+import eu.xenit.move2alf.pipeline.actions.EOCAware;
+import eu.xenit.move2alf.pipeline.actions.EOCBlockingAction;
+import eu.xenit.move2alf.pipeline.actions.context.EOCBlockingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.ACL;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
-import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 
-public class SAUpload extends SimpleActionWithSourceSink {
+public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implements EOCAware{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAUpload.class);
 
-	public static final String PARAM_PATH = "path";
-	/**
-	 * SourceSink.MODE_SKIP or SourceSink.MODE_SKIP_AND_LOG or
-	 * SourceSink.MODE_OVERWRITE
-	 */
-	public static final String PARAM_DOCUMENT_EXISTS = "documentExists";
-	public static final String PARAM_BATCH_SIZE = "batchSize";
-	public static final String STATE_BATCH = "batch";
-	public static final String STATE_ACL_BATCH = "aclBatch";
 
+    public static final String PARAM_USAGESERVICE = "usageService";
 	private UsageService usageService;
+    public void setUsageService(UsageService usageService){
+        this.usageService = usageService;
+    }
 
-
-	public SAUpload(final SourceSink sink, final ConfiguredSourceSink sinkConfig, UsageService usageService) {
-		super(sink, sinkConfig);
-		this.usageService = usageService;
-	}
-
-	@Override
-	public List<FileInfo> execute(final FileInfo parameterMap,
-								  final ActionConfig config, final Map<String, Serializable> state) {
-		if (usageService.isBlockedByDocumentCounter()) {
-			throw new Move2AlfException("Document counter is 0.");
-		}
-
-		final Integer maxBatchSize = Integer.parseInt(config
-				.get(PARAM_BATCH_SIZE));
-
-		final Batch batch = getCurrentBatch(state);
-		final List<ACL> aclBatch = getCurrentACLBatch(state);
-
-		boolean uploadNow = false;
-		Batch batchToUpload = new Batch();
-		List<ACL> aclsToSet = new ArrayList<ACL>();
-
-		synchronized (batch) {
-			if (batch.size() < maxBatchSize) {
-				logger.debug("Queueing file for upload: " + ((File) parameterMap.get(Parameters.PARAM_FILE)).getName());
-				batch.add(parameterMap);
-
-				final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) parameterMap
-						.get(Parameters.PARAM_ACL);
-				if (acl != null) {
-					final String basePath = normalizeBasePath(config
-							.get(PARAM_PATH));
-					final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
-					for (final String aclPath : acl.keySet()) {
-						normalizedAcl.put(normalizeAclPath(basePath, aclPath),
-								acl.get(aclPath));
-					}
-					final boolean inheritPermissions = getInheritPermissionsFromParameterMap(parameterMap);
-					aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
-				}
-			} else {
-				// this should never happen
-				throw new Move2AlfException(
-						"Batch size too big, failed to commit batch?");
-			}
-
-			if (batch.size() == maxBatchSize) {
-				logger.debug("Batch size reached, uploading " + maxBatchSize + " files");
-				uploadNow = true;
-				// make a local copies
-				batchToUpload = new Batch(batch);
-				batch.clear();
-				aclsToSet = new ArrayList<ACL>(aclBatch);
-				aclBatch.clear();
-			}
-		}
-
-		// Move slow IO code outside of synchronized block
-		if (uploadNow) {
-			final List<FileInfo> output = uploadAndSetACLs(config, batchToUpload, aclsToSet);
-			return output;
-		} else {
-			return new ArrayList<FileInfo>();
-		}
-	}
-
-	private List<FileInfo> uploadAndSetACLs(final ActionConfig config, final Batch batch, final List<ACL> acls) {
+	private List<FileInfo> uploadAndSetACLs(final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
 		String errorMessage = "";
 		List<UploadResult> results = null;
 		try {
-			results = upload(batch, config);
+			results = upload(batch);
 
 			for (final ACL acl : acls) {
 				getSink().setACL(getSinkConfig(), acl);
@@ -153,46 +82,15 @@ public class SAUpload extends SimpleActionWithSourceSink {
 		return output;
 	}
 
-	@Override
-	public List<FileInfo> initializeState(final ActionConfig config, final Map<String, Serializable> state) {
-		logger.debug("Initializing state");
-		state.put(STATE_BATCH, new Batch());
-		state.put(STATE_ACL_BATCH, new ArrayList<ACL>());
+    public static final String PARAM_WRITEOPTION = "writeOption";
+    private WriteOption writeOption;
+    public void setWriteOption(WriteOption writeOption){
+        this.writeOption = writeOption;
+    }
 
-		getSink().clearCaches(getSinkConfig());
-
-		return null;
-	}
-
-	@Override
-	public List<FileInfo> cleanupState(final ActionConfig config, final Map<String, Serializable> state) {
-		logger.debug("Cleaning up state");
-		final Batch batch = getCurrentBatch(state);
-		List<FileInfo> output = null;
-		if (batch.size() > 0) {
-			logger.debug("There are documents queued for upload, uploading " + batch.size() + " documents");
-			final List<ACL> aclBatch = getCurrentACLBatch(state);
-			output = uploadAndSetACLs(config, batch, aclBatch);
-		} else {
-			logger.debug("No documents queued");
-		}
-		state.remove(STATE_BATCH);
-		state.remove(STATE_ACL_BATCH);
-		return output;
-	}
-
-	private Batch getCurrentBatch(final Map<String, Serializable> state) {
-		return (Batch) state.get(STATE_BATCH);
-	}
-
-	private List<ACL> getCurrentACLBatch(final Map<String, Serializable> state) {
-		return (List<ACL>) state.get(STATE_ACL_BATCH);
-	}
-
-	private List<UploadResult> upload(final Batch batch,
-									  final ActionConfig config) {
+	private List<UploadResult> upload(final Batch batch) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
-		final String basePath = normalizeBasePath(config.get(PARAM_PATH));
+		final String basePath = normalizeBasePath(path);
 
 		Map<Document, FileInfo> documentFileInfoMapping = new HashMap<Document, FileInfo>();
 		for (final FileInfo parameterMap : batch) {
@@ -223,7 +121,7 @@ public class SAUpload extends SimpleActionWithSourceSink {
 			documentFileInfoMapping.put(document, parameterMap);
 		}
 
-		return getSink().sendBatch(getSinkConfig(), WriteOption.valueOf(config.get(PARAM_DOCUMENT_EXISTS)),
+		return getSink().sendBatch(getSinkConfig(), writeOption,
 				documentsToUpload);
 	}
 
@@ -321,4 +219,62 @@ public class SAUpload extends SimpleActionWithSourceSink {
 	public String getDescription() {
 		return "Uploading documents to Alfresco";
 	}
+
+    public static final String PARAM_BATCH_SIZE = "batchSize";
+    private int batchSize;
+    public void setBatchSize(int batchSize){
+        this.batchSize = batchSize;
+    }
+
+    public static final String PARAM_PATH = "path";
+    private String path;
+    public void setPath(String path){
+        this.path = path;
+    }
+
+    Batch batch = new Batch();
+    List<ACL> aclBatch = new ArrayList<ACL>();
+
+    @Override
+    public void executeImpl(FileInfoMessage message) {
+        if (usageService.isBlockedByDocumentCounter()) {
+            throw new Move2AlfException("Document counter is 0.");
+        }
+
+        logger.debug("Queueing file for upload: " + ((File) message.fileInfo.get(Parameters.PARAM_FILE)).getName());
+        batch.add(message.fileInfo);
+
+        final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) message.fileInfo
+                .get(Parameters.PARAM_ACL);
+        if (acl != null) {
+            final String basePath = normalizeBasePath(path);
+            final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
+            for (final String aclPath : acl.keySet()) {
+                normalizedAcl.put(normalizeAclPath(basePath, aclPath),
+                        acl.get(aclPath));
+            }
+            final boolean inheritPermissions = getInheritPermissionsFromParameterMap(message.fileInfo);
+            aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
+        }
+
+        if(batch.size() == batchSize){
+            logger.debug("Batch size reached, uploading " + batchSize + " files");
+            uploadBatch();
+        }
+    }
+
+    private void uploadBatch() {
+        List<FileInfo> output = uploadAndSetACLs(batch, aclBatch);
+        for(FileInfo fileInfo: output){
+            sendMessage(new FileInfoMessage(fileInfo));
+        }
+        batch.clear();
+        aclBatch.clear();
+    }
+
+    @Override
+    public void beforeSendEOC() {
+        logger.debug("EOC triggerd upload.");
+        uploadBatch();
+    }
 }

@@ -21,7 +21,7 @@ public class ExecuteCommandAction extends Move2AlfAction<StartMessage> {
     }
 
     @Override
-    public void execute(StartMessage message) {
+    public void executeImpl(StartMessage message) {
         logger.debug("Command: " + command);
         if (command != null && !"".equals(command)) {
             logger.debug("Executing command " + command);

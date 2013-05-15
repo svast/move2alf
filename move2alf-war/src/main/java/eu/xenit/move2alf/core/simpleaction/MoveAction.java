@@ -28,7 +28,7 @@ public class MoveAction extends Move2AlfAction<FileInfoMessage> {
 
 
     @Override
-    public void execute(FileInfoMessage message) {
+    public void executeImpl(FileInfoMessage message) {
         FileInfo output = new FileInfo();
         output.putAll(message.fileInfo);
         String source = (String) message.fileInfo.get(Parameters.PARAM_INPUT_PATH);

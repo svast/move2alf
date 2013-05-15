@@ -9,7 +9,8 @@ import concurrent.stm._
  * Time: 3:28 PM
  * To change this template use File | Settings | File Templates.
  */
-class JobContext {
+class JobContext(val jobId: String) {
+
   private val states = TMap.empty[String, Any]
 
   def getStateValue(key: String): Any =  {

@@ -37,7 +37,7 @@ class ActionWrapperTest {
   @Before
   def before(){
     system = ActorSystem("TestSystem1")
-    implicit val jobContext = new JobContext
+    implicit val jobContext = new JobContext("TestJobContext")
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     _action = mock(classOf[ReceivingAction[StringMessage]])
     implicit val context = mock(classOf[ActorContext])
