@@ -220,11 +220,11 @@ public class JobConfig {
 		this.moveBeforeProc = Boolean.valueOf(moveBeforeProc);
 	}
 	
-	public void setMoveBeforeProc(Boolean moveBeforeProc) {
+	public void setMoveBeforeProc(boolean moveBeforeProc) {
 		this.moveBeforeProc = moveBeforeProc;
 	}
 
-	public Boolean getMoveBeforeProc() {
+	public boolean getMoveBeforeProc() {
 		return moveBeforeProc;
 	}
 
@@ -240,11 +240,11 @@ public class JobConfig {
 		this.moveAfterLoad = Boolean.valueOf(moveAfterLoad);
 	}
 	
-	public void setMoveAfterLoad(Boolean moveAfterLoad) {
+	public void setMoveAfterLoad(boolean moveAfterLoad) {
 		this.moveAfterLoad = moveAfterLoad;
 	}
 
-	public Boolean getMoveAfterLoad() {
+	public boolean getMoveAfterLoad() {
 		return moveAfterLoad;
 	}
 
@@ -260,11 +260,11 @@ public class JobConfig {
 		this.moveNotLoad = Boolean.valueOf(moveNotLoad);
 	}
 	
-	public void setMoveNotLoad(Boolean moveNotLoad) {
+	public void setMoveNotLoad(boolean moveNotLoad) {
 		this.moveNotLoad = moveNotLoad;
 	}
 
-	public Boolean getMoveNotLoad() {
+	public boolean getMoveNotLoad() {
 		return moveNotLoad;
 	}
 
@@ -276,7 +276,7 @@ public class JobConfig {
 		return moveNotLoadText;
 	}
 	
-	public void setSendNotification(Boolean sendNotification) {
+	public void setSendNotification(boolean sendNotification) {
 		this.sendNotification = sendNotification;
 	}
 
@@ -284,7 +284,7 @@ public class JobConfig {
 		this.sendNotification = Boolean.valueOf(sendNotification);
 	}
 
-	public Boolean getSendNotification() {
+	public boolean getSendNotification() {
 		return sendNotification;
 	}
 
@@ -296,7 +296,7 @@ public class JobConfig {
 		return sendNotificationText;
 	}
 	
-	public void setSendReport(Boolean sendReport) {
+	public void setSendReport(boolean sendReport) {
 		this.sendReport = sendReport;
 	}
 
@@ -304,7 +304,7 @@ public class JobConfig {
 		this.sendReport = Boolean.valueOf(sendReport);
 	}
 
-	public Boolean getSendReport() {
+	public boolean getSendReport() {
 		return sendReport;
 	}
 

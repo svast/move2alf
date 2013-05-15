@@ -16,6 +16,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 public class MoveAction extends Move2AlfAction<FileInfoMessage> {
 
+    public static final String PARAM_PATH = "path";
     private String path;
     public void setPath(String path){
         this.path = path;

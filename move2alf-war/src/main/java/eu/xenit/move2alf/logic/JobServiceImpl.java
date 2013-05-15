@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,10 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.xenit.move2alf.common.IdObject;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.action.ActionFactory;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
@@ -54,8 +51,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private Scheduler scheduler;
 
-	private ActionFactory actionFactory;
-
 	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
@@ -76,15 +71,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public Scheduler getScheduler() {
 		return scheduler;
-	}
-
-	@Autowired
-	public void setActionFactory(final ActionFactory actionFactory) {
-		this.actionFactory = actionFactory;
-	}
-
-	public ActionFactory getActionFactory() {
-		return actionFactory;
 	}
 
 	@Autowired
@@ -383,7 +369,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
 				.getCurrentSession()
 				.createQuery(
-						"from ConfiguredSourceSink as c where c.className!=?")
+						"from ConfiguredSourceSink as c where c.classId!=?")
 				.setString(0, fileSourceSink).list();
 
 		return configuredSourceSink;
@@ -439,14 +425,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	}
 
-	@Override
-	public void createAction(final String className,
-			final Map<String, String> parameters) {
-		final ConfiguredAction action = new ConfiguredAction();
-		action.setClassId(className);
-		action.setParameters(parameters);
-		getSessionFactory().getCurrentSession().save(action);
-	}
 
 	@Override
 	public void createSourceSink(final String className,

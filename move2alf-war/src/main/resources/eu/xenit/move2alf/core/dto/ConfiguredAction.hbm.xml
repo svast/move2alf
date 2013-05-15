@@ -10,7 +10,7 @@
 		</id>
 		<property name="classId" column="classId"/>
 
-        <property name="configuredSourceSink" column="configuredSourceSink" />
+        <many-to-one name="configuredSourceSink" column="configuredSourceSinkId" unique="true" lazy="false" />
     	
     	<map name="parameters" table="configuredActionParameter" cascade="all-delete-orphan" lazy="false">
     		<key column="configuredActionId"/>
@@ -23,8 +23,7 @@
                 <column name="senderId" not-null="true" />
             </key>
             <map-key column="name" type="string"/>
-            <element column="receiverId"/>
+            <many-to-many column="receiverId" class="eu.xenit.move2alf.core.dto.ConfiguredAction"/>
         </map>
-    	
 	</class>
 </hibernate-mapping>

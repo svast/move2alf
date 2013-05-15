@@ -14,6 +14,16 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 public abstract class SourceSink extends ConfigurableObject {
 
+    public int getId() {
+        return id;
+    }
+
+    private int id;
+
+    public void setId(int id){
+        this.id = id;
+    }
+
 	public abstract void send(ConfiguredSourceSink configuredSourceSink,
 			WriteOption docExistsMode, String remotePath,
 			String mimeType, String namespace, String contentType,

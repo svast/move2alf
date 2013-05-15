@@ -27,4 +27,6 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 	}
 
 	public abstract JobConfig getJobConfigForJob(int id);
+
+    public abstract void assemblePipeline(JobConfig jobConfig);
 }

@@ -19,6 +19,7 @@ public class SASource extends Move2AlfAction<StartMessage> {
 		return "Listing documents";
 	}
 
+    public static final String PARAM_INPUTPATHS = "inputPaths";
     private List<String> inputPaths;
     public void setInputPaths(List<String> inputPaths){
         this.inputPaths = inputPaths;

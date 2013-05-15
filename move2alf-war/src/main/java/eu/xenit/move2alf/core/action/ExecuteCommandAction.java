@@ -15,6 +15,8 @@ public class ExecuteCommandAction extends Move2AlfAction<StartMessage> {
     private static final Logger logger = LoggerFactory
             .getLogger(ExecuteCommandAction.class);
 
+
+    public static final String PARAM_COMMAND = "command";
     private String command;
     public void setCommand(String command){
         this.command = command;

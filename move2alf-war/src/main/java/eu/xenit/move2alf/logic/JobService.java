@@ -193,7 +193,7 @@ public interface JobService {
 	/**
 	 * Edits a destination
 	 * 
-	 * @param dinkId
+	 * @param sinkId
 	 * @param destinationType
 	 *            The type of destination
 	 * @param destinationParams
@@ -233,13 +233,6 @@ public interface JobService {
 	 * @param id
 	 */
 	public void deleteDestination(int id);
-	
-	/**
-	 * 
-	 * @param className
-	 * @param parameters
-	 */
-	public void createAction(String className, Map<String, String> parameters);
 	
 	/**
 	 * 

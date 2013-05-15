@@ -1,73 +1,73 @@
 package eu.xenit.move2alf.core;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import eu.xenit.move2alf.core.dto.UserPswd;
+import eu.xenit.move2alf.core.dto.UserRole;
+import org.hibernate.classic.Session;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
 
-import javax.sql.DataSource;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.springframework.jdbc.datasource.init.DataSourceInitializer;
-
-public class ConditionalDataSourceInitializer extends DataSourceInitializer {
+public class ConditionalDataSourceInitializer implements InitializingBean {
 	
 	private boolean enabled = false;
 	
 	public boolean isEnabled(){
 		return enabled;
 	}
-	
-	@Override
+
 	public void setEnabled(boolean enabled){
 		this.enabled = enabled;
-		super.setEnabled(enabled);
-	}
-	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if(this.isEnabled() && this.databaseEmpty()){
-			super.afterPropertiesSet();
-		}
-	}
-	
-	private DataSource dataSource;
-	
-	@Override
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-		super.setDataSource(dataSource);
 	}
 
-	private boolean databaseEmpty() {
-		DataSource dataSource = this.dataSource;
-		try {
-			Connection connection = dataSource.getConnection();
-			try{
-				String sql = "SHOW tables";
-				PreparedStatement stm = connection.prepareStatement(sql);
-				ResultSet resultSet = stm.executeQuery();
-				if(resultSet.next()){
-					return false;
-				}
-				else{
-					return true;
-				}
-				
-			}
-			finally{
-				try {
-					connection.close();
-				}
-				catch (SQLException e) {
-					// TODO: handle exception
-				}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return false;
-	}
+    private HibernateTransactionManager txManager;
+    public void setTxManager(HibernateTransactionManager txManager){
+        this.txManager = txManager;
+    }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if(!isEnabled())
+            return;
+
+        Session session = txManager.getSessionFactory().openSession();
+        session.beginTransaction();
+        List<UserPswd> users = session.createQuery("from UserPswd").list();
+        if(users.size() == 0){
+            UserPswd admin = new UserPswd();
+            admin.setUserName("admin");
+            admin.setPassword("21232f297a57a5a743894a0e4a801fc3");
+
+            Set<UserRole> roles = new HashSet<UserRole>();
+
+            UserRole consumer = new UserRole();
+            consumer.setUserName("admin");
+            consumer.setRole("CONSUMER");
+            roles.add(consumer);
+
+            UserRole scheduleAdmin = new UserRole();
+            scheduleAdmin.setUserName("admin");
+            scheduleAdmin.setRole("SCHEDULE_ADMIN");
+            roles.add(scheduleAdmin);
+
+            UserRole jobAdmin = new UserRole();
+            jobAdmin.setUserName("admin");
+            jobAdmin.setRole("JOB_ADMIN");
+            roles.add(jobAdmin);
+
+            UserRole systemAdmin = new UserRole();
+            systemAdmin.setUserName("admin");
+            systemAdmin.setRole("SYSTEM_ADMIN");
+            roles.add(systemAdmin);
+
+            admin.setUserRoleSet(roles);
+
+            session.save(admin);
+            session.getTransaction().commit();
+
+            System.out.println("TEST1231111111111111111");
+        }
+    }
 }
