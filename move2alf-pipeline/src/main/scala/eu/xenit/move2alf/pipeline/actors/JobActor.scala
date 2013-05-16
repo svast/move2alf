@@ -38,7 +38,7 @@ class JobActor(val id: String, private val config: ActionConfig, private val job
 
   when(NotRunning) {
     case Event(Start, Uninitialized) => {
-      firstActor ! Start
+      firstActor ! Broadcast(EOC)
       goto(Running) using CycleData(data = new HashMap[String, Any], counter = nmbOfSenders)
     }
   }

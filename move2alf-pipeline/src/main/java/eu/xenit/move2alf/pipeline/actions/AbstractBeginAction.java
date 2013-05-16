@@ -7,5 +7,5 @@ package eu.xenit.move2alf.pipeline.actions;
  * Time: 4:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class AbstractBeginAction extends AbstractSendingAction implements BeginAction {
+public abstract class AbstractBeginAction extends AbstractSendingAction implements EOCAware {
 }

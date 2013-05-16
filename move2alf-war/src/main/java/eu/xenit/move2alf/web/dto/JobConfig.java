@@ -118,8 +118,6 @@ public class JobConfig {
 	private String commandAfter;
 
 	private int dest;
-	
-	private String inputPath="";
 
 	public JobConfig() {
 
@@ -149,20 +147,12 @@ public class JobConfig {
 		return description;
 	}
 
-	public void setInputFolders(List<String> inputFolders) {
+	public void setInputFolder(List<String> inputFolders) {
 		this.inputFolders = inputFolders;
 	}
 
-	public List<String> getInputFolders() {
+	public List<String> getInputFolder() {
 		return inputFolders;
-	}
-	
-	public void setInputPath(String inputPath) {
-		this.inputPath = inputPath;
-	}
-
-	public String getInputPath() {
-		return inputPath;
 	}
 
 	public void setDestinationFolder(String destinationFolder) {

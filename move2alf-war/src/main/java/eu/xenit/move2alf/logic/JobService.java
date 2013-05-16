@@ -343,6 +343,4 @@ public interface JobService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     int openCycleForJob(Integer jobId);
-
-    Object getActionsByCategory(String catMetadata);
 }

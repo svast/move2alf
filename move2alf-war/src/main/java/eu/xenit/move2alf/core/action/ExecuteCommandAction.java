@@ -1,7 +1,12 @@
 package eu.xenit.move2alf.core.action;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.action.messages.StartMessage;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.actions.AbstractBasicAction;
+import eu.xenit.move2alf.pipeline.actions.AbstractBeginAction;
+import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ExecuteCommandAction extends Move2AlfAction<StartMessage> {
+public class ExecuteCommandAction extends AbstractBeginAction{
 
     private static final Logger logger = LoggerFactory
             .getLogger(ExecuteCommandAction.class);
@@ -23,7 +28,7 @@ public class ExecuteCommandAction extends Move2AlfAction<StartMessage> {
     }
 
     @Override
-    public void executeImpl(StartMessage message) {
+    public void beforeSendEOC() {
         logger.debug("Command: " + command);
         if (command != null && !"".equals(command)) {
             logger.debug("Executing command " + command);
@@ -66,5 +71,4 @@ public class ExecuteCommandAction extends Move2AlfAction<StartMessage> {
 
         sendMessage(new StartMessage());
     }
-
 }

@@ -12,10 +12,10 @@ import eu.xenit.move2alf.pipeline.actions.BeginAction
  * To change this template use File | Settings | File Templates.
  */
 class BeginActionContextFactory(actionClass: Class[_], parameters: Map[String, AnyRef], receivers: Map[String, ActorRef])(implicit context: ActorContext, jobContext: JobContext) extends AbstractActionContextFactory(actionClass, parameters) {
-  protected type T = BeginAction
+  protected type T = AnyRef
 
   protected def constructActionContext(basicAction: T) = {
-    val actionContext = new AbstractActionContext(receivers, 1) with StartActionContext {
+    val actionContext = new AbstractActionContext(receivers, 1) {
       val action = basicAction
     }
     addSendingContext(basicAction, actionContext)

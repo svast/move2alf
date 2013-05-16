@@ -66,8 +66,6 @@ public class ConditionalDataSourceInitializer implements InitializingBean {
 
             session.save(admin);
             session.getTransaction().commit();
-
-            System.out.println("TEST1231111111111111111");
         }
     }
 }

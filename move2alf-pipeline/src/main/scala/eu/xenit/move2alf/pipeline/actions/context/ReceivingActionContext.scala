@@ -17,9 +17,10 @@ trait ReceivingActionContext[T <: AbstractMessage] extends AbstractActionContext
     case s => super.receive(s)
   }
 
-  val action: ReceivingAction[T]
   protected def execute(message: T){
-    action.execute(message)
+    action match {
+      case a: ReceivingAction[T] => a.execute(message)
+    }
   }
 
 }

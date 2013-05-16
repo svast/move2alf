@@ -1,22 +1,17 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ReportMessage;
+import eu.xenit.move2alf.core.action.M2AlfStartAction;
 import eu.xenit.move2alf.core.action.Move2AlfAction;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
-import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionSingleResult;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.pipeline.AbstractMessage;
-import eu.xenit.move2alf.pipeline.actions.AbstractEndingAction;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.*;
 
 public class SAReport extends Move2AlfAction<AbstractMessage> {

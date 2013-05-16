@@ -7,13 +7,15 @@ import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.action.messages.StartMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.FileSourceSink;
+import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.actions.AbstractBasicAction;
+import eu.xenit.move2alf.pipeline.actions.EOCAware;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SASource extends Move2AlfAction<StartMessage> {
+public class SASource extends Move2AlfAction implements EOCAware{
 
 	public String getDescription() {
 		return "Listing documents";
@@ -26,7 +28,11 @@ public class SASource extends Move2AlfAction<StartMessage> {
     }
 
     @Override
-    public void executeImpl(StartMessage message) {
+    public void executeImpl(AbstractMessage message) {
+    }
+
+    @Override
+    public void beforeSendEOC() {
         FileSourceSink source = new FileSourceSink();
 
         for (String inputPath: inputPaths){

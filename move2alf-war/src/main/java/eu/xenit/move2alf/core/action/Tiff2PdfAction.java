@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.media.jai.JAI;
 
+import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,32 +17,36 @@ import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.common.Tiff2Pdf;
 
-public class Tiff2PdfAction extends Action {
+@ActionInfo(classId = "Tiff2PdfAction",
+            category = ConfigurableObject.CAT_TRANSFORM,
+            description = "Action that transforms multiple tiff files to pdf.")
+public class Tiff2PdfAction extends Move2AlfAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(Tiff2PdfAction.class);
 
 	@Override
-	protected void executeImpl(ConfiguredAction configuredAction,
-			Map<String, Object> parameterMap) {
-		List filesToTransform = null;
-		File destination = (File) parameterMap.get(Parameters.PARAM_FILE);
-		Object fileListParamValue = parameterMap
-				.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
-		if (fileListParamValue != null) {
-			try {
-				filesToTransform = (List) parameterMap
-						.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
-			} catch (ClassCastException e) {
-				logger
-						.warn("Files to transform should be of type List<File> or List<String>");
-				return;
-			}
-		} else {
-			logger.warn("No files to transform");
-			return; 
-		}
-		createPdf(destination, filesToTransform);
+	protected void executeImpl(FileInfoMessage message) {
+
+        //TODO: FIX
+//		List filesToTransform = null;
+//		File destination = (File) parameterMap.get(Parameters.PARAM_FILE);
+//		Object fileListParamValue = parameterMap
+//				.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
+//		if (fileListParamValue != null) {
+//			try {
+//				filesToTransform = (List) parameterMap
+//						.get(Parameters.PARAM_TRANSFORM_FILE_LIST);
+//			} catch (ClassCastException e) {
+//				logger
+//						.warn("Files to transform should be of type List<File> or List<String>");
+//				return;
+//			}
+//		} else {
+//			logger.warn("No files to transform");
+//			return;
+//		}
+//		createPdf(destination, filesToTransform);
 	}
 
 	public void createPdf(File document, List transformFiles) {

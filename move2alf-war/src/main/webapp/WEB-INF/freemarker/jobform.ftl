@@ -19,10 +19,10 @@
 						</tr>
 					</thead>
 					<tbody>
-					<#list job.inputFolders! as folder>
+					<#list job.inputFolder! as folder>
 						<tr id="inputPath_${folder_index}">
 							<td>${folder_index+1}</td>
-							<td>${folder}<input name="inputFolders" type="hidden" value="${folder}" />
+							<td>${folder}<input name="inputFolder" type="hidden" value="${folder}" />
 							</td>
 							<td>
 								<img onclick="$('#inputPath_${folder_index}').remove()" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" class="clickable" />
@@ -69,7 +69,7 @@
 		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." attributes="maxlength='${job.commandMaxLength}'" />
 		
 		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions helpText="Choose the metadata processor."; processor>
-			<option value="${processor.class.name}" <#if job.metadata?? && processor.class.name=job.metadata >selected="selected"</#if> >${processor.name} - ${processor.description}</option>
+			<option value="${processor.classId}" <#if job.metadata?? && processor.classId=job.metadata >selected="selected"</#if> >${processor.classId} - ${processor.description}</option>
 		</@labeledSelectList>
 		
 				
@@ -80,7 +80,7 @@
 		<@labeledInput label="Transformation" forId="transformation">
 				<@radio name="transform" value="notransformation" checked=(jobTransform?? || !jobTransform?has_content || "No transformation"==jobTransform) description="No transformation" />
 			<#list transformOptions as transformOption>
-				<@radio name="transform" value=transformOption.class.name checked=(job.transform?? && transformOption.class.name==job.transform) description=transformOption.description />
+				<@radio name="transform" value=transformOption.classId checked=(job.transform?? && transformOption.classId==job.transform) description=transformOption.classId+" - "+transformOption.description />
 			</#list>
 		</@labeledInput>
 		

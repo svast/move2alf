@@ -47,7 +47,7 @@ function deleteDestination(id){
 		<tr>
 			<td><a href="<@spring.url relativeUrl="/destination/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
 			<td>${destination.parameters.name}</td>
-			<td>${typeNames[destination.className]}</td>
+			<td>${typeNames[destination.classId]}</td>
 			<td>${destination.parameters.url}</td>
 			<td>${destination.parameters.user}</td>
 			<td>${destination.parameters.threads}</td>

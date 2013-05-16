@@ -639,9 +639,4 @@ public class JobServiceImpl extends AbstractHibernateService implements
         return cycle.getId();
     }
 
-    @Override
-    public Object getActionsByCategory(String catMetadata) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
 }

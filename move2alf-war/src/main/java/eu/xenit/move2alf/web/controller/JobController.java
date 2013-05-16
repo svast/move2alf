@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import eu.xenit.move2alf.core.action.ActionClassService;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.logic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +59,18 @@ public class JobController extends AbstractController{
 	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
+    private ActionClassService actionClassService;
 
-	@Autowired
+    public ActionClassService getActionClassService() {
+        return actionClassService;
+    }
+
+    @Autowired
+    public void setActionClassService(ActionClassService actionClassService) {
+        this.actionClassService = actionClassService;
+    }
+
+    @Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
 	}
@@ -159,9 +169,9 @@ public class JobController extends AbstractController{
 
 		job.setId(jobId);
 		job.setDest(destId);
-		getPipelineAssembler().getPipeline(job);
+		getPipelineAssembler().assemblePipeline(job);
 
-        //TODO START AND CREATE JOB
+        //TODO START JOB
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
@@ -170,10 +180,8 @@ public class JobController extends AbstractController{
 	private void jobModel(ModelAndView mav) {
 		mav.addObject("destinations", getJobService()
 				.getAllDestinationConfiguredSourceSinks());
-		mav.addObject("metadataOptions", getJobService()
-				.getActionsByCategory(ConfigurableObject.CAT_METADATA));
-		mav.addObject("transformOptions", getJobService()
-				.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
+		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
+		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
 		mav.addObject("destinationOptions", getJobService()
 				.getSourceSinksByCategory(
 						ConfigurableObject.CAT_DESTINATION));
@@ -212,7 +220,7 @@ public class JobController extends AbstractController{
 			}
 		}
 
-		List<String> inputFolder = job.getInputFolders();
+		List<String> inputFolder = job.getInputFolder();
 		Set<String> uniqueInputFolders = new HashSet<String>();
 		if (inputFolder != null) {
 			for (int i = 0; i < inputFolder.size(); i++) {
@@ -276,8 +284,8 @@ public class JobController extends AbstractController{
 
 		job.setId(jobId);
 		job.setDest(destId);
-		getPipelineAssembler().getPipeline(job);
-        //TODO SAVE AND CREATE JOB
+		getPipelineAssembler().assemblePipeline(job);
+        //TODO CREATE JOB
 
 		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
 		if (firstAction != null) {

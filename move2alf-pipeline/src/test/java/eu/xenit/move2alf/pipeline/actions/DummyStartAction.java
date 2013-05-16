@@ -10,12 +10,7 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
  * Time: 1:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DummyStartAction implements BeginAction, HasStateContext, HasSendingContext {
-
-    @Override
-    public void execute() {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+public class DummyStartAction extends AbstractBeginAction{
 
     @Override
     public void setSendingContext(SendingContext sendingContext) {
@@ -24,6 +19,11 @@ public class DummyStartAction implements BeginAction, HasStateContext, HasSendin
 
     @Override
     public void setStateContext(StateContext stateContext) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void beforeSendEOC() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

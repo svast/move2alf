@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-
+@ActionInfo(classId = "CSVMetadataLoader",
+        category = ConfigurableObject.CAT_METADATA,
+        description = "Loads metadata and filenames from pipe separated CSV file")
 public class CSVMetadataLoader extends Move2AlfAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);

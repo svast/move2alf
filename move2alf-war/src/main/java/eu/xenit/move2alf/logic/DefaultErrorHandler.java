@@ -58,7 +58,7 @@ public class DefaultErrorHandler implements ErrorHandler {
         } else {
             sendingContext.sendMessage(
                     new ReportMessage("Not a file", new Date(), Parameters.VALUE_FAILED, params, null),
-                    "Reporting"
+                    PipelineAssemblerImpl.REPORTER
             );
         }
     }

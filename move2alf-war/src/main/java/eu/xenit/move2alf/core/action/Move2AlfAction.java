@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.core.action;
 
+import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.logic.ErrorHandler;
 import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.actions.AbstractBasicAction;
@@ -38,6 +39,14 @@ public abstract class Move2AlfAction<T extends AbstractMessage> extends Abstract
     }
 
     public String getDescription() {
+        return this.getClass().getSimpleName();
+    }
+
+    public String getCategory(){
+        return ConfigurableObject.CAT_DEFAULT;
+    }
+
+    public String getName(){
         return this.getClass().getSimpleName();
     }
 }

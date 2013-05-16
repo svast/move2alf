@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.pipeline
 
-import eu.xenit.move2alf.pipeline.actions.{ActionConfig, AbstractEndingAction, AbstractBasicAction, AbstractBeginAction}
+import eu.xenit.move2alf.pipeline.actions._
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,7 +30,7 @@ object JobControllerTest {
 }
 
 class StartAction extends AbstractBeginAction{
-  def execute() {
+  def beforeSendEOC() {
     1 to 100 foreach { i => sendMessage("Middle", new StringMessage("Message number "+ i))}
   }
 }
