@@ -1,31 +1,24 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
+import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
-import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
-public class SAFilter extends Move2AlfAction<FileInfoMessage> {
+@ActionInfo(classId = "SAFilter",
+            description = "Filters messages based on the file extension")
+public class SAFilter extends Move2AlfReceivingAction<FileInfoMessage> {
 
 	public static final String PARAM_EXTENSION = "extension";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAFilter.class);
-
-	@Override
-	public String getDescription() {
-		return "Filtering documents";
-	}
 
     private String extension;
     public void setExtension(String extension){

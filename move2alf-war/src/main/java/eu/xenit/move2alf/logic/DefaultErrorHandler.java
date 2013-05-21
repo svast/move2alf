@@ -9,7 +9,6 @@ import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
 
 import java.io.File;
@@ -29,13 +28,13 @@ public class DefaultErrorHandler implements ErrorHandler {
 	 * @see eu.xenit.move2alf.logic.ErrorHandlerInterface#handleError(eu.xenit.move2alf.core.simpleaction.data.FileInfo, eu.xenit.move2alf.web.dto.JobConfig, eu.xenit.move2alf.core.dto.Cycle, java.lang.Exception)
 	 */
 	@Override
-	public void handleError(AbstractMessage message, Exception e, SendingContext sendingContext) {
+	public void handleError(String actionId, Object message, Exception e, SendingContext sendingContext) {
         final String errorMessage = Util.getFullErrorMessage(e);
-        handleError(message, errorMessage, sendingContext);
+        handleError(actionId, message, errorMessage, sendingContext);
     }
 
     @Override
-    public void handleError(AbstractMessage message, String error, SendingContext sendingContext) {
+    public void handleError(String actionId, Object message, String error, SendingContext sendingContext) {
         // reporting
         Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
         ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
@@ -50,7 +49,7 @@ public class DefaultErrorHandler implements ErrorHandler {
 
             sendingContext.sendMessage(
                     new ReportMessage(file.getName(),
-                            new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), "Reporting");
+                            new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
 
             if(moveNotLoad){
                 sendingContext.sendMessage(message, "MoveNotLoad");

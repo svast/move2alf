@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
-import eu.xenit.move2alf.pipeline.AbstractMessage
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,11 +9,11 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
  * To change this template use File | Settings | File Templates.
  */
 class SendingContextImpl(private val ct: AbstractActionContext) extends SendingContext{
-  def sendMessage(message: AbstractMessage) {
+  def sendMessage(message: AnyRef) {
     ct.sendMessage(message)
   }
 
-  def sendMessage(message: AbstractMessage, receiver: String) {
+  def sendMessage(message: AnyRef, receiver: String) {
     ct.sendMessage(message, receiver)
   }
 }

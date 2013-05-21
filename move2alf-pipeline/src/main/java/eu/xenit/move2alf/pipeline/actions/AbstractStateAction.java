@@ -11,7 +11,17 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
  */
 public abstract class AbstractStateAction implements HasStateContext {
 
-    private StateContext stateContext;
+    protected StateContext stateContext;
+    protected String id;
+
+    @Override
+    public void setId(String id){
+        this.id = id;
+    }
+
+    public String getId(){
+        return id;
+    }
 
     @Override
     public void setStateContext(StateContext stateContext) {

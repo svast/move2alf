@@ -11,15 +11,15 @@ import akka.actor.ActorContext
  * Time: 3:36 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractActionContextFactory(val actionClass: Class[_], private val parameters: Map[String, AnyRef])(implicit val context: ActorContext) extends LogHelper{
+abstract class AbstractActionContextFactory(id: String, actionClass: Class[_], parameters: Map[String, AnyRef]) extends LogHelper{
 
   protected type T
 
 
-  def createActionContext(): AbstractActionContext = {
+  def createActionContext(context: ActorContext): AbstractActionContext = {
     val basicAction: T = getAction
 
-    val actionContext = constructActionContext(basicAction)
+    val actionContext = constructActionContext(basicAction)(context)
 
     basicAction match {
       case sa: HasStateContext => {
@@ -41,7 +41,7 @@ abstract class AbstractActionContextFactory(val actionClass: Class[_], private v
   }
 
 
-  protected def constructActionContext(basicAction: T): AbstractActionContext
+  protected def constructActionContext(basicAction: T)(implicit context: ActorContext): AbstractActionContext
 
   protected def addSendingContext(basicAction: T, context: AbstractActionContext) {
     basicAction match {
@@ -56,11 +56,39 @@ abstract class AbstractActionContextFactory(val actionClass: Class[_], private v
   protected def getAction: T = {
     val constructor = actionClass.getConstructor()
     val basicAction: T = constructor.newInstance().asInstanceOf[T]
+    val methods = actionClass.getMethods
+    val methodMap = methods map {
+      method => (method.getName, method)
+    } toMap
 
     parameters foreach {
-      case (key, value) => actionClass.getMethod("set"+key.capitalize,classOf[String]).invoke(basicAction, value)
-    }
+      case (key, value) => {
+        try {
+          val method = methodMap("set"+key.capitalize)
 
+          try {
+            logger.debug("Setting parameter: "+key+", value: "+value.toString);
+            method.invoke(basicAction, value)
+          } catch {
+            case e: IllegalArgumentException => {
+              logger.error("Could not set parameter: "+key+"\n" +
+                "Method parameter: "+method.getParameterTypes()(0).getCanonicalName+"\n" +
+                "Value type: "+value.getClass.getCanonicalName, e)
+            }
+            case e: NullPointerException => {
+              logger.error("NullPointer", e);
+              if(method == null){
+                logger.error("method is null")
+              }
+              logger.error("key: "+key)
+              logger.error("value: "+value)
+            }
+          }
+        } catch {
+          case e: NoSuchElementException => logger.info("No setter for parameter: "+key)
+        }
+      }
+    }
     basicAction
   }
 

@@ -53,6 +53,7 @@ public class ActionConfig {
         receivers.put(key, value);
     }
 
+
     public Map<String, ActionConfig> getReceivers(){
         return receivers;
     }

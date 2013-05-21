@@ -5,7 +5,7 @@ import scala.collection.mutable
 import scala.collection.JavaConversions._
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContextFactory, EndActionContextFactory, BeginActionContextFactory, BasicActionContextFactory}
+import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContextFactory, EndActionContextFactory, BasicActionContextFactory}
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,14 +21,16 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
     val countedActionConfigs = new mutable.HashMap[ActionConfig, Int]()
     var nmbEndActions = 0
 
+    var counted = new mutable.HashSet[ActionConfig]()
     def countSenders(config: ActionConfig) {
       config.getReceivers() foreach {
         case (_, ac) => {
           val nmbSenders = countedActionConfigs.getOrElseUpdate(ac, 0)
           countedActionConfigs.update(ac, nmbSenders + config.getNmbOfWorkers)
-          countSenders(ac)
+          if (!counted.contains(ac)) countSenders(ac)
         }
       }
+      counted.+=(config)
     }
     countSenders(config)
 
@@ -48,16 +50,14 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
         }
 
         val actionContextFactory: AbstractActionContextFactory = {
-          if(nmbSenders == 0){
-            new BeginActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap)
-          } else if (config.getReceivers.isEmpty) {
+         if (config.getReceivers.isEmpty) {
             nmbEndActions += config.getNmbOfWorkers
-            new EndActionContextFactory(config.getClazz, config.getParameters.toMap, ("default", jobActor), nmbSenders)
+            new EndActionContextFactory(config.getId, config.getClazz, config.getParameters.toMap, ("default", jobActor))
           } else {
-            new BasicActionContextFactory(config.getClazz, config.getParameters.toMap, receiversToMap, nmbSenders)
+            new BasicActionContextFactory(config.getId, config.getClazz, config.getParameters.toMap, receiversToMap)
           }
         }
-        val factory = new ActionActorFactory(config.getId, actionContextFactory, config.getNmbOfWorkers)
+        val factory = new ActionActorFactory(config.getId, actionContextFactory, if(nmbSenders==0) 1 else nmbSenders, config.getNmbOfWorkers)
         actorRefs.put(config.getId, factory.createActor)
       }
     }

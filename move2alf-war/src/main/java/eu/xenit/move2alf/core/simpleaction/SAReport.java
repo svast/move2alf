@@ -1,35 +1,36 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.core.ApplicationContextProvider;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.action.M2AlfStartAction;
-import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
+import eu.xenit.move2alf.core.action.StartCycleAction;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
 
 import java.io.File;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-public class SAReport extends Move2AlfAction<AbstractMessage> {
+@ActionInfo(classId = "SAReport",
+            description = "Writes report messages to the database")
+public class SAReport extends Move2AlfReceivingAction<Object> {
 
 	public String getDescription() {
 		return "Checking for errors";
 	}
 
-
-    public static String PARAM_JOBSERVICE = "jobService";
-    private JobService jobService;
-    public void setJobService(JobService jobService){
-        this.jobService = jobService;
-    }
+    private JobService jobService = (JobService) ApplicationContextProvider.getApplicationContext().getBean("jobService");
 
     @Override
-    public void executeImpl(AbstractMessage message) {
-        Cycle cycle = jobService.getCycle((Integer) getStateValue(M2AlfStartAction.PARAM_CYCLE));
+    public void executeImpl(Object message) {
+        Cycle cycle = jobService.getCycle((Integer) getStateValue(StartCycleAction.PARAM_CYCLE));
         if(message instanceof FileInfoMessage){
             // reporting
             FileInfoMessage fileInfoMessage = (FileInfoMessage) message;

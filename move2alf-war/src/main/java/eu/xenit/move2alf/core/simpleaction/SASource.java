@@ -2,20 +2,22 @@ package eu.xenit.move2alf.core.simpleaction;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
-import eu.xenit.move2alf.core.action.messages.StartMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.FileSourceSink;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
-import eu.xenit.move2alf.pipeline.actions.AbstractBasicAction;
-import eu.xenit.move2alf.pipeline.actions.EOCAware;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class SASource extends Move2AlfAction implements EOCAware{
+@ActionInfo(classId = "SASource",
+            category = ConfigurableObject.CAT_DEFAULT,
+            description = "Reads files from the filesystem and sends fileinfo messages")
+public class SASource extends Move2AlfStartAction{
 
 	public String getDescription() {
 		return "Listing documents";
@@ -23,16 +25,12 @@ public class SASource extends Move2AlfAction implements EOCAware{
 
     public static final String PARAM_INPUTPATHS = "inputPaths";
     private List<String> inputPaths;
-    public void setInputPaths(List<String> inputPaths){
-        this.inputPaths = inputPaths;
+    public void setInputPaths(String inputPaths){
+        this.inputPaths = Arrays.asList(inputPaths.split("\\|"));
     }
 
     @Override
-    public void executeImpl(AbstractMessage message) {
-    }
-
-    @Override
-    public void beforeSendEOC() {
+    public void onStartImpl() {
         FileSourceSink source = new FileSourceSink();
 
         for (String inputPath: inputPaths){

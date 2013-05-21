@@ -20,7 +20,7 @@ import eu.xenit.move2alf.common.Tiff2Pdf;
 @ActionInfo(classId = "Tiff2PdfAction",
             category = ConfigurableObject.CAT_TRANSFORM,
             description = "Action that transforms multiple tiff files to pdf.")
-public class Tiff2PdfAction extends Move2AlfAction<FileInfoMessage> {
+public class Tiff2PdfAction extends Move2AlfReceivingAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(Tiff2PdfAction.class);
@@ -93,21 +93,6 @@ public class Tiff2PdfAction extends Move2AlfAction<FileInfoMessage> {
 		logger.info("TIMESTAMP: Single tif removal {}", (new Date()).getTime());
 		singleTifFile.delete();
 
-	}
-
-	@Override
-	public String getCategory() {
-		return ConfigurableObject.CAT_TRANSFORM;
-	}
-
-	@Override
-	public String getDescription() {
-		return "Convert tiff files to PDF";
-	}
-
-	@Override
-	public String getName() {
-		return "Tiff2Pdf";
 	}
 
 }

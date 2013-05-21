@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -10,6 +11,8 @@ import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 import java.io.File;
 
+@ActionInfo(classId = "SADelete",
+            description = "Deletes files")
 public class SADelete extends SimpleActionWithSourceSink<FileInfoMessage> {
 
 	public static final String PARAM_PATH = "path";
@@ -18,17 +21,11 @@ public class SADelete extends SimpleActionWithSourceSink<FileInfoMessage> {
         this.path = path;
     }
 
-
 	public static final String PARAM_DELETEOPTION = "deleteOption";
     private DeleteOption deleteOption;
     public void setDeleteOption(DeleteOption deleteOption){
         this.deleteOption = deleteOption;
     }
-
-	@Override
-	public String getDescription() {
-		return "Deleting documents in Alfresco";
-	}
 
     @Override
     public void executeImpl(FileInfoMessage message) {

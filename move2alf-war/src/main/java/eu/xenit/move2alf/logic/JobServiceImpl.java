@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import akka.actor.ActorSystem;
+import eu.xenit.move2alf.pipeline.JobHandle;
+import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.web.dto.JobConfig;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -43,6 +47,21 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobServiceImpl.class);
+
+    @Override
+    public int openCycleForJob(String jobId) {
+        return openCycleForJob(getJobIdByName(jobId));
+    }
+
+    private int getJobIdByName(String name) {
+        final List<Job> jobs = sessionFactory.getCurrentSession()
+                .createQuery("from Job as j where j.name=?")
+                .setString(0, name).list();
+        return jobs.get(0).getId();
+    }
+
+    @Autowired
+    private PipelineAssembler pipelineAssembler;
 	
 	@Autowired
 	private UsageService usageService;
@@ -54,6 +73,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
+
+    private ActorSystem actorSystem = ActorSystem.create("Move2Alf");
+
+    private Map<Integer, JobHandle> jobMap = new HashMap<Integer, JobHandle>();
 
 	@Autowired
 	public void setUserService(final UserService userService) {
@@ -103,35 +126,49 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	// @Transactional(propagation=Propagation.REQUIRES_NEW)
-	public Job createJob(final String name, final String description) {
+	public Job createJob(JobConfig jobConfig) {
 		final Date now = new Date();
 		final Job job = new Job();
-		job.setName(name);
-		job.setDescription(description);
+		job.setName(jobConfig.getName());
+		job.setDescription(jobConfig.getDescription());
 		job.setCreationDateTime(now);
 		job.setLastModifyDateTime(now);
 		job.setCreator(getUserService().getCurrentUser());
-		getSessionFactory().getCurrentSession().save(job);
+
+        ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobConfig);
+        job.setFirstConfiguredAction(configuredAction);
+
+        getSessionFactory().getCurrentSession().save(job);
+
 		return job;
 	}
 
 	@Override
-	public Job editJob(final int id, final String name, final String description) {
+	public Job editJob(JobConfig jobConfig) {
 		final Date now = new Date();
-		final Job job = getJob(id);
-		job.setId(id);
-		job.setName(name);
-		job.setDescription(description);
+		final Job job = getJob(jobConfig.getId());
+		job.setId(jobConfig.getId());
+		job.setName(jobConfig.getName());
+		job.setDescription(jobConfig.getDescription());
 		job.setCreationDateTime(now);
 		job.setLastModifyDateTime(now);
 		job.setCreator(getUserService().getCurrentUser());
-		getSessionFactory().getCurrentSession().save(job);
+        job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobConfig));
+        getSessionFactory().getCurrentSession().save(job);
+        if(jobMap.containsKey(jobConfig.getId())){
+            jobMap.get(jobConfig.getId()).deleteJob();
+            jobMap.remove(jobConfig.getId());
+        }
 		return job;
 	}
 
 	@Override
 	public void deleteJob(final int id) {
 		final Job job = getJob(id);
+        if(jobMap.get(id) != null){
+            jobMap.get(id).deleteJob();
+            jobMap.remove(id);
+        }
 		sessionFactory.getCurrentSession().delete(job);
 		logger.debug("Reloading scheduler");
 		getSessionFactory().getCurrentSession().flush();
@@ -391,38 +428,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredAction getActionRelatedToConfiguredSourceSink(
-			final int sourceSinkId) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredAction> configuredActions = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredAction")
-				.list();
-
-		for (int i = 0; i < configuredActions.size(); i++) {
-			final ConfiguredSourceSink configuredSourceSinkForAction = configuredActions
-					.get(i).getConfiguredSourceSink();
-
-					if (configuredSourceSinkForAction
-							.getId() == sourceSinkId) {
-						return configuredActions.get(i);
-					}
-		}
-		return null;
-	}
-
-	@Override
 	public void deleteDestination(final int id) {
 		final ConfiguredSourceSink destination = getConfiguredSourceSink(id);
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);
-	}
-
-	@Override
-	public void addSourceSinkToAction(final ConfiguredAction action,
-			final ConfiguredSourceSink sourceSink) {
-		// TODO Auto-generated method stub
-
 	}
 
 
@@ -475,11 +485,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return (Long) query.uniqueResult();
 	}
 
-	@Override
-	public void deleteAction(final int id) {
-		final Session s = getSessionFactory().getCurrentSession();
-		s.delete(s.get(ConfiguredAction.class, id));
-	}
 
 	@Override
 	public List<SourceSink> getSourceSinksByCategory(final String category) {
@@ -488,16 +493,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public ECycleState getJobState(final int jobId) {
-		logger.debug("Getting state of job: " + jobId);
-		final String hql = "SELECT cycle.id FROM Cycle as cycle WHERE cycle.job.id= :jobId AND cycle.endDateTime is null";
-		final Session s = sessionFactory.getCurrentSession();
-		final Query q = s.createQuery(hql);
-		q.setParameter("jobId", jobId);
-		if (q.list().size() == 0) {
-			return ECycleState.NOT_RUNNING;
-		} else {
-			return ECycleState.RUNNING;
-		}
+		if(jobMap.get(jobId)!=null && jobMap.get(jobId).isRunning()){
+            return ECycleState.RUNNING;
+        }
+        return ECycleState.NOT_RUNNING;
 	}
 
 	@Override
@@ -600,13 +599,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			final Cycle cycle = getLastCycleForJob(job);
 			if (cycle != null) {
 				info.setCycleStartDateTime(cycle.getStartDateTime());
-				info.setScheduleState(cycle.getState().getDisplayName());
 				info.setNrOfDocuments(countProcessedDocuments(cycle.getId()));
 				info.setNrOfFailedDocuments(countProcessedDocumentsWithStatus(cycle.getId(),
 						EProcessedDocumentStatus.FAILED));
-			} else {
-				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
 			}
+
+			info.setScheduleState(getJobState(job.getId()).getDisplayName());
+
 			info.setDescription(job.getDescription());
 			jobInfoList.add(info);
 		}
@@ -624,6 +623,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
     }
 
     @Override
+    public void closeCycle(int cycle) {
+        closeCycle(getCycle(cycle));
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int openCycleForJob(final Integer jobId) {
         final Session session = getSessionFactory().getCurrentSession();
@@ -637,6 +641,27 @@ public class JobServiceImpl extends AbstractHibernateService implements
         session.save(cycle);
 
         return cycle.getId();
+    }
+
+    @Override
+    public void startJob(Integer jobId) {
+        if(!jobMap.containsKey(jobId)){
+            Job job = getJob(jobId);
+            ConfiguredAction configuredAction = getJob(jobId).getFirstConfiguredAction();
+            JobHandle jobHandle = new JobHandle(actorSystem, job.getName(), pipelineAssembler.getActionConfig(configuredAction));
+            jobMap.put(job.getId(), jobHandle);
+        }
+        JobHandle handle = jobMap.get(jobId);
+        if(!handle.isRunning()){
+            jobMap.get(jobId).startJob();
+        } else {
+            logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
+        }
+    }
+
+    @Override
+    public JobConfig getJobConfigForJob(int id) {
+        return pipelineAssembler.getJobConfigForJob(id);
     }
 
 }

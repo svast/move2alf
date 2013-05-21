@@ -6,7 +6,6 @@ import eu.xenit.move2alf.pipeline.state.JobContext
 import org.mockito.Mockito._
 import akka.testkit.{TestActor, TestActorRef}
 import eu.xenit.move2alf.pipeline.actions.{DummyEndAction, JavaActionImpl, DummyStartAction, ActionConfig}
-import eu.xenit.move2alf.pipeline.AbstractMessage
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +25,7 @@ class PipeLineFactoryTest {
     val factory = new PipeLineFactory(mock(classOf[TestActorRef[TestActor]]))
 
     val startAction = new ActionConfig("startAction", classOf[DummyStartAction], 1)
-    val middleAction = new ActionConfig("middleAction", classOf[JavaActionImpl[AbstractMessage]], 1)
+    val middleAction = new ActionConfig("middleAction", classOf[JavaActionImpl[_]], 1)
     val endAction = new ActionConfig("endAction", classOf[DummyEndAction], 1)
     startAction.addReceiver("default", middleAction)
     middleAction.addReceiver("default", endAction)
@@ -42,7 +41,7 @@ class PipeLineFactoryTest {
     assert(nmbOfEndActions2 == 4)
     assert(actorRefs2.size == 4)
 
-    val middleAction2 = new ActionConfig("middleAction2", classOf[JavaActionImpl[AbstractMessage]], 8)
+    val middleAction2 = new ActionConfig("middleAction2", classOf[JavaActionImpl[_]], 8)
     startAction.addReceiver("default2", middleAction2)
     middleAction2.addReceiver("default3", endAction)
     val (actorRefs3, nmbOfEndActions3) = factory.generateActors(startAction)

@@ -19,7 +19,7 @@ import java.util.Map;
 @ActionInfo(classId = "CSVMetadataLoader",
         category = ConfigurableObject.CAT_METADATA,
         description = "Loads metadata and filenames from pipe separated CSV file")
-public class CSVMetadataLoader extends Move2AlfAction<FileInfoMessage> {
+public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfoMessage> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
 	private static final char CSV_DELIMITER = '|';
@@ -74,11 +74,6 @@ public class CSVMetadataLoader extends Move2AlfAction<FileInfoMessage> {
 			throw new RuntimeException("Empty input file");
 
 		return metadataFields;
-	}
-
-	@Override
-	public String getDescription() {
-		return "Read metadata from a CSV file";
 	}
 
 	public String getCategory() {

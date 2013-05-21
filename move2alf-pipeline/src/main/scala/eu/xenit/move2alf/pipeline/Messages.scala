@@ -10,7 +10,6 @@ package eu.xenit.move2alf.pipeline
 case object Start
 case object EOC
 
-case class M2AMessage(message: AbstractMessage)
-abstract class AbstractMessage
-class StringMessage(val string: String) extends AbstractMessage
-class StringMessage2(val string: String) extends AbstractMessage
+case class M2AMessage(message: AnyRef)
+class StringMessage(val string: String)
+class StringMessage2(val string: String)

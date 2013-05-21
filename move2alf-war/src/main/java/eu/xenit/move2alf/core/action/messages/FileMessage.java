@@ -1,7 +1,5 @@
 package eu.xenit.move2alf.core.action.messages;
 
-import eu.xenit.move2alf.pipeline.AbstractMessage;
-
 import java.io.File;
 
 /**
@@ -11,7 +9,7 @@ import java.io.File;
  * Time: 12:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileMessage extends AbstractMessage {
+public class FileMessage {
 
     public final File file;
     public FileMessage(File file){

@@ -3,14 +3,12 @@
  */
 package eu.xenit.move2alf.core;
 
+import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
+
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
-
-public class ReportMessage extends AbstractMessage{
+public class ReportMessage{
 	public final String name;
 	public final Date date;
 	public final String state;

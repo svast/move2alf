@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.core.action.messages;
 
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,7 +9,7 @@ import eu.xenit.move2alf.pipeline.AbstractMessage;
  * Time: 12:45 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileInfoMessage extends AbstractMessage{
+public class FileInfoMessage{
 
     public final FileInfo fileInfo;
     public FileInfoMessage(FileInfo fileInfo){

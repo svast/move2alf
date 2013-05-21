@@ -1,20 +1,18 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
+@ActionInfo(classId = "SAList",
+            description = "Checks if the file exists in the given path")
 public class SAList extends SimpleActionWithSourceSink<FileInfoMessage> {
 
 	public static final String PARAM_PATH = "path";
@@ -22,12 +20,6 @@ public class SAList extends SimpleActionWithSourceSink<FileInfoMessage> {
     public void setPath(String path){
         this.path = path;
     }
-
-	@Override
-	public String getDescription() {
-		return "Listing documents in Alfresco";
-	}
-
 
     @Override
     public void executeImpl(FileInfoMessage message) {

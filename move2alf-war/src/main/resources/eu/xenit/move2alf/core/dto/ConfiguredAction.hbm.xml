@@ -10,9 +10,8 @@
 		</id>
 		<property name="classId" column="classId"/>
         <property name="actionId" column="actionId"/>
+        <property name="nmbOfWorkers" column="nmbOfWorkers"/>
 
-        <many-to-one name="configuredSourceSink" column="configuredSourceSinkId" unique="false" lazy="false" />
-    	
     	<map name="parameters" table="configuredActionParameter" cascade="all-delete-orphan" lazy="false">
     		<key column="configuredActionId"/>
     		<map-key column="name" type="string"/>

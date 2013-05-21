@@ -3,9 +3,9 @@ package eu.xenit.move2alf.pipeline.actions.context
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
 import akka.routing.Broadcast
-import eu.xenit.move2alf.pipeline.{AbstractMessage, M2AMessage, EOC}
+import eu.xenit.move2alf.pipeline.{Start, M2AMessage, EOC}
 import eu.xenit.move2alf.common.LogHelper
-import eu.xenit.move2alf.pipeline.actions.EOCAware
+import eu.xenit.move2alf.pipeline.actions.{StartAware, ReceivingAction, EOCAware}
 
 
 /**
@@ -15,18 +15,30 @@ import eu.xenit.move2alf.pipeline.actions.EOCAware
  * Time: 2:54 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractActionContext(protected val receivers: Map[String, ActorRef], protected val nmbSenders: Int)(implicit protected val jobContext: JobContext, implicit protected val context: ActorContext) extends LogHelper {
+abstract class AbstractActionContext(val id: String, protected val receivers: Map[String, ActorRef])(implicit protected val jobContext: JobContext, implicit protected val context: ActorContext) extends LogHelper {
 
   val action: Any
 
-  def receive: PartialFunction[Any, Unit] = {
-    case EOC | Broadcast(EOC) => eocMessage()
+  def receive(message: AnyRef) {
+    execute(message)
   }
 
-  protected var nmbOfEOC:Int = 0
+  protected def execute(message: AnyRef){
+    logger.debug("Message arrived at action: "+context.self)
+
+    action match {
+      case a: ReceivingAction[AnyRef@unchecked] => a.execute(message)
+    }
+  }
+
+  def onStart(){
+    action match {
+      case a: StartAware => a.onStart()
+      case _ =>
+    }
+  }
 
   var blocked = false
-  var prevented = false
 
   def blockEOC(){
     blocked = true
@@ -34,33 +46,21 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
 
   def unblockEOC(){
     blocked = false
-    if(prevented) {
-      broadCastEOC()
-      prevented = false
-    }
   }
 
-
-  protected def eocMessage(){
-    logger.debug("Received EOC message")
-    nmbOfEOC += 1
-    if (nmbOfEOC == nmbSenders) {
-      nmbOfEOC = 0
-      broadCastEOC()
-    }
+  def sendStartMessage(){
+    receivers foreach { case (_,receiver) => receiver ! Broadcast(Start)}
   }
 
-  protected def broadCastEOC(){
+  def broadCastEOC(){
     action match {
       case a: EOCAware => a.beforeSendEOC()
       case _ =>
     }
-    if(!blocked){
-      logger.debug("Sending EOC message")
-      receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
-    } else {
-      prevented = true
-    }
+
+    logger.debug(context.self+"Sending EOC message")
+    receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
+
   }
 
   /**
@@ -82,11 +82,11 @@ abstract class AbstractActionContext(protected val receivers: Map[String, ActorR
   }
 
 
-  final def sendMessage(message: AbstractMessage, receiver: String = "default"){
+  final def sendMessage(message: AnyRef, receiver: String = "default"){
     receivers.get(receiver).get ! M2AMessage(message)
   }
 
-  final def getJobId(): String = {
+  final def getJobId: String = {
     jobContext.jobId
   }
 

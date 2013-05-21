@@ -9,7 +9,7 @@ import eu.xenit.move2alf.pipeline.actions.context.EOCBlockingContext;
  * Time: 4:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface EOCBlockingAction {
+public interface EOCBlockingAction extends Action{
 
     public void setEOCBlockingContext(EOCBlockingContext eocBlockingContext);
 }

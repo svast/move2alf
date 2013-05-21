@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.action;
 
 import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.pipeline.actions.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -33,7 +34,7 @@ public class ActionClassService {
     private void scanForClasses(String basePackage) {
         ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
                 false);
-        provider.addIncludeFilter(new AssignableTypeFilter(Move2AlfAction.class));
+        provider.addIncludeFilter(new AssignableTypeFilter(Action.class));
         Set<BeanDefinition> components = provider.findCandidateComponents(basePackage);
         for (BeanDefinition component : components) {
             try {

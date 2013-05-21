@@ -14,7 +14,7 @@ import akka.testkit.{TestActor, TestActorRef, TestProbe}
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.M2AMessage
 import akka.routing.Broadcast
-import eu.xenit.move2alf.pipeline.actions.context.{ReceivingActionContext, AbstractActionContext}
+import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContext}
 import eu.xenit.move2alf.pipeline.M2AMessage
 import akka.routing.Broadcast
 
@@ -41,7 +41,7 @@ class ActionWrapperTest {
     mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     _action = mock(classOf[ReceivingAction[StringMessage]])
     implicit val context = mock(classOf[ActorContext])
-    actionWrapper = new AbstractActionContext(Map("default" -> mockedReceiver), nmbReceivers) with ReceivingActionContext[StringMessage] {
+    actionWrapper = new AbstractActionContext("actionid",Map("default" -> mockedReceiver)){
       val action = _action
     }
   }
@@ -55,14 +55,14 @@ class ActionWrapperTest {
   def testReceive(){
     //Test EOC
     val nmbTimes = 9
-    1 to (nmbReceivers * nmbTimes + nmbReceivers - 1) foreach { _ => actionWrapper.receive(EOC)}
+   // 1 to (nmbReceivers * nmbTimes + nmbReceivers - 1) foreach { _ => actionWrapper.receive(EOC)}
     verify(mockedReceiver, times(nmbTimes)) ! Broadcast(EOC)
-    actionWrapper.receive(EOC)
+    //actionWrapper.receive(EOC)
     verify(mockedReceiver, times(nmbTimes+1)) ! Broadcast(EOC)
 
     //Test execution invocation of BasicAction
     val message = new StringMessage("Test")
-    actionWrapper.receive(M2AMessage(message))
+    actionWrapper.receive(message)
     //verify(action, times(1)).execute(message)
   }
 

@@ -1,32 +1,25 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
-public class MoveAction extends Move2AlfAction<FileInfoMessage> {
+@ActionInfo(classId = "MoveAction",
+            description = "Moves files on the filesystem")
+public class MoveAction extends Move2AlfReceivingAction<FileInfoMessage> {
 
     public static final String PARAM_PATH = "path";
     private String path;
     public void setPath(String path){
         this.path = path;
     }
-
-	@Override
-	public String getDescription() {
-		return "Moving documents";
-	}
-
 
     @Override
     public void executeImpl(FileInfoMessage message) {

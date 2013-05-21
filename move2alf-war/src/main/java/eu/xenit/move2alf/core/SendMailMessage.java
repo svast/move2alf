@@ -1,8 +1,6 @@
 package eu.xenit.move2alf.core;
 
-import eu.xenit.move2alf.pipeline.AbstractMessage;
-
-public class SendMailMessage extends AbstractMessage{
+public class SendMailMessage{
 	private final int cycleId;
 	private final String jobName;
 	

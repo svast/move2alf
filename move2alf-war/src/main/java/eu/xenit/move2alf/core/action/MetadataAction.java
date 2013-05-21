@@ -1,9 +1,7 @@
 package eu.xenit.move2alf.core.action;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -15,16 +13,16 @@ import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.action.metadata.MetadataLoader;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 
-public abstract class MetadataAction extends Move2AlfAction<FileInfoMessage> {
+public abstract class MetadataAction extends Move2AlfReceivingAction<FileInfoMessage> {
 
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(MetadataAction.class);
 	
-	protected Vector<MetadataLoader> metadataLoaders;
+	protected List<MetadataLoader> metadataLoaders;
 
 	public MetadataAction() {
 		super();
-		metadataLoaders = new Vector<MetadataLoader>();
+		metadataLoaders = new ArrayList<MetadataLoader>();
 		initMetadataLoaders();
 	}
 	
@@ -51,10 +49,5 @@ public abstract class MetadataAction extends Move2AlfAction<FileInfoMessage> {
 			}
 		}
         sendMessage(new FileInfoMessage(fileInfo));
-	}
-
-	@Override
-	public final String getCategory() {
-		return ConfigurableObject.CAT_METADATA;
 	}
 }

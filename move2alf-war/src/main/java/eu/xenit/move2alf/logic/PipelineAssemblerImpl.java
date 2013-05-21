@@ -1,17 +1,14 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import eu.xenit.move2alf.core.action.ActionClassService;
 import eu.xenit.move2alf.core.action.ExecuteCommandAction;
-import eu.xenit.move2alf.core.action.M2AlfStartAction;
+import eu.xenit.move2alf.core.action.M2AlfEndAction;
+import eu.xenit.move2alf.core.action.StartCycleAction;
 import eu.xenit.move2alf.core.simpleaction.*;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     public static final String COMMAND_AFTER_ID = "CommandAfter";
     public static final String DEFAULT_RECEIVER = "default";
     public static final String REPORTER = "reporter";
+    public static final String END_ACTION = "EndAction";
+    public static final String START = "Start";
 
     @Autowired
     private ActionClassService actionClassService;
@@ -61,7 +60,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			.getLogger(PipelineAssemblerImpl.class);
 
 	@Value(value = "#{'${default.batch.size}'}")
-	private String defaultBatchSize;
+	private int defaultBatchSize;
 
 	@Autowired
 	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
@@ -121,30 +120,32 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		for(ConfiguredAction action: configuredActionMap.values()) {
 			if (SOURCE_ID.equals(action
                     .getActionId())) {
-                String path = action.getParameter(SASource.PARAM_INPUTPATHS+"_0");
-                for(int i = 1; path != null; i++){
-                    inputFolder.add(path);
-                    path = action.getParameter(SASource.PARAM_INPUTPATHS+"_"+i);
-                }
+                String path = action.getParameter(SASource.PARAM_INPUTPATHS);
+                inputFolder = Arrays.asList(path.split("\\|"));
 			} else if (UPLOAD_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(SAUpload.PARAM_PATH);
-				dest = action.getConfiguredSourceSink().getId();
+				dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
 				writeOption = action.getParameter(SAUpload.PARAM_WRITEOPTION);
 				mode = Mode.WRITE;
 			} else if (DELETE_ID
 					.equals(action.getActionId())) {
 				destinationFolder = action.getParameter(SADelete.PARAM_PATH);
-				dest = action.getConfiguredSourceSink().getId();
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
 				deleteOption = action.getParameter(SADelete.PARAM_DELETEOPTION);
 				mode = Mode.DELETE;
 			} else if (LIST_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(SAList.PARAM_PATH);
-				dest = action.getConfiguredSourceSink().getId();
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
 				ignorePath = false;
 				mode = Mode.LIST;
-			} else if (MOVE_BEFORE_ID
+			} else if (EXISTENCE_CHECK_ID.equals(action.getActionId())){
+                ignorePath = true;
+                mode = Mode.LIST;
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
+                destinationFolder = action.getParameter(SAList.PARAM_PATH);
+            } else if (MOVE_BEFORE_ID
 					.equals(action.getActionId())) {
 				moveBeforeProcessing = true;
 				moveBeforeProcessingPath = action
@@ -241,85 +242,70 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		return jobConfig;
 	}
 
+
     @Override
-    public void assemblePipeline(JobConfig jobConfig) {
-        ActionConfig pipeline = getPipeline(jobConfig);
-        ConfiguredAction configuredAction = actionConfigToConfiguredAction(pipeline, new HashMap<String, ConfiguredAction>());
-        Job job = getJobService().getJob(jobConfig.getId());
-        job.setFirstConfiguredAction(configuredAction);
-        getSessionFactory().getCurrentSession().save(job);
+    public ActionConfig getActionConfig(ConfiguredAction configuredAction){
+        return configuredActionToActionConfig(configuredAction, new HashMap<String, ActionConfig>());
     }
 
-    private ConfiguredAction actionConfigToConfiguredAction(ActionConfig actionConfig, Map<String, ConfiguredAction> configuredActions) {
-        Map<String, ConfiguredAction> receivers = new HashMap<String, ConfiguredAction>();
-        Map<String, ActionConfig> acReceivers = actionConfig.getReceivers();
+    private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
+        Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
+        ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), actionClassService.getActionClassInfo(configuredAction.getClassId()).getClazz(), configuredAction.getNmbOfWorkers());
 
-        for(String key: acReceivers.keySet()){
-            if(!configuredActions.containsKey(acReceivers.get(key).getId())){
-                ConfiguredAction receiver = actionConfigToConfiguredAction(acReceivers.get(key), configuredActions);
-                configuredActions.put(acReceivers.get(key).getId(), receiver);
+        for(String key: configuredActionReceivers.keySet()){
+            if(!actionConfigMap.containsKey(configuredActionReceivers.get(key).getActionId())){
+                ActionConfig receiver = configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
+                actionConfigMap.put(configuredActionReceivers.get(key).getActionId(), receiver);
             }
-            receivers.put(key, configuredActions.get(acReceivers.get(key).getId()));
+            actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceivers.get(key).getActionId()));
         }
 
-        ConfiguredAction configuredAction = new ConfiguredAction();
-        configuredAction.setActionId(actionConfig.getId());
-        configuredAction.setReceivers(receivers);
-        configuredAction.setClassId(actionClassService.getClassId(actionConfig.getClazz()));
-        configuredAction.setNmbOfWorkers(actionConfig.getNmbOfWorkers());
-        Map<String, String> parameters = new HashMap<String, String>();
-        Map<String, Object> acParameters = actionConfig.getParameters();
-        for(String key: acParameters.keySet()){
-            Object value = acParameters.get(key);
-            if(value instanceof String){
-                parameters.put(key, (String)value);
-            } else if (value instanceof ConfiguredSourceSink){
-                configuredAction.setConfiguredSourceSink((ConfiguredSourceSink) value);
-            } else if (value instanceof List){
-                try{
-                    List<String> list = (List<String>) value;
-                    int i = 0;
-                    for(String str: list){
-                        parameters.put(key+"_"+i, str);
-                        i++;
-                    }
-                } catch (ClassCastException e){
-                    logger.error("Cannot persist paramameter in database.", e);
-                }
-            } else if (!(value instanceof SourceSink)){
-                logger.error("Cannot persist parameter "+key);
-            }
+        for(Map.Entry<String, String> entry: configuredAction.getParameters().entrySet()){
+            actionConfig.setParameter(entry.getKey(), entry.getValue());
         }
-        configuredAction.setParameters(parameters);
-        return configuredAction;
+        return actionConfig;
     }
 
     @Override
-	public ActionConfig getPipeline(final JobConfig jobConfig) {
+	public ConfiguredAction getConfiguredAction(final JobConfig jobConfig) {
 
-        ActionConfig reporter = new ActionConfig(REPORTER, SAReport.class, 1);
-        reporter.setParameter(SAReport.PARAM_JOBSERVICE, getJobService());
+        ConfiguredAction reporter = new ConfiguredAction();
+        reporter.setActionId(REPORTER);
+        reporter.setNmbOfWorkers(1);
+        reporter.setClassId(actionClassService.getClassId(SAReport.class));
 
-        ActionConfig start = new ActionConfig("Start",M2AlfStartAction.class, 1);
+        ConfiguredAction start = new ConfiguredAction();
+        start.setActionId(START);
+        start.setNmbOfWorkers(1);
+        start.setClassId(actionClassService.getClassId(StartCycleAction.class));
 
-        ActionConfig end = start;
+        ConfiguredAction end = start;
 
         if(!jobConfig.getCommand().isEmpty()){
-            ActionConfig executeCommandBefore = new ActionConfig(COMMAND_BEFORE_ID, ExecuteCommandAction.class, 1);
+            ConfiguredAction executeCommandBefore = new ConfiguredAction();
+            executeCommandBefore.setActionId(COMMAND_BEFORE_ID);
+            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            executeCommandBefore.setNmbOfWorkers(1);
             executeCommandBefore.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobConfig.getCommand());
             executeCommandBefore.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, executeCommandBefore);
             end = executeCommandBefore;
         }
 
-        ActionConfig sourceAction = new ActionConfig(SOURCE_ID, SASource.class, 1);
-        sourceAction.setParameter(SASource.PARAM_INPUTPATHS, jobConfig.getInputFolder());
+        ConfiguredAction sourceAction = new ConfiguredAction();
+        sourceAction.setActionId(SOURCE_ID);
+        sourceAction.setClassId(actionClassService.getClassId(SASource.class));
+        sourceAction.setNmbOfWorkers(1);
+        sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobConfig.getInputFolder()));
         sourceAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, sourceAction);
         end = sourceAction;
 
         if(jobConfig.getMoveBeforeProc()){
-            ActionConfig moveAction = new ActionConfig(MOVE_BEFORE_ID, MoveAction.class, 1);
+            ConfiguredAction moveAction = new ConfiguredAction();
+            moveAction.setActionId(MOVE_BEFORE_ID);
+            moveAction.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveAction.setNmbOfWorkers(1);
             moveAction.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveBeforeProcText());
             moveAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, moveAction);
@@ -327,7 +313,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         }
 
         if(!jobConfig.getExtension().isEmpty() && !jobConfig.getExtension().equals("*")){
-            ActionConfig filter = new ActionConfig(FILTER_ID, SAFilter.class, 1);
+            ConfiguredAction filter = new ConfiguredAction();
+            filter.setActionId(FILTER_ID);
+            filter.setClassId(actionClassService.getClassId(SAFilter.class));
+            filter.setNmbOfWorkers(1);
             filter.setParameter(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
             filter.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, filter);
@@ -335,8 +324,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         }
 
         String classId = jobConfig.getMetadata();
-        Class clazz = actionClassService.getActionClassInfo(classId).getClazz();
-        ActionConfig metadataAction = new ActionConfig(METADATA_ACTION_ID, clazz, 1);
+        ConfiguredAction metadataAction = new ConfiguredAction();
+        metadataAction.setActionId(METADATA_ACTION_ID);
+        metadataAction.setClassId(classId);
+        metadataAction.setNmbOfWorkers(1);
         metadataAction.addReceiver(REPORTER, reporter);
         setParameters(jobConfig.getParamMetadata(), metadataAction);
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
@@ -347,32 +338,35 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				.equals(jobConfig.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
 
-            clazz = actionClassService.getActionClassInfo(jobConfig.getTransform()).getClazz();
-            ActionConfig transformAction = new ActionConfig(TRANSFORM_ACTION_ID, clazz, 1);
+            ConfiguredAction transformAction = new ConfiguredAction();
+            transformAction.setActionId(TRANSFORM_ACTION_ID);
+            transformAction.setClassId(jobConfig.getTransform());
+            transformAction.setNmbOfWorkers(1);
             transformAction.addReceiver(REPORTER, reporter);
             setParameters(jobConfig.getParamTransform(), transformAction);
             end.addReceiver(DEFAULT_RECEIVER, transformAction);
             end = transformAction;
 		}
 
-        ActionConfig mimeTypeAction = new ActionConfig(MIME_TYPE_ID, SAMimeType.class, 1);
+        ConfiguredAction mimeTypeAction = new ConfiguredAction();
+        mimeTypeAction.setActionId(MIME_TYPE_ID);
+        mimeTypeAction.setClassId(actionClassService.getClassId(SAMimeType.class));
+        mimeTypeAction.setNmbOfWorkers(1);
         mimeTypeAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, mimeTypeAction);
         end = mimeTypeAction;
 
 
 		if (Mode.WRITE == jobConfig.getMode()) {
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassId());
-            final ActionConfig uploadAction = new ActionConfig(UPLOAD_ID, SAUpload.class, 1);
+            final ConfiguredAction uploadAction = new ConfiguredAction();
+            uploadAction.setActionId(UPLOAD_ID);
+            uploadAction.setClassId(actionClassService.getClassId(SAUpload.class));
+            uploadAction.setNmbOfWorkers(1);
             uploadAction.addReceiver(REPORTER, reporter);
-            uploadAction.setParameter(SimpleActionWithSourceSink.PARAM_SINK, sink);
-            uploadAction.setParameter(SimpleActionWithSourceSink.PARAM_SINKCONFIG, sinkConfig);
+            uploadAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
 			uploadAction.setParameter(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
-            uploadAction.setParameter(SAUpload.PARAM_WRITEOPTION, jobConfig.getWriteOption());
-            uploadAction.setParameter(SAUpload.PARAM_BATCH_SIZE, defaultBatchSize);
+            uploadAction.setParameter(SAUpload.PARAM_WRITEOPTION, jobConfig.getWriteOption().toString());
+            uploadAction.setParameter(SAUpload.PARAM_BATCH_SIZE, String.valueOf(defaultBatchSize));
 			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
 		}
@@ -382,12 +376,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 					.getDestination(jobConfig.getDest());
 			final SourceSink sink = getSourceSinkFactory().getObject(
 					sinkConfig.getClassId());
-            final ActionConfig deleteAction = new ActionConfig(DELETE_ID, SADelete.class, 1);
+            final ConfiguredAction deleteAction = new ConfiguredAction();
+            deleteAction.setActionId(DELETE_ID);
+            deleteAction.setClassId(actionClassService.getClassId(SADelete.class));
+            deleteAction.setNmbOfWorkers(1);
             deleteAction.addReceiver(REPORTER, reporter);
-            deleteAction.setParameter(SimpleActionWithSourceSink.PARAM_SINK, sink);
-            deleteAction.setParameter(SimpleActionWithSourceSink.PARAM_SINKCONFIG, sinkConfig);
+            deleteAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
             deleteAction.setParameter(SADelete.PARAM_PATH, jobConfig.getDestinationFolder());
-            deleteAction.setParameter(SADelete.PARAM_DELETEOPTION, jobConfig.getDeleteOption());
+            deleteAction.setParameter(SADelete.PARAM_DELETEOPTION, jobConfig.getDeleteOption().toString());
             end.addReceiver(DEFAULT_RECEIVER, deleteAction);
             end = deleteAction;
 		}
@@ -398,25 +394,32 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			final SourceSink sink = getSourceSinkFactory().getObject(
 					sinkConfig.getClassId());
 
-            ActionConfig listAction;
+            ConfiguredAction listAction;
 			
 			if(jobConfig.getListIgnorePath()){
-				listAction = new ActionConfig(EXISTENCE_CHECK_ID, SAExistenceCheck.class, 1);
+				listAction = new ConfiguredAction();
+                listAction.setActionId(EXISTENCE_CHECK_ID);
+                listAction.setClassId(actionClassService.getClassId(SAExistenceCheck.class));
 			}
 			else{
-				listAction = new ActionConfig(LIST_ID, SAList.class, 1);
-				listAction.setParameter(SAList.PARAM_PATH, jobConfig.getDestinationFolder());
+				listAction = new ConfiguredAction();
+                listAction.setActionId(LIST_ID);
+                listAction.setActionId(actionClassService.getClassId(SAList.class));
 			}
+            listAction.setNmbOfWorkers(1);
+            listAction.setParameter(SAList.PARAM_PATH, jobConfig.getDestinationFolder());
             listAction.addReceiver(REPORTER, reporter);
-			listAction.setParameter(SimpleActionWithSourceSink.PARAM_SINK, sink);
-            listAction.setParameter(SimpleActionWithSourceSink.PARAM_SINKCONFIG, sinkConfig);
+			listAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
             end.addReceiver(DEFAULT_RECEIVER, listAction);
             end = listAction;
 		}
 
 
         if(!jobConfig.getCommandAfter().isEmpty()){
-            ActionConfig commandAfter = new ActionConfig(COMMAND_AFTER_ID, ExecuteCommandAction.class, 1);
+            ConfiguredAction commandAfter = new ConfiguredAction();
+            commandAfter.setActionId(COMMAND_AFTER_ID);
+            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            commandAfter.setNmbOfWorkers(1);
             commandAfter.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobConfig.getCommandAfter());
             commandAfter.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, commandAfter);
@@ -424,16 +427,31 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         }
 
         end.addReceiver(DEFAULT_RECEIVER, reporter);
+        end = reporter;
+
+        ConfiguredAction endAction = new ConfiguredAction();
+        endAction.setActionId(END_ACTION);
+        endAction.setClassId(actionClassService.getClassId(M2AlfEndAction.class));
+        endAction.setNmbOfWorkers(1);
+        end.addReceiver(DEFAULT_RECEIVER, endAction);
 
 		return start;
 	}
 
-    private void setParameters(List<String> parameters, ActionConfig metadataAction) {
+    private void setParameters(List<String> parameters, ConfiguredAction metadataAction) {
         if(parameters == null)
             return;
         for(String param: parameters){
             String[] keyValue = param.split("\\|");
             metadataAction.setParameter(keyValue[0], keyValue[1]);
         }
+    }
+
+    private String encodeStringList(List<String> list){
+        String str = "";
+        for(String el: list){
+            str += el +"|";
+        }
+        return str.substring(0, str.length()-1);
     }
 }

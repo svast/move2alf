@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.pipeline.actions;
 
-import eu.xenit.move2alf.pipeline.AbstractMessage;
 import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
 
 /**
@@ -18,11 +17,11 @@ public abstract class AbstractSendingAction extends AbstractStateAction implemen
         this.sendingContext = sendingContext;
     }
 
-    protected void sendMessage(AbstractMessage message){
+    protected void sendMessage(Object message){
         sendingContext.sendMessage(message);
     }
 
-    protected void sendMessage(String receiver, AbstractMessage message){
+    protected void sendMessage(String receiver, Object message){
         sendingContext.sendMessage(message, receiver);
     }
 }

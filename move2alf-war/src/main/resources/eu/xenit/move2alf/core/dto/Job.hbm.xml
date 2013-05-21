@@ -8,7 +8,7 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<property name="name" />
+		<property name="name" unique="true"/>
 		<property name="description" />
 		<many-to-one name="creator" column="creatorId" />
 		<property name="creationDateTime" />

@@ -1,23 +1,21 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.xenit.move2alf.core.ApplicationContextProvider;
+import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.pipeline.actions.EOCAware;
-import eu.xenit.move2alf.pipeline.actions.EOCBlockingAction;
-import eu.xenit.move2alf.pipeline.actions.context.EOCBlockingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
@@ -27,17 +25,16 @@ import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
+@ActionInfo(classId = "SAUpload",
+            description = "Uploads files to the configured sourcesink")
 public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implements EOCAware{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAUpload.class);
 
 
-    public static final String PARAM_USAGESERVICE = "usageService";
-	private UsageService usageService;
-    public void setUsageService(UsageService usageService){
-        this.usageService = usageService;
-    }
+	private UsageService usageService = (UsageService) ApplicationContextProvider.getApplicationContext().getBean("usageService");
+
 
 	private List<FileInfo> uploadAndSetACLs(final Batch batch, final List<ACL> acls) {
 		boolean batchFailed = false;
@@ -84,8 +81,8 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
 
     public static final String PARAM_WRITEOPTION = "writeOption";
     private WriteOption writeOption;
-    public void setWriteOption(WriteOption writeOption){
-        this.writeOption = writeOption;
+    public void setWriteOption(String writeOption){
+        this.writeOption = WriteOption.valueOf(writeOption);
     }
 
 	private List<UploadResult> upload(final Batch batch) {
@@ -215,15 +212,10 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
 		return value;
 	}
 
-	@Override
-	public String getDescription() {
-		return "Uploading documents to Alfresco";
-	}
-
     public static final String PARAM_BATCH_SIZE = "batchSize";
     private int batchSize;
-    public void setBatchSize(int batchSize){
-        this.batchSize = batchSize;
+    public void setBatchSize(String batchSize){
+        this.batchSize = Integer.parseInt(batchSize);
     }
 
     public static final String PARAM_PATH = "path";
@@ -274,7 +266,7 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
 
     @Override
     public void beforeSendEOC() {
-        logger.debug("EOC triggerd upload.");
+        logger.debug("EOC triggered upload.");
         uploadBatch();
     }
 }

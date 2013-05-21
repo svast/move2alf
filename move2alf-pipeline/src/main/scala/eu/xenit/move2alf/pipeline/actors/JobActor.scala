@@ -16,7 +16,7 @@ case object NotRunning extends JobState
 
 sealed trait Data
 case object Uninitialized extends Data
-case class CycleData(data: HashMap[String, Any], counter: Int) extends Data
+case class CycleData(counter: Int) extends Data
 
 
 
@@ -38,8 +38,9 @@ class JobActor(val id: String, private val config: ActionConfig, private val job
 
   when(NotRunning) {
     case Event(Start, Uninitialized) => {
+      firstActor ! Broadcast(Start)
       firstActor ! Broadcast(EOC)
-      goto(Running) using CycleData(data = new HashMap[String, Any], counter = nmbOfSenders)
+      goto(Running) using CycleData(counter = nmbOfSenders)
     }
   }
 
@@ -50,6 +51,7 @@ class JobActor(val id: String, private val config: ActionConfig, private val job
         case _ => stay using data.copy(counter = data.counter - 1)
       }
     }
+    case Event(Start | Broadcast(Start), _) => stay
   }
 
   onTransition {

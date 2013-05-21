@@ -2,8 +2,6 @@ package eu.xenit.move2alf.pipeline.actions.context
 
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.ReceivingAction
-import eu.xenit.move2alf.pipeline.AbstractMessage
 
 /**
   * Created with IntelliJ IDEA.
@@ -12,11 +10,12 @@ import eu.xenit.move2alf.pipeline.AbstractMessage
   * Time: 10:39 AM
   * To change this template use File | Settings | File Templates.
   */
-class EndActionContextFactory(actionClass: Class[_], parameters: Map[String, AnyRef], receiver: (String, ActorRef), nmbOfSenders: Int)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActionContextFactory(actionClass, parameters) {
-   protected type T = ReceivingAction[AbstractMessage]
+class EndActionContextFactory(id: String, actionClass: Class[_], parameters: Map[String, AnyRef], receiver: (String, ActorRef))(implicit jobContext: JobContext) extends AbstractActionContextFactory(id, actionClass, parameters) {
+   protected type T = AnyRef
 
-   protected def constructActionContext(basicAction: T) = {
-     val actionContext = new AbstractActionContext(Map(receiver), nmbOfSenders) with ReceivingActionContext[AbstractMessage]{
+   protected def constructActionContext(basicAction: T)(implicit context: ActorContext) = {
+     logger.debug("Constructing EndAction")
+     val actionContext = new AbstractActionContext(id, Map(receiver)){
        val action = basicAction
      }
      actionContext

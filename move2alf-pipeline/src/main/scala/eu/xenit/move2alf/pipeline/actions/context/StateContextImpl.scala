@@ -17,7 +17,7 @@ class StateContextImpl(private val ct: AbstractActionContext) extends StateConte
     ct.getStateValue(key)
   }
 
-  def getJobId():String = {
-    ct.getJobId()
+  def getJobId:String = {
+    ct.getJobId
   }
 }

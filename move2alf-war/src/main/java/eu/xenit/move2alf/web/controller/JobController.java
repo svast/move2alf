@@ -56,7 +56,6 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private PipelineAssembler pipelineAssembler;
 	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
     private ActionClassService actionClassService;
@@ -77,15 +76,6 @@ public class JobController extends AbstractController{
 
 	public JobService getJobService() {
 		return jobService;
-	}
-
-	@Autowired
-	public void setPipelineAssembler(PipelineAssembler pipelineAssembler) {
-		this.pipelineAssembler = pipelineAssembler;
-	}
-
-	public PipelineAssembler getPipelineAssembler() {
-		return pipelineAssembler;
 	}
 
 	@Autowired
@@ -158,20 +148,11 @@ public class JobController extends AbstractController{
 
 		ModelAndView mav = new ModelAndView();
 		List<String> cronJobs = job.getCron();
-		int jobId = getJobService().createJob(job.getName(),
-				job.getDescription()).getId();
+		int jobId = getJobService().createJob(job).getId();
 
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
-
-		int destId = job.getDest();
-
-		job.setId(jobId);
-		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
-
-        //TODO START JOB
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
@@ -236,7 +217,7 @@ public class JobController extends AbstractController{
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView("edit-job");
-		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(id);
+		JobConfig jobConfig = getJobService().getJobConfigForJob(id);
 		
 		mav.addObject("job", jobConfig);
 		
@@ -267,30 +248,10 @@ public class JobController extends AbstractController{
 		}
 		
 		ModelAndView mav = new ModelAndView();
-		Job editedJob = getJobService().editJob(id, job.getName(),
-				job.getDescription());
+		Job editedJob = getJobService().editJob(job);
 		int jobId = editedJob.getId();
 
 		handleSchedule(id, job.getCron());
-
-		int destId = job.getDest();
-
-		/*
-		 * Create new action pipeline and remove old one by deleting first
-		 * action. The delete will be cascaded by Hibernate.
-		 * 
-		 * TODO: delete FileSourceSink
-		 */
-
-		job.setId(jobId);
-		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
-        //TODO CREATE JOB
-
-		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
-		if (firstAction != null) {
-			getJobService().deleteAction(firstAction.getId());
-		}
 
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;

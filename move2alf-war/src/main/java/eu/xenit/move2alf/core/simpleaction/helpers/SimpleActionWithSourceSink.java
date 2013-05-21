@@ -1,23 +1,23 @@
 package eu.xenit.move2alf.core.simpleaction.helpers;
 
-import eu.xenit.move2alf.core.action.Move2AlfAction;
+import eu.xenit.move2alf.core.ApplicationContextProvider;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.simpleaction.SimpleAction;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.pipeline.AbstractMessage;
+import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.logic.JobService;
+import org.springframework.context.ApplicationContext;
 
-public abstract class SimpleActionWithSourceSink<T extends AbstractMessage> extends Move2AlfAction<T> {
+public abstract class SimpleActionWithSourceSink<T> extends Move2AlfReceivingAction<T> {
 
-    public static final String PARAM_SINK = "sink";
 	private SourceSink sink;
-    public void setSink(SourceSink sink){
-        this.sink = sink;
-    }
 
-    public static final String PARAM_SINKCONFIG = "sinkConfig";
+    public static final String PARAM_DESTINATION = "destination";
 	private ConfiguredSourceSink sinkConfig;
-    public void setSinkConfig(ConfiguredSourceSink sinkConfig){
-        this.sinkConfig = sinkConfig;
+    public void setDestination(String dest){
+        ApplicationContext context = ApplicationContextProvider.getApplicationContext();
+        sinkConfig = ((JobService)context.getBean("jobService")).getDestination(Integer.parseInt(dest));
+        sink = ((SourceSinkFactory)context.getBean("sourceSinkFactory")).getObject(sinkConfig.getClassId());
     }
 
 	public SourceSink getSink() {

@@ -21,4 +21,9 @@ public class DummyEndAction implements ReceivingAction<StringMessage>, HasStateC
     public void execute(StringMessage message) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public void setId(String id) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

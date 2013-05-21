@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.web.dto.JobConfig;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,28 +40,20 @@ public interface JobService {
 	/**
 	 * Create a new job.
 	 * 
-	 * @param name
-	 *            The name of the job
-	 * @param description
-	 *            The description of the job
+	 * @param jobConfig
+	 *            The job configuration
 	 * @return The new job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job createJob(String name, String description);
+	public Job createJob(JobConfig jobConfig);
 
 	/**
-	 * Edit a job
-	 * 
-	 * @param id
-	 *            The id of the job to edit
-	 * @param name
-	 *            The name of the job
-	 * @param description
-	 *            The description of the job
+	 * @param jobConfig
+	 *            The job configuration
 	 * @return The edited job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job editJob(int id, String name, String description);
+	public Job editJob(JobConfig jobConfig);
 
 	/**
 	 * Delete a job
@@ -240,13 +233,6 @@ public interface JobService {
 	 * @param parameters
 	 */
 	public void createSourceSink(String className, Map<String, String> parameters);
-	
-	/**
-	 * 
-	 * @param action
-	 * @param sourceSink
-	 */
-	public void addSourceSinkToAction(ConfiguredAction action, ConfiguredSourceSink sourceSink);
 
 	/**
 	 * 
@@ -283,20 +269,6 @@ public interface JobService {
 	 */
 	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
 
-	/**
-	 * Delete a configured action with the given id.
-	 * 
-	 * @param id
-	 */
-	public void deleteAction(int id);
-
-	/**
-	 * Get the configured action related to the configured source sink
-	 * 
-	 * @param sourceSinkId
-	 * @return
-	 */
-	public ConfiguredAction getActionRelatedToConfiguredSourceSink(int sourceSinkId);
 
 	/**
 	 * 
@@ -342,5 +314,14 @@ public interface JobService {
     void closeCycle(Cycle cycle);
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void closeCycle(int cycle);
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     int openCycleForJob(Integer jobId);
+
+    void startJob(Integer jobId);
+
+    JobConfig getJobConfigForJob(int id);
+
+    int openCycleForJob(String jobId);
 }

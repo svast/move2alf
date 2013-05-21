@@ -9,14 +9,4 @@ public class XmlPropertiesFileMetadataAction extends MetadataAction {
 		//TODO meerdere loaders toelaten
 		//metadataLoaders.add(new FilesystemMetadataLoader());
 	}
-
-	@Override
-	public String getDescription() {
-		return "Read metadata from an XML properties file";
-	}
-
-	@Override
-	public String getName() {
-		return "XML properties file metadata";
-	}	
 }

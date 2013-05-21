@@ -10,7 +10,7 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
  * Time: 1:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DummyStartAction extends AbstractBeginAction{
+public class DummyStartAction extends AbstractSendingAction implements StartAware {
 
     @Override
     public void setSendingContext(SendingContext sendingContext) {
@@ -23,7 +23,12 @@ public class DummyStartAction extends AbstractBeginAction{
     }
 
     @Override
-    public void beforeSendEOC() {
+    public void onStart() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void setId(String id) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

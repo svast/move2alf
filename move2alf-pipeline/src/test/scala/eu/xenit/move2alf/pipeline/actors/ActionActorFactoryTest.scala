@@ -1,13 +1,10 @@
 package eu.xenit.move2alf.pipeline.actors
 
-import akka.actor.{ActorContext, Actor, Props, ActorSystem}
+import akka.actor.{ActorContext, ActorSystem}
 import eu.xenit.move2alf.pipeline.state.JobContext
 import org.junit.Test
-import org.mockito._
 import org.mockito.Mockito._
 import akka.testkit.{TestActor, TestActorRef}
-import eu.xenit.move2alf.pipeline.actions.context.BasicActionContextFactory
-import eu.xenit.move2alf.pipeline.actions.JavaActionImpl
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,8 +21,8 @@ class ActionActorFactoryTest {
     implicit val jobContext = new JobContext("TestJobContext")
     val mockedReceiver = mock(classOf[TestActorRef[TestActor]])
     implicit val context = mock(classOf[ActorContext])
-    val factory = new BasicActionContextFactory(classOf[JavaActionImpl[_]], Map("param1"->"Test123"), Map("default" -> mockedReceiver), 1)
-    val actor = new ActionActorFactory("testActor", factory, 2)
+//    val factory = new BasicActionContextFactory(new JavaActionImpl[AbstractMessage], Map("default" -> mockedReceiver))
+//    val actor = new ActionActorFactory("testActor", factory, 1, 2).createActor
   }
 
 }

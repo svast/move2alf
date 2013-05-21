@@ -1,20 +1,12 @@
 package eu.xenit.move2alf.logic;
 
-import eu.xenit.move2alf.core.simpleaction.SimpleAction;
-
 public class PipelineStepProgress {
-	private SimpleAction action;
 	private volatile long processed;
 	private volatile long total;
 
-	public PipelineStepProgress(final SimpleAction action, final int processed, final int total) {
-		this.action = action;
+	public PipelineStepProgress(final int processed, final int total) {
 		this.processed = processed;
 		this.total = total;
-	}
-
-	public SimpleAction getAction() {
-		return action;
 	}
 
 	public long getProcessed() {

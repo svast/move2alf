@@ -12,13 +12,4 @@ public class EmptyMetadataAction extends MetadataAction {
 		metadataLoaders.add(new DummyMetadataLoader());
 	}
 
-	@Override
-	public String getDescription() {
-		return "Do not set metadata";
-	}
-
-	@Override
-	public String getName() {
-		return "Empty metadata";
-	}
 }
