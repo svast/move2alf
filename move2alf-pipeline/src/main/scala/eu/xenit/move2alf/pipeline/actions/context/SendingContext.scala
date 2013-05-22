@@ -14,4 +14,6 @@ trait SendingContext{
 
   def sendMessage(message: AnyRef, receiver: String)
 
+  def hasReceiver(receiver: String): Boolean
+
 }

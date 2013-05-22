@@ -47,18 +47,22 @@ public class DefaultErrorHandler implements ErrorHandler {
             // TODO: handle cleaner?
             File file = (File) fileInfo.get(Parameters.PARAM_FILE);
 
-            sendingContext.sendMessage(
-                    new ReportMessage(file.getName(),
-                            new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage(file.getName(),
+                                new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
+            }
 
             if(moveNotLoad){
                 sendingContext.sendMessage(message, "MoveNotLoad");
             }
         } else {
-            sendingContext.sendMessage(
-                    new ReportMessage("Not a file", new Date(), Parameters.VALUE_FAILED, params, null),
-                    PipelineAssemblerImpl.REPORTER
-            );
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage("Not a file", new Date(), Parameters.VALUE_FAILED, params, null),
+                        PipelineAssemblerImpl.REPORTER
+                );
+            }
         }
     }
 

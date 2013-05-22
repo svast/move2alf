@@ -86,6 +86,10 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
     receivers.get(receiver).get ! M2AMessage(message)
   }
 
+  final def hasReceiver(receiver: String): Boolean = {
+    receivers.contains(receiver)
+  }
+
   final def getJobId: String = {
     jobContext.jobId
   }

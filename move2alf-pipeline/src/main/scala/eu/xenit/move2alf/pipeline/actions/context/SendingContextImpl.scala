@@ -16,4 +16,8 @@ class SendingContextImpl(private val ct: AbstractActionContext) extends SendingC
   def sendMessage(message: AnyRef, receiver: String) {
     ct.sendMessage(message, receiver)
   }
+
+  def hasReceiver(receiver: String): Boolean = {
+    ct.hasReceiver(receiver)
+  }
 }
