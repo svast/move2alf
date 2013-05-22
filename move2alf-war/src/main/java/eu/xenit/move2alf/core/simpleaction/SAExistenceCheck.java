@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.simpleaction;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
@@ -13,12 +12,12 @@ import java.io.File;
 
 @ActionInfo(classId = "SAExistenceCheck",
             description = "Checks if a filename exists in the sourcesink")
-public class SAExistenceCheck extends SimpleActionWithSourceSink<FileInfoMessage> {
+public class SAExistenceCheck extends SimpleActionWithSourceSink<FileInfo> {
 
     @Override
-    public void executeImpl(FileInfoMessage message) {
+    public void executeImpl(FileInfo fileInfo) {
         FileInfo newParameterMap = new FileInfo();
-        newParameterMap.putAll(message.fileInfo);
+        newParameterMap.putAll(fileInfo);
 
         ConfiguredSourceSink sinkConfig = getSinkConfig();
         SourceSink sink = getSink();
@@ -30,6 +29,6 @@ public class SAExistenceCheck extends SimpleActionWithSourceSink<FileInfoMessage
             throw new Move2AlfException("Document not found");
         }
 
-        sendMessage(new FileInfoMessage(message.fileInfo));
+        sendMessage(newParameterMap);
     }
 }

@@ -5,7 +5,6 @@ import java.io.File;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
@@ -13,7 +12,7 @@ import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 @ActionInfo(classId = "SAList",
             description = "Checks if the file exists in the given path")
-public class SAList extends SimpleActionWithSourceSink<FileInfoMessage> {
+public class SAList extends SimpleActionWithSourceSink<FileInfo> {
 
 	public static final String PARAM_PATH = "path";
     private String path;
@@ -22,9 +21,9 @@ public class SAList extends SimpleActionWithSourceSink<FileInfoMessage> {
     }
 
     @Override
-    public void executeImpl(FileInfoMessage message) {
+    public void executeImpl(FileInfo fileInfo) {
         FileInfo newParameterMap = new FileInfo();
-        newParameterMap.putAll(message.fileInfo);
+        newParameterMap.putAll(fileInfo);
 
         ConfiguredSourceSink sinkConfig = getSinkConfig();
         SourceSink sink = getSink();
@@ -68,6 +67,6 @@ public class SAList extends SimpleActionWithSourceSink<FileInfoMessage> {
             throw new Move2AlfException("Document not found");
         }
 
-        sendMessage(new FileInfoMessage(message.fileInfo));
+        sendMessage(fileInfo);
     }
 }

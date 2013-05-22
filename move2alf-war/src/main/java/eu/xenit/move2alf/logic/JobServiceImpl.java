@@ -42,6 +42,8 @@ import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 
+import javax.annotation.PreDestroy;
+
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
@@ -647,7 +649,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
     public void startJob(Integer jobId) {
         if(!jobMap.containsKey(jobId)){
             Job job = getJob(jobId);
-            ConfiguredAction configuredAction = getJob(jobId).getFirstConfiguredAction();
+            ConfiguredAction configuredAction = job.getFirstConfiguredAction();
             JobHandle jobHandle = new JobHandle(actorSystem, job.getName(), pipelineAssembler.getActionConfig(configuredAction));
             jobMap.put(job.getId(), jobHandle);
         }
@@ -662,6 +664,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
     @Override
     public JobConfig getJobConfigForJob(int id) {
         return pipelineAssembler.getJobConfigForJob(id);
+    }
+
+    @PreDestroy
+    public void preDestroy(){
+        logger.debug("Stopping the actorSystem");
+        actorSystem.shutdown();
     }
 
 }

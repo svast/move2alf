@@ -8,7 +8,6 @@ import java.util.Map;
 
 import eu.xenit.move2alf.core.ApplicationContextProvider;
 import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 @ActionInfo(classId = "SAUpload",
             description = "Uploads files to the configured sourcesink")
-public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implements EOCAware{
+public class SAUpload extends SimpleActionWithSourceSink<FileInfo> implements EOCAware{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAUpload.class);
@@ -228,15 +227,15 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
     List<ACL> aclBatch = new ArrayList<ACL>();
 
     @Override
-    public void executeImpl(FileInfoMessage message) {
+    public void executeImpl(FileInfo fileInfo) {
         if (usageService.isBlockedByDocumentCounter()) {
             throw new Move2AlfException("Document counter is 0.");
         }
 
-        logger.debug("Queueing file for upload: " + ((File) message.fileInfo.get(Parameters.PARAM_FILE)).getName());
-        batch.add(message.fileInfo);
+        logger.debug("Queueing file for upload: " + ((File) fileInfo.get(Parameters.PARAM_FILE)).getName());
+        batch.add(fileInfo);
 
-        final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) message.fileInfo
+        final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) fileInfo
                 .get(Parameters.PARAM_ACL);
         if (acl != null) {
             final String basePath = normalizeBasePath(path);
@@ -245,7 +244,7 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
                 normalizedAcl.put(normalizeAclPath(basePath, aclPath),
                         acl.get(aclPath));
             }
-            final boolean inheritPermissions = getInheritPermissionsFromParameterMap(message.fileInfo);
+            final boolean inheritPermissions = getInheritPermissionsFromParameterMap(fileInfo);
             aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
         }
 
@@ -258,7 +257,7 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfoMessage> implem
     private void uploadBatch() {
         List<FileInfo> output = uploadAndSetACLs(batch, aclBatch);
         for(FileInfo fileInfo: output){
-            sendMessage(new FileInfoMessage(fileInfo));
+            sendMessage(fileInfo);
         }
         batch.clear();
         aclBatch.clear();

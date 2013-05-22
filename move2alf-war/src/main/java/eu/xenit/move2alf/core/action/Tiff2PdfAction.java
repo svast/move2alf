@@ -1,32 +1,28 @@
 package eu.xenit.move2alf.core.action;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.media.jai.JAI;
 
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.common.Tiff2Pdf;
 
 @ActionInfo(classId = "Tiff2PdfAction",
             category = ConfigurableObject.CAT_TRANSFORM,
             description = "Action that transforms multiple tiff files to pdf.")
-public class Tiff2PdfAction extends Move2AlfReceivingAction<FileInfoMessage> {
+public class Tiff2PdfAction extends Move2AlfReceivingAction<FileInfo> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(Tiff2PdfAction.class);
 
 	@Override
-	protected void executeImpl(FileInfoMessage message) {
+	protected void executeImpl(FileInfo message) {
 
         //TODO: FIX
 //		List filesToTransform = null;

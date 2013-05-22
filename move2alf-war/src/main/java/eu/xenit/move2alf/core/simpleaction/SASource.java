@@ -5,7 +5,6 @@ import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.Move2AlfStartAction;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.core.sourcesink.FileSourceSink;
 
@@ -45,7 +44,7 @@ public class SASource extends Move2AlfStartAction{
                 fileMap.put(Parameters.PARAM_RELATIVE_PATH, Util.relativePath(inputPath,
                         file));
                 fileMap.put(Parameters.PARAM_INPUT_PATH, inputPath);
-                sendMessage(new FileInfoMessage(fileMap));
+                sendMessage(fileMap);
             }
         }
     }

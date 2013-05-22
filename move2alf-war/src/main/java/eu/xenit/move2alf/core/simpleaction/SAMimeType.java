@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.action.Move2AlfAction;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +15,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 @ActionInfo(classId = "SAMimeType",
             description = "Detects the mimetype of a file and adds it to the metadata")
-public class SAMimeType extends Move2AlfReceivingAction<FileInfoMessage> {
+public class SAMimeType extends Move2AlfReceivingAction<FileInfo> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SAMimeType.class);
 	private static final Tika tika = new Tika();
@@ -37,11 +35,11 @@ public class SAMimeType extends Move2AlfReceivingAction<FileInfoMessage> {
 	}
 
     @Override
-    public void executeImpl(FileInfoMessage message) {
+    public void executeImpl(FileInfo fileInfo) {
         FileInfo output = new FileInfo();
-        output.putAll(message.fileInfo);
-        File file = (File) message.fileInfo.get(Parameters.PARAM_FILE);
+        output.putAll(fileInfo);
+        File file = (File) fileInfo.get(Parameters.PARAM_FILE);
         output.put(Parameters.PARAM_MIMETYPE, determineMimeType(file));
-        sendMessage(new FileInfoMessage(output));
+        sendMessage(output);
     }
 }

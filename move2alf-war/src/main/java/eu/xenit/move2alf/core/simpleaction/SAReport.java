@@ -6,10 +6,10 @@ import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.action.ActionInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.StartCycleAction;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.JobService;
 
 import java.io.File;
@@ -30,17 +30,23 @@ public class SAReport extends Move2AlfReceivingAction<Object> {
 
     @Override
     public void executeImpl(Object message) {
-        Cycle cycle = jobService.getCycle((Integer) getStateValue(StartCycleAction.PARAM_CYCLE));
-        if(message instanceof FileInfoMessage){
+        Cycle cycle = jobService.getCycle((Integer)getStateValue(StartCycleAction.PARAM_CYCLE));
+        if(message instanceof FileInfo){
             // reporting
-            FileInfoMessage fileInfoMessage = (FileInfoMessage) message;
+            FileInfo fileInfo = (FileInfo) message;
             Set<ProcessedDocumentParameter> params = createProcessedDocumentParameterSet(
-                    (Map<String, String>) fileInfoMessage.fileInfo
+                    (Map<String, String>) fileInfo
                             .get(Parameters.PARAM_REPORT_FIELDS),cycle
                     .getJob().getFirstConfiguredAction());
+            if(fileInfo.get(Parameters.PARAM_STATUS).equals(Parameters.VALUE_FAILED)){
+                ProcessedDocumentParameter parameter = new ProcessedDocumentParameter();
+                parameter.setName(Parameters.PARAM_ERROR_MESSAGE);
+                parameter.setValue((String) fileInfo.get(Parameters.PARAM_ERROR_MESSAGE));
+                params.add(parameter);
+            }
             jobService.createProcessedDocument(cycle.getId(),
-                    ((File)fileInfoMessage.fileInfo.get(Parameters.PARAM_FILE)).getName(), new Date(),
-                    Parameters.VALUE_OK, params, (String)fileInfoMessage.fileInfo.get(Parameters.PARAM_REFERENCE));
+                    ((File)fileInfo.get(Parameters.PARAM_FILE)).getName(), new Date(),
+                    (String)fileInfo.get(Parameters.PARAM_STATUS), params, (String)fileInfo.get(Parameters.PARAM_REFERENCE));
         }
         if (message instanceof ReportMessage) {
             ReportMessage reportMessage = (ReportMessage) message;

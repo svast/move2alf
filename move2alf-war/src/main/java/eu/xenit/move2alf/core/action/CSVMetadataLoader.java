@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.action;
 import au.com.bytecode.opencsv.CSVReader;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ import java.util.Map;
 @ActionInfo(classId = "CSVMetadataLoader",
         category = ConfigurableObject.CAT_METADATA,
         description = "Loads metadata and filenames from pipe separated CSV file")
-public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfoMessage> {
+public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
 	private static final char CSV_DELIMITER = '|';
@@ -92,8 +91,8 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfoMessage> 
     }
 
     @Override
-    public void executeImpl(FileInfoMessage message) {
-        File inputFile = (File) message.fileInfo.get(Parameters.PARAM_FILE);
+    public void executeImpl(FileInfo message) {
+        File inputFile = (File) message.get(Parameters.PARAM_FILE);
 
         CSVReader reader = null;
         String[] metadataFields = null;
@@ -115,7 +114,7 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfoMessage> 
         String[] nextLine;
         try {
             while ((nextLine = reader.readNext()) != null) {
-                sendMessage(new FileInfoMessage(processLine(nextLine, metadataFields)));
+                sendMessage(processLine(nextLine, metadataFields));
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block

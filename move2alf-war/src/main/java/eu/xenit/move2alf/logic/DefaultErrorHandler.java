@@ -6,7 +6,6 @@ package eu.xenit.move2alf.logic;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.action.messages.FileInfoMessage;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
@@ -41,8 +40,8 @@ public class DefaultErrorHandler implements ErrorHandler {
         msg.setName(Parameters.PARAM_ERROR_MESSAGE);
         msg.setValue(error);
         params.add(msg);
-        if(message instanceof FileInfoMessage){
-            FileInfo fileInfo = ((FileInfoMessage)message).fileInfo;
+        if(message instanceof FileInfo){
+            FileInfo fileInfo = ((FileInfo)message);
 
             // TODO: handle cleaner?
             File file = (File) fileInfo.get(Parameters.PARAM_FILE);
