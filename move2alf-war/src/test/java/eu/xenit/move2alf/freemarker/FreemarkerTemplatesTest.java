@@ -6,11 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.util.Assert;
 
 import eu.xenit.move2alf.core.action.FilesystemMetadataAction;
@@ -23,6 +19,7 @@ import eu.xenit.move2alf.freemarkerchecktool.FreemarkerCheckTool;
 import eu.xenit.move2alf.freemarkerchecktool.RootMap;
 import eu.xenit.move2alf.web.dto.JobConfig;
 
+@Ignore
 public class FreemarkerTemplatesTest {
 	public static FreemarkerCheckTool freemarkerCheckTool;
 

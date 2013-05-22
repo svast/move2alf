@@ -5,11 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
@@ -19,6 +15,7 @@ import eu.xenit.move2alf.core.dto.Schedule;
 import eu.xenit.move2alf.core.dto.UserPswd;
 import eu.xenit.move2alf.core.dto.UserRole;
 
+@Ignore
 public class RootMapTest {
 
 	@BeforeClass

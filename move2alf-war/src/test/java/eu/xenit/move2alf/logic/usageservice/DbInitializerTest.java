@@ -11,11 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,6 +23,7 @@ import eu.xenit.move2alf.logic.usageservice.DbInitializer.ActionEnum;
 import eu.xenit.move2alf.logic.usageservice.dto.DocumentCounter;
 import eu.xenit.move2alf.logic.usageservice.dto.LicenseHistory;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "file:src/main/webapp/WEB-INF/applicationContext.xml", "classpath:test-applicationContext-embeddedDbs.xml" })
 @Transactional

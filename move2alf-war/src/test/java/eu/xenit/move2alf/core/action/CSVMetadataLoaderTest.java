@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import eu.xenit.move2alf.common.Parameters;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class CSVMetadataLoaderTest {
 
 	private static final String DIR = "src/test/resources/testdocs";
