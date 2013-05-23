@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import eu.xenit.move2alf.core.action.ActionClassService;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +50,7 @@ import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class JobController extends AbstractController{
@@ -216,6 +219,10 @@ public class JobController extends AbstractController{
 
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
 	public ModelAndView editJobForm(@PathVariable int id) {
+        if(getJobService().getJobState(id) == ECycleState.RUNNING){
+            Map<String, Object> model = new HashMap<String, Object>();
+            return new ModelAndView("redirect:/job/dashboard", model);
+        }
 		ModelAndView mav = new ModelAndView("edit-job");
 		JobConfig jobConfig = getJobService().getJobConfigForJob(id);
 		
@@ -226,6 +233,14 @@ public class JobController extends AbstractController{
 		return mav;
 	}
 
+    @RequestMapping(value = "/job/{id}/stop", method = RequestMethod.GET)
+    public ModelAndView stopJob(@PathVariable int id){
+        getJobService().stopJob(id);
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("redirect:/job/dashboard");
+        return mav;
+    }
+
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
 	public ModelAndView editJob(@PathVariable int id,
 			@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
@@ -233,6 +248,10 @@ public class JobController extends AbstractController{
 		if (!getJobService().getJob(id).getName().equals(job.getName()) && getJobService().checkJobExists(job.getName())) {
 			errors.addError(new FieldError("job", "name", "The name you entered is the name of another job!"));
 		}
+
+        if (getJobService().getJobState(id) == ECycleState.RUNNING){
+            errors.addError(new ObjectError("job", "The job you want to save is currently running. Please wait until the job has finished."));
+        }
 		
 		jobValidation(job, errors);
 
@@ -247,13 +266,11 @@ public class JobController extends AbstractController{
 			return mav;
 		}
 		
-		ModelAndView mav = new ModelAndView();
+		ModelAndView mav = new ModelAndView("redirect:/job/dashboard");
 		Job editedJob = getJobService().editJob(job);
 		int jobId = editedJob.getId();
 
 		handleSchedule(id, job.getCron());
-
-		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
 

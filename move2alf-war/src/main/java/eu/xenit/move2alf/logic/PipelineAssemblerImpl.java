@@ -2,10 +2,7 @@ package eu.xenit.move2alf.logic;
 
 import java.util.*;
 
-import eu.xenit.move2alf.core.action.ActionClassService;
-import eu.xenit.move2alf.core.action.ExecuteCommandAction;
-import eu.xenit.move2alf.core.action.M2AlfEndAction;
-import eu.xenit.move2alf.core.action.StartCycleAction;
+import eu.xenit.move2alf.core.action.*;
 import eu.xenit.move2alf.core.simpleaction.*;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
@@ -47,6 +44,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     public static final String REPORTER = "reporter";
     public static final String END_ACTION = "EndAction";
     public static final String START = "Start";
+    public static final String UPLOADED_FILE_HANDLER = "UploadedFileHandler";
 
     @Autowired
     private ActionClassService actionClassService;
@@ -61,6 +59,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 	@Value(value = "#{'${default.batch.size}'}")
 	private int defaultBatchSize;
+
+    @Value(value="#{'${mail.from}'}")
+    private String mailFrom;
+
+    @Value(value="#{'${url}'}")
+    private String url;
 
 	@Autowired
 	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
@@ -158,13 +162,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 				moveNotLoaded = true;
 				moveNotLoadedPath = action
 						.getParameter(MoveAction.PARAM_PATH);
-			} else if (EMAIL_ID
+			} else if (END_ACTION
 					.equals(action.getActionId())) {
-				sendNotification = action.getParameter("sendNotification");
+				sendNotification = action.getParameter(M2AlfEndAction.PARAM_SENDERROR);
 				emailAddressNotification = action
-						.getParameter("emailAddressNotification");
-				sendReport = action.getParameter("sendReport");
-				emailAddressReport = action.getParameter("emailAddressReport");
+						.getParameter(M2AlfEndAction.PARAM_ERROR_TO);
+				sendReport = action.getParameter(M2AlfEndAction.PARAM_SENDREPORT);
+				emailAddressReport = action.getParameter(M2AlfEndAction.PARAM_REPORT_TO);
 			} else if (FILTER_ID
 					.equals(action.getActionId())) {
 				extension = action.getParameter(SAFilter.PARAM_EXTENSION);
@@ -179,7 +183,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		    } else if (TRANSFORM_ACTION_ID.equals(action.getActionId())) {
                         transform = action.getClassId();
 						transformParameterMap = action.getParameters();
-			}
+            }
 		}
 
 		jobConfig.setInputFolder(inputFolder);
@@ -414,6 +418,34 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
             end = listAction;
 		}
 
+        final ConfiguredAction uploadedFileHandler = new ConfiguredAction();
+        uploadedFileHandler.setClassId(actionClassService.getClassId(UploadedFileHandler.class));
+        uploadedFileHandler.setActionId(UPLOADED_FILE_HANDLER);
+        uploadedFileHandler.addReceiver(REPORTER, reporter);
+        uploadedFileHandler.setNmbOfWorkers(1);
+        end.addReceiver(DEFAULT_RECEIVER, uploadedFileHandler);
+        end = uploadedFileHandler;
+
+        if(jobConfig.getMoveAfterLoad()){
+            final ConfiguredAction moveAfterLoad = new ConfiguredAction();
+            moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveAfterLoad.setActionId(MOVE_AFTER_ID);
+            moveAfterLoad.setNmbOfWorkers(1);
+            moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveAfterLoadText());
+            moveAfterLoad.addReceiver(REPORTER, reporter);
+            uploadedFileHandler.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
+        }
+
+        if(jobConfig.getMoveNotLoad()){
+            final ConfiguredAction moveNotLoaded = new ConfiguredAction();
+            moveNotLoaded.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveNotLoaded.setActionId(MOVE_NOT_LOADED_ID);
+            moveNotLoaded.setNmbOfWorkers(1);
+            moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveNotLoadText());
+            moveNotLoaded.addReceiver(REPORTER, reporter);
+            uploadedFileHandler.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+        }
+
 
         if(!jobConfig.getCommandAfter().isEmpty()){
             ConfiguredAction commandAfter = new ConfiguredAction();
@@ -433,6 +465,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         endAction.setActionId(END_ACTION);
         endAction.setClassId(actionClassService.getClassId(M2AlfEndAction.class));
         endAction.setNmbOfWorkers(1);
+        endAction.setParameter(M2AlfEndAction.PARAM_SENDREPORT, Boolean.toString(jobConfig.getSendReport()));
+        endAction.setParameter(M2AlfEndAction.PARAM_REPORT_TO, jobConfig.getSendReportText());
+        endAction.setParameter(M2AlfEndAction.PARAM_SENDERROR, Boolean.toString(jobConfig.getSendNotification()));
+        endAction.setParameter(M2AlfEndAction.PARAM_ERROR_TO, jobConfig.getSendNotificationText());
+        endAction.setParameter(M2AlfEndAction.PARAM_MAILFROM, mailFrom);
+        endAction.setParameter(M2AlfEndAction.PARAM_URL, url);
         end.addReceiver(DEFAULT_RECEIVER, endAction);
 
 		return start;

@@ -324,4 +324,6 @@ public interface JobService {
     JobConfig getJobConfigForJob(int id);
 
     int openCycleForJob(String jobId);
+
+    void stopJob(int jobId);
 }

@@ -18,9 +18,9 @@ $(function() {
 	});
 });
 
-function deleteJob(id){
-	if(confirm("Are you sure you want to delete this job?")){
-		window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/delete";
+function stopJob(id){
+	if(confirm("Are you sure you want to stop this job?")){
+		window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/stop";
 	}
 }
 </script>
@@ -46,14 +46,13 @@ function deleteJob(id){
 			<th class="header">Status</th>
 			<th></th>
 			<th></th>
-			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
 			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
 			</td>
@@ -75,15 +74,13 @@ function deleteJob(id){
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
 			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
 					<a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a>
-				</#if>		
-			</td>
-			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
-					<img class="clickable" onclick="deleteJob('${jobInfo.jobId}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" />
-				</#if>		
-			</td>
+				</#if>
+                <#if jobInfo.scheduleState=="Running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
+                    <a class="btn btn-danger" onclick="stopJob('${jobInfo.jobId}')">STOP</a>
+                </#if>
+            </td>
 		</tr>
 		</#list>
 	</tbody>

@@ -55,6 +55,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
         return openCycleForJob(getJobIdByName(jobId));
     }
 
+    @Override
+    public void stopJob(int jobId) {
+        jobMap.get(jobId).deleteJob();
+        jobMap.remove(jobId);
+        closeCycle(getLastCycleForJob(getJob(jobId)));
+    }
+
     private int getJobIdByName(String name) {
         final List<Job> jobs = sessionFactory.getCurrentSession()
                 .createQuery("from Job as j where j.name=?")
@@ -669,6 +676,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
     @PreDestroy
     public void preDestroy(){
         logger.debug("Stopping the actorSystem");
+        for(JobHandle handle: jobMap.values()){
+            handle.deleteJob();
+        }
         actorSystem.shutdown();
     }
 

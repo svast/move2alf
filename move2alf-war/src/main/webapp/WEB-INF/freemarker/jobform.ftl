@@ -161,3 +161,13 @@
 
 	<input class="btn btn-success" type="submit" value="Save" />
 	<a class="btn btn-inverse" href="<@spring.url relativeUrl="/job/dashboard" />">Cancel</a>
+    <#if job.name??>
+    <a class="btn btn-danger" onclick="deleteJob('${job.id}')" >Delete Job</a>
+    <script>
+        function deleteJob(id){
+            if(confirm("Are you sure you want to delete this job?")){
+                window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/delete";
+            }
+        }
+    </script>
+    </#if>
