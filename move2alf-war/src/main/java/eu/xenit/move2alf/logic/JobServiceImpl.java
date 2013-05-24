@@ -534,6 +534,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					param.setValue(param.getValue().substring(0, 255));
 				}
 			}
+            logger.debug("Number of params: "+params.size());
 			doc.setProcessedDocumentParameterSet(params);
 			doc.setReference(reference);
 			getSessionFactory().getCurrentSession().save(doc);

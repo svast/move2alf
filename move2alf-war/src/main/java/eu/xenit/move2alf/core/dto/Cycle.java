@@ -14,9 +14,7 @@ public class Cycle extends IdObject {
 	private Date endDateTime;
 	
 	private Job job;
-	
-	private Set<RunningAction> runningActions;
-	
+
 	private Set<ProcessedDocument> processedDocuments;
 	
 	public Cycle() {
@@ -60,14 +58,6 @@ public class Cycle extends IdObject {
 			return ECycleState.RUNNING;
 		}
 		return ECycleState.NOT_RUNNING;
-	}
-
-	public void setRunningActions(Set<RunningAction> runningActions) {
-		this.runningActions = runningActions;
-	}
-
-	public Set<RunningAction> getRunningActions() {
-		return runningActions;
 	}
 
 	public void setProcessedDocuments(Set<ProcessedDocument> processedDocuments) {

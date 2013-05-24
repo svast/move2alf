@@ -81,9 +81,7 @@
 				<value>eu/xenit/move2alf/core/dto/Cycle.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Job.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/ProcessedDocument.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/RunningAction.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Schedule.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/ThreadPool.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/UserPswd.hbm.xml</value>
 			</list>
 		</property>
