@@ -26,7 +26,7 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 @ActionInfo(classId = "SAUpload",
             description = "Uploads files to the configured sourcesink")
-public class SAUpload extends SimpleActionWithSourceSink<FileInfo> implements EOCAware{
+public class SAUpload extends SimpleActionWithSourceSink<Batch>{
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAUpload.class);
@@ -109,10 +109,11 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfo> implements EO
 					.get(Parameters.PARAM_MULTI_VALUE_METADATA);
 
 			final File file = (File) parameterMap.get(Parameters.PARAM_FILE);
+            final String contentUrl = (String) parameterMap.get(Parameters.PARAM_CONTENTURL);
 
 			final Document document = new Document(file, mimeType, remotePath,
 					description, namespace, contentType, metadata,
-					multiValueMetadata);
+					multiValueMetadata, contentUrl);
 			documentsToUpload.add(document);
 			documentFileInfoMapping.put(document, parameterMap);
 		}
@@ -211,61 +212,37 @@ public class SAUpload extends SimpleActionWithSourceSink<FileInfo> implements EO
 		return value;
 	}
 
-    public static final String PARAM_BATCH_SIZE = "batchSize";
-    private int batchSize;
-    public void setBatchSize(String batchSize){
-        this.batchSize = Integer.parseInt(batchSize);
-    }
-
     public static final String PARAM_PATH = "path";
     private String path;
     public void setPath(String path){
         this.path = path;
     }
 
-    Batch batch = new Batch();
-    List<ACL> aclBatch = new ArrayList<ACL>();
-
     @Override
-    public void executeImpl(FileInfo fileInfo) {
+    public void executeImpl(Batch batch) {
         if (usageService.isBlockedByDocumentCounter()) {
             throw new Move2AlfException("Document counter is 0.");
         }
 
-        logger.debug("Queueing file for upload: " + ((File) fileInfo.get(Parameters.PARAM_FILE)).getName());
-        batch.add(fileInfo);
+        List<ACL> aclBatch = new ArrayList<ACL>();
 
-        final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) fileInfo
-                .get(Parameters.PARAM_ACL);
-        if (acl != null) {
-            final String basePath = normalizeBasePath(path);
-            final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
-            for (final String aclPath : acl.keySet()) {
-                normalizedAcl.put(normalizeAclPath(basePath, aclPath),
-                        acl.get(aclPath));
+        for(FileInfo fileInfo: batch){
+            final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) fileInfo
+                    .get(Parameters.PARAM_ACL);
+            if (acl != null) {
+                final String basePath = normalizeBasePath(path);
+                final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
+                for (final String aclPath : acl.keySet()) {
+                    normalizedAcl.put(normalizeAclPath(basePath, aclPath),
+                            acl.get(aclPath));
+                }
+                final boolean inheritPermissions = getInheritPermissionsFromParameterMap(fileInfo);
+                aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
             }
-            final boolean inheritPermissions = getInheritPermissionsFromParameterMap(fileInfo);
-            aclBatch.add(new ACL(normalizedAcl, inheritPermissions));
         }
 
-        if(batch.size() == batchSize){
-            logger.debug("Batch size reached, uploading " + batchSize + " files");
-            uploadBatch();
-        }
-    }
-
-    private void uploadBatch() {
-        List<FileInfo> output = uploadAndSetACLs(batch, aclBatch);
-        for(FileInfo fileInfo: output){
+        for(FileInfo fileInfo: uploadAndSetACLs(batch, aclBatch)){
             sendMessage(fileInfo);
         }
-        batch.clear();
-        aclBatch.clear();
-    }
-
-    @Override
-    public void beforeSendEOC() {
-        logger.debug("EOC triggered upload.");
-        uploadBatch();
     }
 }

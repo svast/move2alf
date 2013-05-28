@@ -10,6 +10,11 @@ package eu.xenit.move2alf.pipeline.actions.context
  */
 trait SendingContext{
 
+
+  /**
+   * Send a message to the default receiver
+   * @param message
+   */
   def sendMessage(message: AnyRef)
 
   def sendMessage(message: AnyRef, receiver: String)

@@ -58,4 +58,13 @@ public class ActionConfig {
         return receivers;
     }
 
+    public String getDispatcher() {
+        return dispatcher;
+    }
+
+    private String dispatcher = null;
+    public void setDispatcher(String dispatcher){
+        this.dispatcher = dispatcher;
+    }
+
 }

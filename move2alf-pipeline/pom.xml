@@ -99,13 +99,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>atmos</id>
-            <name>Atmos Repo</name>
-            <url>http://repo.typesafe.com/typesafe/atmos-releases/</url>
-        </repository>
-    </repositories>
 	<build>
         <plugins>
             <plugin>

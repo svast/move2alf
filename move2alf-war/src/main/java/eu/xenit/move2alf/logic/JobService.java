@@ -314,9 +314,6 @@ public interface JobService {
     void closeCycle(Cycle cycle);
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void closeCycle(int cycle);
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     int openCycleForJob(Integer jobId);
 
     void startJob(Integer jobId);

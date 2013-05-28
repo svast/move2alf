@@ -11,6 +11,7 @@
 		<property name="classId" column="classId"/>
         <property name="actionId" column="actionId"/>
         <property name="nmbOfWorkers" column="nmbOfWorkers"/>
+        <property name="dispatcher" column="dispatcher" />
 
     	<map name="parameters" table="configuredActionParameter" cascade="all-delete-orphan" lazy="false">
     		<key column="configuredActionId"/>

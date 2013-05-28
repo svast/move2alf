@@ -18,7 +18,7 @@ public class StartCycleAction extends Move2AlfStartAction {
     @Override
     public void onStartImpl() {
         int cycleId = jobService.openCycleForJob(stateContext.getJobId());
-        setState(PARAM_CYCLE, cycleId);
+        setState(PARAM_CYCLE, jobService.getCycle(cycleId));
     }
 
 }

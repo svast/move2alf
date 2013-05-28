@@ -3,6 +3,7 @@ package eu.xenit.move2alf.logic;
 import java.util.*;
 
 import eu.xenit.move2alf.core.action.*;
+import eu.xenit.move2alf.core.action.metadata.SetAlfrescoContentUrlAction;
 import eu.xenit.move2alf.core.simpleaction.*;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
@@ -45,6 +46,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     public static final String END_ACTION = "EndAction";
     public static final String START = "Start";
     public static final String UPLOADED_FILE_HANDLER = "UploadedFileHandler";
+    public static final String PUT_CONTENT = "PutContent";
+    public static final String BATCH_ACTION = "BatchAction";
+    public static final String REPORT_SAVER = "reportSaver";
+    public static final String PINNED_DISPATCHER = "pinned-dispatcher";
 
     @Autowired
     private ActionClassService actionClassService;
@@ -267,16 +272,25 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         for(Map.Entry<String, String> entry: configuredAction.getParameters().entrySet()){
             actionConfig.setParameter(entry.getKey(), entry.getValue());
         }
+        actionConfig.setDispatcher(configuredAction.getDispatcher());
         return actionConfig;
     }
 
     @Override
 	public ConfiguredAction getConfiguredAction(final JobConfig jobConfig) {
 
+        ConfiguredAction reportSaver = new ConfiguredAction();
+        reportSaver.setActionId(REPORT_SAVER);
+        reportSaver.setNmbOfWorkers(4);
+        reportSaver.setClassId(actionClassService.getClassId(SAReport.class));
+        reportSaver.setDispatcher(PINNED_DISPATCHER);
+
         ConfiguredAction reporter = new ConfiguredAction();
         reporter.setActionId(REPORTER);
         reporter.setNmbOfWorkers(1);
-        reporter.setClassId(actionClassService.getClassId(SAReport.class));
+        reporter.setClassId(actionClassService.getClassId(BatchReportsAction.class));
+        reporter.setParameter(BatchReportsAction.PARAM_BATCHSIZE, Integer.toString(50));
+        reporter.addReceiver(DEFAULT_RECEIVER, reportSaver);
 
         ConfiguredAction start = new ConfiguredAction();
         start.setActionId(START);
@@ -362,24 +376,39 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 
 		if (Mode.WRITE == jobConfig.getMode()) {
+            final ConfiguredAction putContentAction = new ConfiguredAction();
+            putContentAction.setActionId(PUT_CONTENT);
+            putContentAction.setClassId(actionClassService.getClassId(SetAlfrescoContentUrlAction.class));
+            putContentAction.setNmbOfWorkers(2);
+            putContentAction.addReceiver(REPORTER, reporter);
+            putContentAction.setParameter(SetAlfrescoContentUrlAction.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+            putContentAction.setDispatcher(PINNED_DISPATCHER);
+            end.addReceiver(DEFAULT_RECEIVER, putContentAction);
+            end = putContentAction;
+
+            final ConfiguredAction batchAction = new ConfiguredAction();
+            batchAction.setActionId(BATCH_ACTION);
+            batchAction.setClassId(actionClassService.getClassId(BatchAction.class));
+            batchAction.setNmbOfWorkers(1);
+            batchAction.addReceiver(REPORTER, reporter);
+            batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(defaultBatchSize));
+            end.addReceiver(DEFAULT_RECEIVER, batchAction);
+            end = batchAction;
+
             final ConfiguredAction uploadAction = new ConfiguredAction();
             uploadAction.setActionId(UPLOAD_ID);
             uploadAction.setClassId(actionClassService.getClassId(SAUpload.class));
-            uploadAction.setNmbOfWorkers(1);
+            uploadAction.setNmbOfWorkers(2);
             uploadAction.addReceiver(REPORTER, reporter);
             uploadAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
 			uploadAction.setParameter(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
             uploadAction.setParameter(SAUpload.PARAM_WRITEOPTION, jobConfig.getWriteOption().toString());
-            uploadAction.setParameter(SAUpload.PARAM_BATCH_SIZE, String.valueOf(defaultBatchSize));
+            uploadAction.setDispatcher(PINNED_DISPATCHER);
 			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
 		}
 
 		if (Mode.DELETE  == jobConfig.getMode()) {
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassId());
             final ConfiguredAction deleteAction = new ConfiguredAction();
             deleteAction.setActionId(DELETE_ID);
             deleteAction.setClassId(actionClassService.getClassId(SADelete.class));
@@ -388,15 +417,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
             deleteAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
             deleteAction.setParameter(SADelete.PARAM_PATH, jobConfig.getDestinationFolder());
             deleteAction.setParameter(SADelete.PARAM_DELETEOPTION, jobConfig.getDeleteOption().toString());
+            deleteAction.setDispatcher(PINNED_DISPATCHER);
             end.addReceiver(DEFAULT_RECEIVER, deleteAction);
             end = deleteAction;
 		}
-		if (Mode.LIST == jobConfig.getMode()) {
-			
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassId());
+		if (Mode.LIST == jobConfig.getMode()){
 
             ConfiguredAction listAction;
 			
@@ -414,6 +439,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
             listAction.setParameter(SAList.PARAM_PATH, jobConfig.getDestinationFolder());
             listAction.addReceiver(REPORTER, reporter);
 			listAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+            listAction.setDispatcher(PINNED_DISPATCHER);
             end.addReceiver(DEFAULT_RECEIVER, listAction);
             end = listAction;
 		}
@@ -459,7 +485,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
         }
 
         end.addReceiver(DEFAULT_RECEIVER, reporter);
-        end = reporter;
+        end = reportSaver;
 
         ConfiguredAction endAction = new ConfiguredAction();
         endAction.setActionId(END_ACTION);

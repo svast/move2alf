@@ -41,6 +41,7 @@ public class CMLDocument {
 		this.session = session;
 		this.doc = doc;
 		this.id = id;
+        this.contentDetails = doc.contentUrl;
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {

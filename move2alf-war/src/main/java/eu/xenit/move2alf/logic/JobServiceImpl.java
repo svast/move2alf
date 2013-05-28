@@ -1,17 +1,19 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import akka.actor.ActorSystem;
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.dto.*;
+import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.core.enums.EDestinationParameter;
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.core.sourcesink.SourceSink;
+import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.JobHandle;
-import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.JobInfo;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -24,25 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.Cycle;
-import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobInfo;
-
 import javax.annotation.PreDestroy;
+import java.util.*;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
@@ -83,7 +68,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private MailSender mailSender;
 
-    private ActorSystem actorSystem = ActorSystem.create("Move2Alf");
+    private ActorSystem actorSystem;
 
     private Map<Integer, JobHandle> jobMap = new HashMap<Integer, JobHandle>();
 
@@ -124,7 +109,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	public JobServiceImpl() {
-	}
+        actorSystem = ActorSystem.create("Move2Alf");
+    }
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -630,11 +616,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
         cycle.setEndDateTime(new Date());
         session.update(cycle);
-    }
-
-    @Override
-    public void closeCycle(int cycle) {
-        closeCycle(getCycle(cycle));
     }
 
     @Override

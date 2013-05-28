@@ -49,4 +49,6 @@ public abstract class SourceSink extends ConfigurableObject {
 	public abstract void clearCaches(ConfiguredSourceSink sinkConfig);
 
 	public abstract boolean fileNameExists(ConfiguredSourceSink sinkConfig, String name);
+
+    public abstract String putContent(ConfiguredSourceSink sinkConfig, File file, String mimeType);
 }

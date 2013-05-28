@@ -57,7 +57,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
             new BasicActionContextFactory(config.getId, config.getClazz, config.getParameters.toMap, receiversToMap)
           }
         }
-        val factory = new ActionActorFactory(config.getId, actionContextFactory, if(nmbSenders==0) 1 else nmbSenders, config.getNmbOfWorkers)
+        val factory = new ActionActorFactory(config.getId, actionContextFactory, if(nmbSenders==0) 1 else nmbSenders, config.getNmbOfWorkers, config.getDispatcher)
         actorRefs.put(config.getId, factory.createActor)
       }
     }

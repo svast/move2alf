@@ -12,19 +12,31 @@ public class Document {
 	public final String contentModelType;
 	public final Map<String, String> meta;
 	public final Map<String, String> multiValueMeta;
+    public final String contentUrl;
 
 	public Document(final File file, final String mimeType,
 			final String spacePath, final String description,
 			final String contentModelNamespace, final String contentModelType,
 			final Map<String, String> meta,
 			final Map<String, String> multiValueMeta) {
-		this.file = file;
-		this.mimeType = mimeType;
-		this.spacePath = spacePath;
-		this.description = description;
-		this.contentModelNamespace = contentModelNamespace;
-		this.contentModelType = contentModelType;
-		this.meta = meta;
-		this.multiValueMeta = multiValueMeta;
+		this(file, mimeType, spacePath, description, contentModelNamespace, contentModelType, meta, multiValueMeta, null);
 	}
+
+    public Document(final File file, final String mimeType,
+                    final String spacePath, final String description,
+                    final String contentModelNamespace, final String contentModelType,
+                    final Map<String, String> meta,
+                    final Map<String, String> multiValueMeta, final String contentUrl) {
+        this.file = file;
+        this.mimeType = mimeType;
+        this.spacePath = spacePath;
+        this.description = description;
+        this.contentModelNamespace = contentModelNamespace;
+        this.contentModelType = contentModelType;
+        this.meta = meta;
+        this.multiValueMeta = multiValueMeta;
+        this.contentUrl = contentUrl;
+    }
+
+
 }

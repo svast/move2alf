@@ -28,6 +28,12 @@ public class Parameters {
 	 */
 	public static final String PARAM_METADATA = "metadata";
 
+    /**
+     * ContentUrl of a document. Abstraction is made to be able to put a file
+     * in Castor and the document in Alfresco.
+     */
+    public static final String PARAM_CONTENTURL = "contentUrl";
+
 	/**
 	 * Map with metadata of file. The key is the property name without
 	 * namespace, PARAM_NAMESPACE is used as namespace for all properties.

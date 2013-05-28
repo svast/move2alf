@@ -15,11 +15,17 @@ import akka.routing.SmallestMailboxRouter
  * Time: 2:25 PM
  * To change this template use File | Settings | File Templates.
  */
-class ActionActorFactory(val id: String, val actionContextFactory: AbstractActionContextFactory,val nmbOfSenders: Int, val nmbActors: Int)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActorFactory with LogHelper{
+class ActionActorFactory(val id: String, val actionContextFactory: AbstractActionContextFactory,val nmbOfSenders: Int, val nmbActors: Int, val dispatcher: String)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActorFactory with LogHelper{
 
   def createActor: ActorRef = {
     logger.debug("number of routees: "+nmbActors)
-    return context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
+    if(dispatcher != null) {
+      logger.debug("Constructing actor with dispatcher: "+dispatcher)
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
+    } else {
+      logger.debug("Contructing actor with default dispatcher")
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
+    }
   }
 
 }

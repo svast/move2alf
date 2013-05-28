@@ -195,4 +195,5 @@ public interface RepositoryAccessSession {
 			boolean optimistic, boolean acceptDuplicates)
 			throws RepositoryAccessException, RepositoryException;
 
+    String putContent(File file, String mimeType);
 }

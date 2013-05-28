@@ -114,6 +114,11 @@ public class AlfrescoSourceSink extends SourceSink {
 		}
 	}
 
+    @Override
+    public String putContent(ConfiguredSourceSink sinkConfig, File file, String mimeType){
+        return createRepositoryAccessSession(sinkConfig).putContent(file, mimeType);
+    }
+
 	@Override
 	public List<UploadResult> sendBatch(final ConfiguredSourceSink configuredSourceSink,
 			final WriteOption docExistsMode, final List<Document> documents) {

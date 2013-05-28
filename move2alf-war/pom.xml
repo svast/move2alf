@@ -46,6 +46,12 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
+
+        <repository>
+            <id>atmos</id>
+            <name>Atmos Repo</name>
+            <url>http://repo.typesafe.com/typesafe/atmos-releases/</url>
+        </repository>
 	</repositories>
     <dependencies>
         <dependency>
@@ -326,11 +332,7 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.4</version>
 		</dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.10</artifactId>
-            <version>2.1.2</version>
-        </dependency>
+
 		<dependency>
 			<groupId>com.sun.media</groupId>
 			<artifactId>jai_imageio</artifactId>
@@ -374,6 +376,20 @@
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
 		</dependency>
+<!--
+        <dependency>
+            <groupId>com.typesafe.atmos</groupId>
+            <artifactId>trace-akka-2.1.2</artifactId>
+            <version>1.2.0-M4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.typesafe.atmos</groupId>
+            <artifactId>atmos-collect-mongo</artifactId>
+            <version>1.2.0-M4</version>
+        </dependency>
+
+        -->
 	</dependencies>
 	<build>
 		<finalName>move2alf</finalName>

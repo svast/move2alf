@@ -132,4 +132,9 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		return null;
 	}
 
+    @Override
+    public String putContent(File file, String mimeType) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
 }

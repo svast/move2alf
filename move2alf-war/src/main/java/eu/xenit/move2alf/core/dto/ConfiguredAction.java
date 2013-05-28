@@ -11,6 +11,15 @@ public class ConfiguredAction extends ConfiguredObject {
     private Map<String, ConfiguredAction> receivers;
     private int nmbOfWorkers;
     private String actionId;
+    private String dispatcher;
+
+    public String getDispatcher() {
+        return dispatcher;
+    }
+
+    public void setDispatcher(String dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 
     public String getActionId() {
         return actionId;

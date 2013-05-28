@@ -64,10 +64,10 @@ public class M2AlfEndAction extends AbstractStateAction implements EOCAware {
     @Override
     public void beforeSendEOC() {
         try {
-            jobService.closeCycle((Integer) getStateValue(StartCycleAction.PARAM_CYCLE));
+            jobService.closeCycle((Cycle) getStateValue(StartCycleAction.PARAM_CYCLE));
 
             if(sendReport || sendError){
-                Cycle cycle = jobService.getCycle((Integer) getStateValue(StartCycleAction.PARAM_CYCLE));
+                Cycle cycle = (Cycle) getStateValue(StartCycleAction.PARAM_CYCLE);
                 int cycleId = cycle.getId();
 
                 // only send report on errors

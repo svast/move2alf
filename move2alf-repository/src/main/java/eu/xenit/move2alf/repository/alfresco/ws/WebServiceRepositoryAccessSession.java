@@ -1040,7 +1040,8 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		}
 	}
 
-	protected String putContent(File file, String mimeType) {
+    @Override
+	public String putContent(File file, String mimeType) {
 		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
 				mimeType, "UTF-8");
 		logger.debug("File put in repository, details: {}", contentDetails);
