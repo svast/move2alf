@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import eu.xenit.move2alf.core.sourcesink.InputSource;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
@@ -37,6 +38,11 @@ public class JobConfig {
 	@Size(min=0, max=jobDescriptionMaxLength, message="Max length of description is " + jobDescriptionMaxLength)
 	@NotEmpty(message="Please enter a description for the job.")
 	private String description;
+
+	@NotEmpty(message="inputSoure is null")
+	private InputSource inputSource;
+
+	private String cmisURL;
 
 	@NotEmpty(message="There should be at least one inputfolder!")
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
@@ -145,6 +151,22 @@ public class JobConfig {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public InputSource getInputSource() {
+		return inputSource;
+	}
+
+	public void setInputSource(final InputSource inputSource) {
+		this.inputSource = inputSource;
+	}
+
+	public String getCmisURL() {
+		return cmisURL;
+	}
+
+	public void setCmisURL(final String cmisURL) {
+		this.cmisURL = cmisURL;
 	}
 
 	public void setInputFolder(List<String> inputFolders) {
