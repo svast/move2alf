@@ -1,30 +1,21 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.*;
 
+import eu.xenit.move2alf.core.action.*;
+import eu.xenit.move2alf.core.action.metadata.SetAlfrescoContentUrlAction;
 import eu.xenit.move2alf.core.simpleaction.*;
+import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.action.Action;
-import eu.xenit.move2alf.core.action.ActionFactory;
-import eu.xenit.move2alf.core.action.MoveDocumentsAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
-import eu.xenit.move2alf.core.simpleaction.execution.ActionExecutor;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWrapper;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
@@ -35,26 +26,50 @@ import eu.xenit.move2alf.web.dto.JobConfig;
 @Service("pipelineAssembler")
 public class PipelineAssemblerImpl extends PipelineAssembler {
 
-	@Autowired
+    public static final String SOURCE_ID= "Source";
+    public static final String MOVE_BEFORE_ID = "MoveBefore";
+    public static final String MOVE_AFTER_ID = "MoveAfter";
+    public static final String MOVE_NOT_LOADED_ID = "MoveNotLoaded";
+    public static final String FILTER_ID = "Filter";
+    public static final String METADATA_ACTION_ID = "MetadataAction";
+    public static final String TRANSFORM_ACTION_ID = "TransformAction";
+    public static final String MIME_TYPE_ID = "MimeType";
+    public static final String UPLOAD_ID = "Upload";
+    public static final String DELETE_ID = "Delete";
+    public static final String EXISTENCE_CHECK_ID = "ExistenceCheck";
+    public static final String LIST_ID = "List";
+    public static final String EMAIL_ID = "Email";
+    public static final String COMMAND_BEFORE_ID = "CommandBefore";
+    public static final String COMMAND_AFTER_ID = "CommandAfter";
+    public static final String DEFAULT_RECEIVER = "default";
+    public static final String REPORTER = "reporter";
+    public static final String END_ACTION = "EndAction";
+    public static final String START = "Start";
+    public static final String UPLOADED_FILE_HANDLER = "UploadedFileHandler";
+    public static final String PUT_CONTENT = "PutContent";
+    public static final String BATCH_ACTION = "BatchAction";
+    public static final String REPORT_SAVER = "reportSaver";
+    public static final String PINNED_DISPATCHER = "pinned-dispatcher";
+
+    @Autowired
+    private ActionClassService actionClassService;
+
+    @Autowired
 	private UsageService usageService;
-	
-	private ActionFactory actionFactory;
+
 	private SourceSinkFactory sourceSinkFactory;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PipelineAssemblerImpl.class);
 
 	@Value(value = "#{'${default.batch.size}'}")
-	private String defaultBatchSize;
+	private int defaultBatchSize;
 
-	@Autowired
-	public void setActionFactory(final ActionFactory actionFactory) {
-		this.actionFactory = actionFactory;
-	}
+    @Value(value="#{'${mail.from}'}")
+    private String mailFrom;
 
-	public ActionFactory getActionFactory() {
-		return actionFactory;
-	}
+    @Value(value="#{'${url}'}")
+    private String url;
 
 	@Autowired
 	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
@@ -65,213 +80,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		return sourceSinkFactory;
 	}
 
-	@Override
-	public void assemblePipeline(final JobConfig jobConfig) {
-		final List<ActionBuilder> actions = new ArrayList<ActionBuilder>();
 
-		final Map<String, String> metadataParameterMap = metadataParameters(jobConfig);
-		final Map<String, String> transformParameterMap = transformParameters(jobConfig);
-
-		final List<String> inputPathList = jobConfig.getInputFolder();
-		String inputPaths = "";
-		if (inputPathList != null) {
-			for (int i = 0; i < inputPathList.size(); i++) {
-				if (i == 0) {
-					inputPaths = inputPathList.get(i);
-				} else {
-					inputPaths = inputPaths + "|" + inputPathList.get(i);
-				}
-			}
-		}
-		logger.debug("Move before not load: "
-				+ jobConfig.getMoveBeforeProc().toString());
-		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
-				.param("command", jobConfig.getCommand())
-				.param("path", inputPaths)
-				.param("stage", "before")
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getMoveBeforeProcText()));
-
-		actions.add(action("eu.xenit.move2alf.core.action.SourceAction")
-				.param("path", inputPaths)
-				.param("recursive", "true")
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-						jobConfig.getMoveNotLoad().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-						jobConfig.getMoveNotLoadText())
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc().toString())
-				// true
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getMoveBeforeProcText())
-				.sourceSink(
-						sourceSink("eu.xenit.move2alf.core.sourcesink.FileSourceSink")));
-
-		actions.add(action("eu.xenit.move2alf.core.action.FilterAction").param(
-				"extension", jobConfig.getExtension()));
-
-		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc().toString())
-				// true
-				// or
-				// false
-				// (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getMoveBeforeProcText())
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD, "false")
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH, "")
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED, "false")
-				// true
-				// or
-				// false
-				// (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH, "")
-				.param("path", inputPaths).param("stage", "before"));
-
-		actions.add(action(jobConfig.getMetadata()).paramMap(
-				metadataParameterMap));
-
-		if (!"notransformation".equals(jobConfig.getTransform())) {
-
-			actions.add(action(jobConfig.getTransform()).paramMap(
-					transformParameterMap));
-		}
-
-		actions.add(action("eu.xenit.move2alf.core.action.EmailAction")
-				.param("sendNotification",
-						jobConfig.getSendNotification().toString())
-				// true or
-				// false
-				// (String)
-				.param("emailAddressNotification",
-						jobConfig.getSendNotificationText())
-				.param("sendReport", jobConfig.getSendReport().toString()) // true
-																			// or
-																			// false
-																			// (String)
-				.param("emailAddressReport", jobConfig.getSendReportText()));
-
-		if (Mode.WRITE == jobConfig.getMode()) {
-			actions.add(action("eu.xenit.move2alf.core.action.SinkAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("writeOption", jobConfig.getWriteOption().toString())
-					// TODO: add param: ignore / error / overwrite / version
-					.sourceSink(sourceSinkById(jobConfig.getDest())));
-		}
-
-		if (Mode.DELETE == jobConfig.getMode()) {
-			actions.add(action("eu.xenit.move2alf.core.action.DeleteAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("deleteOption", jobConfig.getDeleteOption().toString())
-					.sourceSink(sourceSinkById(jobConfig.getDest())));
-		}
-
-		if (Mode.LIST == jobConfig.getMode()) {
-			actions.add(action("eu.xenit.move2alf.core.action.ListAction")
-					.param("path", jobConfig.getDestinationFolder())
-					.param("ignorePath", Boolean.toString(jobConfig.getListIgnorePath()))
-					.sourceSink(sourceSinkById(jobConfig.getDest())));
-		}
-
-		actions.add(action("eu.xenit.move2alf.core.action.MoveDocumentsAction")
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getMoveBeforeProcText())
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
-						jobConfig.getMoveAfterLoad().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH,
-						jobConfig.getMoveAfterLoadText())
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-						jobConfig.getMoveNotLoad().toString())
-				// true or
-				// false
-				// (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-						jobConfig.getMoveNotLoadText())
-				.param("path", inputPaths).param("stage", "after"));
-
-		actions.add(action("eu.xenit.move2alf.core.action.ExecuteCommandAction")
-				.param("command", jobConfig.getCommandAfter())
-				.param("path", inputPaths)
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING,
-						jobConfig.getMoveBeforeProc().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-						jobConfig.getMoveBeforeProcText())
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD,
-						jobConfig.getMoveAfterLoad().toString())
-				// true or false (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH,
-						jobConfig.getMoveAfterLoadText())
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED,
-						jobConfig.getMoveNotLoad().toString()) // true or
-				// false
-				// (String)
-				.param(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH,
-						jobConfig.getMoveNotLoadText()).param("stage", "after"));
-
-		final ActionBuilder[] actionsArray = actions
-				.toArray(new ActionBuilder[7]);
-
-		assemble(jobConfig, actionsArray);
-	}
-
-	private ActionConfig transformParameters(final JobConfig jobConfig) {
-		final List<String> transformParameterList = jobConfig
-				.getParamTransform();
-		final ActionConfig transformParameterMap = new ActionConfig();
-
-		if (transformParameterList != null) {
-			String[] transformParameter = new String[2];
-			for (int i = 0; i < transformParameterList.size(); i++) {
-				transformParameter = transformParameterList.get(i).split("\\|");
-				if (transformParameter.length == 1) {
-					final String param = transformParameter[0];
-					transformParameter = new String[2];
-					transformParameter[0] = param;
-					transformParameter[1] = "";
-				}
-				logger.debug("transform parameter name: "
-						+ transformParameter[0] + " and value: "
-						+ transformParameter[1]);
-				transformParameterMap.put(transformParameter[0],
-						transformParameter[1]);
-			}
-		}
-		return transformParameterMap;
-	}
-
-	private ActionConfig metadataParameters(final JobConfig jobConfig) {
-		final List<String> metadataParameterList = jobConfig.getParamMetadata();
-		final ActionConfig metadataParameterMap = new ActionConfig();
-
-		if (metadataParameterList != null) {
-			String[] metadataParameter = new String[2];
-			for (int i = 0; i < metadataParameterList.size(); i++) {
-				metadataParameter = metadataParameterList.get(i).split("\\|");
-				if (metadataParameter.length == 1) {
-					final String param = metadataParameter[0];
-					metadataParameter = new String[2];
-					metadataParameter[0] = param;
-					metadataParameter[1] = "";
-				}
-				logger.debug("metadata parameter name: " + metadataParameter[0]
-						+ " and value: " + metadataParameter[1]);
-				metadataParameterMap.put(metadataParameter[0],
-						metadataParameter[1]);
-			}
-		}
-		return metadataParameterMap;
-	}
+    private Map<String, ConfiguredAction> getAllConfiguredActions(ConfiguredAction action, Map<String, ConfiguredAction> configuredActionMap){
+        configuredActionMap.put(action.getActionId(), action);
+        for(ConfiguredAction receiver: action.getReceivers().values()){
+            getAllConfiguredActions(receiver, configuredActionMap);
+        }
+        return configuredActionMap;
+    }
 
 	@Override
 	public JobConfig getJobConfigForJob(final int id) {
@@ -280,9 +96,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setId(id);
 		jobConfig.setName(job.getName());
 		jobConfig.setDescription(job.getDescription());
-		ConfiguredAction action = job.getFirstConfiguredAction();
+		ConfiguredAction startAction = job.getFirstConfiguredAction();
+
+        Map<String, ConfiguredAction> configuredActionMap = getAllConfiguredActions(startAction, new HashMap<String, ConfiguredAction>());
+
 		List<String> inputFolder = new ArrayList();
-		String inputPath = "";
 		String destinationFolder = "";
 		int dest = 0;
 		String writeOption = null;
@@ -292,109 +110,86 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
 		String metadata = "";
 		String transform = "";
-		String moveBeforeProcessing = "";
+		boolean moveBeforeProcessing = false;
 		String moveBeforeProcessingPath = "";
-		String moveAfterLoad = "";
+		boolean moveAfterLoad = false;
 		String moveAfterLoadPath = "";
-		String moveNotLoaded = "";
+		boolean moveNotLoaded = false;
 		String moveNotLoadedPath = "";
 		String sendNotification = "";
 		String emailAddressNotification = "";
 		String sendReport = "";
 		String emailAddressReport = "";
-		String extension = "";
-		String command = "";
+		String extension = "*";
+		String commandBefore = "";
 		String commandAfter = "";
 		Map<String, String> metadataParameterMap = new HashMap<String, String>();
 		Map<String, String> transformParameterMap = new HashMap<String, String>();
 
-		while (action != null) {
-			if ("eu.xenit.move2alf.core.action.SourceAction".equals(action
-					.getClassName())) {
-
-				inputPath = action.getParameter("path");
-			} else if ("eu.xenit.move2alf.core.action.SinkAction".equals(action
-					.getClassName())) {
-				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getId();
-				writeOption = action.getParameter("writeOption");
+		for(ConfiguredAction action: configuredActionMap.values()) {
+			if (SOURCE_ID.equals(action
+                    .getActionId())) {
+                String path = action.getParameter(SASource.PARAM_INPUTPATHS);
+                inputFolder = Arrays.asList(path.split("\\|"));
+			} else if (UPLOAD_ID.equals(action
+                    .getActionId())) {
+				destinationFolder = action.getParameter(SAUpload.PARAM_PATH);
+				dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
+				writeOption = action.getParameter(SAUpload.PARAM_WRITEOPTION);
 				mode = Mode.WRITE;
-			} else if ("eu.xenit.move2alf.core.action.DeleteAction"
-					.equals(action.getClassName())) {
-				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getId();
-				deleteOption = action.getParameter("deleteOption");
+			} else if (DELETE_ID
+					.equals(action.getActionId())) {
+				destinationFolder = action.getParameter(SADelete.PARAM_PATH);
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
+				deleteOption = action.getParameter(SADelete.PARAM_DELETEOPTION);
 				mode = Mode.DELETE;
-			} else if ("eu.xenit.move2alf.core.action.ListAction".equals(action
-					.getClassName())) {
-				destinationFolder = action.getParameter("path");
-				dest = action.getConfiguredSourceSinkSet().iterator().next()
-						.getId();
-				String bla = action.getParameter("ignorePath");
-				ignorePath = Boolean.valueOf(action.getParameter("ignorePath"));
+			} else if (LIST_ID.equals(action
+                    .getActionId())) {
+				destinationFolder = action.getParameter(SAList.PARAM_PATH);
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
+				ignorePath = false;
 				mode = Mode.LIST;
-			} else if ("eu.xenit.move2alf.core.action.MoveDocumentsAction"
-					.equals(action.getClassName())) {
-				moveBeforeProcessing = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING);
+			} else if (EXISTENCE_CHECK_ID.equals(action.getActionId())){
+                ignorePath = true;
+                mode = Mode.LIST;
+                dest = Integer.parseInt(action.getParameter(SimpleActionWithSourceSink.PARAM_DESTINATION));
+                destinationFolder = action.getParameter(SAList.PARAM_PATH);
+            } else if (MOVE_BEFORE_ID
+					.equals(action.getActionId())) {
+				moveBeforeProcessing = true;
 				moveBeforeProcessingPath = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
-				moveAfterLoad = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD);
+						.getParameter(MoveAction.PARAM_PATH);
+            } else if (MOVE_AFTER_ID.equals(action.getActionId())) {
+				moveAfterLoad = true;
 				moveAfterLoadPath = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH);
-				moveNotLoaded = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED);
+						.getParameter(MoveAction.PARAM_PATH);
+            } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId())) {
+				moveNotLoaded = true;
 				moveNotLoadedPath = action
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
-			} else if ("eu.xenit.move2alf.core.action.EmailAction"
-					.equals(action.getClassName())) {
-				sendNotification = action.getParameter("sendNotification");
+						.getParameter(MoveAction.PARAM_PATH);
+			} else if (END_ACTION
+					.equals(action.getActionId())) {
+				sendNotification = action.getParameter(M2AlfEndAction.PARAM_SENDERROR);
 				emailAddressNotification = action
-						.getParameter("emailAddressNotification");
-				sendReport = action.getParameter("sendReport");
-				emailAddressReport = action.getParameter("emailAddressReport");
-			} else if ("eu.xenit.move2alf.core.action.FilterAction"
-					.equals(action.getClassName())) {
-				extension = action.getParameter("extension");
-			} else if ("eu.xenit.move2alf.core.action.ExecuteCommandAction"
-					.equals(action.getClassName())) {
-				if ("before".equals(action.getParameter("stage"))) {
-					command = action.getParameter("command");
-				} else {
-					commandAfter = action.getParameter("command");
-				}
-			} else {
-				Action configurableAction = null;
-				try {
-					configurableAction = getActionFactory().getObject(
-							action.getClassName());
-					if (configurableAction.getCategory() == ConfigurableObject.CAT_METADATA) {
-						metadata = action.getClassName();
-
+						.getParameter(M2AlfEndAction.PARAM_ERROR_TO);
+				sendReport = action.getParameter(M2AlfEndAction.PARAM_SENDREPORT);
+				emailAddressReport = action.getParameter(M2AlfEndAction.PARAM_REPORT_TO);
+			} else if (FILTER_ID
+					.equals(action.getActionId())) {
+				extension = action.getParameter(SAFilter.PARAM_EXTENSION);
+			} else if (COMMAND_BEFORE_ID
+					.equals(action.getActionId())) {
+					commandBefore = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+            } else if (COMMAND_AFTER_ID.equals(action.getActionId())) {
+                commandAfter = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+			} else if (METADATA_ACTION_ID.equals(action.getActionId())) {
+                        metadata = action.getClassId();
 						metadataParameterMap = action.getParameters();
-					} else if (configurableAction.getCategory() == ConfigurableObject.CAT_TRANSFORM) {
-
-						transform = action.getClassName();
+		    } else if (TRANSFORM_ACTION_ID.equals(action.getActionId())) {
+                        transform = action.getClassId();
 						transformParameterMap = action.getParameters();
-					}
-				} catch (final IllegalArgumentException e) {
-					logger.error("Action class not found: "
-							+ action.getClassName());
-				}
-			}
-
-			action = action.getAppliedConfiguredActionOnSuccess();
+            }
 		}
-
-		if (inputPath == null) {
-			inputPath = "";
-		}
-		final String[] inputPathArray = inputPath.split("\\|");
-
-		inputFolder = Arrays.asList(inputPathArray);
 
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setDestinationFolder(destinationFolder);
@@ -420,7 +215,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setSendReport(sendReport);
 		jobConfig.setSendReportText(emailAddressReport);
 		jobConfig.setExtension(extension);
-		jobConfig.setCommand(command);
+		jobConfig.setCommand(commandBefore);
 		jobConfig.setCommandAfter(commandAfter);
 		jobConfig.setCron(getJobService().getCronjobsForJob(id));
 
@@ -456,127 +251,271 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		return jobConfig;
 	}
 
-	@Override
-	public List<PipelineStep> getPipeline(final JobConfig jobConfig) {
-		final SuccessHandler successHandler = new SuccessHandler(
-				getJobService());
-		final ErrorHandler errorHandler = new DefaultErrorHandler(
-				getJobService());
 
-		final List<PipelineStep> pipeline = new ArrayList<PipelineStep>();
-		//pipeline.add(new PipelineStep(new SASource(), null, null, errorHandler));
-		pipeline.add(new PipelineStep(new SACamelInput() {
-			@Override
-			public String getEndpoint() {
-				return "cmis://http://192.168.123.2:8080/alfresco/cmisatom?username=admin&password=admin&readContent=true";
-			}
-		}, null, null, errorHandler));
+    @Override
+    public ActionConfig getActionConfig(ConfiguredAction configuredAction){
+        return configuredActionToActionConfig(configuredAction, new HashMap<String, ActionConfig>());
+    }
 
-		if (jobConfig.getMoveBeforeProc()) {
-			final ActionConfig moveBeforeConfig = new ActionConfig();
-			moveBeforeConfig.put(
-					SAMoveBeforeProcessing.PARAM_MOVE_BEFORE_PROCESSING_PATH,
-					jobConfig.getMoveBeforeProcText());
-			pipeline.add(new PipelineStep(new SAMoveBeforeProcessing(),
-					moveBeforeConfig, null, errorHandler));
-		}
+    private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
+        Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
+        ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), actionClassService.getActionClassInfo(configuredAction.getClassId()).getClazz(), configuredAction.getNmbOfWorkers());
 
-		final ActionConfig filterConfig = new ActionConfig();
-		filterConfig.put(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
-		pipeline.add(new PipelineStep(new SAFilter(), filterConfig, null,
-				errorHandler));
+        for(String key: configuredActionReceivers.keySet()){
+            if(!actionConfigMap.containsKey(configuredActionReceivers.get(key).getActionId())){
+                ActionConfig receiver = configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
+                actionConfigMap.put(configuredActionReceivers.get(key).getActionId(), receiver);
+            }
+            actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceivers.get(key).getActionId()));
+        }
 
-		final SimpleAction metadataAction = new SimpleActionWrapper(
-				getActionFactory().getObject(jobConfig.getMetadata()));
-		final ActionConfig metadataConfig = metadataParameters(jobConfig);
-		pipeline.add(new PipelineStep(metadataAction, metadataConfig, null,
-				errorHandler));
-		pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
+        for(Map.Entry<String, String> entry: configuredAction.getParameters().entrySet()){
+            actionConfig.setParameter(entry.getKey(), entry.getValue());
+        }
+        actionConfig.setDispatcher(configuredAction.getDispatcher());
+        return actionConfig;
+    }
+
+    @Override
+	public ConfiguredAction getConfiguredAction(final JobConfig jobConfig) {
+
+        ConfiguredAction reportSaver = new ConfiguredAction();
+        reportSaver.setActionId(REPORT_SAVER);
+        reportSaver.setNmbOfWorkers(4);
+        reportSaver.setClassId(actionClassService.getClassId(SAReport.class));
+        reportSaver.setDispatcher(PINNED_DISPATCHER);
+
+        ConfiguredAction reporter = new ConfiguredAction();
+        reporter.setActionId(REPORTER);
+        reporter.setNmbOfWorkers(1);
+        reporter.setClassId(actionClassService.getClassId(BatchReportsAction.class));
+        reporter.setParameter(BatchReportsAction.PARAM_BATCHSIZE, Integer.toString(50));
+        reporter.addReceiver(DEFAULT_RECEIVER, reportSaver);
+
+        ConfiguredAction start = new ConfiguredAction();
+        start.setActionId(START);
+        start.setNmbOfWorkers(1);
+        start.setClassId(actionClassService.getClassId(StartCycleAction.class));
+
+        ConfiguredAction end = start;
+
+        if(!jobConfig.getCommand().isEmpty()){
+            ConfiguredAction executeCommandBefore = new ConfiguredAction();
+            executeCommandBefore.setActionId(COMMAND_BEFORE_ID);
+            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            executeCommandBefore.setNmbOfWorkers(1);
+            executeCommandBefore.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobConfig.getCommand());
+            executeCommandBefore.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, executeCommandBefore);
+            end = executeCommandBefore;
+        }
+
+        ConfiguredAction sourceAction = new ConfiguredAction();
+        sourceAction.setActionId(SOURCE_ID);
+        sourceAction.setClassId(actionClassService.getClassId(SASource.class));
+        sourceAction.setNmbOfWorkers(1);
+        sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobConfig.getInputFolder()));
+        sourceAction.addReceiver(REPORTER, reporter);
+        end.addReceiver(DEFAULT_RECEIVER, sourceAction);
+        end = sourceAction;
+
+        if(jobConfig.getMoveBeforeProc()){
+            ConfiguredAction moveAction = new ConfiguredAction();
+            moveAction.setActionId(MOVE_BEFORE_ID);
+            moveAction.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveAction.setNmbOfWorkers(1);
+            moveAction.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveBeforeProcText());
+            moveAction.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, moveAction);
+            end = moveAction;
+        }
+
+        if(!jobConfig.getExtension().isEmpty() && !jobConfig.getExtension().equals("*")){
+            ConfiguredAction filter = new ConfiguredAction();
+            filter.setActionId(FILTER_ID);
+            filter.setClassId(actionClassService.getClassId(SAFilter.class));
+            filter.setNmbOfWorkers(1);
+            filter.setParameter(SAFilter.PARAM_EXTENSION, jobConfig.getExtension());
+            filter.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, filter);
+            end = filter;
+        }
+
+        String classId = jobConfig.getMetadata();
+        ConfiguredAction metadataAction = new ConfiguredAction();
+        metadataAction.setActionId(METADATA_ACTION_ID);
+        metadataAction.setClassId(classId);
+        metadataAction.setNmbOfWorkers(1);
+        metadataAction.addReceiver(REPORTER, reporter);
+        setParameters(jobConfig.getParamMetadata(), metadataAction);
+        end.addReceiver(DEFAULT_RECEIVER, metadataAction);
+        end = metadataAction;
+
 
 		if (!("notransformation".equals(jobConfig.getTransform()) || ""
 				.equals(jobConfig.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobConfig.getTransform());
-			final SimpleAction transformAction = new SimpleActionWrapper(
-					getActionFactory().getObject(jobConfig.getTransform()));
-			final ActionConfig transformConfig = transformParameters(jobConfig);
-			// TODO: configure number of transformer threads differently from
-			// number of Alfresco threads
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final ExecutorService executorService = getSourceSinkFactory()
-					.getThreadPool(sinkConfig);
-			pipeline.add(new PipelineStep(transformAction, transformConfig,
-					null, errorHandler, new ActionExecutor(executorService)));
-			pipeline.add(new PipelineStep(new SAReport(), null, null, errorHandler));
+
+            ConfiguredAction transformAction = new ConfiguredAction();
+            transformAction.setActionId(TRANSFORM_ACTION_ID);
+            transformAction.setClassId(jobConfig.getTransform());
+            transformAction.setNmbOfWorkers(1);
+            transformAction.addReceiver(REPORTER, reporter);
+            setParameters(jobConfig.getParamTransform(), transformAction);
+            end.addReceiver(DEFAULT_RECEIVER, transformAction);
+            end = transformAction;
 		}
 
-
-		pipeline.add(new PipelineStep(new SAMimeType(), null, null,
-				errorHandler));
+        ConfiguredAction mimeTypeAction = new ConfiguredAction();
+        mimeTypeAction.setActionId(MIME_TYPE_ID);
+        mimeTypeAction.setClassId(actionClassService.getClassId(SAMimeType.class));
+        mimeTypeAction.setNmbOfWorkers(1);
+        mimeTypeAction.addReceiver(REPORTER, reporter);
+        end.addReceiver(DEFAULT_RECEIVER, mimeTypeAction);
+        end = mimeTypeAction;
 
 
 		if (Mode.WRITE == jobConfig.getMode()) {
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassName());
-			final ExecutorService executorService = getSourceSinkFactory()
-					.getThreadPool(sinkConfig);
-			final SimpleAction uploadAction = new SAUpload(sink, sinkConfig, usageService);
-			final ActionConfig uploadConfig = new ActionConfig();
-			uploadConfig.put(SAUpload.PARAM_PATH,
-					jobConfig.getDestinationFolder());
-			uploadConfig.put(SAUpload.PARAM_DOCUMENT_EXISTS,
-					jobConfig.getWriteOption().toString());
-			uploadConfig.put(SAUpload.PARAM_BATCH_SIZE, defaultBatchSize);
-			pipeline.add(new PipelineStep(uploadAction, uploadConfig,
-					null, errorHandler, new ActionExecutor(
-							executorService)));
+            final ConfiguredAction putContentAction = new ConfiguredAction();
+            putContentAction.setActionId(PUT_CONTENT);
+            putContentAction.setClassId(actionClassService.getClassId(SetAlfrescoContentUrlAction.class));
+            putContentAction.setNmbOfWorkers(2);
+            putContentAction.addReceiver(REPORTER, reporter);
+            putContentAction.setParameter(SetAlfrescoContentUrlAction.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+            putContentAction.setDispatcher(PINNED_DISPATCHER);
+            end.addReceiver(DEFAULT_RECEIVER, putContentAction);
+            end = putContentAction;
+
+            final ConfiguredAction batchAction = new ConfiguredAction();
+            batchAction.setActionId(BATCH_ACTION);
+            batchAction.setClassId(actionClassService.getClassId(BatchAction.class));
+            batchAction.setNmbOfWorkers(1);
+            batchAction.addReceiver(REPORTER, reporter);
+            batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(defaultBatchSize));
+            end.addReceiver(DEFAULT_RECEIVER, batchAction);
+            end = batchAction;
+
+            final ConfiguredAction uploadAction = new ConfiguredAction();
+            uploadAction.setActionId(UPLOAD_ID);
+            uploadAction.setClassId(actionClassService.getClassId(SAUpload.class));
+            uploadAction.setNmbOfWorkers(2);
+            uploadAction.addReceiver(REPORTER, reporter);
+            uploadAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+			uploadAction.setParameter(SAUpload.PARAM_PATH, jobConfig.getDestinationFolder());
+            uploadAction.setParameter(SAUpload.PARAM_WRITEOPTION, jobConfig.getWriteOption().toString());
+            uploadAction.setDispatcher(PINNED_DISPATCHER);
+			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
+            end = uploadAction;
 		}
 
 		if (Mode.DELETE  == jobConfig.getMode()) {
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassName());
-			final ExecutorService executorService = getSourceSinkFactory()
-					.getThreadPool(sinkConfig);
-			final SimpleAction deleteAction = new SADelete(sink, sinkConfig);
-			final ActionConfig deleteConfig = new ActionConfig();
-			deleteConfig.put(SADelete.PARAM_PATH,
-					jobConfig.getDestinationFolder());
-			deleteConfig.put(SADelete.PARAM_DELETEOPTION,
-					jobConfig.getDeleteOption().toString());
-			pipeline.add(new PipelineStep(deleteAction, deleteConfig,
-					null, errorHandler, new ActionExecutor(
-							executorService)));
+            final ConfiguredAction deleteAction = new ConfiguredAction();
+            deleteAction.setActionId(DELETE_ID);
+            deleteAction.setClassId(actionClassService.getClassId(SADelete.class));
+            deleteAction.setNmbOfWorkers(1);
+            deleteAction.addReceiver(REPORTER, reporter);
+            deleteAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+            deleteAction.setParameter(SADelete.PARAM_PATH, jobConfig.getDestinationFolder());
+            deleteAction.setParameter(SADelete.PARAM_DELETEOPTION, jobConfig.getDeleteOption().toString());
+            deleteAction.setDispatcher(PINNED_DISPATCHER);
+            end.addReceiver(DEFAULT_RECEIVER, deleteAction);
+            end = deleteAction;
 		}
-		if (Mode.LIST == jobConfig.getMode()) {
-			
-			final ConfiguredSourceSink sinkConfig = getJobService()
-					.getDestination(jobConfig.getDest());
-			final SourceSink sink = getSourceSinkFactory().getObject(
-					sinkConfig.getClassName());
-			final ExecutorService executorService = getSourceSinkFactory()
-					.getThreadPool(sinkConfig);
-			final SimpleAction listAction;
-			final ActionConfig listConfig = new ActionConfig();
+		if (Mode.LIST == jobConfig.getMode()){
+
+            ConfiguredAction listAction;
 			
 			if(jobConfig.getListIgnorePath()){
-				listAction = new SAExistenceCheck(sink, sinkConfig);
+				listAction = new ConfiguredAction();
+                listAction.setActionId(EXISTENCE_CHECK_ID);
+                listAction.setClassId(actionClassService.getClassId(SAExistenceCheck.class));
 			}
 			else{
-				listAction = new SAList(sink, sinkConfig);
-				listConfig.put(SAList.PARAM_PATH,
-						jobConfig.getDestinationFolder());			
+				listAction = new ConfiguredAction();
+                listAction.setActionId(LIST_ID);
+                listAction.setActionId(actionClassService.getClassId(SAList.class));
 			}
-			pipeline.add(new PipelineStep(listAction, listConfig,
-					null, errorHandler, new ActionExecutor(
-							executorService)));
+            listAction.setNmbOfWorkers(1);
+            listAction.setParameter(SAList.PARAM_PATH, jobConfig.getDestinationFolder());
+            listAction.addReceiver(REPORTER, reporter);
+			listAction.setParameter(SimpleActionWithSourceSink.PARAM_DESTINATION, String.valueOf(jobConfig.getDest()));
+            listAction.setDispatcher(PINNED_DISPATCHER);
+            end.addReceiver(DEFAULT_RECEIVER, listAction);
+            end = listAction;
 		}
 
-		pipeline.add(new PipelineStep(new SAReport(), null, successHandler, errorHandler));
+        final ConfiguredAction uploadedFileHandler = new ConfiguredAction();
+        uploadedFileHandler.setClassId(actionClassService.getClassId(UploadedFileHandler.class));
+        uploadedFileHandler.setActionId(UPLOADED_FILE_HANDLER);
+        uploadedFileHandler.addReceiver(REPORTER, reporter);
+        uploadedFileHandler.setNmbOfWorkers(1);
+        end.addReceiver(DEFAULT_RECEIVER, uploadedFileHandler);
+        end = uploadedFileHandler;
 
-		return pipeline;
+        if(jobConfig.getMoveAfterLoad()){
+            final ConfiguredAction moveAfterLoad = new ConfiguredAction();
+            moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveAfterLoad.setActionId(MOVE_AFTER_ID);
+            moveAfterLoad.setNmbOfWorkers(1);
+            moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveAfterLoadText());
+            moveAfterLoad.addReceiver(REPORTER, reporter);
+            uploadedFileHandler.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
+        }
+
+        if(jobConfig.getMoveNotLoad()){
+            final ConfiguredAction moveNotLoaded = new ConfiguredAction();
+            moveNotLoaded.setClassId(actionClassService.getClassId(MoveAction.class));
+            moveNotLoaded.setActionId(MOVE_NOT_LOADED_ID);
+            moveNotLoaded.setNmbOfWorkers(1);
+            moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobConfig.getMoveNotLoadText());
+            moveNotLoaded.addReceiver(REPORTER, reporter);
+            uploadedFileHandler.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+        }
+
+
+        if(!jobConfig.getCommandAfter().isEmpty()){
+            ConfiguredAction commandAfter = new ConfiguredAction();
+            commandAfter.setActionId(COMMAND_AFTER_ID);
+            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            commandAfter.setNmbOfWorkers(1);
+            commandAfter.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobConfig.getCommandAfter());
+            commandAfter.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, commandAfter);
+            end = commandAfter;
+        }
+
+        end.addReceiver(DEFAULT_RECEIVER, reporter);
+        end = reportSaver;
+
+        ConfiguredAction endAction = new ConfiguredAction();
+        endAction.setActionId(END_ACTION);
+        endAction.setClassId(actionClassService.getClassId(M2AlfEndAction.class));
+        endAction.setNmbOfWorkers(1);
+        endAction.setParameter(M2AlfEndAction.PARAM_SENDREPORT, Boolean.toString(jobConfig.getSendReport()));
+        endAction.setParameter(M2AlfEndAction.PARAM_REPORT_TO, jobConfig.getSendReportText());
+        endAction.setParameter(M2AlfEndAction.PARAM_SENDERROR, Boolean.toString(jobConfig.getSendNotification()));
+        endAction.setParameter(M2AlfEndAction.PARAM_ERROR_TO, jobConfig.getSendNotificationText());
+        endAction.setParameter(M2AlfEndAction.PARAM_MAILFROM, mailFrom);
+        endAction.setParameter(M2AlfEndAction.PARAM_URL, url);
+        end.addReceiver(DEFAULT_RECEIVER, endAction);
+
+		return start;
 	}
+
+    private void setParameters(List<String> parameters, ConfiguredAction metadataAction) {
+        if(parameters == null)
+            return;
+        for(String param: parameters){
+            String[] keyValue = param.split("\\|");
+            metadataAction.setParameter(keyValue[0], keyValue[1]);
+        }
+    }
+
+    private String encodeStringList(List<String> list){
+        String str = "";
+        for(String el: list){
+            str += el +"|";
+        }
+        return str.substring(0, str.length()-1);
+    }
 }
