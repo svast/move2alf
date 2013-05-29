@@ -4,7 +4,6 @@ import static eu.xenit.move2alf.common.Parameters.*;
 
 import com.google.common.io.ByteStreams;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.simpleaction.data.ActionConfig;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
@@ -26,7 +25,7 @@ import java.util.Map;
  *
  * @author Jonas Heylen
  */
-public abstract class SACamelInput extends SimpleAction {
+public abstract class SACamelInput {
 
 	private static final Logger logger = LoggerFactory.getLogger(SACamelInput.class);
 
@@ -34,9 +33,7 @@ public abstract class SACamelInput extends SimpleAction {
 
 	public abstract String getEndpoint();
 
-	@Override
-	public List<FileInfo> execute(final FileInfo parameterMap, final ActionConfig config,
-								  final Map<String, Serializable> state) {
+	public List<FileInfo> execute(final FileInfo parameterMap, final Map<String, Serializable> state) {
 		final CamelContext camel = new DefaultCamelContext();
 		try {
 			camel.addRoutes(new RouteBuilder() {
