@@ -4,6 +4,7 @@ import static eu.xenit.move2alf.common.Parameters.*;
 
 import com.google.common.io.ByteStreams;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
@@ -16,32 +17,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
- * SACamelInput
+ * SACMISInput
  *
  * @author Jonas Heylen
  */
-public abstract class SACamelInput {
+public class SACMISInput extends Move2AlfStartAction {
 
-	private static final Logger logger = LoggerFactory.getLogger(SACamelInput.class);
+	private static final Logger logger = LoggerFactory.getLogger(SACMISInput.class);
 
 	private static final String DIRECT_ENDPOINT = "direct:input";
+	public static final String PARAM_CMIS_URL = "cmisUrl";
 
-	public abstract String getEndpoint();
+	private String cmisURL;
 
-	public List<FileInfo> execute(final FileInfo parameterMap, final Map<String, Serializable> state) {
+	public void setCmisURL(String cmisURL) {
+		this.cmisURL = cmisURL;
+	}
+
+	public String getEndpoint() {
+		return "cmis://" + cmisURL + "&readContent=true";
+	}
+
+	@Override
+	protected void onStartImpl() {
 		final CamelContext camel = new DefaultCamelContext();
 		try {
 			camel.addRoutes(new RouteBuilder() {
 				@Override
 				public void configure() throws Exception {
 					from(getEndpoint())
-							.streamCaching()  // TODO: nodig? content wordt maar 1 maal uitgelezen
-							//.wireTap()
 							.to(DIRECT_ENDPOINT);
 				}
 			});
@@ -59,7 +65,6 @@ public abstract class SACamelInput {
 			throw new Move2AlfException("Camel exception", e);
 		}
 
-		final List<FileInfo> result = new ArrayList<FileInfo>();
 		boolean done = false;
 		boolean firstLoop = true;
 		String first = null;
@@ -97,7 +102,7 @@ public abstract class SACamelInput {
 
 				final FileInfo fileInfo = new FileInfo();
 				fileInfo.put(PARAM_FILE, file);
-				result.add(fileInfo);
+				sendMessage(fileInfo);
 			}
 
 			if (path.equals(first) && !firstLoop) {
@@ -112,7 +117,5 @@ public abstract class SACamelInput {
 			e.printStackTrace();
 			throw new Move2AlfException("Camel exception", e);
 		}
-
-		return result;
 	}
 }

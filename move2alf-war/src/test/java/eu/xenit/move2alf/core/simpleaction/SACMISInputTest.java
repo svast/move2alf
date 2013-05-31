@@ -5,14 +5,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 /**
- * SACamelInputTest
+ * SACMISInputTest
  *
  * @author Jonas Heylen
  */
-public class SACamelInputTest {
+public class SACMISInputTest {
 	@Test
 	public void testCamelInput() {
-//		SimpleAction action = new SACamelInput() {
+//		SimpleAction action = new SACMISInput() {
 //			@Override
 //			public String getEndpoint() {
 //				return "cmis://http://alf1.xenit.eu/alfresco/cmisatom?username=jenkins&password=CichyopMank5";
