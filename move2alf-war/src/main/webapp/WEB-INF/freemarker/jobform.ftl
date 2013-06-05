@@ -76,6 +76,8 @@
 
 		<div id="inputOptions-CMIS" class="inputOptions">
 		<@labeledSingleLineTextInput label="CMIS URL" name="cmisURL" binding="job.cmisURL"/>
+		<@labeledSingleLineTextInput label="Username" name="cmisUsername" binding="job.cmisUsername"/>
+		<@labeledSingleLineTextInput label="Password" name="cmisPassword" binding="job.cmisPassword"/>
 		</div>
 	</fieldset>
 

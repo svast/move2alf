@@ -39,12 +39,14 @@ public class JobConfig {
 	@NotEmpty(message="Please enter a description for the job.")
 	private String description;
 
-	@NotEmpty(message="inputSoure is null")
+	@NotNull(message="inputSoure is null")
 	private InputSource inputSource;
 
 	private String cmisURL;
+	private String cmisUsername;
+	private String cmisPassword;
 
-	@NotEmpty(message="There should be at least one inputfolder!")
+	//@NotEmpty(message="There should be at least one inputfolder!")
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolders;
 
@@ -167,6 +169,22 @@ public class JobConfig {
 
 	public void setCmisURL(final String cmisURL) {
 		this.cmisURL = cmisURL;
+	}
+
+	public String getCmisUsername() {
+		return cmisUsername;
+	}
+
+	public String getCmisPassword() {
+		return cmisPassword;
+	}
+
+	public void setCmisUsername(final String cmisUsername) {
+		this.cmisUsername = cmisUsername;
+	}
+
+	public void setCmisPassword(final String cmisPassword) {
+		this.cmisPassword = cmisPassword;
 	}
 
 	public void setInputFolder(List<String> inputFolders) {

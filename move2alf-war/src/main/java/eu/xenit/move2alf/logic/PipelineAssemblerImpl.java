@@ -102,6 +102,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		InputSource inputSource = InputSource.FILESYSTEM;
 		List<String> inputFolder = new ArrayList();
 		String cmisURL = "";
+		String cmisUsername = "";
+		String cmisPassword = "";
 		String destinationFolder = "";
 		int dest = 0;
 		String writeOption = null;
@@ -136,6 +138,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			} else if (SOURCE_CMIS_ID.equals(action.getActionId())) {
 				inputSource = InputSource.CMIS;
 				cmisURL = action.getParameter(SACMISInput.PARAM_CMIS_URL);
+				cmisUsername = action.getParameter(SACMISInput.PARAM_CMIS_USERNAME);
+				cmisPassword = action.getParameter(SACMISInput.PARAM_CMIS_PASSWORD);
 			} else if (UPLOAD_ID.equals(action
 					.getActionId())) {
 				destinationFolder = action.getParameter(SAUpload.PARAM_PATH);
@@ -199,6 +203,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		jobConfig.setInputSource(inputSource);
 		jobConfig.setInputFolder(inputFolder);
 		jobConfig.setCmisURL(cmisURL);
+		jobConfig.setCmisUsername(cmisUsername);
+		jobConfig.setCmisPassword(cmisPassword);
 		jobConfig.setDestinationFolder(destinationFolder);
 		jobConfig.setDest(dest);
 		jobConfig.setMode(mode);
@@ -326,6 +332,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			sourceAction.setActionId(SOURCE_CMIS_ID);
 			sourceAction.setClassId(actionClassService.getClassId(SACMISInput.class));
 			sourceAction.setParameter(SACMISInput.PARAM_CMIS_URL, jobConfig.getCmisURL());
+			sourceAction.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobConfig.getCmisUsername());
+			sourceAction.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobConfig.getCmisPassword());
 		}
 		sourceAction.setNmbOfWorkers(1);
 		sourceAction.addReceiver(REPORTER, reporter);
