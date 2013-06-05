@@ -29,15 +29,27 @@ public class SACMISInput extends Move2AlfStartAction {
 
 	private static final String DIRECT_ENDPOINT = "direct:input";
 	public static final String PARAM_CMIS_URL = "cmisUrl";
+	public static final String PARAM_CMIS_USERNAME = "cmisUsername";
+	public static final String PARAM_CMIS_PASSWORD = "cmisPassword";
 
 	private String cmisURL;
+	private String cmisUsername;
+	private String cmisPassword;
 
-	public void setCmisURL(String cmisURL) {
+	public void setCmisUrl(String cmisURL) {
 		this.cmisURL = cmisURL;
 	}
 
+	public void setCmisUsername(final String cmisUsername) {
+		this.cmisUsername = cmisUsername;
+	}
+
+	public void setCmisPassword(final String cmisPassword) {
+		this.cmisPassword = cmisPassword;
+	}
+
 	public String getEndpoint() {
-		return "cmis://" + cmisURL + "&readContent=true";
+		return String.format("cmis://%s?username=%s&password=%s&readContent=true", cmisURL, cmisUsername, cmisPassword);
 	}
 
 	@Override
@@ -88,11 +100,10 @@ public class SACMISInput extends Move2AlfStartAction {
 			if (isFile) {
 				logger.debug("This is a file, writing to filesystem");
 				final InputStream in = exchange.getIn().getBody(InputStream.class);
-				logger.debug("Body: " + exchange.getIn().getBody());
-				logger.debug("Inputstream: " + in);
 				final File file = new File(cmisName);
 				try {
 					ByteStreams.copy(in, new FileOutputStream(file));
+					in.close();
 				} catch (FileNotFoundException e) {
 					// file is actually a folder. should never happen
 					throw new Move2AlfException(e);
@@ -101,6 +112,7 @@ public class SACMISInput extends Move2AlfStartAction {
 				}
 
 				final FileInfo fileInfo = new FileInfo();
+				fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
 				fileInfo.put(PARAM_FILE, file);
 				sendMessage(fileInfo);
 			}
