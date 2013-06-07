@@ -12,8 +12,8 @@ import java.io.File;
 public class SetAlfrescoContentUrlAction extends SimpleActionWithSourceSink<FileInfo> {
     @Override
     protected void executeImpl(FileInfo message) {
-        //String contentUrl = getSink().putContent(getSinkConfig(),(File) message.get(Parameters.PARAM_FILE),(String) message.get(Parameters.PARAM_MIMETYPE));
-        message.put(Parameters.PARAM_CONTENTURL, "contentUrl=store://2013/5/27/14/45/8a5b6263-9522-4e12-b58f-b105c34de6e2.bin|mimetype=application/msword|size=0|encoding=UTF-8|locale=en_US_|id=70789");
+        String contentUrl = getSink().putContent(getSinkConfig(),(File) message.get(Parameters.PARAM_FILE),(String) message.get(Parameters.PARAM_MIMETYPE));
+        message.put(Parameters.PARAM_CONTENTURL, contentUrl);
         sendMessage(message);
     }
 }
