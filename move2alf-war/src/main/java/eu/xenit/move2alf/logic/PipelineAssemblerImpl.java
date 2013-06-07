@@ -334,6 +334,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			sourceAction.setParameter(SACMISInput.PARAM_CMIS_URL, jobConfig.getCmisURL());
 			sourceAction.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobConfig.getCmisUsername());
 			sourceAction.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobConfig.getCmisPassword());
+			sourceAction.setDispatcher(PINNED_DISPATCHER);
 		}
 		sourceAction.setNmbOfWorkers(1);
 		sourceAction.addReceiver(REPORTER, reporter);
