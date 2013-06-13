@@ -2,7 +2,7 @@ package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
 
-import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.xenit.move2alf.common.Parameters;
 
-@ActionInfo(classId = "SAFilter",
+@ClassInfo(classId = "SAFilter",
             description = "Filters messages based on the file extension")
 public class SAFilter extends Move2AlfReceivingAction<FileInfo> {
 

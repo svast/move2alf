@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
+import akka.actor.{ActorRef, ActorContext}
+
 /**
  * Created with IntelliJ IDEA.
  * User: thijs
@@ -19,5 +21,22 @@ class StateContextImpl(private val ct: AbstractActionContext) extends StateConte
 
   def getJobId:String = {
     ct.getJobId
+  }
+
+
+  def getActionId(): String = {
+    ct.id
+  }
+
+  def getActorContext(): ActorContext = {
+    ct.context
+  }
+
+  def getActorRef(): ActorRef = {
+    ct.context.self
+  }
+
+  def getRouterActorRef(): ActorRef = {
+    ct.context.parent
   }
 }

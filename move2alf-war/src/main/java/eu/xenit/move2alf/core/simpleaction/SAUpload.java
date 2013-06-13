@@ -1,38 +1,39 @@
 package eu.xenit.move2alf.core.simpleaction;
 
+import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.action.messages.SendBatchMessage;
+import eu.xenit.move2alf.core.action.messages.SetAclMessage;
+import eu.xenit.move2alf.core.simpleaction.data.Batch;
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
+import eu.xenit.move2alf.core.sourcesink.ACL;
+import eu.xenit.move2alf.core.sourcesink.WriteOption;
+import eu.xenit.move2alf.logic.DestinationService;
+import eu.xenit.move2alf.logic.usageservice.UsageService;
+import eu.xenit.move2alf.repository.UploadResult;
+import eu.xenit.move2alf.repository.alfresco.ws.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.xenit.move2alf.core.ApplicationContextProvider;
-import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.pipeline.actions.EOCAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.simpleaction.data.Batch;
-import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
-import eu.xenit.move2alf.core.sourcesink.ACL;
-import eu.xenit.move2alf.core.sourcesink.WriteOption;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
-import eu.xenit.move2alf.repository.UploadResult;
-import eu.xenit.move2alf.repository.alfresco.ws.Document;
-
-@ActionInfo(classId = "SAUpload",
+@ClassInfo(classId = "SAUpload",
             description = "Uploads files to the configured sourcesink")
-public class SAUpload extends SimpleActionWithSourceSink<Batch>{
+public class SAUpload extends ActionWithDestination<Batch> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(SAUpload.class);
 
-
-	private UsageService usageService = (UsageService) ApplicationContextProvider.getApplicationContext().getBean("usageService");
+    @Autowired
+    private UsageService usageService;
 
 
 	private List<FileInfo> uploadAndSetACLs(final Batch batch, final List<ACL> acls) {
@@ -43,7 +44,7 @@ public class SAUpload extends SimpleActionWithSourceSink<Batch>{
 			results = upload(batch);
 
 			for (final ACL acl : acls) {
-				getSink().setACL(getSinkConfig(), acl);
+                sendTaskToDestination(new SetAclMessage(acl));
 			}
 		} catch (final Exception e) {
 			batchFailed = true;
@@ -84,15 +85,14 @@ public class SAUpload extends SimpleActionWithSourceSink<Batch>{
         this.writeOption = WriteOption.valueOf(writeOption);
     }
 
-	private List<UploadResult> upload(final Batch batch) {
+	private void upload(final Batch batch) {
 		final List<Document> documentsToUpload = new ArrayList<Document>();
-		final String basePath = normalizeBasePath(path);
 
 		Map<Document, FileInfo> documentFileInfoMapping = new HashMap<Document, FileInfo>();
 		for (final FileInfo parameterMap : batch) {
 			final String relativePath = getParameterWithDefault(parameterMap,
 					Parameters.PARAM_RELATIVE_PATH, "");
-			final String remotePath = normalizeRemotePath(basePath,
+			final String remotePath = normalizeRemotePath(path,
 					relativePath);
 			final String mimeType = getParameterWithDefault(parameterMap,
 					Parameters.PARAM_MIMETYPE, "text/plain");
@@ -117,9 +117,7 @@ public class SAUpload extends SimpleActionWithSourceSink<Batch>{
 			documentsToUpload.add(document);
 			documentFileInfoMapping.put(document, parameterMap);
 		}
-
-		return getSink().sendBatch(getSinkConfig(), writeOption,
-				documentsToUpload);
+        sendTaskToDestination(SendBatchMessage(writeOption, documentsToUpload));
 	}
 
 	private static boolean getInheritPermissionsFromParameterMap(
@@ -215,7 +213,7 @@ public class SAUpload extends SimpleActionWithSourceSink<Batch>{
     public static final String PARAM_PATH = "path";
     private String path;
     public void setPath(String path){
-        this.path = path;
+        this.path = normalizeBasePath(path);
     }
 
     @Override
@@ -230,10 +228,9 @@ public class SAUpload extends SimpleActionWithSourceSink<Batch>{
             final Map<String, Map<String, String>> acl = (Map<String, Map<String, String>>) fileInfo
                     .get(Parameters.PARAM_ACL);
             if (acl != null) {
-                final String basePath = normalizeBasePath(path);
                 final Map<String, Map<String, String>> normalizedAcl = new HashMap<String, Map<String, String>>();
                 for (final String aclPath : acl.keySet()) {
-                    normalizedAcl.put(normalizeAclPath(basePath, aclPath),
+                    normalizedAcl.put(normalizeAclPath(path, aclPath),
                             acl.get(aclPath));
                 }
                 final boolean inheritPermissions = getInheritPermissionsFromParameterMap(fileInfo);

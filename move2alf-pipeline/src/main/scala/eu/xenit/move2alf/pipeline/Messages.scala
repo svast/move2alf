@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.pipeline
 
+import akka.actor.ActorRef
+
 /**
  * Created with IntelliJ IDEA.
  * User: thijs
@@ -8,8 +10,12 @@ package eu.xenit.move2alf.pipeline
  * To change this template use File | Settings | File Templates.
  */
 case object Start
+case object Stop
 case object EOC
 
 case class M2AMessage(message: AnyRef)
+case class TaskMessage(key: String, message: AnyRef, sendResult: ActorRef)
+case class ReplyMessage(key: String, message: AnyRef)
+
 class StringMessage(val string: String)
 class StringMessage2(val string: String)

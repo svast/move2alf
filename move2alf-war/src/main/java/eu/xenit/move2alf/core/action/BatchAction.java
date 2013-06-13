@@ -6,9 +6,7 @@ import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-@ActionInfo(classId = "BatchAction",
+@ClassInfo(classId = "BatchAction",
             description = "Action that puts FileInfoMessages into batches")
 public class BatchAction extends Move2AlfReceivingAction<FileInfo> implements EOCAware{
 

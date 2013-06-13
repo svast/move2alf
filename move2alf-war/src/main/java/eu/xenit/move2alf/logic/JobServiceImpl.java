@@ -11,8 +11,9 @@ import eu.xenit.move2alf.core.sourcesink.SourceSink;
 import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.JobHandle;
+import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.JobModel;
 import eu.xenit.move2alf.web.dto.JobInfo;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -42,7 +43,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
     @Override
     public void stopJob(int jobId) {
-        jobMap.get(jobId).deleteJob();
+        jobMap.get(jobId).destroy();
         jobMap.remove(jobId);
         closeCycle(getLastCycleForJob(getJob(jobId)));
     }
@@ -68,6 +69,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private MailSender mailSender;
 
+    @Autowired
     private ActorSystem actorSystem;
 
     private Map<Integer, JobHandle> jobMap = new HashMap<Integer, JobHandle>();
@@ -108,10 +110,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return mailSender;
 	}
 
-	public JobServiceImpl() {
-        actorSystem = ActorSystem.create("Move2Alf");
-    }
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Job> getAllJobs() {
@@ -121,16 +119,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	// @Transactional(propagation=Propagation.REQUIRES_NEW)
-	public Job createJob(JobConfig jobConfig) {
+	public Job createJob(JobModel jobModel) {
 		final Date now = new Date();
 		final Job job = new Job();
-		job.setName(jobConfig.getName());
-		job.setDescription(jobConfig.getDescription());
+		job.setName(jobModel.getName());
+		job.setDescription(jobModel.getDescription());
 		job.setCreationDateTime(now);
 		job.setLastModifyDateTime(now);
 		job.setCreator(getUserService().getCurrentUser());
 
-        ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobConfig);
+        ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobModel);
         job.setFirstConfiguredAction(configuredAction);
 
         getSessionFactory().getCurrentSession().save(job);
@@ -139,20 +137,20 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public Job editJob(JobConfig jobConfig) {
+	public Job editJob(JobModel jobModel) {
 		final Date now = new Date();
-		final Job job = getJob(jobConfig.getId());
-		job.setId(jobConfig.getId());
-		job.setName(jobConfig.getName());
-		job.setDescription(jobConfig.getDescription());
+		final Job job = getJob(jobModel.getId());
+		job.setId(jobModel.getId());
+		job.setName(jobModel.getName());
+		job.setDescription(jobModel.getDescription());
 		job.setCreationDateTime(now);
 		job.setLastModifyDateTime(now);
 		job.setCreator(getUserService().getCurrentUser());
-        job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobConfig));
+        job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobModel));
         getSessionFactory().getCurrentSession().save(job);
-        if(jobMap.containsKey(jobConfig.getId())){
-            jobMap.get(jobConfig.getId()).deleteJob();
-            jobMap.remove(jobConfig.getId());
+        if(jobMap.containsKey(jobModel.getId())){
+            jobMap.get(jobModel.getId()).destroy();
+            jobMap.remove(jobModel.getId());
         }
 		return job;
 	}
@@ -161,7 +159,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public void deleteJob(final int id) {
 		final Job job = getJob(id);
         if(jobMap.get(id) != null){
-            jobMap.get(id).deleteJob();
+            jobMap.get(id).destroy();
             jobMap.remove(id);
         }
 		sessionFactory.getCurrentSession().delete(job);
@@ -319,19 +317,19 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredSourceSink createDestination(final String destinationType,
+	public ConfiguredSharedResource createDestination(final String destinationType,
 			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
+		final ConfiguredSharedResource sourceSink = new ConfiguredSharedResource();
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
 		return sourceSink;
 	}
 
 	@Override
-	public ConfiguredSourceSink editDestination(final int sinkId,
+	public ConfiguredSharedResource editDestination(final int sinkId,
 			final String destinationType,
 			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
+		final ConfiguredSharedResource sourceSink = getConfiguredSourceSink(sinkId);
 		sourceSink.setClassId(destinationType);
 		createSourceSink(destinationType, destinationParams, sourceSink);
 		getSessionFactory().getCurrentSession().save(sourceSink);
@@ -339,16 +337,16 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public ConfiguredSourceSink getDestination(final int id) {
-		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession()
-				.get(ConfiguredSourceSink.class, id);
+	public ConfiguredSharedResource getDestination(final int id) {
+		return (ConfiguredSharedResource) getSessionFactory().getCurrentSession()
+				.get(ConfiguredSharedResource.class, id);
 	}
 
 	@Override
 	public boolean checkDestinationExists(final String destinationName) {
 		@SuppressWarnings("unchecked")
 		final List<ConfiguredObject> destinations = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSourceSink")
+				.getCurrentSession().createQuery("from ConfiguredSharedResource")
 				.list();
 
 		for (int i = 0; i < destinations.size(); i++) {
@@ -364,7 +362,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private void createSourceSink(final String destinationType,
 			final HashMap<EDestinationParameter, Object> destinationParams,
-			final ConfiguredSourceSink sourceSink) {
+			final ConfiguredSharedResource sourceSink) {
 		sourceSink.setClassId(destinationType);
 
 		final Map<String, String> sourceSinkParameters = new HashMap<String, String>();
@@ -384,47 +382,47 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks() {
+	public List<ConfiguredSharedResource> getAllConfiguredSourceSinks() {
 		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSourceSink")
+		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
+				.getCurrentSession().createQuery("from ConfiguredSharedResource")
 				.list();
 
 		return configuredSourceSink;
 	}
 
 	@Override
-	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks() {
+	public List<ConfiguredSharedResource> getAllDestinationConfiguredSourceSinks() {
 
 		final String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
 		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
+		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
 				.getCurrentSession()
 				.createQuery(
-						"from ConfiguredSourceSink as c where c.classId!=?")
+						"from ConfiguredSharedResource as c where c.classId!=?")
 				.setString(0, fileSourceSink).list();
 
 		return configuredSourceSink;
 	}
 
 	@Override
-	public ConfiguredSourceSink getConfiguredSourceSink(final int sourceSinkId) {
+	public ConfiguredSharedResource getConfiguredSourceSink(final int sourceSinkId) {
 		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
+		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
 				.getCurrentSession()
-				.createQuery("from ConfiguredSourceSink as c where c.id=?")
+				.createQuery("from ConfiguredSharedResource as c where c.id=?")
 				.setLong(0, sourceSinkId).list();
 		if (configuredSourceSink.size() == 1) {
 			return configuredSourceSink.get(0);
 		} else {
-			throw new Move2AlfException("ConfiguredSourceSink with id "
+			throw new Move2AlfException("ConfiguredSharedResource with id "
 					+ sourceSinkId + " not found");
 		}
 	}
 
 	@Override
 	public void deleteDestination(final int id) {
-		final ConfiguredSourceSink destination = getConfiguredSourceSink(id);
+		final ConfiguredSharedResource destination = getConfiguredSourceSink(id);
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);
@@ -434,7 +432,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public void createSourceSink(final String className,
 			final Map<String, String> parameters) {
-		final ConfiguredSourceSink ss = new ConfiguredSourceSink();
+		final ConfiguredSharedResource ss = new ConfiguredSharedResource();
 		ss.setClassId(className);
 		ss.setParameters(parameters);
 		getSessionFactory().getCurrentSession().save(ss);
@@ -639,7 +637,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
         if(!jobMap.containsKey(jobId)){
             Job job = getJob(jobId);
             ConfiguredAction configuredAction = job.getFirstConfiguredAction();
-            JobHandle jobHandle = new JobHandle(actorSystem, job.getName(), pipelineAssembler.getActionConfig(configuredAction));
+            JobHandle jobHandle = new JobHandle(actorSystem, job.getName(), new JobConfig(pipelineAssembler.getActionConfig(configuredAction)));
             jobMap.put(job.getId(), jobHandle);
         }
         JobHandle handle = jobMap.get(jobId);
@@ -651,7 +649,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
     }
 
     @Override
-    public JobConfig getJobConfigForJob(int id) {
+    public JobModel getJobConfigForJob(int id) {
         return pipelineAssembler.getJobConfigForJob(id);
     }
 
@@ -659,7 +657,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
     public void preDestroy(){
         logger.debug("Stopping the actorSystem");
         for(JobHandle handle: jobMap.values()){
-            handle.deleteJob();
+            handle.destroy();
         }
         actorSystem.shutdown();
     }

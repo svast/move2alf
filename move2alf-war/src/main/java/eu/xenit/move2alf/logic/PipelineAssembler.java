@@ -2,7 +2,7 @@ package eu.xenit.move2alf.logic;
 
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
-import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 
 	private JobService jobService;
 
-	public abstract ConfiguredAction getConfiguredAction(JobConfig jobConfig);
+	public abstract ConfiguredAction getConfiguredAction(JobModel jobModel);
 
 
 	@Autowired
@@ -28,7 +28,7 @@ public abstract class PipelineAssembler extends AbstractHibernateService {
 		return jobService;
 	}
 
-	public abstract JobConfig getJobConfigForJob(int id);
+	public abstract JobModel getJobConfigForJob(int id);
 
     public abstract ActionConfig getActionConfig(ConfiguredAction configuredAction);
 

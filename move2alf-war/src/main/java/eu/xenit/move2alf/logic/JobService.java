@@ -6,21 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.Cycle;
-import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.dto.Schedule;
+import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
@@ -40,20 +35,20 @@ public interface JobService {
 	/**
 	 * Create a new job.
 	 * 
-	 * @param jobConfig
+	 * @param jobModel
 	 *            The job configuration
 	 * @return The new job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job createJob(JobConfig jobConfig);
+	public Job createJob(JobModel jobModel);
 
 	/**
-	 * @param jobConfig
+	 * @param jobModel
 	 *            The job configuration
 	 * @return The edited job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job editJob(JobConfig jobConfig);
+	public Job editJob(JobModel jobModel);
 
 	/**
 	 * Delete a job
@@ -180,7 +175,7 @@ public interface JobService {
 	 * @return the configured source sink
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public ConfiguredSourceSink createDestination(String destinationType,
+	public ConfiguredSharedResource createDestination(String destinationType,
 			HashMap<EDestinationParameter, Object> destinationParams);
 
 	/**
@@ -193,16 +188,16 @@ public interface JobService {
 	 *            A map of parameters that define the destination
 	 * @return the configured source sink
 	 */
-	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
+	public ConfiguredSharedResource editDestination(int sinkId, String destinationType,
 			HashMap<EDestinationParameter, Object> destinationParams);
 	
 	/**
-	 * Get ConfiguredSourceSink by id.
+	 * Get ConfiguredSharedResource by id.
 	 * 
 	 * @param sinkId
 	 * @return
 	 */
-	public ConfiguredSourceSink getDestination(int sinkId);
+	public ConfiguredSharedResource getDestination(int sinkId);
 
 	/**
 	 * gets all configured source sinks
@@ -210,7 +205,7 @@ public interface JobService {
 	 * @return a list of configured source sinks
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
-	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks();
+	public List<ConfiguredSharedResource> getAllConfiguredSourceSinks();
 
 	/**
 	 * gets a configured source sink based on id.
@@ -267,7 +262,7 @@ public interface JobService {
 	 * 
 	 * @return List of configured source sinks
 	 */
-	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
+	public List<ConfiguredSharedResource> getAllDestinationConfiguredSourceSinks();
 
 
 	/**
@@ -318,7 +313,7 @@ public interface JobService {
 
     void startJob(Integer jobId);
 
-    JobConfig getJobConfigForJob(int id);
+    JobModel getJobConfigForJob(int id);
 
     int openCycleForJob(String jobId);
 

@@ -1,9 +1,12 @@
 package eu.xenit.move2alf.pipeline.actors
 
 import akka.actor._
-import eu.xenit.move2alf.pipeline.{EOC, Start, M2AMessage}
+import eu.xenit.move2alf.pipeline._
 import eu.xenit.move2alf.common.LogHelper
 import eu.xenit.move2alf.pipeline.actions.context.AbstractActionContextFactory
+import eu.xenit.move2alf.pipeline.M2AMessage
+import eu.xenit.move2alf.pipeline.TaskMessage
+import scala.Some
 import akka.routing.Broadcast
 
 /**
@@ -37,6 +40,14 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
     case Event(M2AMessage(message), data: CycleData) => {
       action.receive(message)
+      stayOrStop(data, false)
+    }
+    case Event(TaskMessage(key, message, replyTo), data: CycleData) => {
+      action.receive(message, Some(key), Some(replyTo))
+      stayOrStop(data, false)
+    }
+    case Event(ReplyMessage(key, message), data: CycleData) => {
+      action.receiveReply(key, message)
       stayOrStop(data, false)
     }
   }

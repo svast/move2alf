@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.pipeline
 
 import eu.xenit.move2alf.pipeline.actors.{NotRunning, JobState}
+import akka.actor.ActorRef
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,5 +13,15 @@ import eu.xenit.move2alf.pipeline.actors.{NotRunning, JobState}
 class JobInfo {
 
   var state: JobState = NotRunning
+
+  private var actorRefs: Map[String, ActorRef] = _
+
+  def setActorRefs(actorRefs: Map[String, ActorRef]){
+    this.actorRefs = actorRefs
+  }
+
+  def getActorRef(actionId: String){
+    actorRefs.get(actionId).get
+  }
 
 }

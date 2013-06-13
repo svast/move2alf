@@ -1,18 +1,18 @@
 package eu.xenit.move2alf.core.simpleaction;
 
 import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
+import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 import java.io.File;
 
-@ActionInfo(classId = "SADelete",
+@ClassInfo(classId = "SADelete",
             description = "Deletes files")
-public class SADelete extends SimpleActionWithSourceSink<FileInfo> {
+public class SADelete extends ActionWithDestination<FileInfo> {
 
 	public static final String PARAM_PATH = "path";
     private String path;
@@ -31,7 +31,7 @@ public class SADelete extends SimpleActionWithSourceSink<FileInfo> {
         FileInfo newParameterMap = new FileInfo();
         newParameterMap.putAll(fileInfo);
 
-        ConfiguredSourceSink sinkConfig = getSinkConfig();
+        ConfiguredSharedResource sinkConfig = getSinkConfig();
         SourceSink sink = getSink();
 
         String basePath = path;

@@ -52,9 +52,9 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
         val actionContextFactory: AbstractActionContextFactory = {
          if (config.getReceivers.isEmpty) {
             nmbEndActions += config.getNmbOfWorkers
-            new EndActionContextFactory(config.getId, config.getClazz, config.getParameters.toMap, ("default", jobActor))
+            new EndActionContextFactory(config.getId, config.getActionFactory, ("default", jobActor))
           } else {
-            new BasicActionContextFactory(config.getId, config.getClazz, config.getParameters.toMap, receiversToMap)
+            new BasicActionContextFactory(config.getId, config.getActionFactory, receiversToMap)
           }
         }
         val factory = new ActionActorFactory(config.getId, actionContextFactory, if(nmbSenders==0) 1 else nmbSenders, config.getNmbOfWorkers, config.getDispatcher)

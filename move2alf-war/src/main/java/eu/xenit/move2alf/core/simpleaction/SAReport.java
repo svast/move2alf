@@ -1,26 +1,24 @@
 package eu.xenit.move2alf.core.simpleaction;
 
-import eu.xenit.move2alf.core.ApplicationContextProvider;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.StartCycleAction;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@ActionInfo(classId = "SAReport",
+@ClassInfo(classId = "SAReport",
             description = "Writes report messages to the database")
 public class SAReport extends Move2AlfReceivingAction<List<ReportMessage>>{
 
@@ -30,7 +28,8 @@ public class SAReport extends Move2AlfReceivingAction<List<ReportMessage>>{
 		return "Checking for errors";
 	}
 
-    private SessionFactory sessionFactory = (SessionFactory) ApplicationContextProvider.getApplicationContext().getBean("sessionFactory");
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Override
     public void executeImpl(List<ReportMessage> batch) {

@@ -7,7 +7,7 @@ package eu.xenit.move2alf.core.action;
  * Time: 11:44 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ActionClassInfo {
+public class ClassInfoModel {
 
     private final String classId;
     private final String category;
@@ -19,7 +19,7 @@ public class ActionClassInfo {
         return description;
     }
 
-    public ActionClassInfo(String classId, String category, Class clazz, String description) {
+    public ClassInfoModel(String classId, String category, Class clazz, String description) {
         this.classId = classId;
         this.category = category;
         this.clazz = clazz;

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@ActionInfo(classId = "CSVMetadataLoader",
+@ClassInfo(classId = "CSVMetadataLoader",
         category = ConfigurableObject.CAT_METADATA,
         description = "Loads metadata and filenames from pipe separated CSV file")
 public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {

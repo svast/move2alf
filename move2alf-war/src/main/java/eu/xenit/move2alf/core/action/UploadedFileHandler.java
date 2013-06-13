@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@ActionInfo(classId = "UploadedFileHandler",
+@ClassInfo(classId = "UploadedFileHandler",
             description = "Constructs a ReportMessage and routes to the reporter. Also routes to move-not-loaded and moveloaded")
 public class UploadedFileHandler extends Move2AlfReceivingAction<FileInfo> {
     

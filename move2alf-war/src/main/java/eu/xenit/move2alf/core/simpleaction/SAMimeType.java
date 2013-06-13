@@ -3,7 +3,7 @@ package eu.xenit.move2alf.core.simpleaction;
 import java.io.File;
 import java.io.IOException;
 
-import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
-@ActionInfo(classId = "SAMimeType",
+@ClassInfo(classId = "SAMimeType",
             description = "Detects the mimetype of a file and adds it to the metadata")
 public class SAMimeType extends Move2AlfReceivingAction<FileInfo> {
 

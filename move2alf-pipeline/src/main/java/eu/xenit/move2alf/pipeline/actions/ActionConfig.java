@@ -11,37 +11,28 @@ import java.util.*;
  */
 public class ActionConfig {
 
-    public Map<String, Object> getParameters() {
-        return parameters;
-    }
-
-    private Map<String, Object> parameters = new TreeMap<String, Object>();
-
-    public void setParameter(String key, Object value){
-        parameters.put(key, value);
-    }
-
-    public Class getClazz() {
-        return clazz;
-    }
-
     public int getNmbOfWorkers() {
         return nmbOfWorkers;
     }
 
-    private Class clazz;
-    private int nmbOfWorkers;
+    private final int nmbOfWorkers;
 
     public String getId() {
         return id;
     }
 
-    private String id;
+    private final String id;
 
-    public ActionConfig(String id, Class clazz, int nmbOfWorkers){
+    public ActionFactory getActionFactory() {
+        return actionFactory;
+    }
+
+    private final ActionFactory actionFactory;
+
+    public ActionConfig(String id, ActionFactory actionFactory, int nmbOfWorkers){
         this.id = id;
-        this.clazz = clazz;
         this.nmbOfWorkers = nmbOfWorkers;
+        this.actionFactory = actionFactory;
     }
 
     private Map<String, ActionConfig> receivers = new TreeMap<String, ActionConfig>();

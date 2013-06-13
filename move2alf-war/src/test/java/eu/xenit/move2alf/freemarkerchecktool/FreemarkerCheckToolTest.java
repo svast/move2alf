@@ -2,6 +2,7 @@ package eu.xenit.move2alf.freemarkerchecktool;
 
 import static org.junit.Assert.assertEquals;
 
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -9,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.util.Assert;
 
-import eu.xenit.move2alf.web.dto.JobConfig;
 import freemarker.core.InvalidReferenceException;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
@@ -38,11 +38,11 @@ public class FreemarkerCheckToolTest {
 	private RootMap createRootMap() throws Exception {
 		final RootMap rootMap = freemarkerCheckTool.createRootMap();
 
-		final JobConfig jobConfig = new JobConfig();
-		jobConfig.setName("x");
-		jobConfig.setDescription("x");
+		final JobModel jobModel = new JobModel();
+		jobModel.setName("x");
+		jobModel.setDescription("x");
 
-		rootMap.addValue("job", jobConfig);
+		rootMap.addValue("job", jobModel);
 
 		return rootMap;
 	}

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.junit.*;
 import org.springframework.util.Assert;
 
@@ -17,7 +18,6 @@ import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.freemarkerchecktool.FreemarkerCheckTool;
 import eu.xenit.move2alf.freemarkerchecktool.RootMap;
-import eu.xenit.move2alf.web.dto.JobConfig;
 
 @Ignore
 public class FreemarkerTemplatesTest {
@@ -132,14 +132,14 @@ public class FreemarkerTemplatesTest {
 
 		ArrayList<Object> destinationOptions = new ArrayList<Object>();
 		
-		rootMap.add("job", JobConfig.class);
+		rootMap.add("job", JobModel.class);
 		rootMap.addValue("destinations", destinations); //TODO rootMap.addList("destinations", ... .class)
 		rootMap.addList("metadataOptions", FilesystemMetadataAction.class);
 		rootMap.addValue("transformOptions", transformOptions); //TODO rootMap.addList("transformOptions", ... .class)
 		rootMap.addValue("destinationOptions", destinationOptions); //TODO rootMap.addList("destinationOptions", ... .class)
 		rootMap.addValue("role", "x");
 		
-		rootMap.add("docsPerSecond", JobConfig.class);
+		rootMap.add("docsPerSecond", JobModel.class);
 		rootMap.addList("processedDocuments", ProcessedDocument.class);
 		
 		return rootMap;

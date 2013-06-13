@@ -8,7 +8,6 @@ import java.util.Set;
 import org.junit.*;
 
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
@@ -74,7 +73,7 @@ public class RootMapTest {
 //				.getAppliedConfiguredActionOnFailure();
 //		assertNotNull(appliedConfiguredActionOnFailure); // TODO check fields of
 //															// appliedConfiguredActionOnFailure
-//		final Set<ConfiguredSourceSink> configuredSourceSinkSet = configuredAction
+//		final Set<ConfiguredSharedResource> configuredSourceSinkSet = configuredAction
 //				.getConfiguredSourceSinkSet();
 //		assertEquals(1, configuredSourceSinkSet.size()); // TODO check
 //															// configuredSourceSinkSet

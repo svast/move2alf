@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ActionInfo {
+public @interface ClassInfo {
     String classId();
     String category() default ConfigurableObject.CAT_DEFAULT;
     String description() default "";

@@ -24,7 +24,7 @@ public class DefaultErrorHandler implements ErrorHandler {
     }
 
 	/* (non-Javadoc)
-	 * @see eu.xenit.move2alf.logic.ErrorHandlerInterface#handleError(eu.xenit.move2alf.core.simpleaction.data.FileInfo, eu.xenit.move2alf.web.dto.JobConfig, eu.xenit.move2alf.core.dto.Cycle, java.lang.Exception)
+	 * @see eu.xenit.move2alf.logic.ErrorHandlerInterface#handleError(eu.xenit.move2alf.core.simpleaction.data.FileInfo, eu.xenit.move2alf.web.dto.JobModel, eu.xenit.move2alf.core.dto.Cycle, java.lang.Exception)
 	 */
 	@Override
 	public void handleError(String actionId, Object message, Exception e, SendingContext sendingContext) {

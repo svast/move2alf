@@ -1,23 +1,19 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
-import eu.xenit.move2alf.pipeline.actions.{EOCBlockingAction, HasSendingContext, HasStateContext}
+import eu.xenit.move2alf.pipeline.actions._
 import eu.xenit.move2alf.common.LogHelper
 import akka.actor.ActorContext
 
 /**
- * Created with IntelliJ IDEA.
- * User: thijs
+ * User: Thijs Lemmens
  * Date: 5/2/13
  * Time: 3:36 PM
- * To change this template use File | Settings | File Templates.
  */
-abstract class AbstractActionContextFactory(id: String, actionClass: Class[_], parameters: Map[String, AnyRef]) extends LogHelper{
-
-  protected type T
+abstract class AbstractActionContextFactory(id: String, actionFactory: ActionFactory) extends LogHelper{
 
 
   def createActionContext(context: ActorContext): AbstractActionContext = {
-    val basicAction: T = getAction
+    val basicAction: Action = getAction
 
     val actionContext = constructActionContext(basicAction)(context)
 
@@ -37,13 +33,21 @@ abstract class AbstractActionContextFactory(id: String, actionClass: Class[_], p
       case _ =>
     }
 
+    basicAction match {
+      case sa: HasTaskContext => {
+        logger.debug("Adding TaskContext")
+        sa.setTaskContext(new TaskContextImpl(actionContext))
+      }
+      case _ =>
+    }
+
     actionContext
   }
 
 
-  protected def constructActionContext(basicAction: T)(implicit context: ActorContext): AbstractActionContext
+  protected def constructActionContext(basicAction: Action)(implicit context: ActorContext): AbstractActionContext
 
-  protected def addSendingContext(basicAction: T, context: AbstractActionContext) {
+  protected def addSendingContext(basicAction: Action, context: AbstractActionContext) {
     basicAction match {
       case sa: HasSendingContext => {
         logger.debug("Adding SendingContext")
@@ -53,43 +57,8 @@ abstract class AbstractActionContextFactory(id: String, actionClass: Class[_], p
     }
   }
 
-  protected def getAction: T = {
-    val constructor = actionClass.getConstructor()
-    val basicAction: T = constructor.newInstance().asInstanceOf[T]
-    val methods = actionClass.getMethods
-    val methodMap = methods map {
-      method => (method.getName, method)
-    } toMap
-
-    parameters foreach {
-      case (key, value) => {
-        try {
-          val method = methodMap("set"+key.capitalize)
-
-          try {
-            logger.debug("Setting parameter: "+key+", value: "+value.toString);
-            method.invoke(basicAction, value)
-          } catch {
-            case e: IllegalArgumentException => {
-              logger.error("Could not set parameter: "+key+"\n" +
-                "Method parameter: "+method.getParameterTypes()(0).getCanonicalName+"\n" +
-                "Value type: "+value.getClass.getCanonicalName, e)
-            }
-            case e: NullPointerException => {
-              logger.error("NullPointer", e);
-              if(method == null){
-                logger.error("method is null")
-              }
-              logger.error("key: "+key)
-              logger.error("value: "+value)
-            }
-          }
-        } catch {
-          case e: NoSuchElementException => logger.info("No setter for parameter: "+key)
-        }
-      }
-    }
-    basicAction
+  protected def getAction: Action = {
+    actionFactory.createAction()
   }
 
 }

@@ -4,15 +4,15 @@ import java.io.File;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.action.ActionInfo;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
+import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.SimpleActionWithSourceSink;
+import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
-@ActionInfo(classId = "SAList",
+@ClassInfo(classId = "SAList",
             description = "Checks if the file exists in the given path")
-public class SAList extends SimpleActionWithSourceSink<FileInfo> {
+public class SAList extends ActionWithDestination<FileInfo> {
 
 	public static final String PARAM_PATH = "path";
     private String path;
@@ -25,7 +25,7 @@ public class SAList extends SimpleActionWithSourceSink<FileInfo> {
         FileInfo newParameterMap = new FileInfo();
         newParameterMap.putAll(fileInfo);
 
-        ConfiguredSourceSink sinkConfig = getSinkConfig();
+        ConfiguredSharedResource sinkConfig = getSinkConfig();
         SourceSink sink = getSink();
 
         String basePath = path;

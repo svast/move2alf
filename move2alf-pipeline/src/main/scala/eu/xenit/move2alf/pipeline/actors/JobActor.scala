@@ -2,12 +2,14 @@ package eu.xenit.move2alf.pipeline.actors
 
 import akka.actor.{ActorRef, Actor, FSM}
 import scala.collection.immutable.HashMap
-import eu.xenit.move2alf.pipeline.{JobInfo, EOC, Start}
+import eu.xenit.move2alf.pipeline._
 import akka.routing.Broadcast
-import eu.xenit.move2alf.pipeline.actions.ActionConfig
+import eu.xenit.move2alf.pipeline.actions.{JobConfig, ActionConfig}
 import scala.collection.mutable
 import scala.collection.JavaConversions._
 import eu.xenit.move2alf.pipeline.state.JobContext
+import eu.xenit.move2alf.pipeline.actors.CycleData
+import akka.routing.Broadcast
 
 
 sealed trait JobState
@@ -27,19 +29,20 @@ case class CycleData(counter: Int) extends Data
  * Time: 2:52 PM
  * To change this template use File | Settings | File Templates.
  */
-class JobActor(val id: String, private val config: ActionConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
+class JobActor(val id: String, private val config: JobConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
   implicit val jobContext = new JobContext(id)
 
-  val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config)
+  val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config.getFirstAction)
+  jobInfo.setActorRefs(actorRefs)
 
-  val firstActor:ActorRef = actorRefs.get(config.getId).get
+  val firstActor:ActorRef = actorRefs.get(config.getFirstAction.getId).get
 
   startWith(NotRunning, Uninitialized)
 
   when(NotRunning) {
     case Event(Start, Uninitialized) => {
       firstActor ! Broadcast(Start)
-      firstActor ! Broadcast(EOC)
+      if (config.isAutoStop) firstActor ! Broadcast(EOC)
       goto(Running) using CycleData(counter = nmbOfSenders)
     }
   }
@@ -52,6 +55,14 @@ class JobActor(val id: String, private val config: ActionConfig, private val job
       }
     }
     case Event(Start | Broadcast(Start), _) => stay
+    case Event(Stop, _) => {
+      firstActor ! Broadcast(EOC)
+      stay
+    }
+    case Event(TaskMessage(key, message, ref), _) => {
+      firstActor ! TaskMessage(key, message, ref)
+      stay
+    }
   }
 
   onTransition {

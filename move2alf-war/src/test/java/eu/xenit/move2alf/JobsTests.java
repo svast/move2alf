@@ -62,7 +62,7 @@ public class JobsTests extends IntegrationTests {
 //		assertTrue(after.after(newJob.getLastModifyDateTime())
 //				|| after.equals(newJob.getLastModifyDateTime()));
 //		assertEquals("admin", newJob.getCreator().getUserName());
-//		getJobService().deleteJob(newJob.getId());
+//		getJobService().destroy(newJob.getId());
 //	}
 //
 //	@Test
@@ -79,7 +79,7 @@ public class JobsTests extends IntegrationTests {
 //			}
 //		}
 //		assertTrue(testJobInResult);
-//		getJobService().deleteJob(newJob.getId());
+//		getJobService().destroy(newJob.getId());
 //	}
 //
 //	@Test
@@ -96,7 +96,7 @@ public class JobsTests extends IntegrationTests {
 //		// cycles = getJobService().getCyclesForJob(newJob.getId());
 //		Thread.sleep(1000);
 //
-//		getJobService().deleteJob(newJob.getId());
+//		getJobService().destroy(newJob.getId());
 //		// assertEquals(1, cycles.size());
 //		// TODO: run job, see if cycle is created
 //		// TODO: do cycles need to be sorted chronologically?

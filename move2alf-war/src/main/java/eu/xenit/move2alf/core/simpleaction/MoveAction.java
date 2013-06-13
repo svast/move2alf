@@ -5,12 +5,12 @@ import java.io.File;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.action.ActionInfo;
+import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 
-@ActionInfo(classId = "MoveAction",
+@ClassInfo(classId = "MoveAction",
             description = "Moves files on the filesystem")
 public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
 

@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.pipeline.actions.context
 
+import akka.actor.{ActorRef, ActorContext}
+
 /**
  * Created with IntelliJ IDEA.
  * User: thijs
@@ -10,6 +12,14 @@ package eu.xenit.move2alf.pipeline.actions.context
 trait StateContext {
 
   def getJobId(): String
+
+  def getActorContext(): ActorContext
+
+  def getActorRef(): ActorRef
+
+  def getRouterActorRef(): ActorRef
+
+  def getActionId(): String
 
   /**
    * Save a variable that can be retrieved later in this cycle by an Action in the current Job.

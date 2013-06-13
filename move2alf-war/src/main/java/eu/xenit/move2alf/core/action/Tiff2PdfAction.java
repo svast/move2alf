@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.common.Tiff2Pdf;
 
-@ActionInfo(classId = "Tiff2PdfAction",
+@ClassInfo(classId = "Tiff2PdfAction",
             category = ConfigurableObject.CAT_TRANSFORM,
             description = "Action that transforms multiple tiff files to pdf.")
 public class Tiff2PdfAction extends Move2AlfReceivingAction<FileInfo> {
