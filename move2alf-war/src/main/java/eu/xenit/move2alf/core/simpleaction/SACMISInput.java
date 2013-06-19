@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Map;
 
 /**
  * SACMISInput
@@ -31,6 +32,8 @@ public class SACMISInput extends Move2AlfStartAction {
 	public static final String PARAM_CMIS_URL = "cmisUrl";
 	public static final String PARAM_CMIS_USERNAME = "cmisUsername";
 	public static final String PARAM_CMIS_PASSWORD = "cmisPassword";
+
+	public static final String PARAM_CAMEL_HEADER = "camelHeader";
 
 	private String cmisURL;
 	private String cmisUsername;
@@ -59,7 +62,7 @@ public class SACMISInput extends Move2AlfStartAction {
 			camel.addRoutes(new RouteBuilder() {
 				@Override
 				public void configure() throws Exception {
-					from(getEndpoint())
+					from(getEndpoint())//.streamCaching()
 							.to(DIRECT_ENDPOINT);
 				}
 			});
@@ -89,6 +92,16 @@ public class SACMISInput extends Move2AlfStartAction {
 			final String cmisPath = (String) exchange.getIn().getHeader("cmis:path");
 			logger.debug(String.format("folderPath: %s, cmisName: %s, cmisPath: %s", folderPath, cmisName, cmisPath));
 
+			// log all headers
+			for (Map.Entry<String, Object> header : exchange.getIn().getHeaders().entrySet()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Message ID: '%s' - Header name: '%s' value: '%s'",
+							exchange.getIn().getMessageId(),
+							header.getKey(),
+							(header.getValue() != null) ? header.getValue().toString() : "null"));
+				}
+			}
+
 			final boolean isFile = (cmisPath == null);
 			final String path = isFile ? folderPath + "/" + cmisName : cmisPath;
 
@@ -108,12 +121,13 @@ public class SACMISInput extends Move2AlfStartAction {
 					// file is actually a folder. should never happen
 					throw new Move2AlfException(e);
 				} catch (IOException e) {
-					throw new Move2AlfException(e);
+					throw new Move2AlfException(String.format("'%s' failed", cmisName), e);
 				}
 
 				final FileInfo fileInfo = new FileInfo();
 				fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
 				fileInfo.put(PARAM_FILE, file);
+				fileInfo.put(PARAM_CAMEL_HEADER, exchange.getIn().getHeaders());
 				sendMessage(fileInfo);
 			}
 
