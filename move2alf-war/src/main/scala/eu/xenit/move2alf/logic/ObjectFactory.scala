@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.logic
 
-import eu.xenit.move2alf.pipeline.actions.Action
 import scala.collection.JavaConversions._
 import eu.xenit.move2alf.common.LogHelper
 import org.springframework.stereotype.Component

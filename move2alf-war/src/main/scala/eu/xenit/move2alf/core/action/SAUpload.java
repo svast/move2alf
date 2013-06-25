@@ -1,17 +1,14 @@
-package eu.xenit.move2alf.core.simpleaction;
+package eu.xenit.move2alf.core.action;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.action.ClassInfo;
-import eu.xenit.move2alf.core.action.messages.SendBatchMessage;
+import eu.xenit.move2alf.core.action.ActionWithDestination;
 import eu.xenit.move2alf.core.action.messages.SetAclMessage;
 import eu.xenit.move2alf.core.simpleaction.data.Batch;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 import eu.xenit.move2alf.core.sourcesink.ACL;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
-import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;

@@ -4,7 +4,6 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 

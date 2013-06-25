@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.core.action;
 
-import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.logic.DefaultErrorHandler;
 import eu.xenit.move2alf.logic.ErrorHandler;
 import eu.xenit.move2alf.pipeline.actions.AbstractSendingAction;
@@ -14,7 +13,11 @@ import eu.xenit.move2alf.pipeline.actions.AbstractSendingAction;
  */
 public abstract class Move2AlfAction extends AbstractSendingAction {
 
-    private ErrorHandler errorHandler = new DefaultErrorHandler(false);
+    public Move2AlfAction(){
+        errorHandler = new DefaultErrorHandler(false);
+    }
+
+    private ErrorHandler errorHandler;
     public void setErrorHandler(ErrorHandler errorHandler){
         this.errorHandler = errorHandler;
     }

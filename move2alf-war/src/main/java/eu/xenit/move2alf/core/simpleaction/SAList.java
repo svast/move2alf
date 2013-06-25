@@ -7,7 +7,6 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 import eu.xenit.move2alf.core.sourcesink.SourceSink;
 
 @ClassInfo(classId = "SAList",

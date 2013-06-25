@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.action.metadata;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.core.simpleaction.helpers.ActionWithDestination;
 
 import java.io.File;
 

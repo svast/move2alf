@@ -1,6 +1,5 @@
 package eu.xenit.move2alf.core.action;
 
-import eu.xenit.move2alf.pipeline.actions.AbstractBasicAction;
 import eu.xenit.move2alf.pipeline.actions.ReceivingAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ public abstract class Move2AlfReceivingAction<T> extends Move2AlfAction implemen
         try {
             executeImpl(message);
         } catch (Exception e){
-
             handleError(message, e);
         }
     }
