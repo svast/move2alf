@@ -13,10 +13,12 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultConsumerTemplate;
+import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisExtensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -123,6 +125,17 @@ public class SACMISInput extends Move2AlfStartAction {
 				} catch (IOException e) {
 					throw new Move2AlfException(String.format("'%s' failed", cmisName), e);
 				}
+
+                if (logger.isDebugEnabled()) {
+                    List<CmisExtensionType> extensions = (List<CmisExtensionType>) exchange.getIn().getHeader(CamelCMISConstants.CAMEL_CMIS_EXTENSIONS);
+                    if (extensions != null) {
+                        logger.debug("EXTENSIONS: " + extensions);
+                    }
+                    Object acl = exchange.getIn().getHeader(CamelCMISConstants.CAMEL_CMIS_ACL);
+                    if (acl != null) {
+                        logger.debug("ACL: " + acl);
+                    }
+                }
 
 				final FileInfo fileInfo = new FileInfo();
 				fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
