@@ -7,15 +7,13 @@ import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
 import eu.xenit.move2alf.repository.*;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -259,8 +257,8 @@ public class AlfrescoSourceSink extends SourceSink {
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		try {
 			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
-					description, namespace, contentType, metadata,
-					multiValueMetadata);
+                    description, namespace, contentType, metadata,
+                    multiValueMetadata);
 		} catch (final RepositoryException e) {
 			Throwable cause = e.getCause();
 			if (cause == null) {
@@ -285,10 +283,10 @@ public class AlfrescoSourceSink extends SourceSink {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
 					ras.updateContentByDocNameAndPath(remotePath,
-							document.getName(), document, mimeType, false);
+                            document.getName(), document, mimeType, false);
 					if (metadata != null) {
 						ras.updateMetaDataByDocNameAndPath(remotePath,
-								document.getName(), namespace, metadata);
+                                document.getName(), namespace, metadata);
 						// TODO: updating multivalue metadata not supported by
 						// RRA?
 					}
@@ -358,37 +356,50 @@ public class AlfrescoSourceSink extends SourceSink {
 	private static RepositoryAccessSession createRepositoryAccessSession(
 			final ConfiguredSourceSink sinkConfig) {
 		// RepositoryAccessSession ras;
-		RepositoryAccessSession ras = AlfrescoSourceSink.ras.get();
-		if (ras == null) {
-			logger.debug("Creating new RepositoryAccessSession for thread "
-					+ Thread.currentThread());
-			final String user = sinkConfig.getParameter(PARAM_USER);
-			final String password = sinkConfig.getParameter(PARAM_PASSWORD);
-			String url = sinkConfig.getParameter(PARAM_URL);
-			if (url.endsWith("/")) {
-				url = url + "api/";
-			} else {
-				url = url + "/api/";
-			}
-			WebServiceRepositoryAccess ra = null;
-			try {
-				ra = new WebServiceRepositoryAccess(new URL(url), user,
-						password, AlfrescoSourceSink.luceneFallbackEnabled);
-			} catch (final MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			ras = ra.createSessionAndRetry();
-			AlfrescoSourceSink.ras.set(ras);
+		WebServiceRepositoryAccessSession ras = (WebServiceRepositoryAccessSession) AlfrescoSourceSink.ras.get();
+        final String user = sinkConfig.getParameter(PARAM_USER);
+        final String password = sinkConfig.getParameter(PARAM_PASSWORD);
+        String url = sinkConfig.getParameter(PARAM_URL);
+        if (url.endsWith("/")) {
+            url = url + "api/";
+        } else {
+            url = url + "/api/";
+        }
+        URL url1 = null;
+        try {
+            url1 = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        if (ras == null) {
+            createNewRepositoryAccessSession(user, password, url1);
 		} else {
-			logger.debug("Reusing existing RepositoryAccessSession in thread "
-					+ Thread.currentThread());
+            if(!ras.alfrescoURL.equals(url1)){
+                destroyRepositoryAccessSession();
+                createNewRepositoryAccessSession(user, password, url1);
+            } else {
+                logger.debug("Reusing existing RepositoryAccessSession in thread "
+                        + Thread.currentThread());
+            }
 		}
 		return AlfrescoSourceSink.ras.get();
 		// return ras;
 	}
 
-	private static void destroyRepositoryAccessSession() {
+    private static void createNewRepositoryAccessSession(String user, String password, URL url1) {
+        WebServiceRepositoryAccessSession ras;
+        logger.debug("Creating new RepositoryAccessSession for thread "
+                + Thread.currentThread());
+        WebServiceRepositoryAccess ra = null;
+
+        ra = new WebServiceRepositoryAccess(url1, user,
+                    password, AlfrescoSourceSink.luceneFallbackEnabled);
+
+        ras = (WebServiceRepositoryAccessSession) ra.createSessionAndRetry();
+        AlfrescoSourceSink.ras.set(ras);
+    }
+
+    private static void destroyRepositoryAccessSession() {
 		AlfrescoSourceSink.ras.get().closeSession();
 		AlfrescoSourceSink.ras.remove();
 	}
