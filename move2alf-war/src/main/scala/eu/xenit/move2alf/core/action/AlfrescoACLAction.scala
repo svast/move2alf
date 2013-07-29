@@ -1,6 +1,10 @@
 package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.core.action.messages.{SetACLReply, BatchACLMessage}
+import scala.collection.JavaConversions._
+import eu.xenit.move2alf.repository.UploadResult
+import eu.xenit.move2alf.core.simpleaction.data.FileInfo
+import eu.xenit.move2alf.common.Parameters
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -8,7 +12,23 @@ import eu.xenit.move2alf.core.action.messages.{SetACLReply, BatchACLMessage}
  * Time: 11:35 AM
  */
 class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, SetACLReply]{
-  protected def executeImpl(message: BatchACLMessage) {}
+
+
+  protected def executeImpl(message: BatchACLMessage) {
+
+    val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
+
+    for (result <- message.uploadResultList) {
+      val newParameterMap = new FileInfo()
+      newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath);
+      newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file);
+      newParameterMap.put(Parameters.PARAM_STATUS, if (result.getStatus() == UploadResult.VALUE_OK)
+        Parameters.VALUE_OK else Parameters.VALUE_FAILED);
+      newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
+      newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
+      sendMessage(newParameterMap)
+    }
+  }
 }
 
 object AlfrescoACLAction{

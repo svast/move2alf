@@ -5,6 +5,8 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 6/12/13
@@ -17,5 +19,10 @@ public class SharedResourceClassInfoService extends AbstractClassInfoService{
     @Override
     protected void addFilters(ClassPathScanningCandidateComponentProvider provider) {
         provider.addIncludeFilter(new AssignableTypeFilter(SharedResource.class));
+    }
+
+    @PostConstruct
+    public void init() {
+        scanForClasses("eu.xenit");
     }
 }

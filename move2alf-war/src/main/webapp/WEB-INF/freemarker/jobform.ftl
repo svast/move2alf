@@ -55,7 +55,7 @@
 		<@labeledSingleLineTextInput label="Extension" name="extension" binding="job.extension" attributes="maxlength='${job.extensionMaxLength}'" />
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
 			<#if destination.parameters?has_content>
-				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>> ${destination.parameters.name} - ${destination.parameters.url}</option>
+				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>> ${destination.name}</option>
 			</#if>
 		</@labeledSelectList>
 		

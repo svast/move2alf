@@ -11,12 +11,12 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory
  * Date: 6/12/13
  * Time: 1:45 PM
  */
-@Component
-class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String]) extends LogHelper with ApplicationContextAware{
+class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String], private val beanFactory: AutowireCapableBeanFactory) extends LogHelper{
 
   def createObject(): T = {
     val constructor = clazz.getConstructor()
     val basicAction: T = constructor.newInstance().asInstanceOf[T]
+    beanFactory.autowireBean(basicAction)
     val methods = clazz.getMethods
     val methodMap = methods map {
       method => (method.getName, method)
@@ -28,7 +28,7 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
           val method = methodMap("set"+key.capitalize)
 
           try {
-            logger.debug("Setting parameter: "+key+", value: "+value.toString);
+            logger.debug("Setting parameter: "+key+", value: "+value.toString)
             method.invoke(basicAction, value)
           } catch {
             case e: IllegalArgumentException => {
@@ -37,7 +37,7 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
                 "Value type: "+value.getClass.getCanonicalName, e)
             }
             case e: NullPointerException => {
-              logger.error("NullPointer", e);
+              logger.error("NullPointer", e)
               if(method == null){
                 logger.error("method is null")
               }
@@ -50,14 +50,7 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
         }
       }
     }
-    applicationContext.autowireBean(basicAction)
     basicAction
-  }
-
-  private var applicationContext: AutowireCapableBeanFactory = _
-
-  override def setApplicationContext(applicationContext: ApplicationContext) {
-    this.applicationContext = applicationContext.getAutowireCapableBeanFactory
   }
 
 }

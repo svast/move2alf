@@ -7,7 +7,7 @@ import eu.xenit.move2alf.common.IdObject;
  * Date: 6/2/13
  * Time: 5:25 PM
  */
-public class Destination extends IdObject {
+public class Resource extends IdObject {
 
     private String name;
 
@@ -28,4 +28,14 @@ public class Destination extends IdObject {
     public void setFirstConfiguredAction(ConfiguredAction firstConfiguredAction) {
         this.firstConfiguredAction = firstConfiguredAction;
     }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
+    }
+
+    private String classId;
 }

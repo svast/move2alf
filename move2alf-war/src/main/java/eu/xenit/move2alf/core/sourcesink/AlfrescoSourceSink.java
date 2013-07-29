@@ -22,9 +22,9 @@ import java.util.Map;
 
 public class AlfrescoSourceSink extends SharedResource {
 	
-	private static final String PARAM_URL = "url";
-	private static final String PARAM_PASSWORD = "password";
-	private static final String PARAM_USER = "user";
+	public static final String PARAM_URL = "url";
+	public static final String PARAM_PASSWORD = "password";
+	public static final String PARAM_USER = "user";
 
     @Value(value = "#{'${repo.overwrite.optimistic}'}")
     private boolean overwriteOptimistic;
@@ -39,13 +39,9 @@ public class AlfrescoSourceSink extends SharedResource {
         AlfrescoSourceSink.luceneFallbackEnabled = luceneFallbackEnabled;
     }
 
-    private RepositoryAccessSession ras;
+    private ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
 	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSourceSink.class);
-
-	public List<File> list(final String path, final boolean recursive) {
-		return null;
-	}
 
 	public void send(final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
@@ -105,7 +101,7 @@ public class AlfrescoSourceSink extends SharedResource {
 	}
 
     public String putContent(File file, String mimeType){
-        return ras.putContent(file, mimeType);
+        return createRepositoryAccessSession().putContent(file, mimeType);
     }
 
 	public List<UploadResult> sendBatch(
@@ -245,9 +241,9 @@ public class AlfrescoSourceSink extends SharedResource {
 			final File document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		try {
-			ras.storeDocAndCreateParentSpaces(document, mimeType, remotePath,
-					description, namespace, contentType, metadata,
-					multiValueMetadata);
+			createRepositoryAccessSession().storeDocAndCreateParentSpaces(document, mimeType, remotePath,
+                    description, namespace, contentType, metadata,
+                    multiValueMetadata);
 		} catch (final RepositoryException e) {
 			Throwable cause = e.getCause();
 			if (cause == null) {
@@ -271,11 +267,11 @@ public class AlfrescoSourceSink extends SharedResource {
 				} else if (WriteOption.OVERWRITE == docExistsMode) {
 					logger.info("Overwriting document " + document.getName()
 							+ " in " + remotePath);
-					ras.updateContentByDocNameAndPath(remotePath,
-							document.getName(), document, mimeType, false);
+					createRepositoryAccessSession().updateContentByDocNameAndPath(remotePath,
+                            document.getName(), document, mimeType, false);
 					if (metadata != null) {
-						ras.updateMetaDataByDocNameAndPath(remotePath,
-								document.getName(), namespace, metadata);
+						createRepositoryAccessSession().updateMetaDataByDocNameAndPath(remotePath,
+                                document.getName(), namespace, metadata);
 						// TODO: updating multivalue metadata not supported by
 						// RRA?
 					}
@@ -349,19 +345,18 @@ public class AlfrescoSourceSink extends SharedResource {
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        if (url.endsWith("/")) {
+            this.url = url + "api/";
+        } else {
+            this.url = url + "/api/";
+        }
     }
 
     private RepositoryAccessSession createRepositoryAccessSession() {
 		// RepositoryAccessSession ras;
-		if (ras == null) {
+		if (ras.get() == null) {
 			logger.debug("Creating new RepositoryAccessSession for thread "
 					+ Thread.currentThread());
-			if (url.endsWith("/")) {
-				url = url + "api/";
-			} else {
-				url = url + "/api/";
-			}
 			WebServiceRepositoryAccess ra = null;
 			try {
 				ra = new WebServiceRepositoryAccess(new URL(url), user,
@@ -370,17 +365,17 @@ public class AlfrescoSourceSink extends SharedResource {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			ras = ra.createSessionAndRetry();
+			ras.set(ra.createSessionAndRetry());
 		} else {
 			logger.debug("Reusing existing RepositoryAccessSession in thread "
 					+ Thread.currentThread());
 		}
-		return ras;
+		return ras.get();
 	}
 
 	private void destroyRepositoryAccessSession() {
-		ras.closeSession();
-        ras = null;
+		ras.get().closeSession();
+        ras.remove();
 	}
 
 	public String getCategory() {

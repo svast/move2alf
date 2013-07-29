@@ -1,13 +1,14 @@
 package eu.xenit.move2alf.web.controller;
 
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
+import eu.xenit.move2alf.core.action.ClassInfoModel;
+import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
+import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
+import eu.xenit.move2alf.web.controller.destination.DestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.ResourceTypeClassInfoService;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
+import eu.xenit.move2alf.web.dto.DestinationInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,10 @@ import java.util.Map;
 @Controller
 public class DestinationController extends AbstractController{
 
+    public DestinationController(){
+        super();
+    }
+
     @Autowired
     private JobService jobService;
     private JobService getJobService(){
@@ -37,28 +43,20 @@ public class DestinationController extends AbstractController{
     }
 
     @Autowired
-    private SourceSinkFactory sourceSinkFactory;
-    private SourceSinkFactory getSourceSinkFactory(){
-        return sourceSinkFactory;
-    }
+    private ResourceTypeClassInfoService resourceTypeClassInfoService;
+
+    @Autowired
+    private DestinationService destinationService;
+
 
     @RequestMapping("/destinations")
     public ModelAndView destinations() {
         ModelAndView mav = new ModelAndView();
-        List<ConfiguredSharedResource> destinations = getJobService()
-                .getAllDestinationConfiguredSourceSinks();
-
-        Map<String, String> sourceSinkNames = new HashMap<String, String>();
-
-        for (ConfiguredSharedResource destination : destinations) {
-            SourceSink sourceSink = getSourceSinkFactory().getObject(
-                    destination.getClassId());
-            sourceSinkNames.put(destination.getClassId(), sourceSink
-                    .getName());
+        List<DestinationInfo> destinations = new ArrayList<DestinationInfo>();
+        for(Resource resource: destinationService.getDestinations()){
+            destinations.add(resourceTypeClassInfoService.getDestinationType(resource.getClassId()).getDestinationInfo(resource));
         }
-
         mav.addObject("destinations", destinations);
-        mav.addObject("typeNames", sourceSinkNames);
         mav.addObject("role", getRole());
         mav.setViewName("manage-destinations");
         return mav;
@@ -66,13 +64,25 @@ public class DestinationController extends AbstractController{
 
     @RequestMapping(value = "/destination/create", method = RequestMethod.GET)
     public ModelAndView createDestinationsForm() {
+        ModelAndView mav = getModelAndView();
+
+        //Default is Alfresco. If we add something else, we should change this.
+        mav.addObject("destination", resourceTypeClassInfoService.getDestinationType("Alfresco").getModel());
+        mav.setViewName("create-destination");
+        return mav;
+    }
+
+    private ModelAndView getModelAndView() {
         ModelAndView mav = new ModelAndView();
-        mav.addObject("destination", new DestinationConfig());
-        mav.addObject("destinationOptions", getJobService()
-                .getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
+        Map<String, DestinationTypeController> destinationTypeMap = new HashMap<String, DestinationTypeController>();
+        for(ClassInfoModel model: resourceTypeClassInfoService.getClassesForCategory(ResourceTypeClassInfoService.CATEGORY_DESTINATION)){
+            DestinationTypeController type = resourceTypeClassInfoService.getDestinationType(model.getClassId());
+            destinationTypeMap.put(model.getClassId(), type);
+        }
+
+        mav.addObject("destinationOptions", destinationTypeMap);
         mav.addObject("role", getRole());
         mav.addObject("showDestinations", "false");
-        mav.setViewName("create-destination");
         return mav;
     }
 
@@ -84,8 +94,8 @@ public class DestinationController extends AbstractController{
         if(errors.hasErrors()){
             ModelAndView mav = new ModelAndView("create-destination");
             mav.addObject("destination", destination);
-            mav.addObject("destinationOptions", getJobService()
-                    .getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
+
+//            mav.addObject("destinationOptions", destinationTypeMap);
             mav.addObject("role", getRole());
             mav.addObject("errors", errors.getFieldErrors());
             return mav;
@@ -93,12 +103,7 @@ public class DestinationController extends AbstractController{
         ModelAndView mav = new ModelAndView();
 
         HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
-        destinationParams.put(EDestinationParameter.NAME, destination.getDestinationName());
-        destinationParams.put(EDestinationParameter.URL, destination.getDestinationURL());
-        destinationParams.put(EDestinationParameter.USER, destination.getAlfUser());
-        destinationParams.put(EDestinationParameter.PASSWORD, destination.getAlfPswd());
-        destinationParams.put(EDestinationParameter.THREADS, Integer.toString(destination.getNbrThreads()));
-        getJobService().createDestination(destination.getDestinationType(), destinationParams);
+        resourceTypeClassInfoService.getDestinationType(destination.getType()).processModel(destination);
 
         mav.setViewName("redirect:/destinations");
         return mav;
@@ -111,67 +116,15 @@ public class DestinationController extends AbstractController{
     }
 
     private ModelAndView makeEditDestinationModelAndView(int id) {
-        ModelAndView mav = new ModelAndView();
-        ConfiguredObject destination = getJobService().getConfiguredSourceSink(id);
-        DestinationConfig destinationConfig = new DestinationConfig();
+        ModelAndView mav = getModelAndView();
+        Resource resource = destinationService.getDestination(id);
 
-        destinationConfig.setDestinationName(destination.getParameter("name"));
-        destinationConfig.setDestinationType(destination.getClassId());
-        destinationConfig.setDestinationURL(destination.getParameter("url"));
-        destinationConfig.setAlfUser(destination.getParameter("user"));
-        destinationConfig.setAlfPswd(destination.getParameter("password"));
-        destinationConfig.setNbrThreads(Integer.parseInt(destination.getParameter("threads")));
+        DestinationTypeController destinationTypeController = resourceTypeClassInfoService.getDestinationType(resource.getClassId());
+        DestinationConfig destinationConfig = destinationTypeController.getDestinationConfig(resource);
 
         mav.addObject("destination", destinationConfig);
         mav.addObject("destinationId", id);
-        mav.addObject("destinationOptions", getJobService()
-                .getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-        mav.addObject("role", getRole());
         mav.setViewName("edit-destination");
-        return mav;
-    }
-
-    @RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
-    public ModelAndView editDestination(
-            @PathVariable int id,
-            @ModelAttribute("destination") @Valid DestinationConfig destination,
-            BindingResult errors) {
-
-        boolean destinationExists = false;
-        if (!getJobService().getConfiguredSourceSink(id).getParameter("name")
-                .equals(destination.getDestinationName())) {
-            destinationExists = getJobService().checkDestinationExists(
-                    destination.getDestinationName());
-        }
-
-        if (errors.hasErrors() || destinationExists == true) {
-            System.out.println("THE ERRORS: " + errors.toString());
-
-            ModelAndView mav = makeEditDestinationModelAndView(id);
-
-            mav.addObject("destinationExists", destinationExists);
-            mav.addObject("errors", errors.getFieldErrors());
-            return mav;
-        }
-
-        ModelAndView mav = new ModelAndView();
-
-        HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
-
-        destinationParams.put(EDestinationParameter.NAME, destination
-                .getDestinationName());
-        destinationParams.put(EDestinationParameter.URL, destination
-                .getDestinationURL());
-        destinationParams.put(EDestinationParameter.USER, destination
-                .getAlfUser());
-        destinationParams.put(EDestinationParameter.PASSWORD, destination
-                .getAlfPswd());
-        destinationParams.put(EDestinationParameter.THREADS, destination
-                .getNbrThreads());
-        getJobService().editDestination(id, destination.getDestinationType(),
-                destinationParams);
-
-        mav.setViewName("redirect:/destinations");
         return mav;
     }
 

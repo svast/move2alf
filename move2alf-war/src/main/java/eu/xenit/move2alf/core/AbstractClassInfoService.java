@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -21,11 +19,7 @@ public abstract class AbstractClassInfoService {
     private static final Logger logger = LoggerFactory.getLogger(AbstractClassInfoService.class);
     protected Map<Class, ClassInfoModel> classActionClassInfoMap = new HashMap<Class, ClassInfoModel>();
     protected Map<String, ClassInfoModel> idClassMapping = new HashMap<String, ClassInfoModel>();
-
-    protected void registerClassInfo(ClassInfoModel classInfo){
-        idClassMapping.put(classInfo.getClassId(), classInfo);
-        classActionClassInfoMap.put(classInfo.getClazz(), classInfo);
-    }
+    private Map<String, List<ClassInfoModel>> categoryClassInfoMapping = new HashMap<String, List<ClassInfoModel>>();
 
     protected void scanForClasses(String basePackage) {
         ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
@@ -59,5 +53,34 @@ public abstract class AbstractClassInfoService {
         if(!classActionClassInfoMap.containsKey(clazz))
             return clazz.getCanonicalName();
         return classActionClassInfoMap.get(clazz).getClassId();
+    }
+
+    protected void registerClassInfo(ClassInfoModel classInfo){
+        addClassInfoToCategory(classInfo.getCategory(), classInfo);
+        idClassMapping.put(classInfo.getClassId(), classInfo);
+        classActionClassInfoMap.put(classInfo.getClazz(), classInfo);
+    }
+
+    private void addClassInfoToCategory(String category, ClassInfoModel actionClassInfo){
+        List<ClassInfoModel> classInfos = null;
+        if(categoryClassInfoMapping.containsKey(category)){
+            classInfos = categoryClassInfoMapping.get(category);
+        } else {
+            classInfos = new ArrayList<ClassInfoModel>();
+            categoryClassInfoMapping.put(category, classInfos);
+        }
+        classInfos.add(actionClassInfo);
+    }
+
+    public List<ClassInfoModel> getClassesForCategory(String category){
+        return categoryClassInfoMapping.get(category);
+    }
+
+    public List<ClassInfoModel> getAllClasInfoModels(){
+        List<ClassInfoModel> classInfoModels = new ArrayList<ClassInfoModel>();
+        for(List<ClassInfoModel> models: categoryClassInfoMapping.values()){
+            classInfoModels.addAll(models);
+        }
+        return classInfoModels;
     }
 }

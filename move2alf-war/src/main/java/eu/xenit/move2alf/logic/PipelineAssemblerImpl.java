@@ -1,26 +1,28 @@
 package eu.xenit.move2alf.logic;
 
 import eu.xenit.move2alf.core.action.*;
-import eu.xenit.move2alf.core.action.metadata.SetAlfrescoContentUrlAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.simpleaction.*;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service("pipelineAssembler")
-public class PipelineAssemblerImpl extends PipelineAssembler {
+public class PipelineAssemblerImpl extends PipelineAssembler implements ApplicationContextAware{
 
     public static final String SOURCE_ID= "Source";
     public static final String MOVE_BEFORE_ID = "MoveBefore";
@@ -46,6 +48,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     public static final String BATCH_ACTION = "BatchAction";
     public static final String REPORT_SAVER = "reportSaver";
     public static final String PINNED_DISPATCHER = "pinned-dispatcher";
+    public static final String ALFRESCO_ACL_ACTION = "AlfrescoAclAction";
 
     @Autowired
     private ActionClassInfoService actionClassService;
@@ -53,7 +56,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     @Autowired
 	private UsageService usageService;
 
-	private SourceSinkFactory sourceSinkFactory;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PipelineAssemblerImpl.class);
@@ -66,15 +68,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
     @Value(value="#{'${url}'}")
     private String url;
-
-	@Autowired
-	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
-		this.sourceSinkFactory = sourceSinkFactory;
-	}
-
-	public SourceSinkFactory getSourceSinkFactory() {
-		return sourceSinkFactory;
-	}
 
 
     private Map<String, ConfiguredAction> getAllConfiguredActions(ConfiguredAction action, Map<String, ConfiguredAction> configuredActionMap){
@@ -129,19 +122,19 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
                 inputFolder = Arrays.asList(path.split("\\|"));
 			} else if (UPLOAD_ID.equals(action
                     .getActionId())) {
-				destinationFolder = action.getParameter(SAUpload.PARAM_PATH);
+				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
 				dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-				writeOption = action.getParameter(SAUpload.PARAM_WRITEOPTION);
+				writeOption = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION());
 				mode = Mode.WRITE;
 			} else if (DELETE_ID
 					.equals(action.getActionId())) {
-				destinationFolder = action.getParameter(SADelete.PARAM_PATH);
+				destinationFolder = action.getParameter(DeleteAction$.MODULE$.PARAM_PATH());
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-				deleteOption = action.getParameter(SADelete.PARAM_DELETEOPTION);
+				deleteOption = action.getParameter(DeleteAction$.MODULE$.PARAM_DELETEOPTION());
 				mode = Mode.DELETE;
 			} else if (LIST_ID.equals(action
                     .getActionId())) {
-				destinationFolder = action.getParameter(SAList.PARAM_PATH);
+				destinationFolder = action.getParameter(ListAction$.MODULE$.PARAM_PATH());
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
 				ignorePath = false;
 				mode = Mode.LIST;
@@ -149,7 +142,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
                 ignorePath = true;
                 mode = Mode.LIST;
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-                destinationFolder = action.getParameter(SAList.PARAM_PATH);
+                destinationFolder = action.getParameter(ListAction$.MODULE$.PARAM_PATH());
             } else if (MOVE_BEFORE_ID
 					.equals(action.getActionId())) {
 				moveBeforeProcessing = true;
@@ -256,7 +249,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
     private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
         Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
 
-        M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters());
+        M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
         ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
 
         for(String key: configuredActionReceivers.keySet()){
@@ -373,11 +366,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 		if (Mode.WRITE == jobModel.getMode()) {
             final ConfiguredAction putContentAction = new ConfiguredAction();
             putContentAction.setActionId(PUT_CONTENT);
-            putContentAction.setClassId(actionClassService.getClassId(SetAlfrescoContentUrlAction.class));
+            putContentAction.setClassId(actionClassService.getClassId(PutContentAction.class));
             putContentAction.setNmbOfWorkers(2);
             putContentAction.addReceiver(REPORTER, reporter);
             putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-            putContentAction.setDispatcher(PINNED_DISPATCHER);
             end.addReceiver(DEFAULT_RECEIVER, putContentAction);
             end = putContentAction;
 
@@ -392,27 +384,33 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 
             final ConfiguredAction uploadAction = new ConfiguredAction();
             uploadAction.setActionId(UPLOAD_ID);
-            uploadAction.setClassId(actionClassService.getClassId(SAUpload.class));
-            uploadAction.setNmbOfWorkers(2);
+            uploadAction.setClassId(actionClassService.getClassId(AlfrescoUpload.class));
+            uploadAction.setNmbOfWorkers(1);
             uploadAction.addReceiver(REPORTER, reporter);
             uploadAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-			uploadAction.setParameter(SAUpload.PARAM_PATH, jobModel.getDestinationFolder());
-            uploadAction.setParameter(SAUpload.PARAM_WRITEOPTION, jobModel.getWriteOption().toString());
-            uploadAction.setDispatcher(PINNED_DISPATCHER);
+			uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
+            uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION(), jobModel.getWriteOption().toString());
 			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
-		}
+
+            final ConfiguredAction aclAction = new ConfiguredAction();
+            aclAction.setActionId(ALFRESCO_ACL_ACTION);
+            aclAction.setClassId(actionClassService.getClassId(AlfrescoACLAction.class));
+            aclAction.setNmbOfWorkers(1);
+            aclAction.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, aclAction);
+            end = aclAction;
+        }
 
 		if (Mode.DELETE  == jobModel.getMode()) {
             final ConfiguredAction deleteAction = new ConfiguredAction();
             deleteAction.setActionId(DELETE_ID);
-            deleteAction.setClassId(actionClassService.getClassId(SADelete.class));
+            deleteAction.setClassId(actionClassService.getClassId(DeleteAction.class));
             deleteAction.setNmbOfWorkers(1);
             deleteAction.addReceiver(REPORTER, reporter);
             deleteAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-            deleteAction.setParameter(SADelete.PARAM_PATH, jobModel.getDestinationFolder());
-            deleteAction.setParameter(SADelete.PARAM_DELETEOPTION, jobModel.getDeleteOption().toString());
-            deleteAction.setDispatcher(PINNED_DISPATCHER);
+            deleteAction.setParameter(DeleteAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
+            deleteAction.setParameter(DeleteAction$.MODULE$.PARAM_DELETEOPTION(), jobModel.getDeleteOption().toString());
             end.addReceiver(DEFAULT_RECEIVER, deleteAction);
             end = deleteAction;
 		}
@@ -423,18 +421,17 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
 			if(jobModel.getListIgnorePath()){
 				listAction = new ConfiguredAction();
                 listAction.setActionId(EXISTENCE_CHECK_ID);
-                listAction.setClassId(actionClassService.getClassId(SAExistenceCheck.class));
+                listAction.setClassId(actionClassService.getClassId(ExistenceCheck.class));
 			}
 			else{
 				listAction = new ConfiguredAction();
                 listAction.setActionId(LIST_ID);
-                listAction.setActionId(actionClassService.getClassId(SAList.class));
+                listAction.setActionId(actionClassService.getClassId(ListAction.class));
 			}
             listAction.setNmbOfWorkers(1);
-            listAction.setParameter(SAList.PARAM_PATH, jobModel.getDestinationFolder());
+            listAction.setParameter(ListAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
             listAction.addReceiver(REPORTER, reporter);
 			listAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-            listAction.setDispatcher(PINNED_DISPATCHER);
             end.addReceiver(DEFAULT_RECEIVER, listAction);
             end = listAction;
 		}
@@ -512,5 +509,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler {
             str += el +"|";
         }
         return str.substring(0, str.length()-1);
+    }
+
+    private AutowireCapableBeanFactory beanFactory;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }
 }

@@ -7,8 +7,6 @@ import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.JobConfig;
@@ -65,8 +63,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	private Scheduler scheduler;
 
-	private SourceSinkFactory sourceSinkFactory;
-
 	private MailSender mailSender;
 
     @Autowired
@@ -90,15 +86,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	public Scheduler getScheduler() {
 		return scheduler;
-	}
-
-	@Autowired
-	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
-		this.sourceSinkFactory = sourceSinkFactory;
-	}
-
-	public SourceSinkFactory getSourceSinkFactory() {
-		return sourceSinkFactory;
 	}
 
 	@Autowired
@@ -478,11 +465,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return (Long) query.uniqueResult();
 	}
 
-
-	@Override
-	public List<SourceSink> getSourceSinksByCategory(final String category) {
-		return getSourceSinkFactory().getObjectsByCategory(category);
-	}
 
 	@Override
 	public ECycleState getJobState(final int jobId) {

@@ -8,7 +8,6 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
@@ -43,7 +42,6 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private SourceSinkFactory sourceSinkFactory;
 	private UsageService usageService;
     private ActionClassInfoService actionClassService;
 
@@ -65,14 +63,6 @@ public class JobController extends AbstractController{
 		return jobService;
 	}
 
-	@Autowired
-	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
-		this.sourceSinkFactory = sourceSinkFactory;
-	}
-
-	public SourceSinkFactory getSourceSinkFactory() {
-		return sourceSinkFactory;
-	}
 	
 	@Autowired
 	public void setUsageService(UsageService usageService) {
@@ -150,9 +140,6 @@ public class JobController extends AbstractController{
 				.getAllDestinationConfiguredSourceSinks());
 		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
 		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
-		mav.addObject("destinationOptions", getJobService()
-				.getSourceSinksByCategory(
-						ConfigurableObject.CAT_DESTINATION));
 		mav.addObject("role", getRole());
 	}
 

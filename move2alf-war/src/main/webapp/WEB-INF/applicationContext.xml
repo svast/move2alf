@@ -12,12 +12,15 @@
 
     <aop:config expose-proxy="true"/>
 
-	<tx:annotation-driven transaction-manager="txManager" />
+	<tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+
 
 	<bean id="dataSourceInitializer" class="eu.xenit.move2alf.core.ConditionalDataSourceInitializer">
 		<property name="txManager" ref="txManager" />
 		<property name="enabled" value="${db.initialize}" />
 	</bean>
+
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
 
 	<context:annotation-config />
 	<context:component-scan base-package="eu.xenit.move2alf">
@@ -82,7 +85,7 @@
 				<value>eu/xenit/move2alf/core/dto/ProcessedDocument.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Schedule.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/UserPswd.hbm.xml</value>
-                <value>eu/xenit/move2alf/core/dto/Destination.hbm.xml</value>
+                <value>eu/xenit/move2alf/core/dto/Resource.hbm.xml</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">

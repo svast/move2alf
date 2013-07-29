@@ -5,68 +5,26 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class DestinationConfig {
 
 	@NotEmpty
-	private String destinationName;
+	private String name;
 
 	@NotEmpty
-	private String destinationType;
+	private String type;
 
-	@NotEmpty
-	private String destinationURL;
-
-	@NotEmpty
-	private String alfUser;
-
-	@NotEmpty
-	private String alfPswd;
-
-	private int nbrThreads = 1;
-
-	public void setDestinationName(String destinationName) {
-		this.destinationName = destinationName;
+	public String getName() {
+		return name;
 	}
 
-	public String getDestinationName() {
-		return destinationName;
+    public void setName(String name){
+        this.name = name;
+    }
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
-	public void setDestinationType(String destinationType) {
-		this.destinationType = destinationType;
+	public String getType() {
+		return type;
 	}
 
-	public String getDestinationType() {
-		return destinationType;
-	}
-
-	public void setDestinationURL(String destinationURL) {
-		this.destinationURL = destinationURL;
-	}
-
-	public String getDestinationURL() {
-		return destinationURL;
-	}
-
-	public void setAlfUser(String alfUser) {
-		this.alfUser = alfUser;
-	}
-
-	public String getAlfUser() {
-		return alfUser;
-	}
-
-	public void setAlfPswd(String alfPswd) {
-		this.alfPswd = alfPswd;
-	}
-
-	public String getAlfPswd() {
-		return alfPswd;
-	}
-
-	public void setNbrThreads(int nbrThreads) {
-		this.nbrThreads = nbrThreads;
-	}
-
-	public int getNbrThreads() {
-		return nbrThreads;
-	}
 
 }

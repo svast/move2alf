@@ -2,17 +2,14 @@ package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.core.simpleaction.data.{FileInfo, Batch}
 import eu.xenit.move2alf.core.action.messages._
-import eu.xenit.move2alf.common.{Util, Parameters}
+import eu.xenit.move2alf.common.Parameters
 import eu.xenit.move2alf.core.sourcesink.{WriteOption, ACL}
 import java.util
 import scala.collection.JavaConversions._
-import scala.Predef.String
 import scala.Boolean
-import java.lang.String
-import scala.Predef.String
-import eu.xenit.move2alf.repository.UploadResult
 import java.io.File
 import eu.xenit.move2alf.repository.alfresco.ws.Document
+import scala.collection.immutable.Map
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -20,9 +17,7 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document
  * Time: 10:29 AM
  */
 class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
-  final val PARAM_PATH: String = "path"
   private var path: String = null
-
   def setPath(path: String) {
     this.path = normalizeBasePath(path)
   }
@@ -58,7 +53,6 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
 
   }
 
-  final val PARAM_WRITEOPTION: String = "writeOption"
   private var writeOption: WriteOption = null
 
   def setWriteOption(writeOption: String) {
@@ -67,8 +61,7 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
 
   private def upload(batch: Batch, acls: util.List[ACL]) {
     val documentsToUpload: util.List[Document] = new util.ArrayList[Document]
-    val documentFileInfoMapping: util.Map[Document, FileInfo] = new util.HashMap[Document, FileInfo]
-    import scala.collection.JavaConversions._
+    val documentFileInfoMapping: java.util.Map[Document, FileInfo] = new util.HashMap[Document, FileInfo]
     for (parameterMap <- batch) {
       val relativePath: String = getParameterWithDefault(parameterMap, Parameters.PARAM_RELATIVE_PATH, "")
       val remotePath: String = normalizeRemotePath(path, relativePath)
@@ -76,8 +69,8 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       val namespace: String = getParameterWithDefault(parameterMap, Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}")
       val contentType: String = getParameterWithDefault(parameterMap, Parameters.PARAM_CONTENTTYPE, "content")
       val description: String = getParameterWithDefault(parameterMap, Parameters.PARAM_DESCRIPTION, "")
-      val metadata: Map[String, String] = parameterMap.get(Parameters.PARAM_METADATA).asInstanceOf[Map[String, String]]
-      val multiValueMetadata: Map[String, String] = parameterMap.get(Parameters.PARAM_MULTI_VALUE_METADATA).asInstanceOf[Map[String, String]]
+      val metadata: java.util.Map[String, String] = parameterMap.get(Parameters.PARAM_METADATA).asInstanceOf[java.util.Map[String, String]]
+      val multiValueMetadata: java.util.Map[String, String] = parameterMap.get(Parameters.PARAM_MULTI_VALUE_METADATA).asInstanceOf[java.util.Map[String, String]]
       val file: File = parameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]
       val contentUrl: String = parameterMap.get(Parameters.PARAM_CONTENTURL).asInstanceOf[String]
       val document: Document = new Document(file, mimeType, remotePath, description, namespace, contentType, metadata, multiValueMetadata, contentUrl)
@@ -85,7 +78,7 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       documentFileInfoMapping.put(document, parameterMap)
     }
     sendTaskToDestination(new SendBatchMessage(writeOption, documentsToUpload), reply => {
-        sendingContext.sendMessage(new BatchACLMessage(reply.uploadResults, batch))
+        sendingContext.sendMessage(new BatchACLMessage(reply.uploadResults, batch, acls))
     })
   }
 
@@ -95,19 +88,19 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       relativePath = relativePath.substring(1)
     }
     var remotePath: String = basePath + relativePath
-    val components: Array[String] = remotePath.split("/")
+    val components = remotePath.split("/")
     remotePath = ""
-    for (component <- components) {
-      if ("" == component) {
-        remotePath += "/"
+    for(component <- components){
+        if ("" == component) {
+          remotePath += "/"
+        }
+        else if (component.contains(":")) {
+          remotePath += component + "/"
+        }
+        else {
+          remotePath += "cm:" + component + "/"
+        }
       }
-      else if (component.contains(":")) {
-        remotePath += component + "/"
-      }
-      else {
-        remotePath += "cm:" + component + "/"
-      }
-    }
     if (remotePath.length > 0) {
       remotePath = remotePath.substring(0, remotePath.length - 1)
     }
@@ -129,7 +122,7 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       parserAclPath = parserAclPath.substring(0, parserAclPath.length - 1)
     }
     var remoteACLPath: String = basePath + parserAclPath
-    val aclComponents: Array[String] = remoteACLPath.split("/")
+    val aclComponents = remoteACLPath.split("/")
     remoteACLPath = ""
     for (aclComponent <- aclComponents) {
       if ("" == aclComponent) {
@@ -157,4 +150,9 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
     }
     return inheritPermissions
   }
+}
+
+object AlfrescoUpload {
+  final val PARAM_PATH: String = "path"
+  final val PARAM_WRITEOPTION: String = "writeOption"
 }

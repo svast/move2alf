@@ -4,11 +4,12 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="eu.xenit.move2alf.core.dto.Destination" table="destination">
+    <class name="eu.xenit.move2alf.core.dto.Resource" table="resource">
         <id name="id">
             <generator class="identity" />
         </id>
         <property name="name" unique="true"/>
+        <property name="classId" />
         <many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true" cascade="all-delete-orphan" lazy="false" />
     </class>
 </hibernate-mapping>

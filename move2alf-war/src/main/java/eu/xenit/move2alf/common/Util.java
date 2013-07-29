@@ -1,21 +1,10 @@
 package eu.xenit.move2alf.common;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import org.apache.commons.io.FileUtils;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.enums.ERole;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import eu.xenit.move2alf.core.enums.ERole;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class Util {
 	private static final Logger logger = LoggerFactory.getLogger(Util.class);
@@ -115,7 +109,7 @@ public class Util {
 			return movedFile;
 		}
 		else {
-			logger.warn("Destination path could not be made for document "
+			logger.warn("Resource path could not be made for document "
 					+ file.getAbsolutePath());
 			return null;
 		}

@@ -2,7 +2,7 @@ package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import eu.xenit.move2alf.core.dto.Destination;
+import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.pipeline.actions.JobConfig;
@@ -35,21 +35,49 @@ public class DestinationService extends AbstractHibernateService{
     private PipelineAssembler pipelineAssembler;
 
     public void startDestination(int id){
-        List<Destination> destinations = sessionFactory.getCurrentSession().createQuery("select from Destination as d where d.id=?").setLong(0, id).list();
+        List<Resource> destinations = sessionFactory.getCurrentSession().createQuery("from Resource as d where d.id=?").setLong(0, id).list();
         if(destinations.size()<1){
             logger.warn("No destination for id: {}", id);
         } else {
-            Destination destination = destinations.get(0);
-            ActionConfig actionConfig = pipelineAssembler.getActionConfig(destination.getFirstConfiguredAction());
-
-            JobHandle jobHandle = new JobHandle(system, destination.getName(), new JobConfig(actionConfig, false));
-            jobHandle.startJob();
-            jobHandleMap.put(id, jobHandle);
+            startResource(destinations.get(0));
         }
     }
 
+    private void startResource(Resource destination) {
+        ActionConfig actionConfig = pipelineAssembler.getActionConfig(destination.getFirstConfiguredAction());
+        JobHandle jobHandle = new JobHandle(system, destination.getName(), new JobConfig(actionConfig, false));
+        jobHandle.startJob();
+        jobHandleMap.put(destination.getId(), jobHandle);
+    }
+
     public void sendTaskToDestination(int id, String key, Object task, ActorRef replyTo){
+        if(!jobHandleMap.containsKey(id)){
+            logger.info("Creating destination with id {} on first send of task", id);
+            startDestination(id);
+        }
         jobHandleMap.get(id).sendTask(key, task, replyTo);
+    }
+
+    public List<Resource> getDestinations(){
+        return sessionFactory.getCurrentSession().createQuery("from Resource").list();
+    }
+
+    public Resource getDestination(int id){
+        return (Resource) sessionFactory.getCurrentSession().createQuery("from Resource where id=?").setInteger(0, id).list().get(0);
+    }
+
+    public void saveDestination(Resource resource){
+        sessionFactory.getCurrentSession().save(resource);
+    }
+
+    public void updateDestination(Resource resource) {
+        sessionFactory.getCurrentSession().update(resource);
+        int id = resource.getId();
+        if(jobHandleMap.containsKey(id)){
+            jobHandleMap.get(id).destroy();
+            jobHandleMap.remove(id);
+        }
+        startDestination(id);
     }
 
 }

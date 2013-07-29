@@ -25,9 +25,9 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
   private var replyTo: Option[ActorRef] = None
 
   def receive(message: AnyRef, key: Option[String] = None, replyTo: Option[ActorRef] = None) {
-    execute(message)
     this.taskKey = key
     this.replyTo = replyTo
+    execute(message)
   }
 
   def receiveReply(key: String, message: AnyRef) {
@@ -72,7 +72,6 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
       case a: EOCAware => a.beforeSendEOC()
       case _ =>
     }
-
     logger.debug(context.self+"Sending EOC message")
     receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
 
@@ -98,15 +97,19 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
 
 
   final def sendMessage(message: AnyRef, receiver: String = "default"){
-    taskKey match {
-      case None => receivers.get(receiver).get ! M2AMessage(message)
-      case Some(key) => receivers.get(receiver).get ! TaskMessage(key, message, replyTo.get)
+    if (receivers.contains(receiver)){
+      taskKey match {
+        case None => receivers.get(receiver).get ! M2AMessage(message)
+        case Some(key) => receivers.get(receiver).get ! TaskMessage(key, message, replyTo.get)
+      }
+    } else {
+      logger.error("Actor: "+context.self+" has no receiver called "+receiver);
     }
-
   }
 
   final def hasReceiver(receiver: String): Boolean = {
     receivers.contains(receiver)
+
   }
 
   final def getJobId: String = {

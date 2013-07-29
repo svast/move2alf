@@ -1,26 +1,19 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.*;
+import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
-import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobInfo;
+import java.util.*;
 
 @Transactional
 public interface JobService {
@@ -279,11 +272,6 @@ public interface JobService {
 	 */
 	public boolean checkDestinationExists(String destinationName);
 
-	
-	/**
-	 * @param category
-	 */
-	public List<SourceSink> getSourceSinksByCategory(String category);
 	
 	/**
 	 * @param jobId

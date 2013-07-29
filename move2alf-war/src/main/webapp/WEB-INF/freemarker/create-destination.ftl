@@ -6,7 +6,7 @@
 </@head>
 <@bodyMenu title="Create Destination">
 <#include "jobform-errors.ftl" />
-<form class="form-horizontal" method="post" name="createDestination" action="<@spring.url relativeUrl=("/destination/create") />" />
+<form class="form-horizontal" method="post" name="createDestination" action="<@spring.url relativeUrl=("/destination/create/Alfresco") />" />
 	<#include "destinationform.ftl" />
 
 </form>
