@@ -375,6 +375,8 @@ public class AlfrescoSourceSink extends SourceSink {
             createNewRepositoryAccessSession(user, password, url1);
 		} else {
             if(!ras.alfrescoURL.equals(url1)){
+                logger.debug("Alfresco URL's not matching: OLD: "+ras.alfrescoURL+", NEW: "+url1);
+                logger.debug("Destroying old connection, making new connection");
                 destroyRepositoryAccessSession();
                 createNewRepositoryAccessSession(user, password, url1);
             } else {
