@@ -65,8 +65,11 @@ class DeleteAction extends ActionWithDestination[FileInfo, Boolean] {
 
     val name: String = (newParameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]).getName
 
-    sendTaskToDestination(new DeleteMessage(remotePath, name, deleteOption), reply => {
-      if(reply) sendMessage(newParameterMap)
+    sendTaskToDestination(fileInfo, new DeleteMessage(remotePath, name, deleteOption), reply => {
+      if(reply) {
+        newParameterMap.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK)
+        sendMessage(newParameterMap)
+      }
     })
   }
 }

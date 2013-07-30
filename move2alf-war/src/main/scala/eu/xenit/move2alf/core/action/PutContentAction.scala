@@ -12,7 +12,7 @@ import java.io.File
  */
 class PutContentAction extends ActionWithDestination[FileInfo, String]{
   protected def executeImpl(message: FileInfo) {
-    sendTaskToDestination(new PutContentMessage(message.get(Parameters.PARAM_FILE).asInstanceOf[File],
+    sendTaskToDestination(message, new PutContentMessage(message.get(Parameters.PARAM_FILE).asInstanceOf[File],
       message.get(Parameters.PARAM_MIMETYPE).asInstanceOf[String]),
      contentUrl => {
        message.put(Parameters.PARAM_CONTENTURL, contentUrl)

@@ -34,7 +34,10 @@ public class DestinationService extends AbstractHibernateService{
     @Autowired
     private PipelineAssembler pipelineAssembler;
 
-    public void startDestination(int id){
+    public synchronized void startDestination(int id){
+        if(jobHandleMap.containsKey(id)){
+            return;
+        }
         List<Resource> destinations = sessionFactory.getCurrentSession().createQuery("from Resource as d where d.id=?").setLong(0, id).list();
         if(destinations.size()<1){
             logger.warn("No destination for id: {}", id);

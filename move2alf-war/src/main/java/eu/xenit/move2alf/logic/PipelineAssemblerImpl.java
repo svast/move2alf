@@ -367,7 +367,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             final ConfiguredAction putContentAction = new ConfiguredAction();
             putContentAction.setActionId(PUT_CONTENT);
             putContentAction.setClassId(actionClassService.getClassId(PutContentAction.class));
-            putContentAction.setNmbOfWorkers(2);
+            putContentAction.setNmbOfWorkers(1);
             putContentAction.addReceiver(REPORTER, reporter);
             putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             end.addReceiver(DEFAULT_RECEIVER, putContentAction);
@@ -426,7 +426,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 			else{
 				listAction = new ConfiguredAction();
                 listAction.setActionId(LIST_ID);
-                listAction.setActionId(actionClassService.getClassId(ListAction.class));
+                listAction.setClassId(actionClassService.getClassId(ListAction.class));
 			}
             listAction.setNmbOfWorkers(1);
             listAction.setParameter(ListAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());

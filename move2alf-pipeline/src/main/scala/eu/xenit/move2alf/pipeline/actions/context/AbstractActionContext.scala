@@ -34,7 +34,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
     logger.debug("Reply arrived at action: "+context.self)
 
     action match {
-      case a: AcceptsReply[AnyRef@unchecked] => a.acceptReply(key, message)
+      case a: AcceptsReply => a.acceptReply(key, message)
     }
   }
 

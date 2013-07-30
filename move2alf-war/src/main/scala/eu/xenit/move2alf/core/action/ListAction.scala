@@ -48,8 +48,11 @@ class ListAction extends ActionWithDestination[FileInfo, Boolean]{
     remotePath = remotePath.substring(0, remotePath.length - 1)
     val name: String = (newParameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]).getName
 
-    sendTaskToDestination(new ListMessage(remotePath, name), result => {
-      if(result) sendMessage(fileInfo) else handleError(fileInfo, "This file is not in the repository.")
+    sendTaskToDestination(fileInfo, new ListMessage(remotePath, name), result => {
+      if(result) {
+        fileInfo.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK)
+        sendMessage(fileInfo)
+      } else handleError(fileInfo, "This file is not in the repository.")
     })
   }
 }

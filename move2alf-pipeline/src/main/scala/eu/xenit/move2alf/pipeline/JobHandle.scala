@@ -23,6 +23,9 @@ class JobHandle(val actorSystem: ActorSystem, val id: String, val config: JobCon
 
   def destroy(){
     actorSystem.stop(actor)
+    while(!actor.isTerminated){
+      Thread.sleep(10)
+    }
   }
 
   def startJob(){

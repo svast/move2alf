@@ -14,7 +14,7 @@ import scala.collection.mutable
  * Date: 6/19/13
  * Time: 3:33 PM
  */
-abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] with EOCBlockingAction with AcceptsReply[U] with LogHelper {
+abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] with EOCBlockingAction with AcceptsReply with LogHelper {
 
   @Autowired private var destinationService: DestinationService = null
 
@@ -30,8 +30,9 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
 
   private val replyHandlers: mutable.Map[String, (U => Unit)] = new mutable.HashMap
   private val messages: mutable.Map[String, AnyRef] = new mutable.HashMap
+  private val originals: mutable.Map[String, T] = new mutable.HashMap
 
-  protected def sendTaskToDestination(message: AnyRef, replyHandler: (U => Unit)) {
+  protected def sendTaskToDestination(original: T, message: AnyRef, replyHandler: (U => Unit)) {
     if (replyHandlers.size == 0) {
       eocBlockingContext.blockEOC
     }
@@ -39,20 +40,29 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
     destinationService.sendTaskToDestination(destination, key, message, stateContext.getActorRef)
     replyHandlers.put(key, replyHandler)
     messages.put(key, message)
+    originals.put(key, original)
   }
 
-  def acceptReply(key: String, message: U) {
-    if (message.isInstanceOf[Exception]) {
-      handleError(messages.get(key).get, message.asInstanceOf[Exception])
-    }
-    else {
-      replyHandlers.get(key).get.apply(message)
+  def acceptReply(key: String, message: AnyRef) {
+    message match {
+      case message: Exception => handleErrorReply(originals.get(key).get, messages.get(key).get, message)
+      case message: U@unchecked => replyHandlers.get(key).get.apply(message)
     }
     replyHandlers.remove(key)
     messages.remove(key)
+    originals.remove(key)
     if (replyHandlers.size == 0) {
       eocBlockingContext.unblockEOC
     }
+  }
+
+  /**
+   * @param original The original incoming message
+   * @param message The outgoing message for which the error reply occurred
+   * @param reply The Exception that happened in the reply
+   */
+  protected def handleErrorReply(original: T, message: AnyRef, reply: Exception){
+    handleError(original, reply)
   }
 
   private var eocBlockingContext: EOCBlockingContext = null

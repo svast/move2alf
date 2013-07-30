@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.core.action
 
-import eu.xenit.move2alf.core.action.messages.{SetACLReply, BatchACLMessage}
+import eu.xenit.move2alf.core.action.messages.{SetAclMessage, SetACLReply, BatchACLMessage}
 import scala.collection.JavaConversions._
 import eu.xenit.move2alf.repository.UploadResult
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo
@@ -16,6 +16,10 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, SetACLRep
 
   protected def executeImpl(message: BatchACLMessage) {
 
+    for (acl <- message.acls){
+      sendTaskToDestination(message, new SetAclMessage(acl), reply => Unit)
+    }
+
     val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
 
     for (result <- message.uploadResultList) {
@@ -27,6 +31,13 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, SetACLRep
       newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
       newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
       sendMessage(newParameterMap)
+    }
+  }
+
+  override def handleErrorReply(original: BatchACLMessage, message: AnyRef, reply: Exception){
+    message match {
+      case message: SetAclMessage => handleError(message, reply)
+      case _ => super.handleErrorReply(original, message, reply)
     }
   }
 }

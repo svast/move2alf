@@ -2,7 +2,7 @@ package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.core.simpleaction.data.{FileInfo, Batch}
 import eu.xenit.move2alf.core.action.messages._
-import eu.xenit.move2alf.common.Parameters
+import eu.xenit.move2alf.common.{Util, Parameters}
 import eu.xenit.move2alf.core.sourcesink.{WriteOption, ACL}
 import java.util
 import scala.collection.JavaConversions._
@@ -77,7 +77,7 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       documentsToUpload.add(document)
       documentFileInfoMapping.put(document, parameterMap)
     }
-    sendTaskToDestination(new SendBatchMessage(writeOption, documentsToUpload), reply => {
+    sendTaskToDestination(batch, new SendBatchMessage(writeOption, documentsToUpload), reply => {
         sendingContext.sendMessage(new BatchACLMessage(reply.uploadResults, batch, acls))
     })
   }
@@ -149,6 +149,24 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       inheritPermissions = parameterMap.get(Parameters.PARAM_INHERIT_PERMISSIONS).asInstanceOf[Boolean]
     }
     return inheritPermissions
+  }
+
+  /**
+   *
+   * @param message The message for which the error reply occurred
+   * @param reply The Exception that happened in the reply
+   */
+  override def handleErrorReply(original: Batch, message: AnyRef, reply: Exception) {
+    message match {
+      case m: SendBatchMessage => {
+          original.foreach {
+            fileInfo => {
+              handleError(fileInfo, reply)
+            }
+        }
+      }
+      case _ => super.handleErrorReply(original, message, reply)
+    }
   }
 }
 
