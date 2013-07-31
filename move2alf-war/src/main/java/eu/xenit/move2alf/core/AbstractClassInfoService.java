@@ -30,7 +30,7 @@ public abstract class AbstractClassInfoService {
             try {
                 Class clazz = Class.forName(component.getBeanClassName());
                 ClassInfo actionInfo = (ClassInfo) clazz.getAnnotation(ClassInfo.class);
-                ClassInfoModel classInfo = null;
+                ClassInfoModel classInfo;
                 if(actionInfo == null){
                     classInfo = new ClassInfoModel(clazz.getCanonicalName(), ConfigurableObject.CAT_DEFAULT, clazz, "");
                 } else {
@@ -62,7 +62,7 @@ public abstract class AbstractClassInfoService {
     }
 
     private void addClassInfoToCategory(String category, ClassInfoModel actionClassInfo){
-        List<ClassInfoModel> classInfos = null;
+        List<ClassInfoModel> classInfos;
         if(categoryClassInfoMapping.containsKey(category)){
             classInfos = categoryClassInfoMapping.get(category);
         } else {

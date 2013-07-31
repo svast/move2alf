@@ -106,7 +106,7 @@ public class AlfrescoSourceSink extends SharedResource {
 
 	public List<UploadResult> sendBatch(
 			final WriteOption docExistsMode, final List<Document> documents) {
-		List<UploadResult> results = null;
+		List<UploadResult> results;
 		try {
 			final RepositoryAccessSession ras = createRepositoryAccessSession();
 			try {
@@ -225,7 +225,6 @@ public class AlfrescoSourceSink extends SharedResource {
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
-		final RepositoryAccessSession ras = createRepositoryAccessSession();
 
 		logger.debug("Retrying file " + document.getName());
 		uploadFile(docExistsMode, remotePath, mimeType,

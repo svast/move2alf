@@ -1,9 +1,8 @@
 package eu.xenit.move2alf.validation;
 
-import java.util.List;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.List;
 
 public class ParamListValidator implements ConstraintValidator<ParamList, List<String>> {
 
@@ -21,7 +20,7 @@ public class ParamListValidator implements ConstraintValidator<ParamList, List<S
         	for (String parameter : object) {
 				String[] keyValuePair = parameter.split("\\|");
 				String key = keyValuePair[0];
-				String value = null;
+				String value;
 				if (keyValuePair.length == 1) {
 					value = "";
 				} else {

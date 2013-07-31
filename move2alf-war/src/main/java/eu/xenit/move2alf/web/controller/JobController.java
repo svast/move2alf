@@ -239,7 +239,6 @@ public class JobController extends AbstractController{
 		
 		ModelAndView mav = new ModelAndView("redirect:/job/dashboard");
 		Job editedJob = getJobService().editJob(job);
-		int jobId = editedJob.getId();
 
 		handleSchedule(id, job.getCron());
 		return mav;
@@ -477,8 +476,7 @@ public class JobController extends AbstractController{
 			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
 
-		List<HistoryInfo> historyInfoList = new ArrayList<HistoryInfo>();
-		historyInfoList = getJobService().getHistory(jobId);
+		List<HistoryInfo> historyInfoList = getJobService().getHistory(jobId);
 
 		PagedListHolder pagedListHolder = new PagedListHolder(historyInfoList);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);

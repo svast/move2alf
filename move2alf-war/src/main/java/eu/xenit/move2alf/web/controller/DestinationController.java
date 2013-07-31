@@ -2,7 +2,6 @@ package eu.xenit.move2alf.web.controller;
 
 import eu.xenit.move2alf.core.action.ClassInfoModel;
 import eu.xenit.move2alf.core.dto.Resource;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.controller.destination.DestinationTypeController;
@@ -95,14 +94,12 @@ public class DestinationController extends AbstractController{
             ModelAndView mav = new ModelAndView("create-destination");
             mav.addObject("destination", destination);
 
-//            mav.addObject("destinationOptions", destinationTypeMap);
             mav.addObject("role", getRole());
             mav.addObject("errors", errors.getFieldErrors());
             return mav;
         }
         ModelAndView mav = new ModelAndView();
 
-        HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
         resourceTypeClassInfoService.getDestinationType(destination.getType()).processModel(destination);
 
         mav.setViewName("redirect:/destinations");

@@ -55,7 +55,6 @@ public class CSVMetadataLoaderTest {
 		setUp();
 		CSVReader reader = metadataLoader.createReader(csvFile);
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
-		HashMap dummyParameterMap = new HashMap();
 
 		String[] line = {"a"};
 		try {
