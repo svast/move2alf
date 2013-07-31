@@ -27,6 +27,7 @@
 	<modules>
 		<module>move2alf-war</module>
 		<module>move2alf-repository</module>
+        <module>move2alf-pipeline</module>
 	</modules>
 	<build>
 		<plugins>
