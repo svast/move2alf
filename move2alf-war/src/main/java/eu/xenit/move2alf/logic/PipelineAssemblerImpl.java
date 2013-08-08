@@ -5,6 +5,7 @@ import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.simpleaction.*;
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
+import eu.xenit.move2alf.core.sourcesink.InputSource;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
@@ -25,6 +26,7 @@ import java.util.*;
 public class PipelineAssemblerImpl extends PipelineAssembler implements ApplicationContextAware{
 
     public static final String SOURCE_ID= "Source";
+    public static final String SOURCE_CMIS_ID = "SourceCMIS";
     public static final String MOVE_BEFORE_ID = "MoveBefore";
     public static final String MOVE_AFTER_ID = "MoveAfter";
     public static final String MOVE_NOT_LOADED_ID = "MoveNotLoaded";
@@ -89,7 +91,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
         Map<String, ConfiguredAction> configuredActionMap = getAllConfiguredActions(startAction, new HashMap<String, ConfiguredAction>());
 
+        InputSource inputSource = InputSource.FILESYSTEM;
 		List<String> inputFolder = new ArrayList();
+        String cmisURL = "";
+        String cmisUsername = "";
+        String cmisPassword = "";
 		String destinationFolder = "";
 		int dest = 0;
 		String writeOption = null;
@@ -119,8 +125,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 			if (SOURCE_ID.equals(action
                     .getActionId())) {
                 String path = action.getParameter(SASource.PARAM_INPUTPATHS);
+                inputSource = InputSource.FILESYSTEM;
                 inputFolder = Arrays.asList(path.split("\\|"));
-			} else if (UPLOAD_ID.equals(action
+			} else if (SOURCE_CMIS_ID.equals(action.getActionId())) {
+                inputSource = InputSource.CMIS;
+                cmisURL = action.getParameter(SACMISInput.PARAM_CMIS_URL);
+                cmisUsername = action.getParameter(SACMISInput.PARAM_CMIS_USERNAME);
+                cmisPassword = action.getParameter(SACMISInput.PARAM_CMIS_PASSWORD);
+            } else if (UPLOAD_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
 				dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
@@ -180,7 +192,11 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             }
 		}
 
+        jobModel.setInputSource(inputSource);
 		jobModel.setInputFolder(inputFolder);
+        jobModel.setCmisURL(cmisURL);
+        jobModel.setCmisUsername(cmisUsername);
+        jobModel.setCmisPassword(cmisPassword);
 		jobModel.setDestinationFolder(destinationFolder);
 		jobModel.setDest(dest);
 		jobModel.setMode(mode);
@@ -249,6 +265,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
         Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
 
+        System.out.println("actionClassService=" + actionClassService + " and configuredAction=" + configuredAction + " and class info model=" + actionClassService.getClassInfoModel(configuredAction.getClassId()) + " for configuredAction.classId=" + configuredAction.getClassId());
         M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
         ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
 
@@ -299,10 +316,20 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         }
 
         ConfiguredAction sourceAction = new ConfiguredAction();
-        sourceAction.setActionId(SOURCE_ID);
-        sourceAction.setClassId(actionClassService.getClassId(SASource.class));
+        if (jobModel.getInputSource() == null || InputSource.FILESYSTEM.equals(jobModel.getInputSource())) {
+            sourceAction.setActionId(SOURCE_ID);
+            sourceAction.setClassId(actionClassService.getClassId(SASource.class));
+            sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobModel.getInputFolder()));
+        } else {
+            sourceAction.setActionId(SOURCE_CMIS_ID);
+            sourceAction.setClassId(actionClassService.getClassId(SACMISInput.class));
+            sourceAction.setParameter(SACMISInput.PARAM_CMIS_URL, jobModel.getCmisURL());
+            sourceAction.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobModel.getCmisUsername());
+            sourceAction.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobModel.getCmisPassword());
+            sourceAction.setDispatcher(PINNED_DISPATCHER);
+
+        }
         sourceAction.setNmbOfWorkers(1);
-        sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobModel.getInputFolder()));
         sourceAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, sourceAction);
         end = sourceAction;
@@ -338,7 +365,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         setParameters(jobModel.getParamMetadata(), metadataAction);
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
-
 
 		if (!("notransformation".equals(jobModel.getTransform()) || ""
 				.equals(jobModel.getTransform()))) {

@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.web.dto;
 
 import eu.xenit.move2alf.core.sourcesink.DeleteOption;
+import eu.xenit.move2alf.core.sourcesink.InputSource;
 import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.Mode;
 import eu.xenit.move2alf.validation.CSVsize;
@@ -36,7 +37,13 @@ public class JobModel {
 	@NotEmpty(message="Please enter a description for the job.")
 	private String description;
 
-	@NotEmpty(message="There should be at least one inputfolder!")
+    @NotNull(message="inputSoure is null")
+    private InputSource inputSource;
+
+    private String cmisURL;
+    private String cmisUsername;
+    private String cmisPassword;
+
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolders;
 
@@ -45,6 +52,7 @@ public class JobModel {
 	private String destinationFolder="/move2alf";
 
 	private List<String> cron = new ArrayList<String>();
+
 
 	@NotEmpty
 	private String metadata;
@@ -144,6 +152,38 @@ public class JobModel {
 	public String getDescription() {
 		return description;
 	}
+
+    public InputSource getInputSource() {
+        return inputSource;
+    }
+
+    public void setInputSource(final InputSource inputSource) {
+        this.inputSource = inputSource;
+    }
+
+    public String getCmisURL() {
+        return cmisURL;
+    }
+
+    public void setCmisURL(final String cmisURL) {
+        this.cmisURL = cmisURL;
+    }
+
+    public String getCmisUsername() {
+        return cmisUsername;
+    }
+
+    public String getCmisPassword() {
+        return cmisPassword;
+    }
+
+    public void setCmisUsername(final String cmisUsername) {
+        this.cmisUsername = cmisUsername;
+    }
+
+    public void setCmisPassword(final String cmisPassword) {
+        this.cmisPassword = cmisPassword;
+    }
 
 	public void setInputFolder(List<String> inputFolders) {
 		this.inputFolders = inputFolders;
