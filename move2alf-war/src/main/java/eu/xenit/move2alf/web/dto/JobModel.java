@@ -44,7 +44,6 @@ public class JobModel {
     private String cmisUsername;
     private String cmisPassword;
 
-	@NotEmpty(message="There should be at least one inputfolder!")
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolders;
 
