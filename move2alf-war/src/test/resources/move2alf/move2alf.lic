@@ -1,16 +1,17 @@
-#Fri Dec 07 09:42:29 EST 2012
-property_licensee.contactPerson=/
+#Wed Mar 13 17:01:43 CET 2013
+property_licensee.contactPerson=Thijs Lemmens
 property_licensee.street=/
 property_licensee.telephone=/
-startDate=1354856400000
-signature=302c021406c7aea5ff10f124cd81579ef4e8025eb55347390214245872242e34bdfb16fa5685daefac5ed369517d
+startDate=1363190453308
+signature=302c0214010dbe22570349cf4bf9bb4fc009fd9552fa562b0214575dab87cde4df1e85cec634339bcb09c7541919
 property_licensee.state=/
-property_licensee.country=BE
-creationDate=1354891349827
+property_licensee.country=/
+creationDate=1363190412732
 version=2
-property_licensee.postalCode=3000
-property_licensee.email=move2alf@xenit.eu
-property_license.yearlyReplenishmentAmount=1000000
-property_licensee.city=Leuven
-property_license.initialLoadAmount=1000000
-property_licensee.companyName=XeniT
+expirationDate=1426262473397
+property_licensee.postalCode=/
+property_licensee.city=/
+property_license.yearlyReplenishmentAmount=0
+property_licensee.email=/
+property_licensee.companyName=P&V
+property_license.initialLoadAmount=100000000
