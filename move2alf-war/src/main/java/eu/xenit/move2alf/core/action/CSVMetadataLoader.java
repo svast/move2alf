@@ -91,7 +91,7 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
     }
 
     @Override
-    public void executeImpl(FileInfo message) {
+    protected void executeImpl(FileInfo message) {
         File inputFile = (File) message.get(Parameters.PARAM_FILE);
 
         CSVReader reader = null;
