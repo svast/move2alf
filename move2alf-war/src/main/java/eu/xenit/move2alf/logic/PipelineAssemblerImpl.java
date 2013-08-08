@@ -330,6 +330,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
         }
         sourceAction.setNmbOfWorkers(1);
+        sourceAction.setActionId(SOURCE_ID);
+        sourceAction.setClassId(actionClassService.getClassId(SASource.class));
+        sourceAction.setNmbOfWorkers(1);
+        sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobModel.getInputFolder()));
         sourceAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, sourceAction);
         end = sourceAction;
