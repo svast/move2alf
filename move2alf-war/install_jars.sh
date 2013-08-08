@@ -23,3 +23,5 @@ mvn install:install-file -DgroupId=com.sun.media -Dversion=1.1 -Dpackaging=jar \
 mvn install:install-file -Dfile=src/main/webapp/WEB-INF/lib/padlock-2.2.jar \
     -DgroupId=com.javalicensemanager -DartifactId=padlock -Dversion=2.2 -Dpackaging=jar
 
+mvn install:install-file -Dfile=src/main/webapp/WEB-INF/lib/commons-codec-1.4.jar \
+    -DgroupId=org.apache.commons.codec -DartifactId=commons-codec -Dversion=1.4 -Dpackaging=jar
