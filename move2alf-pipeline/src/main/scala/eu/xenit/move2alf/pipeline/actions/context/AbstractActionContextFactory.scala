@@ -19,7 +19,7 @@ abstract class AbstractActionContextFactory(id: String, actionFactory: ActionFac
 
     basicAction match {
       case sa: HasStateContext => {
-        logger.debug("Adding StateContext")
+//        logger.debug("Adding StateContext")
         sa.setStateContext(new StateContextImpl(actionContext))
       }
       case _ =>
@@ -27,7 +27,7 @@ abstract class AbstractActionContextFactory(id: String, actionFactory: ActionFac
 
     basicAction match {
       case sa: EOCBlockingAction => {
-        logger.debug("Adding EOCBlockingContext")
+//        logger.debug("Adding EOCBlockingContext")
         sa.setEOCBlockingContext(new EOCBlockingContextImpl(actionContext))
       }
       case _ =>
@@ -35,7 +35,7 @@ abstract class AbstractActionContextFactory(id: String, actionFactory: ActionFac
 
     basicAction match {
       case sa: HasTaskContext => {
-        logger.debug("Adding TaskContext")
+//        logger.debug("Adding TaskContext")
         sa.setTaskContext(new TaskContextImpl(actionContext))
       }
       case _ =>
@@ -50,7 +50,7 @@ abstract class AbstractActionContextFactory(id: String, actionFactory: ActionFac
   protected def addSendingContext(basicAction: Action, context: AbstractActionContext) {
     basicAction match {
       case sa: HasSendingContext => {
-        logger.debug("Adding SendingContext")
+//        logger.debug("Adding SendingContext")
         sa.setSendingContext(new SendingContextImpl(context))
       }
       case _ =>

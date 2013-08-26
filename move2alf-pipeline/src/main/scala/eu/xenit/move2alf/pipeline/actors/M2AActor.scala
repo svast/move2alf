@@ -18,7 +18,7 @@ import akka.routing.Broadcast
  */
 class M2AActor(protected val factory: AbstractActionContextFactory, protected val nmbOfSenders: Int) extends Actor with FSM[JobState, Data] with LogHelper{
 
-  logger.debug("Creating actor: "+context.self+" with number of senders: "+nmbOfSenders)
+//  logger.debug("Creating actor: "+context.self+" with number of senders: "+nmbOfSenders)
   private val action = factory.createActionContext(context)
 
   startWith(NotRunning, Uninitialized)
@@ -32,7 +32,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   when(Running) {
     case Event(EOC | Broadcast(EOC), data: CycleData) => {
-      logger.debug("Received EOC in "+context.self)
+//      logger.debug("Received EOC in "+context.self)
       stayOrStop(data, true)
     }
     case Event(Start | Broadcast(Start), _) => {

@@ -18,12 +18,12 @@ import akka.routing.SmallestMailboxRouter
 class ActionActorFactory(val id: String, val actionContextFactory: AbstractActionContextFactory,val nmbOfSenders: Int, val nmbActors: Int, val dispatcher: String)(implicit context: ActorContext, jobContext: JobContext) extends AbstractActorFactory with LogHelper{
 
   def createActor: ActorRef = {
-    logger.debug("number of routees: "+nmbActors)
+//    logger.debug("number of routees: "+nmbActors)
     if(dispatcher != null) {
-      logger.debug("Constructing actor with dispatcher: "+dispatcher)
+//      logger.debug("Constructing actor with dispatcher: "+dispatcher)
       context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
     } else {
-      logger.debug("Contructing actor with default dispatcher")
+//      logger.debug("Contructing actor with default dispatcher")
       context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
     }
   }
