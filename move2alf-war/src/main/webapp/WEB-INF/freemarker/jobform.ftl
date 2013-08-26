@@ -18,6 +18,15 @@
 				$('[name="inputSource"]').change(function() {
 					$(".inputOptions").slideToggle();
 				});
+
+                $(".importOptions").each(function() {
+                    if ($(this).attr('id') != "importOptions-" + inputSource) {
+                        $(this).hide();
+                    }
+                });
+                $('[name="inputSource"]').change(function() {
+                    $(".importOptions").slideToggle();
+                });
 			});
 		</script>
 		<@labeledInput label="Input source" forId="inputSource">
@@ -84,7 +93,14 @@
 	<fieldset>
 		<legend>Import</legend>
 
-		<@labeledSingleLineTextInput label="Extension" name="extension" binding="job.extension" attributes="maxlength='${job.extensionMaxLength}'" />
+        <div id="importOptions-FILESYSTEM" class="importOptions">
+        <@labeledSingleLineTextInput label="Extension" name="extension" binding="job.extension" attributes="maxlength='${job.extensionMaxLength}'" />
+        </div>
+
+        <div id="importOptions-CMIS" class="importOptions">
+        <@labeledSingleLineTextInput label="CMIS query" name="cmisQuery" binding="job.cmisQuery" />
+        </div>
+
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
 			<#if destination.parameters?has_content>
 				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>> ${destination.name}</option>

@@ -43,6 +43,7 @@ public class JobModel {
     private String cmisURL;
     private String cmisUsername;
     private String cmisPassword;
+    private String cmisQuery;
 
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
 	private List<String> inputFolders;
@@ -185,7 +186,15 @@ public class JobModel {
         this.cmisPassword = cmisPassword;
     }
 
-	public void setInputFolder(List<String> inputFolders) {
+    public String getCmisQuery() {
+        return cmisQuery;
+    }
+
+    public void setCmisQuery(final String cmisQuery) {
+        this.cmisQuery = cmisQuery;
+    }
+
+    public void setInputFolder(List<String> inputFolders) {
 		this.inputFolders = inputFolders;
 	}
 

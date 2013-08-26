@@ -82,6 +82,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
 	@Override
 	public JobModel getJobConfigForJob(final int id) {
+
 		final Job job = getJobService().getJob(id);
 		final JobModel jobModel = new JobModel();
 		jobModel.setId(id);
@@ -96,6 +97,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         String cmisURL = "";
         String cmisUsername = "";
         String cmisPassword = "";
+        String cmisQuery = "";
 		String destinationFolder = "";
 		int dest = 0;
 		String writeOption = null;
@@ -132,6 +134,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 cmisURL = action.getParameter(SACMISInput.PARAM_CMIS_URL);
                 cmisUsername = action.getParameter(SACMISInput.PARAM_CMIS_USERNAME);
                 cmisPassword = action.getParameter(SACMISInput.PARAM_CMIS_PASSWORD);
+                cmisQuery = action.getParameter(SACMISInput.PARAM_CMIS_QUERY);
             } else if (UPLOAD_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
@@ -197,6 +200,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         jobModel.setCmisURL(cmisURL);
         jobModel.setCmisUsername(cmisUsername);
         jobModel.setCmisPassword(cmisPassword);
+        jobModel.setCmisQuery(cmisQuery);
 		jobModel.setDestinationFolder(destinationFolder);
 		jobModel.setDest(dest);
 		jobModel.setMode(mode);
@@ -265,7 +269,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
         Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
 
-        System.out.println("actionClassService=" + actionClassService + " and configuredAction=" + configuredAction + " and class info model=" + actionClassService.getClassInfoModel(configuredAction.getClassId()) + " for configuredAction.classId=" + configuredAction.getClassId());
         M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
         ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
 
@@ -326,6 +329,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_URL, jobModel.getCmisURL());
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobModel.getCmisUsername());
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobModel.getCmisPassword());
+            sourceAction.setParameter(SACMISInput.PARAM_CMIS_QUERY, jobModel.getCmisQuery());
             sourceAction.setDispatcher(PINNED_DISPATCHER);
 
         }
@@ -424,6 +428,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             aclAction.setClassId(actionClassService.getClassId(AlfrescoACLAction.class));
             aclAction.setNmbOfWorkers(1);
             aclAction.addReceiver(REPORTER, reporter);
+            aclAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             end.addReceiver(DEFAULT_RECEIVER, aclAction);
             end = aclAction;
         }
