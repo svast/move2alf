@@ -19,7 +19,7 @@ public abstract class Move2AlfReceivingAction<T> extends Move2AlfAction implemen
         try {
             executeImpl(message);
         } catch (Exception e){
-            logger.error("Error in executeImpl", e);
+            logger.error("Error in executeImpl " + e + " for message " + message);
             handleError(message, e);
         }
     }

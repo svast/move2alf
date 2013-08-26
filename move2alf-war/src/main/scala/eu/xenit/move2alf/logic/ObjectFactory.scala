@@ -28,7 +28,7 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
           val method = methodMap("set"+key.capitalize)
 
           try {
-            logger.debug("Setting parameter: "+key+", value: "+value.toString)
+            logger.debug("Setting parameter: "+key+", value: "+value.toString+" for clazz=" + clazz)
             method.invoke(basicAction, value)
           } catch {
             case e: IllegalArgumentException => {

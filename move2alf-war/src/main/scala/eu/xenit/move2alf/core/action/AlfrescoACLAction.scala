@@ -11,12 +11,14 @@ import eu.xenit.move2alf.common.Parameters
  * Date: 6/20/13
  * Time: 11:35 AM
  */
-class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, SetACLReply]{
+class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
 
 
   protected def executeImpl(message: BatchACLMessage) {
 
+    logger.debug("in aclaction, message=" + message.batch);
     for (acl <- message.acls){
+      logger.debug("acl=" + acl.acls + " and " + acl.inheritsPermissions);
       sendTaskToDestination(message, new SetAclMessage(acl), reply => Unit)
     }
 

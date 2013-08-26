@@ -9,7 +9,8 @@ import scala.collection.JavaConversions._
 import scala.Boolean
 import java.io.File
 import eu.xenit.move2alf.repository.alfresco.ws.Document
-import scala.collection.immutable.Map
+import org.slf4j.{Logger, LoggerFactory}
+import java.util.{Map => JMap}
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -17,7 +18,9 @@ import scala.collection.immutable.Map
  * Time: 10:29 AM
  */
 class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
+
   private var path: String = null
+
   def setPath(path: String) {
     this.path = normalizeBasePath(path)
   }
@@ -38,14 +41,14 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
     val aclBatch: util.List[ACL] = new util.ArrayList[ACL]
 
     for (fileInfo <- batch) {
-      val acl: Map[String, Map[String, String]] = fileInfo.get(Parameters.PARAM_ACL).asInstanceOf[Map[String, Map[String, String]]]
+      val acl = fileInfo.get(Parameters.PARAM_ACL).asInstanceOf[JMap[String, JMap[String, String]]]
       if (acl != null) {
         val normalizedAcl: util.Map[String, util.Map[String, String]] = new util.HashMap[String, util.Map[String, String]]
         for (aclPath <- acl.keySet) {
-          normalizedAcl.put(normalizeAclPath(path, aclPath), acl.get(aclPath).get)
+          normalizedAcl.put(normalizeAclPath(path, aclPath), acl.get(aclPath))
         }
         val inheritPermissions: Boolean = getInheritPermissionsFromParameterMap(fileInfo)
-        aclBatch.add(new ACL(normalizedAcl, inheritPermissions))
+         aclBatch.add(new ACL(normalizedAcl, inheritPermissions))
       }
     }
 
@@ -136,7 +139,6 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       }
     }
     remoteACLPath = remoteACLPath.substring(0, remoteACLPath.length - 1)
-    logger.debug("ACL path: " + remoteACLPath)
     return remoteACLPath
   }
 
