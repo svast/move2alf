@@ -1,5 +1,8 @@
 package eu.xenit.move2alf.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * List of parameters passed between actions in the parameterMap.
  */
@@ -134,5 +137,12 @@ public class Parameters {
 	 */
 	@Deprecated
 	public static final String PARAM_THREAD = "thread";
+
+    public static final Map mappingNamespaces = new HashMap();
+
+    static {
+        mappingNamespaces.put("cm","{http://www.alfresco.org/model/content/1.0}");
+        mappingNamespaces.put("fred","{http://www.xenit.eu/fred/example/model/0.1}");
+    }
 
 }

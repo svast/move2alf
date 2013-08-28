@@ -5,16 +5,26 @@ import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.SACMISInput;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.apache.camel.component.cmis.CamelCMISConstants;
+import org.apache.chemistry.opencmis.client.api.ObjectType;
+import org.apache.chemistry.opencmis.client.api.Property;
+import org.apache.chemistry.opencmis.client.runtime.PropertyImpl;
+import org.apache.chemistry.opencmis.client.runtime.objecttype.PolicyTypeImpl;
 import org.apache.chemistry.opencmis.commons.data.Ace;
+import org.apache.chemistry.opencmis.commons.data.CmisExtensionElement;
+import org.apache.chemistry.opencmis.commons.data.ExtensionsData;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlListImpl;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.CmisExtensionElementImpl;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.ExtensionDataImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import static eu.xenit.move2alf.common.Parameters.PARAM_ACL;
+import static eu.xenit.move2alf.common.Parameters.PARAM_NAMESPACE;
 
 @ClassInfo(classId = "CMISMetadataAction",
             category = ConfigurableObject.CAT_METADATA,
@@ -83,7 +93,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
             //fileInfo.put(Parameters.PARAM_NAMESPACE,namespace);
             // TO DO: how to handle this more generically??
-            fileInfo.put(Parameters.PARAM_NAMESPACE,"{http://www.xenit.eu/fred/example/model/0.1}");
+            fileInfo.put(Parameters.PARAM_NAMESPACE,Parameters.mappingNamespaces.get(namespace));
         }
         fileInfo.remove(SACMISInput.PARAM_CAMEL_HEADER);
 
@@ -91,13 +101,32 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         Map<String, Map<String, String>> acl = new HashMap<String, Map<String, String>>();
         HashMap<String,String> acList = new HashMap<String,String>();
         for(Ace ace : acli.getAces()) {
-            if(ace.getPermissions().size()>0)
+            // only put the "direct" permissions
+            // we cant know the value of "inheritPErmissions", so we don't set it at all (default=false)
+            if(ace.getPermissions().size()>0 && ace.isDirect()) {
                 acList.put(ace.getPrincipalId(),ace.getPermissions().get(ace.getPermissions().size()-1));
+            }
         }
         acl.put(path,acList);
         fileInfo.put(Parameters.PARAM_ACL,acl);
 
+        HashMap props = new HashMap();
+        if(headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES)!=null) {
+            Collection<PropertyImpl> properties = (Collection<PropertyImpl>)headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES);
+            for(PropertyImpl property : properties) {
+                //logger.debug("property id=" + property.getId() + " and local name=" + property.getLocalName() + " and value=" + property.getValueAsString() + " and displayName " + property.getDisplayName() + " in general=" + property);
+                if(!property.getId().startsWith("cmis:") && !property.getLocalName().contains("nodeRef") && property.getValueAsString()!=null && !property.getValueAsString().isEmpty()) {
+                    // add the property both with and without namespace
+                    props.put(property.getLocalName(),property.getValueAsString());
+                    String ns = property.getId().substring(0,property.getId().indexOf(":"));
+                    props.put(Parameters.mappingNamespaces.get(ns)+property.getLocalName(),property.getValueAsString());
+                }
+            }
+        }
+
+        fileInfo.put(Parameters.PARAM_METADATA,props);
         logger.info("*******************fileInfo=" + fileInfo);
         sendMessage(fileInfo);
     }
+
 }

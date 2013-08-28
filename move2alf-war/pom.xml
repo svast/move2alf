@@ -54,6 +54,11 @@
 		</repository>
 	</repositories>
 	<dependencies>
+	<dependency>
+            <groupId>org.alfresco.cmis.client</groupId>
+            <artifactId>alfresco-opencmis-extension</artifactId>
+            <version>0.3</version>
+        </dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>

@@ -726,8 +726,8 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 						UpdateResult result = results[0];
 						logger.debug(result.getStatement());
 						// put in cache
-						logger.info("Put {} in cache (learned from creation)",
-								path);
+						logger.info("Put {} in cache (learned from creation): {}",
+								path, result.getDestination());
 						referenceCache.put(getXPathEscape(path).toLowerCase(), result.getDestination());
 						return result.getDestination();
 					} else {
@@ -1309,7 +1309,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			ACE[] aces = new ACE[accessControl.size()];
 
 			int count = 0;
-			logger.info("Size Access Control list {}", accessControl.size());
+			logger.info("Size Access Control list {}", accessControl.size()," for "+ref.getPath());
 			for (String key : accessControl.keySet()) {
 				String authority = key;
 				logger.info("Authority {}", authority);
@@ -1323,14 +1323,16 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				count++;
 			}
 
-			// remove existing ...
-			logger.info("Removing ACEs");
-			accessControlService.removeACEs(predicate, null);
-			logger.info("Adding ACEs");
-			accessControlService.addACEs(predicate, aces);
-			logger.info("Setting Inherit Permission to {}", inheritPermissions);
-			accessControlService.setInheritPermission(predicate,
-					inheritPermissions);
+            if(aces.length>0) {
+                // remove existing ...
+                logger.info("Removing ACEs");
+                accessControlService.removeACEs(predicate, null);
+                logger.info("Adding ACEs");
+                accessControlService.addACEs(predicate, aces);
+                logger.info("Setting Inherit Permission to {}", inheritPermissions);
+                accessControlService.setInheritPermission(predicate,
+                        inheritPermissions);
+            }
 			// } catch (AccessControlFault e) {
 			// logger.warn(e.getMessage() + " space: " + ref.getPath(), e);
 			// throw new RepositoryException(e.getMessage());

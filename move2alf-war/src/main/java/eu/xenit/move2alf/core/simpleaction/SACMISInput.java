@@ -70,9 +70,9 @@ public class SACMISInput extends Move2AlfStartAction {
 	public String getEndpoint() {
         cmisURL = cmisURL.replace("?","QUESTIONMARK");  // Sharepoint endpoint contains parameters in the url; temporary hide them, otherwise problems parsing the cmis parameters
         if(cmisQuery.isEmpty())
-            return String.format("cmis://%s?username=%s&password=%s&readContent=true", cmisURL, cmisUsername, cmisPassword);
+            return String.format("cmis://%s?username=%s&password=%s&readContent=true&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl", cmisURL, cmisUsername, cmisPassword);
         else
-            return String.format("cmis://%s?username=%s&password=%s&readContent=true&query=%s", cmisURL, cmisUsername, cmisPassword, cmisQuery);
+            return String.format("cmis://%s?username=%s&password=%s&readContent=true&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl&query=%s", cmisURL, cmisUsername, cmisPassword, cmisQuery);
  	}
 
 	@Override
