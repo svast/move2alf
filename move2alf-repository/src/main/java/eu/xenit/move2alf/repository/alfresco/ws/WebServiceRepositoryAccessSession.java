@@ -402,14 +402,13 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 					if (auditablePropertyMap.size() > 0) {
 						String actionResult = ActionUtils.executeAction(content,
 								"edit-auditable-aspect", auditablePropertyMap);
-						logger.info("actionResult {}", actionResult);
 					}
 				}
 			}
 		} catch (WebServiceException e) {
 			if ("Unable to execute action".equals(e.getMessage())) {
 				logger.warn("Trying to set auditable properties but edit-auditable-aspect action not found. "
-						+ "Please install move2alf-amp on the Alfresco server.");
+						+ "Please install move2alf-amp on the Alfresco server and make sure that the dates are in the correct format.");
 			} else {
 				throw e;
 			}
@@ -1309,7 +1308,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			ACE[] aces = new ACE[accessControl.size()];
 
 			int count = 0;
-			logger.info("Size Access Control list {}", accessControl.size()," for "+ref.getPath());
+			logger.info("Size Access Control list=" + accessControl.size() + " for "+ref.getPath());
 			for (String key : accessControl.keySet()) {
 				String authority = key;
 				logger.info("Authority {}", authority);
