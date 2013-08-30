@@ -1,9 +1,11 @@
 package eu.xenit.move2alf.core.action;
 
 import eu.xenit.move2alf.common.Parameters;
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.SACMISInput;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessSession;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.Property;
@@ -19,9 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static eu.xenit.move2alf.common.Parameters.PARAM_ACL;
 import static eu.xenit.move2alf.common.Parameters.PARAM_NAMESPACE;
@@ -32,33 +32,14 @@ import static eu.xenit.move2alf.common.Parameters.PARAM_NAMESPACE;
 public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
     private static final Logger logger = LoggerFactory.getLogger(CMISMetadataAction.class);
 
-    public final static String CREATED = "created";
-    public final static String MODIFIED = "modified";
-    public final static String CREATOR = "creator";
-    public final static String MODIFIER = "modifier";
-    public final static String TITLE = "title";
-    public final static String DESCRIPTION = "description";
-    public final static String LANGUAGE = "language";
-    public final static String CATEGORIES = "categories";
-
     public final static String CMIS_OBJECT_TYPE_ID = "cmis:objectTypeId";
-    public final static String CMIS_CREATOR = "cmis:createdBy";
-    public final static String CMIS_MODIFIED = "cmis:lastModificationDate";
-    public final static String CMIS_CREATED = "cmis:creationDate";
-    public final static String CMIS_MODIFIER = "cmis:lastModifiedBy";
-
-    public final static String CMIS_TITLE = "Title";
-    public final static String CMIS_DESCRIPTION = "_Comments";
-    public final static String CMIS_LANGUAGE = "Language";
-    public final static String CMIS_KEYWORDS = "Keywords";
-
-    private final static HashMap<String,String> mappingProperties = new HashMap();
-
+    public static final Map<String,String> mappingAuditables;
     static {
-  //      mappingProperties.put(CMIS_MODIFIER, MODIFIER);
-//        mappingProperties.put(CMIS_CREATOR, CREATOR);
-        mappingProperties.put(CMIS_TITLE, TITLE);
-        mappingProperties.put(CMIS_DESCRIPTION, DESCRIPTION);
+        mappingAuditables = new HashMap();
+        mappingAuditables.put("cmis:createdBy", "creator");
+        mappingAuditables.put("cmis:lastModifiedBy", "modifier");
+        mappingAuditables.put("cmis:creationDate", "created");
+        mappingAuditables.put("cmis:lastModificationDate","modified");
     }
 
     @Override
@@ -70,29 +51,14 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             path = path.concat("/");
         path = path.concat(((File)fileInfo.get(Parameters.PARAM_FILE)).getName());
 
-        logger.debug("path=" + path);
-
-        for(String cmiskey : mappingProperties.keySet()) {
-            String value = (String)headers.get(cmiskey);
-            if(value != null) {
-                value = value.replace("\\","");
-                fileInfo.put(mappingProperties.get(cmiskey),value);
-            }
-        }
-
         String type = (String)headers.get(CMIS_OBJECT_TYPE_ID);
         // parse string of the form D:namespace:content type for custm Alfresco types
         int idx1 = type.indexOf(":");
         int idx2 = type.lastIndexOf(":");
-        if(type.equals("cmis:document") || idx1==-1) {
-            fileInfo.put(Parameters.PARAM_CONTENTTYPE,"content");
-            fileInfo.put(Parameters.PARAM_NAMESPACE, "{http://www.alfresco.org/model/content/1.0}");
-        } else {
+        if(!(type.equals("cmis:document")) && idx1!=-1) {
             String namespace = type.substring(idx1+1,idx2);
             String newContentType = type.substring(idx2+1);
             fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
-            //fileInfo.put(Parameters.PARAM_NAMESPACE,namespace);
-            // TO DO: how to handle this more generically??
             fileInfo.put(Parameters.PARAM_NAMESPACE,Parameters.mappingNamespaces.get(namespace));
         }
         fileInfo.remove(SACMISInput.PARAM_CAMEL_HEADER);
@@ -102,7 +68,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         HashMap<String,String> acList = new HashMap<String,String>();
         for(Ace ace : acli.getAces()) {
             // only put the "direct" permissions
-            // we cant know the value of "inheritPErmissions", so we don't set it at all (default=false)
+            // we cant know the value of "inheritPermissions", so we don't set it at all (default=false)
             if(ace.getPermissions().size()>0 && ace.isDirect()) {
                 acList.put(ace.getPrincipalId(),ace.getPermissions().get(ace.getPermissions().size()-1));
             }
@@ -114,8 +80,18 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         if(headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES)!=null) {
             Collection<PropertyImpl> properties = (Collection<PropertyImpl>)headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES);
             for(PropertyImpl property : properties) {
-                //logger.debug("property id=" + property.getId() + " and local name=" + property.getLocalName() + " and value=" + property.getValueAsString() + " and displayName " + property.getDisplayName() + " in general=" + property);
-                if(!property.getId().startsWith("cmis:") && !property.getLocalName().contains("nodeRef") && property.getValueAsString()!=null && !property.getValueAsString().isEmpty()) {
+                // set auditable properties
+                if(isAuditable(property.getId())) {
+                    String ns = property.getId().substring(0,property.getId().indexOf(":"));
+                    String val = property.getValueAsString();
+                    if(property.getValue() instanceof Calendar) {
+                        val = Util.ISO8601format(((Calendar)property.getValue()).getTime());
+                    }
+                    props.put(mappingAuditables.get(property.getId()),val);
+                } else if("cm:description".equals(property.getId())){
+                    fileInfo.put(Parameters.PARAM_DESCRIPTION,property.getValueAsString());
+                } else if(!property.getId().startsWith("cmis:") && !property.getLocalName().contains("nodeRef") && property.getValueAsString()!=null &&
+                        !property.getValueAsString().isEmpty() && !"null".equals(property.getValueAsString())) {
                     // add the property both with and without namespace
                     props.put(property.getLocalName(),property.getValueAsString());
                     String ns = property.getId().substring(0,property.getId().indexOf(":"));
@@ -124,9 +100,13 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             }
         }
 
+
         fileInfo.put(Parameters.PARAM_METADATA,props);
         logger.info("*******************fileInfo=" + fileInfo);
         sendMessage(fileInfo);
     }
 
+    private boolean isAuditable(String id) {
+        return mappingAuditables.keySet().contains(id);
+    }
 }

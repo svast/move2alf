@@ -181,32 +181,14 @@ public class SACMISInput extends Move2AlfStartAction {
                 }
 
 				if (!failed) {
-					/*if (logger.isDebugEnabled()) {
-						List<CmisExtensionType> extensions = (List<CmisExtensionType>) messageIn.getHeader(CamelCMISConstants.CAMEL_CMIS_EXTENSIONS);
-						if (extensions != null) {
-							logger.debug("EXTENSIONS: " + extensions);
-						}
-						Object acl = messageIn.getHeader(CamelCMISConstants.CAMEL_CMIS_ACL);
-						if (acl != null) {
-							logger.debug("ACL: " + acl);
-						}
-					}*/
 
 					final FileInfo fileInfo = new FileInfo();
 					fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
 					fileInfo.put(PARAM_FILE, file);
 
-                    Calendar cCreated = messageIn.getHeader(CMISMetadataAction.CMIS_CREATED,Calendar.class);
-                    String dCreated = Util.ISO8601format(cCreated.getTime());
-                    fileInfo.put(CMISMetadataAction.CREATED,dCreated);
-
-                    Calendar cModified = messageIn.getHeader(CMISMetadataAction.CMIS_MODIFIED,Calendar.class);
-                    String dModified = Util.ISO8601format(cModified.getTime());
-                    fileInfo.put(CMISMetadataAction.MODIFIED,dModified);
-
 					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 
-                    logger.debug("**************** fileInfo=" + fileInfo);
+//                    logger.debug("**************** fileInfo=" + fileInfo);
 					sendMessage(fileInfo);
 				}
             }

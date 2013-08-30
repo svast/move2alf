@@ -16,9 +16,7 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
 
   protected def executeImpl(message: BatchACLMessage) {
 
-    logger.debug("in aclaction, message=" + message.batch);
     for (acl <- message.acls){
-      logger.debug("acl=" + acl.acls + " and " + acl.inheritsPermissions);
       sendTaskToDestination(message, new SetAclMessage(acl), reply => Unit)
     }
 
