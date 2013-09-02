@@ -83,8 +83,7 @@ public class SACMISInput extends Move2AlfStartAction {
 			camel.addRoutes(new RouteBuilder() {
 				@Override
 				public void configure() throws Exception {
-					from(getEndpoint())//.streamCaching()
-							.to(DIRECT_ENDPOINT);
+					from(getEndpoint()).to(DIRECT_ENDPOINT);
 				}
 			});
 			camel.start();
@@ -111,7 +110,11 @@ public class SACMISInput extends Move2AlfStartAction {
 		boolean firstLoop = true;
 		String first = null;
 		while (!done) {
-			final Exchange exchange = template.receive(DIRECT_ENDPOINT);
+			final Exchange exchange = template.receive(DIRECT_ENDPOINT,3000);
+            if(exchange==null) {
+                done=true;
+                break;
+            }
             final Message messageIn = exchange.getIn();
 
 			// CMIS specific
