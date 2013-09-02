@@ -188,7 +188,7 @@ public class SACMISInput extends Move2AlfStartAction {
 
 					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 
-//                    logger.debug("**************** fileInfo=" + fileInfo);
+                    logger.debug("**************** fileInfo=" + fileInfo);
 					sendMessage(fileInfo);
 				}
             }

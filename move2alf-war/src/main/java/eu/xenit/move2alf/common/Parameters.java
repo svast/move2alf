@@ -137,12 +137,4 @@ public class Parameters {
 	 */
 	@Deprecated
 	public static final String PARAM_THREAD = "thread";
-
-    public static final Map mappingNamespaces = new HashMap();  // needed for CMIS import; full namespace is not known (can it be found out?)
-
-    static {
-        mappingNamespaces.put("cm","{http://www.alfresco.org/model/content/1.0}");
-        mappingNamespaces.put("fred","{http://www.xenit.eu/fred/example/model/0.1}");
-    }
-
 }
