@@ -51,6 +51,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String REPORT_SAVER = "reportSaver";
     public static final String PINNED_DISPATCHER = "pinned-dispatcher";
     public static final String ALFRESCO_ACL_ACTION = "AlfrescoAclAction";
+    public static final String VALIDATE_DESTINATION = "ValidateDestination";
 
     @Autowired
     private ActionClassInfoService actionClassService;
@@ -306,6 +307,15 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         start.setClassId(actionClassService.getClassId(StartCycleAction.class));
 
         ConfiguredAction end = start;
+
+        ConfiguredAction validateAction = new ConfiguredAction();
+        validateAction.setActionId(VALIDATE_DESTINATION);
+        validateAction.setClassId(actionClassService.getClassId(ValidateAction.class));
+        validateAction.setNmbOfWorkers(1);
+        validateAction.addReceiver(REPORTER, reporter);
+        validateAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
+        end.addReceiver(DEFAULT_RECEIVER, validateAction);
+        end = validateAction;
 
         if(!jobModel.getCommand().isEmpty()){
             ConfiguredAction executeCommandBefore = new ConfiguredAction();

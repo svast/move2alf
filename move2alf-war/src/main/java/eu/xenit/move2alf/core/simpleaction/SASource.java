@@ -4,8 +4,10 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import java.util.List;
 @ClassInfo(classId = "SASource",
             category = ConfigurableObject.CAT_DEFAULT,
             description = "Reads files from the filesystem and sends fileinfo messages")
-public class SASource extends Move2AlfStartAction{
+public class SASource extends Move2AlfReceivingAction<Object>{
     
     private static final Logger logger = LoggerFactory.getLogger(SASource.class);
 
@@ -32,7 +34,7 @@ public class SASource extends Move2AlfStartAction{
     }
 
     @Override
-    public void onStartImpl() {
+    public void executeImpl(Object message) {
         for (String inputPath: inputPaths){
             list(inputPath, true);
         }

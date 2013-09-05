@@ -1,5 +1,6 @@
 package eu.xenit.move2alf.core.action;
 
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import eu.xenit.move2alf.pipeline.actions.AbstractSendingAction;
 import eu.xenit.move2alf.pipeline.actions.StartAware;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ExecuteCommandAction extends AbstractSendingAction implements StartAware {
+public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> {
 
     private static final Logger logger = LoggerFactory
             .getLogger(ExecuteCommandAction.class);
@@ -23,7 +24,7 @@ public class ExecuteCommandAction extends AbstractSendingAction implements Start
     }
 
     @Override
-    public void onStart() {
+    public void executeImpl(Object message) {
         logger.debug("Command: " + command);
         if (command != null && !"".equals(command)) {
             logger.debug("Executing command " + command);
@@ -62,6 +63,9 @@ public class ExecuteCommandAction extends AbstractSendingAction implements Start
             }
 
             logger.info("Command finished");
+            if (sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)) {
+                sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, "Command executed");
+            }
         }
     }
 }

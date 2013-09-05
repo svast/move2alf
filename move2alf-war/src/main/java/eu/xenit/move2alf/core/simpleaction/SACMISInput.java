@@ -9,6 +9,7 @@ import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ReportMessage;
 import eu.xenit.move2alf.core.action.CMISMetadataAction;
+import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
@@ -30,7 +31,7 @@ import java.util.*;
  *
  * @author Jonas Heylen
  */
-public class SACMISInput extends Move2AlfStartAction {
+public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SACMISInput.class);
 
@@ -76,7 +77,7 @@ public class SACMISInput extends Move2AlfStartAction {
  	}
 
 	@Override
-	protected void onStartImpl() {
+	protected void executeImpl(Object message) {
 		final CamelContext camel = new DefaultCamelContext();
         logger.debug("Endpoint=" + getEndpoint());
 		try {

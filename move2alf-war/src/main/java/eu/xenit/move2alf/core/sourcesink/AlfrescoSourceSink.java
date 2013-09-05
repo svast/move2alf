@@ -389,6 +389,11 @@ public class AlfrescoSourceSink extends SharedResource {
 		return "Alfresco";
 	}
 
+    public boolean validate() {
+        RepositoryAccessSession ras = createRepositoryAccessSession();
+        return (ras!= null);
+    }
+
 	private abstract class RepositoryOperation<T>{
 		
 		protected abstract T executeImpl(RepositoryAccessSession ras) throws RepositoryAccessException, RepositoryException;

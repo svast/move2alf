@@ -28,6 +28,7 @@ class AlfrescoResourceAction extends ResourceAction[AlfrescoMessage]{
       case m:PutContentMessage => reply(alfrescoSourceSink.putContent(m.file, m.mimeType))
       case m:CheckExistenceMessage => reply(boolean2Boolean(alfrescoSourceSink.fileNameExists(m.fileName)))
       case m:ListMessage => reply(boolean2Boolean(alfrescoSourceSink.exists(m.remotePath, m.name)))
+      case m: ValidateMessage => reply(boolean2Boolean(alfrescoSourceSink.validate()))
       case m:SetAclMessage => {
         alfrescoSourceSink.setACL(m.acl)
         reply(boolean2Boolean(true))
