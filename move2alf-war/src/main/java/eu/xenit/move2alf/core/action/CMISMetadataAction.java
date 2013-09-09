@@ -92,6 +92,8 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                     String val = property.getValueAsString();
                     if(property.getValue() instanceof Calendar) {
                         val = Util.ISO8601format(((Calendar)property.getValue()).getTime());
+                    } else {  // for creator and modifier remove domain
+                        val = normalize(val);
                     }
                     props.put(Mappings.mappingAuditables.get(property.getId()),val);
                 } else if("cm:description".equals(property.getId())){
@@ -115,6 +117,14 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         fileInfo.put(Parameters.PARAM_METADATA,props);
         logger.info("*******************fileInfo=" + fileInfo);
         sendMessage(fileInfo);
+    }
+
+    // remove domain
+    private String normalize(String val) {
+        int idx = val.indexOf('\\');
+        if(idx != -1)
+          val = val.substring(idx+1);
+        return val;
     }
 
     private boolean isAuditable(String id) {
