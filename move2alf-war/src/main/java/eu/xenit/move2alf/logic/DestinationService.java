@@ -2,6 +2,9 @@ package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
+import eu.xenit.move2alf.core.dto.ConfiguredAction;
+import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
@@ -59,6 +62,7 @@ public class DestinationService extends AbstractHibernateService{
             startDestination(id);
         }
         jobHandleMap.get(id).sendTask(key, task, replyTo);
+
     }
 
     public List<Resource> getDestinations(){
@@ -66,7 +70,10 @@ public class DestinationService extends AbstractHibernateService{
     }
 
     public Resource getDestination(int id){
-        return (Resource) sessionFactory.getCurrentSession().createQuery("from Resource where id=?").setInteger(0, id).list().get(0);
+        List<Resource> results = sessionFactory.getCurrentSession().createQuery("from Resource where id=?").setInteger(0, id).list();
+        if(results!=null && !results.isEmpty())
+            return results.get(0);
+        return null;
     }
 
     public void saveDestination(Resource resource){
@@ -83,4 +90,7 @@ public class DestinationService extends AbstractHibernateService{
         startDestination(id);
     }
 
+    public void deleteDestination(Resource resource) {
+        sessionFactory.getCurrentSession().delete(resource);
+    }
 }

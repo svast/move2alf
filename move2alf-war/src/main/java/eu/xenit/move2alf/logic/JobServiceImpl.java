@@ -3,6 +3,7 @@ package eu.xenit.move2alf.logic;
 import akka.actor.ActorSystem;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfiguredObject;
+import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EDestinationParameter;
@@ -60,6 +61,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private UsageService usageService;
 
 	private UserService userService;
+
+    @Autowired
+    private DestinationService destinationService;
 
 	private Scheduler scheduler;
 
@@ -409,7 +413,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	public void deleteDestination(final int id) {
-		final ConfiguredSharedResource destination = getConfiguredSourceSink(id);
+        final Resource destinationResource = destinationService.getDestination(id);
+        destinationService.deleteDestination(destinationResource);
+
+        // TO DO: this part should be moved to DestinationService
+        ConfiguredAction action = destinationResource.getFirstConfiguredAction();
+        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+        final ConfiguredSharedResource destination = getConfiguredSourceSink(sourceSink);
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		destination.setParameters(emptyMap);
 		sessionFactory.getCurrentSession().delete(destination);

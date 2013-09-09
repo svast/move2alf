@@ -79,6 +79,8 @@ public class AlfrescoDestinationTypeController implements DestinationTypeControl
         ConfiguredAction first = resource.getFirstConfiguredAction();
         int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
+        if(configuredSharedResource==null)
+            return null;
         info.setType(getName());
         info.setUrl(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_URL));
         info.setUserName(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_USER));
@@ -97,6 +99,8 @@ public class AlfrescoDestinationTypeController implements DestinationTypeControl
         ConfiguredAction first = resource.getFirstConfiguredAction();
         int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
+        if(configuredSharedResource==null)
+            return null;
 
         destinationConfig.setDestinationURL(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_URL));
         destinationConfig.setAlfUser(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_USER));
@@ -124,6 +128,8 @@ public class AlfrescoDestinationTypeController implements DestinationTypeControl
             action =  resource.getFirstConfiguredAction();
             int alfrescoResourceId = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
             alfrescoResource = sharedResourceService.getConfiguredSharedResource(alfrescoResourceId);
+            if(alfrescoResource==null)
+                return null;
         } else {
             action = new ConfiguredAction();
             alfrescoResource = new ConfiguredSharedResource();
