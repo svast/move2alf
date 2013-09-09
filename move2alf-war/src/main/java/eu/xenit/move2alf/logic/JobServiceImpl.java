@@ -133,8 +133,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		job.setCreationDateTime(now);
 		job.setLastModifyDateTime(now);
 		job.setCreator(getUserService().getCurrentUser());
+        ConfiguredAction oldConfiguredAction = job.getFirstConfiguredAction();
         job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobModel));
         getSessionFactory().getCurrentSession().save(job);
+        getSessionFactory().getCurrentSession().delete(oldConfiguredAction);
         if(jobMap.containsKey(jobModel.getId())){
             jobMap.get(jobModel.getId()).destroy();
             jobMap.remove(jobModel.getId());
