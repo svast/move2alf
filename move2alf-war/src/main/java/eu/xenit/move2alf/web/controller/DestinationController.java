@@ -42,7 +42,7 @@ public class DestinationController extends AbstractController{
     }
 
     @Autowired
-    private ResourceTypeClassInfoService resourceTypeClassInfoService;
+    protected ResourceTypeClassInfoService resourceTypeClassInfoService;
 
     @Autowired
     private DestinationService destinationService;
@@ -71,7 +71,7 @@ public class DestinationController extends AbstractController{
         return mav;
     }
 
-    private ModelAndView getModelAndView() {
+    protected ModelAndView getModelAndView() {
         ModelAndView mav = new ModelAndView();
         Map<String, DestinationTypeController> destinationTypeMap = new HashMap<String, DestinationTypeController>();
         for(ClassInfoModel model: resourceTypeClassInfoService.getClassesForCategory(ResourceTypeClassInfoService.CATEGORY_DESTINATION)){
@@ -122,14 +122,6 @@ public class DestinationController extends AbstractController{
         mav.addObject("destination", destinationConfig);
         mav.addObject("destinationId", id);
         mav.setViewName("edit-destination");
-        return mav;
-    }
-
-    @RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
-    public ModelAndView deleteDestination(@PathVariable int id) {
-        ModelAndView mav = new ModelAndView();
-        getJobService().deleteDestination(id);
-        mav.setViewName("redirect:/destinations");
         return mav;
     }
 }

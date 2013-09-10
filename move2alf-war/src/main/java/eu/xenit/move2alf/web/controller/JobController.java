@@ -8,6 +8,7 @@ import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
@@ -135,9 +136,11 @@ public class JobController extends AbstractController{
 		return mav;
 	}
 
+    @Autowired
+    private DestinationService destinationService;
+
 	private void jobModel(ModelAndView mav) {
-		mav.addObject("destinations", getJobService()
-				.getAllDestinationConfiguredSourceSinks());
+		mav.addObject("destinations", destinationService.getAllDestinations());
 		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
 		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
 		mav.addObject("role", getRole());

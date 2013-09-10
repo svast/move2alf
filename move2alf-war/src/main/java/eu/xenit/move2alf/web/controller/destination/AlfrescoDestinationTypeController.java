@@ -2,6 +2,7 @@ package eu.xenit.move2alf.web.controller.destination;
 
 import eu.xenit.move2alf.core.action.ActionClassInfoService;
 import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.action.ClassInfoModel;
 import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction;
 import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -12,6 +13,7 @@ import eu.xenit.move2alf.core.sharedresource.SharedResourceService;
 import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
+import eu.xenit.move2alf.web.controller.AbstractController;
 import eu.xenit.move2alf.web.controller.destination.model.AlfrescoDestinationModel;
 import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
@@ -26,6 +28,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import javax.validation.Validator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -36,7 +40,7 @@ import javax.validation.Validator;
 @ClassInfo(classId = "Alfresco",
             category = ResourceTypeClassInfoService.CATEGORY_DESTINATION,
             description = "Alfresco destination type")
-public class AlfrescoDestinationTypeController implements DestinationTypeController {
+public class AlfrescoDestinationTypeController extends AbstractController implements DestinationTypeController {
 
     @Autowired
     private Validator validator;
@@ -161,12 +165,58 @@ public class AlfrescoDestinationTypeController implements DestinationTypeControl
         return resource;
     }
 
-    @RequestMapping(value = "/destination/alfresco/{id}/edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/destination/Alfresco/{id}/edit", method = RequestMethod.POST)
     public ModelAndView editDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel alfrescoDestinationModel, BindingResult errors, @PathVariable int id){
         Resource resource = populateResource(alfrescoDestinationModel, destinationService.getDestination(id), true);
         destinationService.updateDestination(resource);
 
         ModelAndView mav = new ModelAndView();
+        mav.setViewName("redirect:/destinations");
+        return mav;
+    }
+
+    @Autowired
+    protected ResourceTypeClassInfoService resourceTypeClassInfoService;
+
+    protected ModelAndView getModelAndView() {
+        ModelAndView mav = new ModelAndView();
+        Map<String, DestinationTypeController> destinationTypeMap = new HashMap<String, DestinationTypeController>();
+        for(ClassInfoModel model: resourceTypeClassInfoService.getClassesForCategory(ResourceTypeClassInfoService.CATEGORY_DESTINATION)){
+            DestinationTypeController type = resourceTypeClassInfoService.getDestinationType(model.getClassId());
+            destinationTypeMap.put(model.getClassId(), type);
+        }
+
+        mav.addObject("destinationOptions", destinationTypeMap);
+        mav.addObject("role", getRole());
+        mav.addObject("showDestinations", "false");
+        return mav;
+    }
+
+    @RequestMapping(value = "/destination/Alfresco/{id}/edit", method = RequestMethod.GET)
+    public ModelAndView editDestination(@PathVariable int id){
+        ModelAndView mav = getModelAndView();
+        Resource resource = destinationService.getDestination(id);
+
+        DestinationTypeController destinationTypeController = resourceTypeClassInfoService.getDestinationType(resource.getClassId());
+        DestinationConfig destinationConfig = destinationTypeController.getDestinationConfig(resource);
+
+        mav.addObject("destination", destinationConfig);
+        mav.addObject("destinationId", id);
+        mav.setViewName("edit-destination");
+        return mav;
+    }
+
+    @RequestMapping(value = "/destination/Alfresco/{id}/delete", method = RequestMethod.GET)
+    public ModelAndView deleteDestination(@PathVariable int id){
+        ModelAndView mav = new ModelAndView();
+        final Resource destinationResource = destinationService.getDestination(id);
+        destinationService.deleteDestination(destinationResource);
+
+        // TO DO: this part should be moved to DestinationService
+        ConfiguredAction action = destinationResource.getFirstConfiguredAction();
+        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+        final ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
+        sharedResourceService.deleteConfiguredSharedResource(configuredSharedResource);
         mav.setViewName("redirect:/destinations");
         return mav;
     }
