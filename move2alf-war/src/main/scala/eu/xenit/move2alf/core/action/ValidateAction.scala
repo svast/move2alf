@@ -1,11 +1,7 @@
 package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.pipeline.actions.StartAware
-import messages.{BatchACLMessage, ValidateMessage, SetAclMessage}
-import eu.xenit.move2alf.common.exceptions.Move2AlfException
-import eu.xenit.move2alf.logic.PipelineAssemblerImpl
-;
-
+import messages.ValidateMessage
 /**
  * Created with IntelliJ IDEA.
  * User: rox

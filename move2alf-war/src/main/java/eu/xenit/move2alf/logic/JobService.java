@@ -1,9 +1,7 @@
 package eu.xenit.move2alf.logic;
 
-import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
@@ -13,7 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Transactional
 public interface JobService {
@@ -157,63 +158,6 @@ public interface JobService {
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
 	public int getScheduleId(int jobId, String cronJob);
-
-	/**
-	 * Creates a destination
-	 * 
-	 * @param destinationType
-	 *            The type of destination
-	 * @param destinationParams
-	 *            A map of parameters that define the destination
-	 * @return the configured source sink
-	 */
-	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public ConfiguredSharedResource createDestination(String destinationType,
-			HashMap<EDestinationParameter, Object> destinationParams);
-
-	/**
-	 * Edits a destination
-	 * 
-	 * @param sinkId
-	 * @param destinationType
-	 *            The type of destination
-	 * @param destinationParams
-	 *            A map of parameters that define the destination
-	 * @return the configured source sink
-	 */
-	public ConfiguredSharedResource editDestination(int sinkId, String destinationType,
-			HashMap<EDestinationParameter, Object> destinationParams);
-	
-	/**
-	 * Get ConfiguredSharedResource by id.
-	 * 
-	 * @param sinkId
-	 * @return
-	 */
-	public ConfiguredSharedResource getDestination(int sinkId);
-
-	/**
-	 * gets all configured source sinks
-	 * 
-	 * @return a list of configured source sinks
-	 */
-	@PreAuthorize("hasRole('CONSUMER')")
-	public List<ConfiguredSharedResource> getAllConfiguredSourceSinks();
-
-	/**
-	 * gets a configured source sink based on id.
-	 * 
-	 * @param sourceSinkId
-	 * @return a list of configured source sinks
-	 */
-	public ConfiguredObject getConfiguredSourceSink(int sourceSinkId);
-
-	/**
-	 * deletes a configured source sink based on id.
-	 * 
-	 * @param id
-	 */
-	public void deleteDestination(int id);
 	
 	/**
 	 * 
@@ -251,12 +195,6 @@ public interface JobService {
 	 */
 	public long countProcessedDocumentsWithStatus(int cycleId, EProcessedDocumentStatus status);
 
-	/** gets all configured source sink but filters out the fileSystem source sink
-	 * 
-	 * @return List of configured source sinks
-	 */
-	public List<ConfiguredSharedResource> getAllDestinationConfiguredSourceSinks();
-
 
 	/**
 	 * 
@@ -264,13 +202,6 @@ public interface JobService {
 	 * @return
 	 */
 	public boolean checkJobExists(String jobName);
-
-	/**
-	 * 
-	 * @param destinationName
-	 * @return
-	 */
-	public boolean checkDestinationExists(String destinationName);
 
 	
 	/**

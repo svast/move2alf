@@ -39,19 +39,17 @@ function deleteDestination(id){
 			<th>URL</th>
 			<th>Username</th>
 			<th>Threads</th>
-			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<#list destinations as destination>
 		<tr>
-			<td><a href="<@spring.url relativeUrl="/destination/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
+			<td><a href="<@spring.url relativeUrl="/destination/${destination.type}/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
 			<td>${destination.name}</td>
 			<td>${destination.type}</td>
 			<td>${destination.url}</td>
 			<td>${destination.userName}</td>
 			<td>${destination.threads}</td>
-			<td><img class="clickable" onclick="deleteDestination('${destination.id}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
 		</tr>
 		</#list>
 	</tbody>

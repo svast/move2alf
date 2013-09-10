@@ -102,9 +102,7 @@
         </div>
 
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
-			<#if destination.parameters?has_content>
-				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>> ${destination.name}</option>
-			</#if>
+				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>>${destination.name}</option>
 		</@labeledSelectList>
 
 		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />

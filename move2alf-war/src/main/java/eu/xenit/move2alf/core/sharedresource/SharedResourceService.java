@@ -50,6 +50,11 @@ public class SharedResourceService extends AbstractHibernateService implements A
             return results.get(0);
     }
 
+    public void deleteConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
+        sessionFactory.getCurrentSession().delete(configuredSharedResource);
+        sharedResources.remove(configuredSharedResource.getId());
+    }
+
     public void saveConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
         sessionFactory.getCurrentSession().save(configuredSharedResource);
     }

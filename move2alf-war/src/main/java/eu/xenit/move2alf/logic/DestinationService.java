@@ -2,9 +2,6 @@ package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
@@ -47,6 +44,10 @@ public class DestinationService extends AbstractHibernateService{
         } else {
             startResource(destinations.get(0));
         }
+    }
+
+    public List<Resource> getAllDestinations(){
+        return sessionFactory.getCurrentSession().createQuery("from Resource").list();
     }
 
     private void startResource(Resource destination) {
