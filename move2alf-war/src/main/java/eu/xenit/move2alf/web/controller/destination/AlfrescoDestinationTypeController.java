@@ -37,10 +37,12 @@ import java.util.Map;
  * Time: 2:38 PM
  */
 @Controller
-@ClassInfo(classId = "Alfresco",
+@ClassInfo(classId = AlfrescoDestinationTypeController.CLASS_ID,
             category = ResourceTypeClassInfoService.CATEGORY_DESTINATION,
             description = "Alfresco destination type")
 public class AlfrescoDestinationTypeController extends AbstractController implements DestinationTypeController {
+
+    public static final String CLASS_ID = "Alfresco";
 
     @Autowired
     private Validator validator;
@@ -56,21 +58,6 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
 
     @Autowired
     private SharedResourceService sharedResourceService;
-
-    @Override
-    public void processModel(DestinationConfig destination) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public Object getModel(){
-        return new AlfrescoDestinationModel();
-    }
-
-    @Override
-    public String getViewName() {
-        return "destinationtypes/alfrescodestination.ftl";
-    }
 
     public String getName(){
         return "Alfresco";
@@ -98,7 +85,6 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
     public DestinationConfig getDestinationConfig(Resource resource) {
         AlfrescoDestinationModel destinationConfig = new AlfrescoDestinationModel();
         destinationConfig.setName(resource.getName());
-        destinationConfig.setType(resource.getClassId());
 
         ConfiguredAction first = resource.getFirstConfiguredAction();
         int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
@@ -114,15 +100,32 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return destinationConfig;
     }
 
-    @RequestMapping(value = "/destination/create/Alfresco", method = RequestMethod.POST)
+    @RequestMapping(value = "/destinations/Alfresco/create", method = RequestMethod.POST)
     public ModelAndView createDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel destination, BindingResult errors){
-        //TODO: Handle errors
 
+        if(errors.hasErrors()){
+            ModelAndView mav = new ModelAndView("destinationtypes/alfresco/create");
+            mav.addObject("destination", destination);
+
+            mav.addObject("role", getRole());
+            mav.addObject("errors", errors.getFieldErrors());
+            return mav;
+        }
         Resource resource = populateResource(destination, new Resource(), false);
 
         destinationService.saveDestination(resource);
 
         return new ModelAndView("redirect:/destinations");
+    }
+
+    @RequestMapping(value = "/destinations/Alfresco/create", method = RequestMethod.GET)
+    public ModelAndView createDestination(){
+        ModelAndView mav = getModelAndView();
+
+        //Default is Alfresco. If we add something else, we should change this.
+        mav.addObject("destination", new AlfrescoDestinationModel());
+        mav.setViewName("destinationtypes/alfresco/create");
+        return mav;
     }
 
     private Resource populateResource(AlfrescoDestinationModel destination, Resource resource, boolean update) {
@@ -160,12 +163,12 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         action.setParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK(), Integer.toString(alfrescoResource.getId()));
 
         resource.setName(destination.getName());
-        resource.setClassId(destination.getType());
+        resource.setClassId(CLASS_ID);
         resource.setFirstConfiguredAction(action);
         return resource;
     }
 
-    @RequestMapping(value = "/destination/Alfresco/{id}/edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/destinations/Alfresco/{id}/edit", method = RequestMethod.POST)
     public ModelAndView editDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel alfrescoDestinationModel, BindingResult errors, @PathVariable int id){
         Resource resource = populateResource(alfrescoDestinationModel, destinationService.getDestination(id), true);
         destinationService.updateDestination(resource);
@@ -192,7 +195,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return mav;
     }
 
-    @RequestMapping(value = "/destination/Alfresco/{id}/edit", method = RequestMethod.GET)
+    @RequestMapping(value = "/destinations/Alfresco/{id}/edit", method = RequestMethod.GET)
     public ModelAndView editDestination(@PathVariable int id){
         ModelAndView mav = getModelAndView();
         Resource resource = destinationService.getDestination(id);
@@ -202,7 +205,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
 
         mav.addObject("destination", destinationConfig);
         mav.addObject("destinationId", id);
-        mav.setViewName("edit-destination");
+        mav.setViewName("destinationtypes/alfresco/edit");
         return mav;
     }
 

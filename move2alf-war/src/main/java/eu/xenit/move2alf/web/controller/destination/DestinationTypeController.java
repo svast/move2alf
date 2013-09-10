@@ -11,12 +11,6 @@ import eu.xenit.move2alf.web.dto.DestinationInfo;
  */
 public interface DestinationTypeController {
 
-    public String getViewName();
-
-    public Object getModel();
-
-    public void processModel(DestinationConfig destination);
-
     public String getName();
 
     public DestinationInfo getDestinationInfo(Resource resource);

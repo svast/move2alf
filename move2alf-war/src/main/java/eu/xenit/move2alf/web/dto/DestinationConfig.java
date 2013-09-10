@@ -7,9 +7,6 @@ public class DestinationConfig {
 	@NotEmpty
 	private String name;
 
-	@NotEmpty
-	private String type;
-
 	public String getName() {
 		return name;
 	}
@@ -17,14 +14,5 @@ public class DestinationConfig {
     public void setName(String name){
         this.name = name;
     }
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
-
 
 }

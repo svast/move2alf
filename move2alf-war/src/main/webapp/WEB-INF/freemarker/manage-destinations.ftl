@@ -33,7 +33,7 @@ function deleteDestination(id){
 	<col class="delete-column" />
 	<thead>
 		<tr>
-			<th><a href="<@spring.url relativeUrl="/destination/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>
+			<th></th>
 			<th>Name</th>
 			<th>Type</th>
 			<th>URL</th>
@@ -44,7 +44,7 @@ function deleteDestination(id){
 	<tbody>
 		<#list destinations as destination>
 		<tr>
-			<td><a href="<@spring.url relativeUrl="/destination/${destination.type}/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
+			<td><a href="<@spring.url relativeUrl="/destinations/${destination.type}/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
 			<td>${destination.name}</td>
 			<td>${destination.type}</td>
 			<td>${destination.url}</td>
@@ -54,6 +54,10 @@ function deleteDestination(id){
 		</#list>
 	</tbody>
 </table>
+<b>Create new:<b>
+    <#list destinationOptions?keys as type>
+        <a class="btn btn-success" href="<@spring.url relativeUrl="/destinations/${type}/create" />">${destinationOptions[type].name}</a>
+    </#list>
 
 </@bodyMenu>
 </@html>
