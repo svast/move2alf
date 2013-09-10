@@ -92,6 +92,7 @@ public class DestinationService extends AbstractHibernateService{
     }
 
     public void deleteDestination(Resource resource) {
+        sessionFactory.getCurrentSession().delete(resource.getFirstConfiguredAction());
         sessionFactory.getCurrentSession().delete(resource);
     }
 }

@@ -9,7 +9,7 @@
 <script>
     function deleteDestination(id){
         if(confirm("Are you sure you want to delete this destination?")){
-            window.location.href = "<@spring.url relativeUrl="/destination/" />${destination.type}/${destinationId}/delete";
+            window.location.href = "<@spring.url relativeUrl="/destination/" />${destination.type}/"+id+"/delete";
         }
     }
 </script>
