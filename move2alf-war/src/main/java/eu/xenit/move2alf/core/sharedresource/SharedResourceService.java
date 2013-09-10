@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +33,8 @@ public class SharedResourceService extends AbstractHibernateService implements A
             return sharedResources.get(id);
         } else {
             ConfiguredSharedResource configuredSharedResource = getConfiguredSharedResource(id);
+            if(configuredSharedResource==null)
+                return null;
             ClassInfoModel classInfoModel = sharedResourceClassInfoService.getClassInfoModel(configuredSharedResource.getClassId());
             SharedResource resource = new ObjectFactory<SharedResource>(classInfoModel.getClazz(), configuredSharedResource.getParameters(), beanFactory).createObject();
             sharedResources.put(id, resource);
@@ -40,7 +43,16 @@ public class SharedResourceService extends AbstractHibernateService implements A
     }
 
     public ConfiguredSharedResource getConfiguredSharedResource(int id){
-        return (ConfiguredSharedResource) sessionFactory.getCurrentSession().createQuery("from ConfiguredSharedResource as d where d.id=?").setInteger(0, id).list().get(0);
+        List<ConfiguredSharedResource> results = sessionFactory.getCurrentSession().createQuery("from ConfiguredSharedResource as d where d.id=?").setInteger(0, id).list();
+        if(results == null || results.isEmpty())
+            return null;
+        else
+            return results.get(0);
+    }
+
+    public void deleteConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
+        sessionFactory.getCurrentSession().delete(configuredSharedResource);
+        sharedResources.remove(configuredSharedResource.getId());
     }
 
     public void saveConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){

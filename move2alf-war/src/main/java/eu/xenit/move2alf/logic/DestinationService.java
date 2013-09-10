@@ -46,6 +46,10 @@ public class DestinationService extends AbstractHibernateService{
         }
     }
 
+    public List<Resource> getAllDestinations(){
+        return sessionFactory.getCurrentSession().createQuery("from Resource").list();
+    }
+
     private void startResource(Resource destination) {
         ActionConfig actionConfig = pipelineAssembler.getActionConfig(destination.getFirstConfiguredAction());
         JobHandle jobHandle = new JobHandle(system, destination.getName(), new JobConfig(actionConfig, false));
@@ -59,6 +63,7 @@ public class DestinationService extends AbstractHibernateService{
             startDestination(id);
         }
         jobHandleMap.get(id).sendTask(key, task, replyTo);
+
     }
 
     public List<Resource> getDestinations(){
@@ -66,7 +71,10 @@ public class DestinationService extends AbstractHibernateService{
     }
 
     public Resource getDestination(int id){
-        return (Resource) sessionFactory.getCurrentSession().createQuery("from Resource where id=?").setInteger(0, id).list().get(0);
+        List<Resource> results = sessionFactory.getCurrentSession().createQuery("from Resource where id=?").setInteger(0, id).list();
+        if(results!=null && !results.isEmpty())
+            return results.get(0);
+        return null;
     }
 
     public void saveDestination(Resource resource){
@@ -83,4 +91,8 @@ public class DestinationService extends AbstractHibernateService{
         startDestination(id);
     }
 
+    public void deleteDestination(Resource resource) {
+        sessionFactory.getCurrentSession().delete(resource.getFirstConfiguredAction());
+        sessionFactory.getCurrentSession().delete(resource);
+    }
 }

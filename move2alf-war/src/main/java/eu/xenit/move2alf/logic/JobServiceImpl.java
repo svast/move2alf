@@ -2,17 +2,15 @@ package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorSystem;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ConfiguredObject;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobModel;
 import eu.xenit.move2alf.web.dto.JobInfo;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -60,6 +58,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	private UsageService usageService;
 
 	private UserService userService;
+
+    @Autowired
+    private DestinationService destinationService;
 
 	private Scheduler scheduler;
 
@@ -301,118 +302,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		// job object is still in cache with old schedules
 		getSessionFactory().getCurrentSession().flush();
 		getScheduler().reloadSchedules();
-	}
-
-	@Override
-	public ConfiguredSharedResource createDestination(final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSharedResource sourceSink = new ConfiguredSharedResource();
-		createSourceSink(destinationType, destinationParams, sourceSink);
-		getSessionFactory().getCurrentSession().save(sourceSink);
-		return sourceSink;
-	}
-
-	@Override
-	public ConfiguredSharedResource editDestination(final int sinkId,
-			final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSharedResource sourceSink = getConfiguredSourceSink(sinkId);
-		sourceSink.setClassId(destinationType);
-		createSourceSink(destinationType, destinationParams, sourceSink);
-		getSessionFactory().getCurrentSession().save(sourceSink);
-		return sourceSink;
-	}
-
-	@Override
-	public ConfiguredSharedResource getDestination(final int id) {
-		return (ConfiguredSharedResource) getSessionFactory().getCurrentSession()
-				.get(ConfiguredSharedResource.class, id);
-	}
-
-	@Override
-	public boolean checkDestinationExists(final String destinationName) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredObject> destinations = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSharedResource")
-				.list();
-
-		for (int i = 0; i < destinations.size(); i++) {
-			final String destinationParameter = destinations.get(i)
-					.getParameter("name");
-
-			if (destinationName.equals(destinationParameter)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void createSourceSink(final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams,
-			final ConfiguredSharedResource sourceSink) {
-		sourceSink.setClassId(destinationType);
-
-		final Map<String, String> sourceSinkParameters = new HashMap<String, String>();
-		sourceSinkParameters.put("name",
-				(String) destinationParams.get(EDestinationParameter.NAME));
-		sourceSinkParameters.put("url",
-				(String) destinationParams.get(EDestinationParameter.URL));
-		sourceSinkParameters.put("user",
-				(String) destinationParams.get(EDestinationParameter.USER));
-		sourceSinkParameters.put("password",
-				(String) destinationParams.get(EDestinationParameter.PASSWORD));
-		sourceSinkParameters
-				.put("threads",
-						destinationParams.get(EDestinationParameter.THREADS)
-								.toString());
-		sourceSink.setParameters(sourceSinkParameters);
-	}
-
-	@Override
-	public List<ConfiguredSharedResource> getAllConfiguredSourceSinks() {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSharedResource")
-				.list();
-
-		return configuredSourceSink;
-	}
-
-	@Override
-	public List<ConfiguredSharedResource> getAllDestinationConfiguredSourceSinks() {
-
-		final String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
-				.getCurrentSession()
-				.createQuery(
-						"from ConfiguredSharedResource as c where c.classId!=?")
-				.setString(0, fileSourceSink).list();
-
-		return configuredSourceSink;
-	}
-
-	@Override
-	public ConfiguredSharedResource getConfiguredSourceSink(final int sourceSinkId) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSharedResource> configuredSourceSink = sessionFactory
-				.getCurrentSession()
-				.createQuery("from ConfiguredSharedResource as c where c.id=?")
-				.setLong(0, sourceSinkId).list();
-		if (configuredSourceSink.size() == 1) {
-			return configuredSourceSink.get(0);
-		} else {
-			throw new Move2AlfException("ConfiguredSharedResource with id "
-					+ sourceSinkId + " not found");
-		}
-	}
-
-	@Override
-	public void deleteDestination(final int id) {
-		final ConfiguredSharedResource destination = getConfiguredSourceSink(id);
-		final Map<String, String> emptyMap = new HashMap<String, String>();
-		destination.setParameters(emptyMap);
-		sessionFactory.getCurrentSession().delete(destination);
 	}
 
 

@@ -16,9 +16,13 @@ import scala.collection.mutable
  */
 abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] with EOCBlockingAction with AcceptsReply with LogHelper {
 
-  @Autowired private var destinationService: DestinationService = null
+  @Autowired protected var destinationService: DestinationService = null
 
-  private var destination: Int = 0
+  def getDestinationService: DestinationService = {
+    return destinationService;
+  }
+
+  private var destination: Int = -1
 
   def setDestination(dest: String) {
     this.destination = Integer.parseInt(dest)

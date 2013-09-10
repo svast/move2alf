@@ -1,11 +1,7 @@
 package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.pipeline.actions.StartAware
-import messages.{BatchACLMessage, ValidateMessage, SetAclMessage}
-import eu.xenit.move2alf.common.exceptions.Move2AlfException
-import eu.xenit.move2alf.logic.PipelineAssemblerImpl
-;
-
+import messages.ValidateMessage
 /**
  * Created with IntelliJ IDEA.
  * User: rox
@@ -14,14 +10,16 @@ import eu.xenit.move2alf.logic.PipelineAssemblerImpl
  */
 class ValidateAction extends ActionWithDestination[Any, Boolean] with StartAware {
   def onStart() {
-    sendTaskToDestination("ValidateMessage", new ValidateMessage(), result => {
-      if(result) {
+      logger.debug("destination=" + getDestination)
+      
+      sendTaskToDestination("ValidateMessage", new ValidateMessage(), result => {
+        if(result) {
           sendMessage("Destination " + getDestination + " validated");
-      } else {
-        logger.debug("Destination " + getDestination + " not reachable");
-        handleError("StartMessage", "Destination not reachable");
-    }})
-  }
+        } else {
+          logger.debug("Destination " + getDestination + " not reachable");
+          handleError("ValidateMessage", "Destination not reachable");
+        }})
+    }
 
   protected def executeImpl(message: Any) {}
 }
