@@ -57,4 +57,14 @@ public class CastorDestinationModel extends DestinationConfig {
     public String getEncodedNodes() {
         return getNode1()+"|"+getNode2()+"|"+getNode3();
     }
+
+    private String lifePoint = "[] minreps=2, maxreps=2, deletable=yes";
+
+    public String getLifePoint() {
+        return lifePoint;
+    }
+
+    public void setLifePoint(String lifePoint) {
+        this.lifePoint = lifePoint;
+    }
 }
