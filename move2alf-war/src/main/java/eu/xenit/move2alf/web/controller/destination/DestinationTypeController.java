@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.web.controller.destination;
 
 import eu.xenit.move2alf.core.dto.Resource;
-import eu.xenit.move2alf.web.dto.DestinationConfig;
 import eu.xenit.move2alf.web.dto.DestinationInfo;
 
 /**
@@ -15,5 +14,4 @@ public interface DestinationTypeController {
 
     public DestinationInfo getDestinationInfo(Resource resource);
 
-    public DestinationConfig getDestinationConfig(Resource resource);
 }

@@ -6,5 +6,5 @@ package eu.xenit.move2alf.core.action.messages;
  * Date: 9/2/13
  * Time: 5:40 PM
  */
-public class ValidateMessage extends AlfrescoMessage {
+public class ValidateMessage {
 }

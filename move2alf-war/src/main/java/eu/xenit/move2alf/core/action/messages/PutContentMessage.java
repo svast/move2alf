@@ -7,7 +7,7 @@ import java.io.File;
  * Date: 7/1/13
  * Time: 3:38 PM
  */
-public class PutContentMessage extends AlfrescoMessage{
+public class PutContentMessage {
 
     public final File file;
     public final String mimeType;

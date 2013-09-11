@@ -2,7 +2,6 @@ package eu.xenit.move2alf.web.controller.destination;
 
 import eu.xenit.move2alf.core.action.ActionClassInfoService;
 import eu.xenit.move2alf.core.action.ClassInfo;
-import eu.xenit.move2alf.core.action.ClassInfoModel;
 import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction;
 import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
@@ -10,7 +9,7 @@ import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.core.sharedresource.SharedResourceClassInfoService;
 import eu.xenit.move2alf.core.sharedresource.SharedResourceService;
-import eu.xenit.move2alf.core.sourcesink.AlfrescoSourceSink;
+import eu.xenit.move2alf.core.sharedresource.alfresco.AlfrescoSharedResource;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import eu.xenit.move2alf.web.controller.AbstractController;
@@ -27,9 +26,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
-import javax.validation.Validator;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -43,9 +39,6 @@ import java.util.Map;
 public class AlfrescoDestinationTypeController extends AbstractController implements DestinationTypeController {
 
     public static final String CLASS_ID = "Alfresco";
-
-    @Autowired
-    private Validator validator;
 
     @Autowired
     private DestinationService destinationService;
@@ -68,35 +61,33 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         DestinationInfo info = new DestinationInfo();
         info.setName(resource.getName());
         ConfiguredAction first = resource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         if(configuredSharedResource==null)
             return null;
         info.setType(getName());
-        info.setUrl(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_URL));
-        info.setUserName(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_USER));
+        info.setUrl(configuredSharedResource.getParameter(AlfrescoSharedResource.PARAM_URL));
+        info.setUserName(configuredSharedResource.getParameter(AlfrescoSharedResource.PARAM_USER));
         info.setId(resource.getId());
         info.setThreads(first.getNmbOfWorkers());
 
         return info;
     }
 
-    @Override
-    public DestinationConfig getDestinationConfig(Resource resource) {
+    private DestinationConfig getDestinationConfig(Resource resource) {
         AlfrescoDestinationModel destinationConfig = new AlfrescoDestinationModel();
         destinationConfig.setName(resource.getName());
 
         ConfiguredAction first = resource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         if(configuredSharedResource==null)
             return null;
 
-        destinationConfig.setDestinationURL(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_URL));
-        destinationConfig.setAlfUser(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_USER));
-        destinationConfig.setAlfPswd(configuredSharedResource.getParameter(AlfrescoSourceSink.PARAM_PASSWORD));
+        destinationConfig.setDestinationURL(configuredSharedResource.getParameter(AlfrescoSharedResource.PARAM_URL));
+        destinationConfig.setAlfUser(configuredSharedResource.getParameter(AlfrescoSharedResource.PARAM_USER));
+        destinationConfig.setAlfPswd(configuredSharedResource.getParameter(AlfrescoSharedResource.PARAM_PASSWORD));
         destinationConfig.setNbrThreads(first.getNmbOfWorkers());
-
         return destinationConfig;
     }
 
@@ -133,7 +124,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         ConfiguredSharedResource alfrescoResource;
         if(update){
             action =  resource.getFirstConfiguredAction();
-            int alfrescoResourceId = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+            int alfrescoResourceId = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
             alfrescoResource = sharedResourceService.getConfiguredSharedResource(alfrescoResourceId);
             if(alfrescoResource==null)
                 return null;
@@ -141,18 +132,18 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
             action = new ConfiguredAction();
             alfrescoResource = new ConfiguredSharedResource();
         }
-        action.setActionId(destination.getName()+"_action");
+        action.setActionId(destination.getName().replace(" ","_")+"_action");
         action.setClassId(actionClassInfoService.getClassId(AlfrescoResourceAction.class));
         action.setNmbOfWorkers(destination.getNbrThreads());
         action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);
 
 
 
-        alfrescoResource.setClassId(sharedResourceClassInfoService.getClassId(AlfrescoSourceSink.class));
+        alfrescoResource.setClassId(sharedResourceClassInfoService.getClassId(AlfrescoSharedResource.class));
         alfrescoResource.setName(destination.getName());
-        alfrescoResource.setParameter(AlfrescoSourceSink.PARAM_URL, destination.getDestinationURL());
-        alfrescoResource.setParameter(AlfrescoSourceSink.PARAM_USER, destination.getAlfUser());
-        alfrescoResource.setParameter(AlfrescoSourceSink.PARAM_PASSWORD, destination.getAlfPswd());
+        alfrescoResource.setParameter(AlfrescoSharedResource.PARAM_URL, destination.getDestinationURL());
+        alfrescoResource.setParameter(AlfrescoSharedResource.PARAM_USER, destination.getAlfUser());
+        alfrescoResource.setParameter(AlfrescoSharedResource.PARAM_PASSWORD, destination.getAlfPswd());
 
         if(update){
             sharedResourceService.updateConfiguredSharedResource(alfrescoResource);
@@ -160,7 +151,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
             sharedResourceService.saveConfiguredSharedResource(alfrescoResource);
         }
 
-        action.setParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK(), Integer.toString(alfrescoResource.getId()));
+        action.setParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE(), Integer.toString(alfrescoResource.getId()));
 
         resource.setName(destination.getName());
         resource.setClassId(CLASS_ID);
@@ -172,24 +163,14 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
     public ModelAndView editDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel alfrescoDestinationModel, BindingResult errors, @PathVariable int id){
         Resource resource = populateResource(alfrescoDestinationModel, destinationService.getDestination(id), true);
         destinationService.updateDestination(resource);
-
         ModelAndView mav = new ModelAndView();
         mav.setViewName("redirect:/destinations");
         return mav;
     }
 
-    @Autowired
-    protected ResourceTypeClassInfoService resourceTypeClassInfoService;
-
     protected ModelAndView getModelAndView() {
         ModelAndView mav = new ModelAndView();
-        Map<String, DestinationTypeController> destinationTypeMap = new HashMap<String, DestinationTypeController>();
-        for(ClassInfoModel model: resourceTypeClassInfoService.getClassesForCategory(ResourceTypeClassInfoService.CATEGORY_DESTINATION)){
-            DestinationTypeController type = resourceTypeClassInfoService.getDestinationType(model.getClassId());
-            destinationTypeMap.put(model.getClassId(), type);
-        }
 
-        mav.addObject("destinationOptions", destinationTypeMap);
         mav.addObject("role", getRole());
         mav.addObject("showDestinations", "false");
         return mav;
@@ -199,9 +180,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
     public ModelAndView editDestination(@PathVariable int id){
         ModelAndView mav = getModelAndView();
         Resource resource = destinationService.getDestination(id);
-
-        DestinationTypeController destinationTypeController = resourceTypeClassInfoService.getDestinationType(resource.getClassId());
-        DestinationConfig destinationConfig = destinationTypeController.getDestinationConfig(resource);
+        DestinationConfig destinationConfig = getDestinationConfig(resource);
 
         mav.addObject("destination", destinationConfig);
         mav.addObject("destinationId", id);
@@ -215,9 +194,8 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         final Resource destinationResource = destinationService.getDestination(id);
         destinationService.deleteDestination(destinationResource);
 
-        // TO DO: this part should be moved to DestinationService
         ConfiguredAction action = destinationResource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSOURCESINK()));
+        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
         final ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         sharedResourceService.deleteConfiguredSharedResource(configuredSharedResource);
         mav.setViewName("redirect:/destinations");

@@ -6,11 +6,15 @@ import eu.xenit.move2alf.core.action.ActionClassInfoService;
 import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.ProcessedDocument;
+import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
+import eu.xenit.move2alf.web.controller.destination.AlfrescoDestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.CastorDestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.model.ContentStoreModel;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
@@ -140,7 +144,13 @@ public class JobController extends AbstractController{
     private DestinationService destinationService;
 
 	private void jobModel(ModelAndView mav) {
-		mav.addObject("destinations", destinationService.getAllDestinations());
+        List<ContentStoreModel> contentStores = new ArrayList<ContentStoreModel>();
+        contentStores.add(new ContentStoreModel("Default Alfresco content store", -1));
+        for (Resource resource: destinationService.getDestinationsForClassId(CastorDestinationTypeController.CLASS_ID)){
+            contentStores.add(new ContentStoreModel(resource.getName(), resource.getId()));
+        }
+        mav.addObject("contentStores", contentStores);
+		mav.addObject("destinations", destinationService.getDestinationsForClassId(AlfrescoDestinationTypeController.CLASS_ID));
 		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
 		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
 		mav.addObject("role", getRole());

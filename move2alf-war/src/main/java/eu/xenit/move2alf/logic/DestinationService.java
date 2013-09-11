@@ -50,9 +50,14 @@ public class DestinationService extends AbstractHibernateService{
         return sessionFactory.getCurrentSession().createQuery("from Resource").list();
     }
 
+    public List<Resource> getDestinationsForClassId(String classId){
+        return sessionFactory.getCurrentSession().createQuery("from Resource where classId= :classId").setParameter("classId", classId).list();
+    }
+
     private void startResource(Resource destination) {
+        String name = destination.getName().replace(" ", "_");
         ActionConfig actionConfig = pipelineAssembler.getActionConfig(destination.getFirstConfiguredAction());
-        JobHandle jobHandle = new JobHandle(system, destination.getName(), new JobConfig(actionConfig, false));
+        JobHandle jobHandle = new JobHandle(system, name, new JobConfig(actionConfig, false));
         jobHandle.startJob();
         jobHandleMap.put(destination.getId(), jobHandle);
     }

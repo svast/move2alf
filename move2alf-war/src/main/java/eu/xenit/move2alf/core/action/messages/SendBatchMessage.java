@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.core.action.messages;
 
-import eu.xenit.move2alf.core.sourcesink.WriteOption;
+import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * Date: 6/12/13
  * Time: 5:11 PM
  */
-public class SendBatchMessage extends AlfrescoMessage {
+public class SendBatchMessage {
 
     public final WriteOption writeOption;
     public final List<Document> documentsToUpload;

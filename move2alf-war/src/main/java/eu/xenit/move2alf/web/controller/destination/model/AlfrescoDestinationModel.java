@@ -19,8 +19,6 @@ public class AlfrescoDestinationModel extends DestinationConfig{
     @NotEmpty
     private String alfPswd;
 
-    private int nbrThreads = 1;
-
     public void setDestinationURL(String destinationURL) {
         this.destinationURL = destinationURL;
     }
@@ -41,16 +39,18 @@ public class AlfrescoDestinationModel extends DestinationConfig{
         this.alfPswd = alfPswd;
     }
 
-    public void setNbrThreads(int nbrThreads) {
-        this.nbrThreads = nbrThreads;
-    }
-
     public String getAlfPswd() {
 
         return alfPswd;
     }
 
-    public int getNbrThreads() {
-        return nbrThreads;
+    private int contentStoreId = -1;
+
+    public int getContentStoreId() {
+        return contentStoreId;
+    }
+
+    public void setContentStoreId(int contentStoreId) {
+        this.contentStoreId = contentStoreId;
     }
 }

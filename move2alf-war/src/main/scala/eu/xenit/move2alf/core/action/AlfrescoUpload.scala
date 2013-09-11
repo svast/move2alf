@@ -3,7 +3,6 @@ package eu.xenit.move2alf.core.action
 import eu.xenit.move2alf.core.simpleaction.data.{FileInfo, Batch}
 import eu.xenit.move2alf.core.action.messages._
 import eu.xenit.move2alf.common.{Util, Parameters}
-import eu.xenit.move2alf.core.sourcesink.{WriteOption, ACL}
 import java.util
 import scala.collection.JavaConversions._
 import scala.Boolean
@@ -11,6 +10,7 @@ import java.io.File
 import eu.xenit.move2alf.repository.alfresco.ws.Document
 import org.slf4j.{Logger, LoggerFactory}
 import java.util.{Map => JMap}
+import eu.xenit.move2alf.core.sharedresource.alfresco.{WriteOption, ACL}
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)

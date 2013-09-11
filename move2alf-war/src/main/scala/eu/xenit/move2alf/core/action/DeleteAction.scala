@@ -1,10 +1,10 @@
 package eu.xenit.move2alf.core.action
 
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo
-import eu.xenit.move2alf.core.sourcesink.DeleteOption
 import eu.xenit.move2alf.common.Parameters
 import java.io.File
 import eu.xenit.move2alf.core.action.messages.DeleteMessage
+import eu.xenit.move2alf.core.sharedresource.alfresco.DeleteOption
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)

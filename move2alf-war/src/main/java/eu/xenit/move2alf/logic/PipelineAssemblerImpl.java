@@ -3,10 +3,10 @@ package eu.xenit.move2alf.logic;
 import eu.xenit.move2alf.core.action.*;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.sharedresource.alfresco.DeleteOption;
+import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
+import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
 import eu.xenit.move2alf.core.simpleaction.*;
-import eu.xenit.move2alf.core.sourcesink.DeleteOption;
-import eu.xenit.move2alf.core.sourcesink.InputSource;
-import eu.xenit.move2alf.core.sourcesink.WriteOption;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.web.dto.JobModel;
@@ -101,6 +101,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         String cmisQuery = "";
 		String destinationFolder = "";
 		int dest = 0;
+        int contentStoreId = -1;
 		String writeOption = null;
 		String deleteOption = null;
 		Mode mode = null;
@@ -193,6 +194,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		    } else if (TRANSFORM_ACTION_ID.equals(action.getActionId())) {
                         transform = action.getClassId();
 						transformParameterMap = action.getParameters();
+            } else if (PUT_CONTENT.equals(action.getActionId())){
+                contentStoreId = Integer.parseInt(action.getParameter(PutContentAction.PARAM_DESTINATION()));
             }
 		}
 
@@ -204,6 +207,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         jobModel.setCmisQuery(cmisQuery);
 		jobModel.setDestinationFolder(destinationFolder);
 		jobModel.setDest(dest);
+        jobModel.setContentStoreId(contentStoreId);
 		jobModel.setMode(mode);
 		if(writeOption != null){
 			jobModel.setWriteOption(WriteOption.valueOf(writeOption));
@@ -284,6 +288,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         actionConfig.setDispatcher(configuredAction.getDispatcher());
         return actionConfig;
     }
+
+    @Autowired
+    private DestinationService destinationService;
 
     @Override
 	public ConfiguredAction getConfiguredAction(final JobModel jobModel) {
@@ -409,7 +416,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             putContentAction.setClassId(actionClassService.getClassId(PutContentAction.class));
             putContentAction.setNmbOfWorkers(1);
             putContentAction.addReceiver(REPORTER, reporter);
-            putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
+            int destinationId = jobModel.getDest();
+            if(jobModel.getContentStoreId() != -1){
+                destinationId = jobModel.getContentStoreId();
+            }
+
+            putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(destinationId));
             end.addReceiver(DEFAULT_RECEIVER, putContentAction);
             end = putContentAction;
 

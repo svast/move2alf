@@ -6,8 +6,9 @@ public class DestinationConfig {
 
 	@NotEmpty
 	private String name;
+    private int nbrThreads = 1;
 
-	public String getName() {
+    public String getName() {
 		return name;
 	}
 
@@ -15,4 +16,11 @@ public class DestinationConfig {
         this.name = name;
     }
 
+    public void setNbrThreads(int nbrThreads) {
+        this.nbrThreads = nbrThreads;
+    }
+
+    public int getNbrThreads() {
+        return nbrThreads;
+    }
 }

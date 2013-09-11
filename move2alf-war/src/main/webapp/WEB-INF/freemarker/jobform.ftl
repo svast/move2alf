@@ -105,6 +105,10 @@
 				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>>${destination.name}</option>
 		</@labeledSelectList>
 
+        <@labeledSelectList label="Contentstore" name="contentStoreId" options=contentStores helpText="Choose the contentstore"; contentStore>
+            <option value="${contentStore.id}" <#if job.contentStoreId?? && contentStore.id=job.contentStoreId >selected="selected"</#if> >${contentStore.name}</option>
+        </@labeledSelectList>
+
 		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />
 
 	</fieldset>

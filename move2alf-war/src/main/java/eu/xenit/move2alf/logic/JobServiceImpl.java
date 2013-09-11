@@ -507,8 +507,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
     public void startJob(Integer jobId) {
         if(!jobMap.containsKey(jobId)){
             Job job = getJob(jobId);
+            String name = job.getName().replace(" ", "_");
             ConfiguredAction configuredAction = job.getFirstConfiguredAction();
-            JobHandle jobHandle = new JobHandle(actorSystem, job.getName(), new JobConfig(pipelineAssembler.getActionConfig(configuredAction)));
+            JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(pipelineAssembler.getActionConfig(configuredAction)));
             jobMap.put(job.getId(), jobHandle);
         }
         JobHandle handle = jobMap.get(jobId);

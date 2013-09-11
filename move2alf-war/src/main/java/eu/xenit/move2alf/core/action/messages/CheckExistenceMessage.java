@@ -5,7 +5,7 @@ package eu.xenit.move2alf.core.action.messages;
  * Date: 7/2/13
  * Time: 8:41 AM
  */
-public class CheckExistenceMessage extends AlfrescoMessage{
+public class CheckExistenceMessage {
 
     public final String fileName;
 

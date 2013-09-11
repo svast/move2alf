@@ -1,8 +1,8 @@
 package eu.xenit.move2alf.web.dto;
 
-import eu.xenit.move2alf.core.sourcesink.DeleteOption;
-import eu.xenit.move2alf.core.sourcesink.InputSource;
-import eu.xenit.move2alf.core.sourcesink.WriteOption;
+import eu.xenit.move2alf.core.sharedresource.alfresco.DeleteOption;
+import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
+import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
 import eu.xenit.move2alf.logic.Mode;
 import eu.xenit.move2alf.validation.CSVsize;
 import eu.xenit.move2alf.validation.ParamList;
@@ -39,6 +39,16 @@ public class JobModel {
 
     @NotNull(message="inputSoure is null")
     private InputSource inputSource;
+
+    private int contentStoreId = -1;
+
+    public int getContentStoreId() {
+        return contentStoreId;
+    }
+
+    public void setContentStoreId(int contentStoreId) {
+        this.contentStoreId = contentStoreId;
+    }
 
     private String cmisURL;
     private String cmisUsername;

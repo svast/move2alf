@@ -1,7 +1,7 @@
 package eu.xenit.move2alf.core.action.messages;
 
 import eu.xenit.move2alf.core.simpleaction.data.Batch;
-import eu.xenit.move2alf.core.sourcesink.ACL;
+import eu.xenit.move2alf.core.sharedresource.alfresco.ACL;
 import eu.xenit.move2alf.repository.UploadResult;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core.sourcesink;
+package eu.xenit.move2alf.core.sharedresource.alfresco;
 
 public enum WriteOption{
 	

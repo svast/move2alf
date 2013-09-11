@@ -5,7 +5,7 @@ package eu.xenit.move2alf.core.action.messages;
  * Date: 7/2/13
  * Time: 9:54 AM
  */
-public class ListMessage extends AlfrescoMessage{
+public class ListMessage {
     public final String remotePath;
     public final String name;
 

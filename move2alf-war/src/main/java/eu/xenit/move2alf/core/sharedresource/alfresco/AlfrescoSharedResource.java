@@ -1,4 +1,4 @@
-package eu.xenit.move2alf.core.sourcesink;
+package eu.xenit.move2alf.core.sharedresource.alfresco;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ConfigurableObject;
@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-public class AlfrescoSourceSink extends SharedResource {
+public class AlfrescoSharedResource extends SharedResource {
 	
 	public static final String PARAM_URL = "url";
 	public static final String PARAM_PASSWORD = "password";
@@ -36,12 +36,12 @@ public class AlfrescoSourceSink extends SharedResource {
 
     @Value(value = "#{'${repo.luceneFallback.enabled}'}")
     public void setLuceneFallbackEnabled(boolean luceneFallbackEnabled){
-        AlfrescoSourceSink.luceneFallbackEnabled = luceneFallbackEnabled;
+        AlfrescoSharedResource.luceneFallbackEnabled = luceneFallbackEnabled;
     }
 
     private ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
-	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSourceSink.class);
+	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSharedResource.class);
 
 	public void send(final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
@@ -359,7 +359,7 @@ public class AlfrescoSourceSink extends SharedResource {
 			WebServiceRepositoryAccess ra = null;
 			try {
 				ra = new WebServiceRepositoryAccess(new URL(url), user,
-						password, AlfrescoSourceSink.luceneFallbackEnabled);
+						password, AlfrescoSharedResource.luceneFallbackEnabled);
 			} catch (final MalformedURLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

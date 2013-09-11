@@ -1,13 +1,13 @@
 package eu.xenit.move2alf.core.action.messages;
 
-import eu.xenit.move2alf.core.sourcesink.DeleteOption;
+import eu.xenit.move2alf.core.sharedresource.alfresco.DeleteOption;
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 7/2/13
  * Time: 9:28 AM
  */
-public class DeleteMessage extends AlfrescoMessage{
+public class DeleteMessage {
     public final String remotePath;
     public final String name;
     public final DeleteOption deleteOption;
