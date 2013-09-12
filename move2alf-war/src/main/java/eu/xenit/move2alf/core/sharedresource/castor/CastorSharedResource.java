@@ -1,9 +1,6 @@
 package eu.xenit.move2alf.core.sharedresource.castor;
 
-import com.caringo.client.ScspClient;
-import com.caringo.client.ScspHeaders;
-import com.caringo.client.ScspQueryArgs;
-import com.caringo.client.ScspResponse;
+import com.caringo.client.*;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.sharedresource.SharedResource;
 import org.apache.commons.httpclient.HttpStatus;
@@ -56,13 +53,20 @@ public class CastorSharedResource extends SharedResource{
         return castorClient;
     }
 
-    public static final String PARAM_LIFEPOINT = "lifePoint";
-    /**
-     * CAStor lifepoint with default value
-     */
-    private String lifepoint = "[] minreps=2, maxreps=2, deletable=yes";
-    public void setLifepoint(String lifepoint){
-        this.lifepoint = lifepoint;
+    public static final String PARAM_MINREPS = "minReps";
+    private int minReps;
+    public void setMinReps(String minReps) {
+        this.minReps = Integer.parseInt(minReps);
+    }
+
+    public static final String PARAM_DELETABLE = "deletable";
+    private ScspDeleteConstraint deleteConstraint;
+    public void setDeletable(String deletable){
+        if(deletable.equals("true")){
+            deleteConstraint = ScspDeleteConstraint.DELETABLE;
+        } else {
+            deleteConstraint = ScspDeleteConstraint.NOT_DELETABLE;
+        }
     }
 
     public String uploadFile(File file, String mimeType) throws IOException {
@@ -75,7 +79,7 @@ public class CastorSharedResource extends SharedResource{
             int nbrOfRetries = 0;
             int statusCode = HttpStatus.SC_MOVED_PERMANENTLY;
             ScspHeaders headers = new ScspHeaders();
-            headers.addValue("Lifepoint", lifepoint);
+            headers.addLifepoint(null, deleteConstraint, minReps);
             headers.addValue("Content-Type", mimeType);
             while (((statusCode == HttpStatus.SC_TEMPORARY_REDIRECT) || (statusCode == HttpStatus.SC_MOVED_PERMANENTLY))
                     && (nbrOfRetries < maxNbrOfRetries)) {

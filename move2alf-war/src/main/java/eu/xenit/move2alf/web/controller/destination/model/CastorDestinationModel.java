@@ -58,13 +58,23 @@ public class CastorDestinationModel extends DestinationConfig {
         return getNode1()+"|"+getNode2()+"|"+getNode3();
     }
 
-    private String lifePoint = "[] minreps=2, maxreps=2, deletable=yes";
+    private int reps = 2;
 
-    public String getLifePoint() {
-        return lifePoint;
+    public int getReps() {
+        return reps;
     }
 
-    public void setLifePoint(String lifePoint) {
-        this.lifePoint = lifePoint;
+    public void setReps(int reps) {
+        this.reps = reps;
+    }
+
+    private boolean deletable = false;
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
     }
 }

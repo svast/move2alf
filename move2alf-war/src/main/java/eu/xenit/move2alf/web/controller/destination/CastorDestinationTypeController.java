@@ -124,7 +124,8 @@ public class CastorDestinationTypeController extends AbstractController implemen
         castorResource.setName(destination.getName());
         castorResource.setParameter(CastorSharedResource.PARAM_CLUSTERNAME, destination.getClusterName());
         castorResource.setParameter(CastorSharedResource.PARAM_NODES, destination.getEncodedNodes());
-        castorResource.setParameter(CastorSharedResource.PARAM_LIFEPOINT, destination.getLifePoint());
+        castorResource.setParameter(CastorSharedResource.PARAM_MINREPS, Integer.toString(destination.getReps()));
+        castorResource.setParameter(CastorSharedResource.PARAM_DELETABLE, Boolean.toString(destination.isDeletable()));
 
         if(update){
             sharedResourceService.updateConfiguredSharedResource(castorResource);
@@ -199,7 +200,8 @@ public class CastorDestinationTypeController extends AbstractController implemen
         destinationConfig.setNode2(nodes[1]);
         destinationConfig.setNode3(nodes[2]);
         destinationConfig.setNbrThreads(first.getNmbOfWorkers());
-        destinationConfig.setLifePoint(configuredSharedResource.getParameter(CastorSharedResource.PARAM_LIFEPOINT));
+        destinationConfig.setReps(Integer.parseInt(configuredSharedResource.getParameter(CastorSharedResource.PARAM_MINREPS)));
+        destinationConfig.setDeletable(Boolean.parseBoolean(configuredSharedResource.getParameter(CastorSharedResource.PARAM_DELETABLE)));
 
         return destinationConfig;
     }
