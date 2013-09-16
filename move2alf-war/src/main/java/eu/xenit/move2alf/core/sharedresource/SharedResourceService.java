@@ -42,6 +42,7 @@ public class SharedResourceService extends AbstractHibernateService implements A
         }
     }
 
+
     public ConfiguredSharedResource getConfiguredSharedResource(int id){
         List<ConfiguredSharedResource> results = sessionFactory.getCurrentSession().createQuery("from ConfiguredSharedResource as d where d.id=?").setInteger(0, id).list();
         if(results == null || results.isEmpty())
@@ -66,7 +67,10 @@ public class SharedResourceService extends AbstractHibernateService implements A
         this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }
 
-    public void updateConfiguredSharedResource(ConfiguredSharedResource alfrescoResource) {
-        sessionFactory.getCurrentSession().update(alfrescoResource);
+    public void updateConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource) {
+        sessionFactory.getCurrentSession().update(configuredSharedResource);
+        if(sharedResources.containsKey(configuredSharedResource.getId())){
+            sharedResources.remove(configuredSharedResource.getId());
+        }
     }
 }

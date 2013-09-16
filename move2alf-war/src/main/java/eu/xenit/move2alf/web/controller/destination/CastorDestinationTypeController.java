@@ -127,6 +127,7 @@ public class CastorDestinationTypeController extends AbstractController implemen
         castorResource.setParameter(CastorSharedResource.PARAM_MINREPS, Integer.toString(destination.getReps()));
         castorResource.setParameter(CastorSharedResource.PARAM_DELETABLE, Boolean.toString(destination.isDeletable()));
 
+
         if(update){
             sharedResourceService.updateConfiguredSharedResource(castorResource);
         } else {
