@@ -7,10 +7,27 @@
 
 <script src="<@spring.url relativeUrl="/js/jquery.tablesorter.js" />"></script>
 <script>
+    $.tablesorter.addParser({
+        // set a unique id
+        id: 'date',
+        is: function(s) {
+            // return false so this parser is not auto detected
+            return false;
+        },
+        format: function(s, table, cell, cellIndex) {
+            var $cell = $(cell);
+            return $cell.attr('date');
+        },
+        // set type, either numeric or text
+        type: 'text'
+    });
+
+
 $(function() {
 	$("table#dashboard").tablesorter({
 		headers:{
 			0:{sorter: false},
+            2:{sorter: 'date'},
 			4:{sorter: false},
 			5:{sorter: false},
 			6:{sorter: false}
@@ -58,7 +75,7 @@ function stopJob(id){
 			</td>
 			<td><span data-content="${jobInfo.description!?html}" rel="popover"
 			    data-original-title="Description">${jobInfo.jobName?html}</span></td>
-			<td>
+			<td date="<#if jobInfo.cycleStartDateTime?? >${jobInfo.cycleStartDateTime?string("yyyyMMddHHmmss")}<#else >0</#if>">
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">
 					<#if jobInfo.cycleStartDateTime?string("yyyyMMdd") == .now?string("yyyyMMdd") >
