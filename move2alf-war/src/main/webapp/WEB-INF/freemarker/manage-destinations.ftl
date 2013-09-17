@@ -30,7 +30,6 @@ function deleteDestination(id){
 	<col />
 	<col />
 	<col />
-	<col class="delete-column" />
 	<thead>
 		<tr>
 			<th></th>
