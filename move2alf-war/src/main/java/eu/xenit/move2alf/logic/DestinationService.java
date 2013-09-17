@@ -9,6 +9,7 @@ import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -82,10 +83,12 @@ public class DestinationService extends AbstractHibernateService{
         return null;
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void saveDestination(Resource resource){
         sessionFactory.getCurrentSession().save(resource);
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void updateDestination(Resource resource) {
         sessionFactory.getCurrentSession().update(resource);
         int id = resource.getId();
@@ -96,6 +99,7 @@ public class DestinationService extends AbstractHibernateService{
         startDestination(id);
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void deleteDestination(Resource resource) {
         sessionFactory.getCurrentSession().delete(resource.getFirstConfiguredAction());
         sessionFactory.getCurrentSession().delete(resource);

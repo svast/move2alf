@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -51,11 +52,13 @@ public class SharedResourceService extends AbstractHibernateService implements A
             return results.get(0);
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void deleteConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
         sessionFactory.getCurrentSession().delete(configuredSharedResource);
         sharedResources.remove(configuredSharedResource.getId());
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void saveConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
         sessionFactory.getCurrentSession().save(configuredSharedResource);
     }
@@ -67,6 +70,7 @@ public class SharedResourceService extends AbstractHibernateService implements A
         this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }
 
+    @PreAuthorize("hasRole('JOB_ADMIN')")
     public void updateConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource) {
         sessionFactory.getCurrentSession().update(configuredSharedResource);
         if(sharedResources.containsKey(configuredSharedResource.getId())){
