@@ -540,8 +540,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         endAction.setParameter(M2AlfEndAction.PARAM_REPORT_TO, jobModel.getSendReportText());
         endAction.setParameter(M2AlfEndAction.PARAM_SENDERROR, Boolean.toString(jobModel.getSendNotification()));
         endAction.setParameter(M2AlfEndAction.PARAM_ERROR_TO, jobModel.getSendNotificationText());
-        endAction.setParameter(M2AlfEndAction.PARAM_MAILFROM, mailFrom);
-        endAction.setParameter(M2AlfEndAction.PARAM_URL, url);
         end.addReceiver(DEFAULT_RECEIVER, endAction);
 
 		return start;

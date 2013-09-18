@@ -11,6 +11,7 @@ import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 
 import java.util.ArrayList;
@@ -51,17 +52,11 @@ public class M2AlfEndAction extends AbstractStateAction implements EOCAware {
         this.errorTo = errorTo.split(",");
     }
 
-    public static final String PARAM_MAILFROM = "mailFrom";
+    @Value(value="#{'${mail.from}'}")
     private String mailFrom;
-    public void setMailFrom(String mailFrom){
-        this.mailFrom = mailFrom;
-    }
 
-    public static final String PARAM_URL = "url";
+    @Value(value="#{'${url}'}")
     private String url;
-    public void setUrl(String url){
-        this.url = url;
-    }
 
     @Override
     public void beforeSendEOC() {
