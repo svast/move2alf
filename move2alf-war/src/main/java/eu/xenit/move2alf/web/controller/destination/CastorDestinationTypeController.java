@@ -113,7 +113,7 @@ public class CastorDestinationTypeController extends AbstractController implemen
             action = new ConfiguredAction();
             castorResource = new ConfiguredSharedResource();
         }
-        action.setActionId(destination.getName().replace(" ","_")+"_action");
+        action.setActionId(destination.getName()+"_action");
         action.setClassId(actionClassInfoService.getClassId(CastorResourceAction.class));
         action.setNmbOfWorkers(destination.getNbrThreads());
         action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);

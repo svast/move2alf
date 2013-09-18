@@ -132,7 +132,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
             action = new ConfiguredAction();
             alfrescoResource = new ConfiguredSharedResource();
         }
-        action.setActionId(destination.getName().replace(" ","_")+"_action");
+        action.setActionId(destination.getName()+"_action");
         action.setClassId(actionClassInfoService.getClassId(AlfrescoResourceAction.class));
         action.setNmbOfWorkers(destination.getNbrThreads());
         action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);

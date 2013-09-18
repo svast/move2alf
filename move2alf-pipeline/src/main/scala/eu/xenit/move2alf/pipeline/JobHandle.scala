@@ -4,6 +4,7 @@ import eu.xenit.move2alf.pipeline.actions.{JobConfig, ActionConfig}
 import eu.xenit.move2alf.pipeline.actors.{Running, JobActor}
 import akka.actor._
 import eu.xenit.move2alf.common.LogHelper
+import java.net.URLEncoder
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,7 @@ import eu.xenit.move2alf.common.LogHelper
 class JobHandle(val actorSystem: ActorSystem, val id: String, val config: JobConfig) extends LogHelper{
 
   private val jobInfo = new JobInfo
-  private val actor: ActorRef = actorSystem.actorOf(Props(new JobActor(id, config, jobInfo)), name = id)
+  private val actor: ActorRef = actorSystem.actorOf(Props(new JobActor(id, config, jobInfo)), name = URLEncoder.encode(id, "UTF-8"))
 
   def isRunning(): Boolean = {
     jobInfo.state == Running

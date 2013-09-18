@@ -7,6 +7,7 @@ import eu.xenit.move2alf.pipeline.actions.context._
 import eu.xenit.move2alf.pipeline.actions.{HasStateContext, HasSendingContext, ReceivingAction}
 import eu.xenit.move2alf.common.LogHelper
 import akka.routing.SmallestMailboxRouter
+import java.net.URLEncoder
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,10 +22,10 @@ class ActionActorFactory(val id: String, val actionContextFactory: AbstractActio
 //    logger.debug("number of routees: "+nmbActors)
     if(dispatcher != null) {
 //      logger.debug("Constructing actor with dispatcher: "+dispatcher)
-      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
     } else {
 //      logger.debug("Contructing actor with default dispatcher")
-      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = id)
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
     }
   }
 
