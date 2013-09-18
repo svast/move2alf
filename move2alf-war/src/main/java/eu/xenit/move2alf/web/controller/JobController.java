@@ -9,6 +9,7 @@ import eu.xenit.move2alf.core.dto.ProcessedDocument;
 import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.logic.usageservice.UsageService;
@@ -171,6 +172,12 @@ public class JobController extends AbstractController{
 				}
 			}
 		}
+
+        if(job.getInputSource() == InputSource.FILESYSTEM){
+           if(job.getInputFolder() == null || job.getInputFolder().isEmpty()){
+               errors.addError(new FieldError("job", "inputPath", "You should at least enter 1 inputfolder, or use another input source type."));
+           }
+        }
 		
 
 		List<String> transform = job.getParamTransform();
