@@ -13,13 +13,13 @@
         <property name="nmbOfWorkers" column="nmbOfWorkers"/>
         <property name="dispatcher" column="dispatcher" />
 
-    	<map name="parameters" table="configuredActionParameter" cascade="all-delete-orphan" lazy="false">
+    	<map name="parameters" table="configuredActionParameter" cascade="all" lazy="false">
     		<key column="configuredActionId"/>
     		<map-key column="name" type="string"/>
     		<element column="value" type="string"/>
     	</map>
 
-        <map name="receivers" table="sender_receiver" inverse="false" lazy="true" cascade="all-delete-orphan">
+        <map name="receivers" table="sender_receiver" inverse="false" lazy="true" cascade="all">
             <key>
                 <column name="senderId" not-null="true" />
             </key>

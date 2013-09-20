@@ -10,7 +10,7 @@
 		</id>
 		<property name="classId" column="classId"/>
         <property name="name" column="name" unique="true"/>
-    	<map name="parameters" table="sharedResourceParameter" lazy="false">
+    	<map name="parameters" table="sharedResourceParameter" lazy="false" cascade="all">
 			<key column="sharedResourceId" />
 			<map-key column="name" type="string" />
 			<element column="value" type="string" />
