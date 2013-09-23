@@ -1289,7 +1289,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 		try {
 			repositoryService.update(cml);
-			logger.debug("Finished update");
 		} catch (RepositoryFault e) {
 			logger.warn("Could not update metadata", e);
 			throw new RepositoryException(e.getMessage(), e);
