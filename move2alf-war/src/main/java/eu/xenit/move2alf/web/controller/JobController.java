@@ -209,7 +209,7 @@ public class JobController extends AbstractController{
 	}
 
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
-	public ModelAndView editJobForm(@PathVariable int id) {
+	public ModelAndView editJobForm(@PathVariable("id") int id) {
         if(getJobService().getJobState(id) == ECycleState.RUNNING){
             Map<String, Object> model = new HashMap<String, Object>();
             return new ModelAndView("redirect:/job/dashboard", model);
@@ -225,7 +225,7 @@ public class JobController extends AbstractController{
 	}
 
     @RequestMapping(value = "/job/{id}/stop", method = RequestMethod.GET)
-    public ModelAndView stopJob(@PathVariable int id){
+    public ModelAndView stopJob(@PathVariable("id") int id){
         getJobService().stopJob(id);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("redirect:/job/dashboard");
@@ -513,7 +513,7 @@ public class JobController extends AbstractController{
 	}
 
 	@RequestMapping("/job/{jobId}/cycle/run")
-	public ModelAndView runPoller(@PathVariable int jobId) {
+	public ModelAndView runPoller(@PathVariable("jobId") int jobId) {
 		ModelAndView mav = new ModelAndView();
 
 		getJobService().scheduleNow(jobId);

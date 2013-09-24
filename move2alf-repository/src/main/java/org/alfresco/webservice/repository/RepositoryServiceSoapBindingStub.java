@@ -976,31 +976,30 @@ public class RepositoryServiceSoapBindingStub extends org.apache.axis.client.Stu
 	 */
 	public org.alfresco.webservice.repository.UpdateResult[] update(org.alfresco.webservice.types.CML statements) throws java.rmi.RemoteException, org.alfresco.webservice.repository.RepositoryFault {
         logger.debug("Statements=");
-        CMLCreate create = null;
-        CMLUpdate update = null;
-        if(statements.getCreate()!=null && statements.getCreate().length>0)
-            create = statements.getCreate(0);
-        if(statements.getUpdate()!=null && statements.getUpdate().length>0)
-            update = statements.getUpdate(0);
-        if(create!=null) {
-            logger.debug("create: assoc type=" + create.getAssociationType());
-            logger.debug("child name=" + create.getChildName());
-            logger.debug("id=" + create.getId());
-            logger.debug("parent=" + create.getParent());
-            logger.debug("parent id=" + create.getParent_id());
-            logger.debug("type=" + create.getType());
-            logger.debug("properties=");
-            for(int i=0; i<create.getProperty().length; i++) {
-                logger.debug(create.getProperty(i).getName() + ": " + create.getProperty(i).getValue());
+
+        if(statements.getCreate()!=null && statements.getCreate().length>0) {
+            for(CMLCreate create : statements.getCreate()) {
+                logger.debug("create: assoc type=" + create.getAssociationType());
+                logger.debug("child name=" + create.getChildName());
+                logger.debug("id=" + create.getId());
+                logger.debug("parent=" + create.getParent());
+                logger.debug("parent id=" + create.getParent_id());
+                logger.debug("type=" + create.getType());
+                logger.debug("properties=");
+                for(int i=0; i<create.getProperty().length; i++) {
+                    logger.debug(create.getProperty(i).getName() + ": " + create.getProperty(i).getValue());
+                }
             }
         }
-        if(update!=null) {
+        if(statements.getUpdate()!=null && statements.getUpdate().length>0) {
+            for(CMLUpdate update : statements.getUpdate()) {
             logger.debug("update: where=" + update.getWhere());
             logger.debug("where id=" + update.getWhere_id());
             logger.debug("propertes=");
             for(int i=0; i<update.getProperty().length; i++) {
                 logger.debug(update.getProperty(i).getName() + ": " + update.getProperty(i).getValue());
             }
+        }
         }
 
         if (super.cachedEndpoint == null) {

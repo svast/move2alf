@@ -42,7 +42,7 @@ public interface JobService {
 	 * @return The edited job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job editJob(JobModel jobModel);
+    public Job editJob(JobModel jobModel);
 
 	/**
 	 * Delete a job

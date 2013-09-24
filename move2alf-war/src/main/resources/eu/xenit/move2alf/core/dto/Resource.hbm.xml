@@ -10,6 +10,6 @@
         </id>
         <property name="name" unique="true"/>
         <property name="classId" />
-        <many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true" cascade="all-delete-orphan" lazy="false" />
+        <many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true" cascade="all" lazy="false" />
     </class>
 </hibernate-mapping>

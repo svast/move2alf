@@ -75,6 +75,7 @@
 
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <qualifier value="main" />
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingResources">
 			<list>
