@@ -2,8 +2,6 @@ package eu.xenit.move2alf.logic
 
 import scala.collection.JavaConversions._
 import eu.xenit.move2alf.common.LogHelper
-import org.springframework.stereotype.Component
-import org.springframework.context.{ApplicationContextAware, ApplicationContext}
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory
 
 /**
@@ -16,6 +14,7 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
   def createObject(): T = {
     val constructor = clazz.getConstructor()
     val basicAction: T = constructor.newInstance().asInstanceOf[T]
+      logger.error("autowiring " + clazz)
     beanFactory.autowireBean(basicAction)
     val methods = clazz.getMethods
     val methodMap = methods map {
