@@ -8,6 +8,7 @@ import eu.xenit.move2alf.validation.CSVsize;
 import eu.xenit.move2alf.validation.ParamList;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -134,6 +135,7 @@ public class JobModel {
 	@Size(min=0, max=commandMaxLength, message="Max length of 'Command after' is " + commandMaxLength)
 	private String commandAfter;
 
+    @Min(value=1, message="You have to specify a destination. If none is available, go to the destinations tab and create one first.")
 	private int dest;
 
 	public JobModel() {
