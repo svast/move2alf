@@ -12,6 +12,7 @@ import org.springframework.beans.factory.FactoryBean
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
 import java.util
+import org.springframework.util.StringUtils
 
 /**
  * @author Laurent Van der Linden
@@ -86,10 +87,10 @@ class MixedClasspathScanner(var classPaths: Array[String]) extends ClasspathScan
 
 @Service
 class ClasspathScannerFactory extends FactoryBean[ClasspathScanner] {
-    @Value(value = "#{'${hotdeploy.paths}'}") private var hotdeployPaths: String = null
+    @Value(value = "#{'${hotdeploy.paths:}'}") private var hotdeployPaths: String = null
 
     def getObject: ClasspathScanner = {
-        if (hotdeployPaths != null) {
+        if (StringUtils.hasText(hotdeployPaths) ) {
             new MixedClasspathScanner(hotdeployPaths.split(","))
         } else {
             new SystemClasspathScanner()
