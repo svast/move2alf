@@ -21,7 +21,7 @@ import java.util.Map;
 public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
-	private static final char CSV_DELIMITER = '|';
+	private char CSV_DELIMITER = '\t';
 	private static final char STRING_ESCAPE = '\'';
 
 	public CSVReader createReader(File inputFile) throws FileNotFoundException {
@@ -41,7 +41,7 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 
 		HashMap docMetadata = new HashMap();
 		for(int i=0;i<nextLine.length;i++) {
-			if(i==0) {
+			if(Parameters.PARAM_FILE.equals(metadataFields[i])) {
 				fileInfo.put(Parameters.PARAM_INPUT_FILE,nextLine[i]);
 				fileInfo.put(Parameters.PARAM_FILE,new File(nextLine[i]));
 			}
@@ -49,6 +49,7 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 				docMetadata.put(metadataFields[i], nextLine[i]);
 		}	
 		fileInfo.put(Parameters.PARAM_METADATA,docMetadata);
+        logger.info("fileInfo=" + fileInfo);
 
         return fileInfo;
 	}
@@ -72,6 +73,21 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 		if(metadataFields==null)
 			throw new RuntimeException("Empty input file");
 
+        // if there is a mapping for parameters, use it
+        boolean hasFile = false;
+        for(int i=0; i < metadataFields.length; i++) {
+            String value = getParameter(metadataFields[i]);
+            if(value != null)
+                metadataFields[i]=value;
+            logger.debug("Metadata field " + i + ": " + metadataFields[i]);
+            if(Parameters.PARAM_FILE.equals(metadataFields[i]))
+                hasFile=true;
+        }
+
+        if(!hasFile) {
+            throw new RuntimeException("The header should contain the 'file' parameter or there should be a mapping for one of headers parameters to 'file'");
+        }
+
 		return metadataFields;
 	}
 
@@ -92,6 +108,14 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 
     @Override
     protected void executeImpl(FileInfo message) {
+
+        String delimiter = getParameter(Parameters.PARAM_CSV_DELIMITER);
+        if(delimiter != null) {
+            if(delimiter.length()>1)
+                logger.error("CsvDelimiter should have length=1, using first chracter");
+            CSV_DELIMITER = delimiter.charAt(0);
+        }
+
         File inputFile = (File) message.get(Parameters.PARAM_FILE);
 
         CSVReader reader = null;

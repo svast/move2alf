@@ -15,44 +15,42 @@ class ObjectFactory[T](clazz: Class[_], parameters: java.util.Map[String, String
   def createObject(): T = {
     val constructor = clazz.getConstructor()
     val basicAction: T = constructor.newInstance().asInstanceOf[T]
-      logger.error("autowiring " + clazz)
+      logger.info("autowiring " + clazz)
     beanFactory.autowireBean(basicAction)
 
     basicAction match {
       case b: Parameterized => b.setParameters(parameters)
-      case _ => {
-        val methods = clazz.getMethods
-        val methodMap = methods map {
-          method => (method.getName, method)
-        } toMap
+      case _ =>
+    }
 
-        parameters foreach {
-          case (key, value) => {
-            try {
-              val method = methodMap("set"+key.capitalize)
+    val methods = clazz.getMethods
+    val methodMap = methods map {
+      method => (method.getName, method)
+    } toMap
 
-              try {
-                logger.debug("Setting parameter: "+key+", value: "+value.toString+" for clazz=" + clazz)
-                method.invoke(basicAction, value)
-              } catch {
-                case e: IllegalArgumentException => {
-                  logger.error("Could not set parameter: "+key+"\n" +
-                    "Method parameter: "+method.getParameterTypes()(0).getCanonicalName+"\n" +
-                    "Value type: "+value.getClass.getCanonicalName, e)
-                }
-                case e: NullPointerException => {
-                  logger.error("NullPointer", e)
-                  if(method == null){
-                    logger.error("method is null")
-                  }
-                  logger.error("key: "+key)
-                  logger.error("value: "+value)
-                }
+    parameters foreach {
+      case (key, value) => {
+        try {
+          val method = methodMap("set"+key.capitalize)
+
+          try {
+            logger.debug("Setting parameter: "+key+", value: "+value.toString+" for clazz=" + clazz)
+            method.invoke(basicAction, value)
+          } catch {
+            case e: IllegalArgumentException => {
+              logger.error("Could not set parameter: "+key+"\n" +
+                "Method parameter: "+method.getParameterTypes()(0).getCanonicalName+"\n" +
+                "Value type: "+value.getClass.getCanonicalName, e)
+            }
+            case e: NullPointerException => {
+              logger.debug("NullPointer: key=", key , " and value=" , value, e)
+              if(method == null){
+                logger.debug("Method is null")
               }
-            } catch {
-              case e: NoSuchElementException => logger.info("No setter for parameter: "+key)
             }
           }
+        } catch {
+          case e: NoSuchElementException => logger.info("No setter for parameter: "+key)
         }
       }
     }

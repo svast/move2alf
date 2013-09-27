@@ -53,6 +53,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String ALFRESCO_ACL_ACTION = "AlfrescoAclAction";
     public static final String VALIDATE_DESTINATION = "ValidateDestination";
 
+    // name/values for metadata and transform parameters are kept in a single string using this separator
+    public static final String SEPARATOR = "@@@";
+
     @Autowired
     private ActionClassInfoService actionClassService;
 
@@ -240,7 +243,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 			final Map.Entry nameValuePair = (Map.Entry) metadataMapIterator
 					.next();
 
-			final String listValue = nameValuePair.getKey() + "|"
+			final String listValue = nameValuePair.getKey() + SEPARATOR
 					+ nameValuePair.getValue();
 			logger.debug("metadata list value = " + listValue);
 			paramMetadata.add(listValue);
@@ -254,7 +257,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		while (transformMapIterator.hasNext()) {
 			final Map.Entry nameValuePair = (Map.Entry) transformMapIterator
 					.next();
-			final String listValue = nameValuePair.getKey() + "|"
+			final String listValue = nameValuePair.getKey() + SEPARATOR
 					+ nameValuePair.getValue();
 			logger.debug("transform list value = " + listValue);
 			paramTransform.add(listValue);
@@ -549,7 +552,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(parameters == null)
             return;
         for(String param: parameters){
-            String[] keyValue = param.split("\\|");
+            logger.info("param=" + param);
+            String[] keyValue = param.split(SEPARATOR);
             metadataAction.setParameter(keyValue[0], keyValue[1]);
         }
     }

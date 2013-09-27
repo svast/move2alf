@@ -89,6 +89,11 @@ public class Parameters {
 	public static final String PARAM_ERROR_MESSAGE = "errormessage";
 	public static final String PARAM_REFERENCE = "reference";
 
+    /**
+     * Separator used in the CSV metadata loader
+     */
+    public static final String PARAM_CSV_DELIMITER = "csvDelimiter";
+
 	/************************************************************************************
 	 * TO CHECK
 	 ************************************************************************************/
