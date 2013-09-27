@@ -105,7 +105,7 @@
 				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>>${destination.name}</option>
 		</@labeledSelectList>
 
-        <@labeledSelectList label="Contentstore" name="contentStoreId" options=contentStores helpText="Choose the contentstore"; contentStore>
+        <@labeledSelectList label="Contentstore" name="contentStoreId" options=contentStores; contentStore>
             <option value="${contentStore.id}" <#if job.contentStoreId?? && contentStore.id=job.contentStoreId >selected="selected"</#if> >${contentStore.name}</option>
         </@labeledSelectList>
 
@@ -118,7 +118,7 @@
 
 		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." attributes="maxlength='${job.commandMaxLength}'" />
 
-		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions helpText="Choose the metadata processor."; processor>
+		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions; processor>
 			<option value="${processor.classId}" <#if job.metadata?? && processor.classId=job.metadata >selected="selected"</#if> >${processor.classId} - ${processor.description}</option>
 		</@labeledSelectList>
 
