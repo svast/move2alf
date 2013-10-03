@@ -392,8 +392,22 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
 
+        ConfiguredAction moveWithCounter = null;
+        Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
+        if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
+            moveWithCounter = new ConfiguredAction();
+            moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
+            moveWithCounter.setActionId(MOVE_WITH_COUNTER);
+            moveWithCounter.setNmbOfWorkers(1);
+            moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
+            moveWithCounter.addReceiver(REPORTER, reporter);
+            metadataAction.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
+            //moveAfterLoad.addReceiver(DEFAULT_RECEIVER,moveWithCounter);
+        }
 
-		if (!("notransformation".equals(jobModel.getTransform()) || ""
+
+
+        if (!("notransformation".equals(jobModel.getTransform()) || ""
 				.equals(jobModel.getTransform()))) {
 			logger.debug("getTransform() == \"{}\"", jobModel.getTransform());
 
@@ -512,14 +526,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             moveAfterLoad.addReceiver(REPORTER, reporter);
             end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
 
-            Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-                ConfiguredAction moveWithCounter = new ConfiguredAction();
-                moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
-                moveWithCounter.setActionId(MOVE_WITH_COUNTER);
-                moveWithCounter.setNmbOfWorkers(1);
-                moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
-                moveWithCounter.addReceiver(REPORTER, reporter);
                 moveAfterLoad.addReceiver(DEFAULT_RECEIVER,moveWithCounter);
             }
 
