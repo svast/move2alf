@@ -1,5 +1,7 @@
 package eu.xenit.move2alf.validation;
 
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
@@ -18,7 +20,7 @@ public class ParamListValidator implements ConstraintValidator<ParamList, List<S
     	boolean isValid = true;
         if (object != null) {
         	for (String parameter : object) {
-				String[] keyValuePair = parameter.split("\\|");
+				String[] keyValuePair = parameter.split(PipelineAssemblerImpl.SEPARATOR);
 				String key = keyValuePair[0];
 				String value;
 				if (keyValuePair.length == 1) {

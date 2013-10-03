@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,22 +19,31 @@ import java.util.Map;
 @ClassInfo(classId = "CSVMetadataLoader",
         category = ConfigurableObject.CAT_METADATA,
         description = "Loads metadata and filenames from pipe separated CSV file")
-public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
+public class CSVMetadataLoader extends FileWithMetadataAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
 	private char CSV_DELIMITER = '\t';
-	private static final char STRING_ESCAPE = '\'';
+	private static final char STRING_QUOTE = '"';
+    private static final char STRING_ESCAPE = '\0';  // no escaping
 
-	public CSVReader createReader(File inputFile) throws FileNotFoundException {
-		CSVReader reader = new CSVReader(new FileReader(inputFile), CSV_DELIMITER, STRING_ESCAPE);
+    public void setInputFile(File inputFile) {
+        this.inputFile = inputFile;
+    }
+
+    private File inputFile = null;
+
+	public CSVReader createReader() throws FileNotFoundException {
+		CSVReader reader = new CSVReader(new FileReader(inputFile), CSV_DELIMITER, STRING_QUOTE, STRING_ESCAPE);
 		return reader;
 	}
 
 	public FileInfo processLine(String[] nextLine, String[] metadataFields) {
 		if(nextLine.length != metadataFields.length)
-			throw new RuntimeException("Line " + nextLine + " does not have the same number of fields as the header line");
+			throw new RuntimeException("Line " + Arrays.asList(nextLine) + " does not have the same number of fields as the header line");
 
         FileInfo fileInfo = new FileInfo();
+        fileInfo.put(Parameters.PARAM_INPUT_FILE,inputFile);
+
         if(nameSpace!=null)
             fileInfo.put(Parameters.PARAM_NAMESPACE, "{"+nameSpace+"}");
         if(contentType!=null)
@@ -42,8 +52,10 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
 		HashMap docMetadata = new HashMap();
 		for(int i=0;i<nextLine.length;i++) {
 			if(Parameters.PARAM_FILE.equals(metadataFields[i])) {
-				fileInfo.put(Parameters.PARAM_INPUT_FILE,nextLine[i]);
-				fileInfo.put(Parameters.PARAM_FILE,new File(nextLine[i]));
+                String newPath = processPath(nextLine[i]);
+                File file = new File(newPath);
+                fileInfo.put(Parameters.PARAM_INPUT_PATH,file.getParentFile().getAbsolutePath());
+				fileInfo.put(Parameters.PARAM_FILE,file);
 			}
 			else
 				docMetadata.put(metadataFields[i], nextLine[i]);
@@ -54,7 +66,24 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
         return fileInfo;
 	}
 
-	private void printMetadata(Map<String,Object> parameterMap) {
+    private String processPath(String path) {
+        String newPath = path;
+        String pathMappingRemote = getParameter(Parameters.PARAM_PATH_MAPPING_REMOTE);
+        String pathMappingLocal = getParameter(Parameters.PARAM_PATH_MAPPING_LOCAL);
+        if(pathMappingRemote != null && pathMappingLocal != null) {
+            newPath = newPath.replace(pathMappingRemote,pathMappingLocal);
+        }
+
+        char oldSeparator = '/';
+        if(newPath.indexOf('\\')!=-1)
+            oldSeparator = '\\';
+
+        newPath = newPath.replace(oldSeparator,File.separatorChar);
+
+        return newPath;
+    }
+
+    private void printMetadata(Map<String,Object> parameterMap) {
 		Iterator iterator = parameterMap.keySet().iterator();  
 		while (iterator.hasNext()) {  
 			String key = iterator.next().toString();  
@@ -116,13 +145,13 @@ public class CSVMetadataLoader extends Move2AlfReceivingAction<FileInfo> {
             CSV_DELIMITER = delimiter.charAt(0);
         }
 
-        File inputFile = (File) message.get(Parameters.PARAM_FILE);
+        inputFile = (File) message.get(Parameters.PARAM_FILE);
 
         CSVReader reader = null;
         String[] metadataFields = null;
 
         try {
-            reader = createReader(inputFile);
+            reader = createReader();
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

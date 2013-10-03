@@ -29,6 +29,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String SOURCE_CMIS_ID = "SourceCMIS";
     public static final String MOVE_BEFORE_ID = "MoveBefore";
     public static final String MOVE_AFTER_ID = "MoveAfter";
+    public static final String MOVE_WITH_COUNTER = "MoveWithCounter";
     public static final String MOVE_NOT_LOADED_ID = "MoveNotLoaded";
     public static final String FILTER_ID = "Filter";
     public static final String METADATA_ACTION_ID = "MetadataAction";
@@ -380,15 +381,17 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = filter;
         }
 
+
         String classId = jobModel.getMetadata();
         ConfiguredAction metadataAction = new ConfiguredAction();
         metadataAction.setActionId(METADATA_ACTION_ID);
         metadataAction.setClassId(classId);
         metadataAction.setNmbOfWorkers(1);
-        metadataAction.addReceiver(REPORTER, reporter);
         setParameters(jobModel.getParamMetadata(), metadataAction);
+        metadataAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
+
 
 		if (!("notransformation".equals(jobModel.getTransform()) || ""
 				.equals(jobModel.getTransform()))) {
@@ -398,8 +401,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             transformAction.setActionId(TRANSFORM_ACTION_ID);
             transformAction.setClassId(jobModel.getTransform());
             transformAction.setNmbOfWorkers(1);
-            transformAction.addReceiver(REPORTER, reporter);
             setParameters(jobModel.getParamTransform(), transformAction);
+            transformAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, transformAction);
             end = transformAction;
 		}
@@ -432,8 +435,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             batchAction.setActionId(BATCH_ACTION);
             batchAction.setClassId(actionClassService.getClassId(BatchAction.class));
             batchAction.setNmbOfWorkers(1);
-            batchAction.addReceiver(REPORTER, reporter);
             batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(defaultBatchSize));
+            batchAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, batchAction);
             end = batchAction;
 
@@ -441,10 +444,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             uploadAction.setActionId(UPLOAD_ID);
             uploadAction.setClassId(actionClassService.getClassId(AlfrescoUpload.class));
             uploadAction.setNmbOfWorkers(1);
-            uploadAction.addReceiver(REPORTER, reporter);
             uploadAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-			uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
+            uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
             uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION(), jobModel.getWriteOption().toString());
+            uploadAction.addReceiver(REPORTER, reporter);
 			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
 
@@ -452,8 +455,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             aclAction.setActionId(ALFRESCO_ACL_ACTION);
             aclAction.setClassId(actionClassService.getClassId(AlfrescoACLAction.class));
             aclAction.setNmbOfWorkers(1);
-            aclAction.addReceiver(REPORTER, reporter);
             aclAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
+            aclAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, aclAction);
             end = aclAction;
         }
@@ -463,10 +466,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             deleteAction.setActionId(DELETE_ID);
             deleteAction.setClassId(actionClassService.getClassId(DeleteAction.class));
             deleteAction.setNmbOfWorkers(1);
-            deleteAction.addReceiver(REPORTER, reporter);
             deleteAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             deleteAction.setParameter(DeleteAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
             deleteAction.setParameter(DeleteAction$.MODULE$.PARAM_DELETEOPTION(), jobModel.getDeleteOption().toString());
+            deleteAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, deleteAction);
             end = deleteAction;
 		}
@@ -486,8 +489,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 			}
             listAction.setNmbOfWorkers(1);
             listAction.setParameter(ListAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
+            listAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             listAction.addReceiver(REPORTER, reporter);
-			listAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             end.addReceiver(DEFAULT_RECEIVER, listAction);
             end = listAction;
 		}
@@ -495,8 +498,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         final ConfiguredAction uploadedFileHandler = new ConfiguredAction();
         uploadedFileHandler.setClassId(actionClassService.getClassId(UploadedFileHandler.class));
         uploadedFileHandler.setActionId(UPLOADED_FILE_HANDLER);
-        uploadedFileHandler.addReceiver(REPORTER, reporter);
         uploadedFileHandler.setNmbOfWorkers(1);
+        uploadedFileHandler.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, uploadedFileHandler);
         end = uploadedFileHandler;
 
@@ -507,7 +510,19 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             moveAfterLoad.setNmbOfWorkers(1);
             moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
             moveAfterLoad.addReceiver(REPORTER, reporter);
-            uploadedFileHandler.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
+            end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
+
+            Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
+            if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
+                ConfiguredAction moveWithCounter = new ConfiguredAction();
+                moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
+                moveWithCounter.setActionId(MOVE_WITH_COUNTER);
+                moveWithCounter.setNmbOfWorkers(1);
+                moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
+                moveWithCounter.addReceiver(REPORTER, reporter);
+                moveAfterLoad.addReceiver(DEFAULT_RECEIVER,moveWithCounter);
+            }
+
         }
 
         if(jobModel.getMoveNotLoad()){
@@ -517,7 +532,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             moveNotLoaded.setNmbOfWorkers(1);
             moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
             moveNotLoaded.addReceiver(REPORTER, reporter);
-            uploadedFileHandler.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+            end.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
         }
 
 

@@ -21,6 +21,7 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
     }
 
     val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
+    val inputFile = message.batch.get(0).get(Parameters.PARAM_INPUT_FILE)
 
     for (result <- message.uploadResultList) {
       val newParameterMap = new FileInfo()
@@ -30,6 +31,7 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
         Parameters.VALUE_OK else Parameters.VALUE_FAILED);
       newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
       newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
+      newParameterMap.put(Parameters.PARAM_INPUT_FILE, inputFile);
       sendMessage(newParameterMap)
     }
   }
