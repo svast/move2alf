@@ -14,9 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -77,14 +75,10 @@ public class Util {
 		return out.replace("\\", "/");
 	}
 
-	// moveFile method in MoveDocumentsAction
-	public static File moveFile(final String src, final String dest, final File file) {		
-		String nSrc = normalizePath(src);
-		String nDest = normalizePath(dest);
-		String fullPath = normalizePath(file.getAbsolutePath());
-		String relativePath = fullPath.substring(nSrc.length(), fullPath.lastIndexOf("/"));
-		String fullDestinationPath = nDest + relativePath;
-		File moveFolder = new File(fullDestinationPath);
+	public static File moveFile(final String dest, final File file) {
+        logger.debug("Moving file " + file + " from " + file.getParent() + " to " + dest);
+		String fullDestinationPath = normalizePath(dest);
+        File moveFolder = new File(fullDestinationPath);
 	
 		// check if full path exists, otherwise create path
 		boolean destinationPathExists = true;
@@ -94,13 +88,11 @@ public class Util {
 	
 		// If path exists move document
 		if (destinationPathExists) {
-			String newFileName = fullDestinationPath + "/" + file.getName();
-			File newFile = new File(newFileName);
-			deleteIfExists(newFile);
+			String newFileName = fullDestinationPath + File.separator + file.getName();
 			File movedFile = new File(newFileName);
+            deleteIfExists(movedFile);
 			try {			
-				FileUtils.moveFile(file, new File(newFileName));
-				logger.info("Moved file to " + movedFile.getAbsolutePath());
+				FileUtils.moveFile(file, movedFile);
 			} catch (IOException e) {
 				logger.error("Could not move document "
 						+ file.getAbsolutePath(), e);
@@ -215,4 +207,11 @@ public class Util {
 		}
 		return Joiner.on(" < ").join(errorMessages);
 	}
+
+    public static int countLines(File file) throws IOException {
+        LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
+        lineNumberReader.skip(Long.MAX_VALUE);
+        return lineNumberReader.getLineNumber();
+
+    }
 }

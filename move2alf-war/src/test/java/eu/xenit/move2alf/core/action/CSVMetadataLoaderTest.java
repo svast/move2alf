@@ -18,7 +18,6 @@ public class CSVMetadataLoaderTest {
 	private static final String DIR = "src/test/resources/testdocs";
 
 	private CSVMetadataLoader metadataLoader;
-	private File csvFile;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -30,7 +29,7 @@ public class CSVMetadataLoaderTest {
 
 	public void setUp() throws Exception {
 		metadataLoader = new CSVMetadataLoader();
-		csvFile = new File(DIR, "testfile_csv.csv");
+        metadataLoader.setInputFile(new File(DIR, "testfile_csv.csv"));
 	}
 
 	public void tearDown() throws Exception {
@@ -39,7 +38,7 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testReadMetadataFields() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
 
 		assertEquals(4, metadataFields.length);
@@ -53,7 +52,7 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testProcessLineWrongNumberOfFields() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
 
 		String[] line = {"a"};
@@ -70,7 +69,7 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testProcessLine() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
 		HashMap parameterMap = new HashMap();
 

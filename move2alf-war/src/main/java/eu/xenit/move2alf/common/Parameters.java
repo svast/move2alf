@@ -94,6 +94,18 @@ public class Parameters {
      */
     public static final String PARAM_CSV_DELIMITER = "csvDelimiter";
 
+    /**
+     *  Mapping of the path in the csv file, useful in drive is mounted from another machine.
+     *  Example: \\localhost\CHB_FLS\ => /mnt/windows-scanning/
+     */
+    public static final String PARAM_PATH_MAPPING_REMOTE = "pathMappingRemote";
+    public static final String PARAM_PATH_MAPPING_LOCAL = "pathMappingLocal";
+
+    /**
+     *  E.g. metadata file
+     */
+    public static final String PARAM_INPUT_FILE = "inputFile";
+
 	/************************************************************************************
 	 * TO CHECK
 	 ************************************************************************************/
@@ -103,8 +115,6 @@ public class Parameters {
     public static final String VALUE_AFTER = "after";
     public static final String VALUE_BEFORE = "before";
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
-
-	public static final String PARAM_INPUT_FILE = "inputFile";
 
 	public static final String PARAM_COMMAND = "command";
 
@@ -142,4 +152,5 @@ public class Parameters {
 	 */
 	@Deprecated
 	public static final String PARAM_THREAD = "thread";
+
 }
