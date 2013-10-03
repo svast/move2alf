@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @ClassInfo(classId = "MoveWithCounterAction",
         description = "Moves files on the filesystem when a counter gets to 0")
-public class MoveWithCounterAction extends Move2AlfReceivingAction<FileInfo> implements EOCAware {
+public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> implements EOCAware {
     private static final Logger logger = LoggerFactory.getLogger(MoveWithCounterAction.class);
 
     public static final String PARAM_PATH = "path";
@@ -33,39 +33,52 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<FileInfo> imp
         this.path = path;
     }
 
-    private static Map counters = new HashMap();
+    private Map<File,Integer> counters = new HashMap();
+    private Map<String,Boolean> canBeClosed = new HashMap();
 
 
     @Override
-    public void executeImpl(FileInfo fileInfo) {
+    public void executeImpl(Object message) {
         FileInfo output = new FileInfo();
-        output.putAll(fileInfo);
-        File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
-        Integer counter = (Integer) counters.get(file);
+        if(message instanceof FileInfo) {
+            FileInfo fileInfo = (FileInfo) message;
 
-        if(counter==null) {  // first time the function is called
-            try {
-                logger.info("Counting lines of file " + file);
-                counter = Util.countLines(file)-1;
+            output.putAll(fileInfo);
+            File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
+            Integer counter = counters.get(file);
+
+            if(counter==null) {  // first time the function is called
+                try {
+                    logger.debug("Counting lines of file " + file);
+                    counter = Util.countLines(file)-1;
+                    counter--;
+                    counters.put(file,counter);
+                } catch (IOException e) {
+                    throw new Move2AlfException("Could not count lines in file " + file.getAbsolutePath());
+                }
+            } else {
                 counter--;
                 counters.put(file,counter);
-            } catch (IOException e) {
-                throw new Move2AlfException("Could not count lines in file " + file.getAbsolutePath());
             }
-        } else {
-            counter--;
-            counters.put(file,counter);
-        }
 
-        logger.info("After decreasing the counter, there are still " + counter + " files to be processed");
-        if(counter.intValue()==0) {
-            File newFile = Util.moveFile(path, file);
-            if (newFile != null) {
-                output.put(Parameters.PARAM_INPUT_FILE, newFile);
-            } else {
-                throw new Move2AlfException("Could not move file " + file.getAbsolutePath() + " to " + output);
+            logger.debug("After decreasing the counter, there are still " + counter + " files to be processed");
+            if(counter.intValue()==0) {
+                if(canBeClosed.get(file.getAbsolutePath())!=null && canBeClosed.get(file.getAbsolutePath())) {
+                    File newFile = Util.moveFile(path, file);
+                    if (newFile != null) {
+                        output.put(Parameters.PARAM_INPUT_FILE, newFile);
+                    } else {
+                        throw new Move2AlfException("Could not move file " + file.getAbsolutePath() + " to " + output);
+                    }
+                } else {
+                    logger.debug("File " + file + "(" + file.getClass() + " cannot yet be closed");
+                }
             }
-        }
+        } else if(message instanceof String) {
+            String file = (String)message;
+            logger.debug("File " + file + " can be closed ");
+            canBeClosed.put(file,Boolean.valueOf(true));
+       }
 
         if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)){
             sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, output);

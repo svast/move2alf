@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +142,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction {
         String delimiter = getParameter(Parameters.PARAM_CSV_DELIMITER);
         if(delimiter != null) {
             if(delimiter.length()>1)
-                logger.error("CsvDelimiter should have length=1, using first chracter");
+                logger.error("CsvDelimiter should have length=1, using first character");
             CSV_DELIMITER = delimiter.charAt(0);
         }
 
@@ -175,6 +176,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction {
         }
         try {
             reader.close();
+            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER,inputFile.getAbsolutePath());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
