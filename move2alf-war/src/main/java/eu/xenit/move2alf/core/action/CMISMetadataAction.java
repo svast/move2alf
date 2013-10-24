@@ -36,7 +36,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         fileInfo.remove(SACMISInput.PARAM_CAMEL_HEADER);
 
         String type = (String)headers.get(CMIS_OBJECT_TYPE_ID);
-        logger.debug("Setting type and namespace for " + type);
+        logger.debug("Setting type and namespace for " + type + " for " + fileInfo.get(Parameters.PARAM_FILE));
 
         String alfrescoType = Mappings.mappingTypes.get(type);
         if(alfrescoType == null)
@@ -63,29 +63,8 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             }
         }
 
-        logger.debug("Setting acls");
-        AccessControlListImpl acli = (AccessControlListImpl)headers.get(CamelCMISConstants.CAMEL_CMIS_ACL);
-        Map<String, Map<String, String>> acl = new HashMap<String, Map<String, String>>();
-        HashMap<String,String> acList = new HashMap<String,String>();
-        for(Ace ace : acli.getAces()) {
-            // only put the "direct" permissions
-            // we cant know the value of "inheritPermissions", so we don't set it at all (default=false)
-            int s = ace.getPermissions().size();
-            if(s > 0 && ace.isDirect()) {
-                String permission = Mappings.mappingPermissions.get(ace.getPermissions().get(s-1));
-                if(permission==null)
-                    permission = ace.getPermissions().get(s-1);
-                String user = Mappings.mappingUsers.get(ace.getPrincipalId());
-                if(user==null)
-                    user=ace.getPrincipalId();
-                if(!user.isEmpty())
-                    acList.put(normalize(user),permission);
-            }
-        }
-        acl.put(path,acList);
-        fileInfo.put(Parameters.PARAM_ACL,acl);
 
-        logger.debug("Setting properties");
+        logger.debug("Setting properties for " + fileInfo.get(Parameters.PARAM_FILE));
         HashMap props = new HashMap();
         if(headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES)!=null) {
             Collection<PropertyImpl> properties = (Collection<PropertyImpl>)headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES);
@@ -110,14 +89,38 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                     if(property.getId().indexOf(":")!=-1) {
                         String ns = property.getId().substring(0,property.getId().indexOf(":"));
                         String fullns = Mappings.mappingNamespaces.get(ns);
+                        logger.debug("fullns for " + ns + " is " + fullns);
                         if(fullns !=null)
-                            props.put(Mappings.mappingNamespaces.get(ns)+property.getLocalName(),val);
+                            props.put(fullns+property.getLocalName(),val);
                      } else {
                         props.put(property.getLocalName(),val);
                     }
                 }
             }
         }
+
+
+        logger.debug("Setting acls");
+        AccessControlListImpl acli = (AccessControlListImpl)headers.get(CamelCMISConstants.CAMEL_CMIS_ACL);
+        Map<String, Map<String, String>> acl = new HashMap<String, Map<String, String>>();
+        HashMap<String,String> acList = new HashMap<String,String>();
+        for(Ace ace : acli.getAces()) {
+            // only put the "direct" permissions
+            // we cant know the value of "inheritPermissions", so we don't set it at all (default=false)
+            int s = ace.getPermissions().size();
+            if(s > 0 && ace.isDirect()) {
+                String permission = Mappings.mappingPermissions.get(ace.getPermissions().get(s-1));
+                if(permission==null)
+                    permission = ace.getPermissions().get(s-1);
+                String user = Mappings.mappingUsers.get(ace.getPrincipalId());
+                if(user==null)
+                    user=ace.getPrincipalId();
+                if(!user.isEmpty())
+                    acList.put(normalize(user),permission);
+            }
+        }
+        acl.put(path,acList);
+        fileInfo.put(Parameters.PARAM_ACL,acl);
 
 
         fileInfo.put(Parameters.PARAM_METADATA,props);

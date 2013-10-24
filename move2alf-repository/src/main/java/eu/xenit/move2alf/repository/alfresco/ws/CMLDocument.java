@@ -88,8 +88,18 @@ public class CMLDocument {
 			session.processMultiValuedMetadata(doc.contentModelNamespace, doc.multiValueMeta, contentProps);
 		}
 
-		contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
+        boolean hasTitle = false;
+        boolean hasDescription = false;
+        for(NamedValue value:contentProps) {
+            if(value.getName().equals(Constants.PROP_TITLE))
+                hasTitle = true;
+            if(value.getName().equals(Constants.PROP_DESCRIPTION))
+                hasDescription = true;
+        }
+        if(!hasTitle)
+            contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
+        if(!hasDescription)
+            contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
 /*		for(NamedValue value: contentProps){
 			System.out.println(value.getName()+": "+value.getValue());
 		}*/

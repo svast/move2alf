@@ -42,6 +42,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
+	        logger.debug("Entering MoveWithCounterAction for csv=" + fileInfo.get(Parameters.PARAM_INPUT_FILE) + " and for file=" + fileInfo.get(Parameters.PARAM_FILE));
 
             output.putAll(fileInfo);
             File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
@@ -61,7 +62,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
                 counters.put(file,counter);
             }
 
-            logger.debug("After decreasing the counter, there are still " + counter + " files to be processed");
+            logger.debug("After decreasing the counter, there are still " + counter + " files to be processed for " + file);
             if(counter.intValue()==0) {
                 if(canBeClosed.get(file.getAbsolutePath())!=null && canBeClosed.get(file.getAbsolutePath())) {
                     File newFile = Util.moveFile(path, file);
