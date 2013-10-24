@@ -39,6 +39,7 @@ public interface RepositoryAccessSession {
 	 * Missing parent spaces are created automatically.
 	 * 
 	 * @param document : document to store
+     * @param name : name of the document to store
 	 * @param mimeType : mime-type of the document to store
 	 * @param spacePath : 
 	 * @param description : this value will be written in the title and description
@@ -52,7 +53,7 @@ public interface RepositoryAccessSession {
 	 * @throws RepositoryException : exception thrown when the repository can not execute the request.
 	 * @throws IllegalDocumentException 
 	 */
-	public abstract void storeDocAndCreateParentSpaces(File document,
+	public abstract void storeDocAndCreateParentSpaces(File document, String name,
 			String mimeType, String spacePath, String description,
 			String contentModelNamespace, String contentModelType,
 			Map<String, String> meta, Map<String, String> multiValueMeta)

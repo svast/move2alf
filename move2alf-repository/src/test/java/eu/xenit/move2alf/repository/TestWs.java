@@ -32,7 +32,8 @@ public class TestWs extends TestBase {
 	}
 
 	private static Document doc(final String path, final String folderPath) {
-		return new Document(new File(path), "text/plain", folderPath, path, "{"
+        File f = new File(path);
+		return new Document(f, f.getName(), "text/plain", folderPath, path, "{"
 				+ NamespaceService.CONTENT_MODEL_1_0_URI + "}",
 				ContentModel.TYPE_CONTENT.getLocalName(),
 				new HashMap<String, String>(), new HashMap<String, String>());

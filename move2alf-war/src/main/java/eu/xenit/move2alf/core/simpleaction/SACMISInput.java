@@ -165,9 +165,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 in = messageIn.getBody(InputStream.class);
 
                 String uuid = extractUuid(cmisObjectId);
-				//final File file = new File(tempFolder, uuid);
-                final File file = new File(tempFolder, cmisName);
-                logger.debug("saving " + cmisName);
+				final File file = new File(tempFolder, uuid);
 				try {
 //					logger.debug("Stream: " + in);
 					ByteStreams.copy(in, new FileOutputStream(file));
@@ -179,12 +177,12 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 					logger.error(String.format("'%s' failed", cmisName), e);
 					Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
 					ProcessedDocumentParameter parameter = new ProcessedDocumentParameter();
-					parameter.setName(Parameters.PARAM_ERROR_MESSAGE);
+					parameter.setName(PARAM_ERROR_MESSAGE);
 					parameter.setValue(e.toString());
 					params.add(parameter);
 					ReportMessage reportMessage = new ReportMessage(file.getName(),
 							new Date(),
-							Parameters.VALUE_FAILED,
+							VALUE_FAILED,
 							params,
 							null);
 					sendMessage(PipelineAssemblerImpl.REPORTER, reportMessage);
@@ -198,6 +196,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 					final FileInfo fileInfo = new FileInfo();
 					fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
 					fileInfo.put(PARAM_FILE, file);
+                    fileInfo.put(PARAM_NAME, cmisName);
 
 					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 

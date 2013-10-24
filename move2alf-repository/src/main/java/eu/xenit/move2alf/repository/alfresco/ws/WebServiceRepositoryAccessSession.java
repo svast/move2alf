@@ -135,12 +135,12 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 	 *             void storeDocAndCreateParentSpaces(Document)}
 	 */
 	@Override
-	public void storeDocAndCreateParentSpaces(File file, String mimeType,
+	public void storeDocAndCreateParentSpaces(File file, String name, String mimeType,
 											  String spacePath, String description, String contentModelNamespace,
 											  String contentModelType, Map<String, String> meta,
 											  Map<String, String> multiValueMeta)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
-		Document document = new Document(file, mimeType, spacePath,
+		Document document = new Document(file, name, mimeType, spacePath,
 				description, contentModelNamespace, contentModelType, meta,
 				multiValueMeta);
 		storeDocAndCreateParentSpaces(document);

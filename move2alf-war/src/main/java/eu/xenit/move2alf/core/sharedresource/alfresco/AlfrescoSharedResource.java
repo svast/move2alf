@@ -48,20 +48,21 @@ public class AlfrescoSharedResource extends SharedResource {
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final File document) throws IllegalDocumentException {
+			final File document,
+            final String name) throws IllegalDocumentException {
 		try {
 			try {
 				logger.debug("Uploading file " + document.getName() + " to remotePath " + remotePath);
 				uploadFile(docExistsMode, remotePath, mimeType,
 						namespace, contentType, description, metadata,
-						multiValueMetadata, document);
+						multiValueMetadata, document, name);
 			} catch (final RepositoryAccessException e) {
 				if (!(e.getMessage() == null)
 						&& (e.getMessage()
 								.indexOf("security processing failed") != -1)) {
 					retryUpload(docExistsMode,
 							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, document);
+							description, metadata, multiValueMetadata, document, name);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -71,7 +72,7 @@ public class AlfrescoSharedResource extends SharedResource {
 						.getMessage())) {
 					retryUpload(docExistsMode,
 							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, document);
+							description, metadata, multiValueMetadata, document, name);
 				} else {
 					logger.error(e.getMessage(), e);
 					throw new Move2AlfException(e.getMessage(), e);
@@ -221,7 +222,8 @@ public class AlfrescoSharedResource extends SharedResource {
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final File document)
+			final File document,
+            final String name)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		logger.debug("Authentication failure? Creating new RAS");
 		destroyRepositoryAccessSession();
@@ -229,7 +231,7 @@ public class AlfrescoSharedResource extends SharedResource {
 		logger.debug("Retrying file " + document.getName());
 		uploadFile(docExistsMode, remotePath, mimeType,
 				namespace, contentType, description, metadata,
-				multiValueMetadata, document);
+				multiValueMetadata, document, name);
 	}
 
 	private void uploadFile(final WriteOption docExistsMode,
@@ -237,10 +239,11 @@ public class AlfrescoSharedResource extends SharedResource {
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
 			final Map<String, String> multiValueMetadata,
-			final File document)
+			final File document,
+            final String name)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
 		try {
-			createRepositoryAccessSession().storeDocAndCreateParentSpaces(document, mimeType, remotePath,
+			createRepositoryAccessSession().storeDocAndCreateParentSpaces(document, name, mimeType, remotePath,
                     description, namespace, contentType, metadata,
                     multiValueMetadata);
 		} catch (final RepositoryException e) {
