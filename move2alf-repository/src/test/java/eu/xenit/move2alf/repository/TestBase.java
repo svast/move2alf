@@ -39,7 +39,7 @@ public class TestBase extends TestCase {
 
 			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -47,7 +47,7 @@ public class TestBase extends TestCase {
 
 			assertFalse(ras.doesDocExist("test1.pdf", spacePath, true));
 			document = new File(pathOffset + "test1.pdf");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -55,7 +55,7 @@ public class TestBase extends TestCase {
 
 			assertFalse(ras.doesDocExist("test1.doc", spacePath, true));
 			document = new File(pathOffset + "test1.doc");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -102,14 +102,14 @@ public class TestBase extends TestCase {
 			String description = "description test1";
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
 
 			try {
 				document = new File(pathOffset + "test1.txt");
-				ras.storeDocAndCreateParentSpaces(document, SourceParser
+				ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 						.determineMimeType(document.getName()), spacePath,
 						description, modelNamespace, modelType, meta,
 						multiValueMeta);
@@ -160,7 +160,7 @@ public class TestBase extends TestCase {
 			assertFalse(ras.doesDocExist("test1.txt", spacePath, true));
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -203,7 +203,7 @@ public class TestBase extends TestCase {
 			String description = "description test1";
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -233,7 +233,7 @@ public class TestBase extends TestCase {
 			String description = "description test1";
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -261,7 +261,7 @@ public class TestBase extends TestCase {
 			String description = "description test1";
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -306,7 +306,7 @@ public class TestBase extends TestCase {
 			String description = "description test"+i;
 
 			File document = new File(pathOffset + "test1.txt");
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath,
 					description, modelNamespace, modelType, meta,
 					multiValueMeta);
@@ -357,7 +357,7 @@ public class TestBase extends TestCase {
 
 			try{
 				String spacePath= "/cm:m1/cm:m2/cm:m3/cm:m4/cm:f"+t;
-			ras.storeDocAndCreateParentSpaces(document, SourceParser
+			ras.storeDocAndCreateParentSpaces(document, document.getName(), SourceParser
 					.determineMimeType(document.getName()), spacePath, "", TestBase.modelNamespace, TestBase.modelType, meta, multiValueMeta);
 			ras.deleteByDocNameAndSpace(spacePath, "test1.txt");
 			ras.deleteSpace(spacePath, true);

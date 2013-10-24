@@ -35,7 +35,10 @@ public class UploadedFileHandler extends Move2AlfReceivingAction<FileInfo> {
 
 //        logger.debug("Number of params: "+params.size());
 
-        ReportMessage reportMessage = new ReportMessage(((File)fileInfo.get(Parameters.PARAM_FILE)).getName(),
+        String name = ((File)fileInfo.get(Parameters.PARAM_FILE)).getName();
+        if(fileInfo.get(Parameters.PARAM_NAME)!=null)
+            name = (String)fileInfo.get(Parameters.PARAM_NAME);
+        ReportMessage reportMessage = new ReportMessage(name,
                 new Date(),
                 status,
                 params,

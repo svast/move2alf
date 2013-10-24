@@ -69,7 +69,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 
 	}
 
-	public void storeDocAndCreateParentSpaces(File document, String mimeType,
+	public void storeDocAndCreateParentSpaces(File document, String name, String mimeType,
 			String spacePath, String description, String contentModelNamespace,
 			String contentModelType, Map<String, String> meta,
 			Map<String, String> multiValueMeta)

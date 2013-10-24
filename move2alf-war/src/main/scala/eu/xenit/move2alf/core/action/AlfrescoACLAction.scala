@@ -25,7 +25,8 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
     for (result <- message.uploadResultList) {
       val newParameterMap = new FileInfo()
       newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath);
-      newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file);
+      newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file)
+      newParameterMap.put(Parameters.PARAM_NAME, result.getDocument().name)
       newParameterMap.put(Parameters.PARAM_STATUS, if (result.getStatus() == UploadResult.VALUE_OK)
         Parameters.VALUE_OK else Parameters.VALUE_FAILED);
       newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());

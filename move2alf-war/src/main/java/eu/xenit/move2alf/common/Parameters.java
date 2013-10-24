@@ -44,6 +44,11 @@ public class Parameters {
 	 */
 	public static final String PARAM_MULTI_VALUE_METADATA = "multiValueMetadata";
 
+    /**
+     * Name of document to be uploaded. Can be different of filename, to allow CMIS import of files with same name. Type: String
+     */
+    public static final String PARAM_NAME = "name";
+
 	/**
 	 * Description of the file. Type: String
 	 */
