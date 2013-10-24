@@ -20,19 +20,22 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
       sendTaskToDestination(message, new SetAclMessage(acl), reply => Unit)
     }
 
-    val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
-    val inputFile = message.batch.get(0).get(Parameters.PARAM_INPUT_FILE)
 
+
+    var idx = 0;
     for (result <- message.uploadResultList) {
       val newParameterMap = new FileInfo()
-      newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath);
-      newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file);
+      val inputFile = message.batch.get(idx).get(Parameters.PARAM_INPUT_FILE)
+      val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
+      newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath)
+      newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file)
       newParameterMap.put(Parameters.PARAM_STATUS, if (result.getStatus() == UploadResult.VALUE_OK)
         Parameters.VALUE_OK else Parameters.VALUE_FAILED);
-      newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage());
-      newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference());
-      newParameterMap.put(Parameters.PARAM_INPUT_FILE, inputFile);
+      newParameterMap.put(Parameters.PARAM_ERROR_MESSAGE, result.getMessage())
+      newParameterMap.put(Parameters.PARAM_REFERENCE, result.getReference())
+      newParameterMap.put(Parameters.PARAM_INPUT_FILE, inputFile)
       sendMessage(newParameterMap)
+      idx = idx+1;
     }
   }
 

@@ -14,7 +14,10 @@ import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
-import org.apache.camel.*;
+import org.apache.camel.CamelContext;
+import org.apache.camel.ConsumerTemplate;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -94,6 +97,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 		}
 
 		final ConsumerTemplate template = new DefaultConsumerTemplate(camel);
+        template.setMaximumCacheSize(100);
 		try {
 			template.start();
 		} catch (Exception e) {
@@ -101,6 +105,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 			throw new Move2AlfException("Camel exception", e);
 		}
 
+        logger.debug("maximum cache size=" + template.getMaximumCacheSize() + " and current=" + template.getCurrentCacheSize());
 		// Create temporary folder
 		final File tempFolder = Files.createTempDir();
 		if (logger.isDebugEnabled()) {
@@ -111,10 +116,11 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 		boolean firstLoop = true;
 		String first = null;
 		while (!done) {
-			final Exchange exchange = template.receive(DIRECT_ENDPOINT,3000);
+			Exchange exchange = template.receive(DIRECT_ENDPOINT,5000);
             if(exchange==null) {
-                done=true;
-                break;
+                logger.debug("exchange=null, trying again");
+                //done=true;
+                continue;
             }
             final Message messageIn = exchange.getIn();
 
@@ -144,7 +150,9 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 			}
 
             if (path.equals(first) && !firstLoop) {
+                logger.debug("done=true, will stop, got again to first");
                 done = true;
+                template.doneUoW(exchange);
                 break;
             }
 
@@ -159,6 +167,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 String uuid = extractUuid(cmisObjectId);
 				//final File file = new File(tempFolder, uuid);
                 final File file = new File(tempFolder, cmisName);
+                logger.debug("saving " + cmisName);
 				try {
 //					logger.debug("Stream: " + in);
 					ByteStreams.copy(in, new FileOutputStream(file));
@@ -192,14 +201,16 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
 					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 
-                    logger.debug("**************** fileInfo=" + fileInfo);
+                    //logger.debug("**************** fileInfo=" + fileInfo);
 					sendMessage(fileInfo);
 				}
             }
 			firstLoop = false;
+            template.doneUoW(exchange);
 		}
 
 		try {
+            logger.debug("shutting down");
 			camel.stop();
 		} catch (Exception e) {
 			e.printStackTrace();

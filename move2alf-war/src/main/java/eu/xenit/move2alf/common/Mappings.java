@@ -80,6 +80,7 @@ public class Mappings {
         mappingNamespaces.put("wf","{http://www.alfresco.org/model/workflow/1.0}");
         mappingNamespaces.put("youtube","{http://www.alfresco.org/model/publishing/youtube/1.0}");
         mappingNamespaces.put("fred","{http://www.xenit.eu/fred/example/model/0.1}");
+        mappingNamespaces.put("demo","{http://www.xenit.eu/model/demo/1.0}");
         mappingNamespaces.put("sharepoint","{http://www.xenit.eu/sharepoint/example/model/0.1}");
 
         mappingTypes.put("0x01010B006DBEC9104B358340916826B490EC2063","sharepoint:dublin_core_columns");
