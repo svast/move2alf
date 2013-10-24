@@ -35,6 +35,34 @@ public interface RepositoryAccessSession {
 	public abstract void closeSession();
 
 	/**
+<<<<<<< HEAD
+=======
+	 * Store a document in the repository in space <code>spacePath</code>. 
+	 * Missing parent spaces are created automatically.
+	 * 
+	 * @param document : document to store
+     * @param name : name of the document to store
+	 * @param mimeType : mime-type of the document to store
+	 * @param spacePath : 
+	 * @param description : this value will be written in the title and description
+	 * properties
+	 * @param contentModelNamespace : namespace of the content model, e.g. "{li.model}"
+	 * @param contentModelType : content model, e.g. "polisDoc"
+	 * @param meta : map of name-value pairs to store as properties in alfresco
+	 * @param multiValueMeta : map of properties that can be multi-valued. The values are separated by a ','
+	 * @throws RepositoryAccessException : exception thrown when there is
+	 * a connectivity problem to the repository.
+	 * @throws RepositoryException : exception thrown when the repository can not execute the request.
+	 * @throws IllegalDocumentException 
+	 */
+	public abstract void storeDocAndCreateParentSpaces(File document, String name,
+			String mimeType, String spacePath, String description,
+			String contentModelNamespace, String contentModelType,
+			Map<String, String> meta, Map<String, String> multiValueMeta)
+			throws RepositoryAccessException, RepositoryException, IllegalDocumentException;
+
+	/**
+>>>>>>> Added PARAM_NAME as an additional parameter in parameterMap and populate it in the CMIS import, while the temporary files on the disk use the uuid got as input.
 	 * Check whether the document with name <code>docName</code> exists in the
 	 * space <code>spacePath</code>
 	 * @param docName
