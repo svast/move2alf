@@ -209,7 +209,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                     } catch (NullPointerException e) {
                         logger.debug("Empty message body (no content), will continue anyway!");
                     }
-                }
+		}
 
 				if (!failed) {
 

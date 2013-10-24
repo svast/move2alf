@@ -35,7 +35,6 @@ public interface RepositoryAccessSession {
 	public abstract void closeSession();
 
 	/**
-
 	 * Check whether the document with name <code>docName</code> exists in the
 	 * space <code>spacePath</code>
 	 * @param docName
