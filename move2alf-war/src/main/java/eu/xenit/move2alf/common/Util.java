@@ -63,7 +63,7 @@ public class Util {
 		if (filePath.contains("/")) {
 			relativePath = filePath.substring(0, filePath.lastIndexOf("/"));
 		}
-		relativePath = relativePath.substring(inputPath.length());
+		relativePath = relativePath.substring(normalizePath(inputPath).length());
 		return relativePath;
 	}
 
