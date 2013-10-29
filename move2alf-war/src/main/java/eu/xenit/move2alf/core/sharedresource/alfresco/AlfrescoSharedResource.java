@@ -43,64 +43,6 @@ public class AlfrescoSharedResource extends SharedResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSharedResource.class);
 
-	public void send(final WriteOption docExistsMode,
-			final String remotePath, final String mimeType,
-			final String namespace, final String contentType,
-			final String description, final Map<String, String> metadata,
-			final Map<String, String> multiValueMetadata,
-			final File document,
-            final String name) throws IllegalDocumentException {
-		try {
-			try {
-				logger.debug("Uploading file " + document.getName() + " to remotePath " + remotePath);
-				uploadFile(docExistsMode, remotePath, mimeType,
-						namespace, contentType, description, metadata,
-						multiValueMetadata, document, name);
-			} catch (final RepositoryAccessException e) {
-				if (!(e.getMessage() == null)
-						&& (e.getMessage()
-								.indexOf("security processing failed") != -1)) {
-					retryUpload(docExistsMode,
-							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, document, name);
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
-				}
-			} catch (final RuntimeException e) {
-				if ("Error writing content to repository server".equals(e
-						.getMessage())) {
-					retryUpload(docExistsMode,
-							remotePath, mimeType, namespace, contentType,
-							description, metadata, multiValueMetadata, document, name);
-				} else {
-					logger.error(e.getMessage(), e);
-					throw new Move2AlfException(e.getMessage(), e);
-				}
-			}
-		} catch (final RepositoryAccessException e) {
-			// we end up here if there is a communication error during a session
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		} catch (final RepositoryException e) {
-			// we end up here if the request could not be handled by the
-			// repository
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		} catch (final WebServiceException e) {
-			logger.error(e.getMessage(), e);
-			throw new Move2AlfException(e.getMessage(), e);
-		} catch (final RepositoryFatalException e) {
-			logger.error("Fatal Exception", e);
-			throw new Move2AlfException(e.getMessage(), e);
-			// TODO: stop job instead of stopping tomcat
-			// System.exit(1);
-		} catch (final RuntimeException e2) {
-			logger.error(e2.getMessage(), e2);
-			throw new Move2AlfException(e2.getMessage(), e2);
-		}
-	}
-
     public String putContent(File file, String mimeType){
         return createRepositoryAccessSession().putContent(file, mimeType);
     }
@@ -216,7 +158,7 @@ public class AlfrescoSharedResource extends SharedResource {
 		}
 	}
 
-	private void retryUpload(
+	/*private void retryUpload(
 			final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
@@ -232,9 +174,9 @@ public class AlfrescoSharedResource extends SharedResource {
 		uploadFile(docExistsMode, remotePath, mimeType,
 				namespace, contentType, description, metadata,
 				multiValueMetadata, document, name);
-	}
+	}*/
 
-	private void uploadFile(final WriteOption docExistsMode,
+	/*private void uploadFile(final WriteOption docExistsMode,
 			final String remotePath, final String mimeType,
 			final String namespace, final String contentType,
 			final String description, final Map<String, String> metadata,
@@ -282,7 +224,7 @@ public class AlfrescoSharedResource extends SharedResource {
 				throw e;
 			}
 		}
-	}
+	}*/
 
 	public boolean exists(final String remotePath, final String name) {
 		

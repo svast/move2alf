@@ -15,14 +15,6 @@ public class Document {
 	public final Map<String, String> multiValueMeta;
     public final String contentUrl;
 
-	public Document(final File file, final String name, final String mimeType,
-			final String spacePath, final String description,
-			final String contentModelNamespace, final String contentModelType,
-			final Map<String, String> meta,
-			final Map<String, String> multiValueMeta) {
-		this(file, name, mimeType, spacePath, description, contentModelNamespace, contentModelType, meta, multiValueMeta, null);
-	}
-
     public Document(final File file, final String name, final String mimeType,
                     final String spacePath, final String description,
                     final String contentModelNamespace, final String contentModelType,
@@ -39,6 +31,4 @@ public class Document {
         this.multiValueMeta = multiValueMeta;
         this.contentUrl = contentUrl;
     }
-
-
 }

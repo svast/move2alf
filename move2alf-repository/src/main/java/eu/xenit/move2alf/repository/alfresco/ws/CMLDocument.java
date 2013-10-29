@@ -76,8 +76,9 @@ public class CMLDocument {
 
 		// these properties are always present
 		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, doc.name));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,
-				getContentDetailsAndCreateIfNotExists()));
+		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,getContentDetails()));
+        contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
+        contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
 
 		if (doc.meta != null) {
 			// Enumeration<String> E = meta.;
@@ -100,10 +101,8 @@ public class CMLDocument {
             contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
         if(!hasDescription)
             contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
-/*		for(NamedValue value: contentProps){
-			System.out.println(value.getName()+": "+value.getValue());
-		}*/
-		return contentProps.toArray(new NamedValue[0]);
+	
+	return contentProps.toArray(new NamedValue[0]);
 	}
 
 	public String getXpath() {
@@ -122,12 +121,5 @@ public class CMLDocument {
 
 	public String getSpacePath() {
 		return doc.spacePath;
-	}
-
-	private String getContentDetailsAndCreateIfNotExists() {
-		if (getContentDetails() == null) {
-			contentDetails = session.putContent(doc.file, doc.mimeType);
-		}
-		return getContentDetails();
 	}
 }
