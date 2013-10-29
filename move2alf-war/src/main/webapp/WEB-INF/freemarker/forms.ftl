@@ -144,7 +144,6 @@ $("#${name}").change(function(){
 	checkboxChanged("${name}");
 });
 </script>
-
 </#macro>
 
 <#macro checkboxWithText binding label checked=false >
@@ -154,4 +153,17 @@ $("#${name}").change(function(){
 		<@formCheckbox binding />${label}
 	</label>
 </div>
+</#macro>
+
+<#macro checkboxWithTextBefore binding label helpText checked=false>
+    <#assign name=binding?split('.')?last />
+    <@labeledInput label=label forId=name helpText=helpText>
+        <@formCheckbox binding/>
+    </@labeledInput>
+<script>
+    $(function(){checkboxChanged("${name}");});
+    $("#${name}").change(function(){
+        checkboxChanged("${name}");
+    });
+</script>
 </#macro>

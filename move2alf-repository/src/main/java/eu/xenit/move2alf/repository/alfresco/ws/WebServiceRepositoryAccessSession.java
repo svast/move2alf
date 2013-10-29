@@ -174,23 +174,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		}
 	}
 
-	/**
-	 * @throws IllegalDocumentException
-	 * @deprecated as of Move2Alf 1.2, replaced by {@see
-	 *             void storeDocAndCreateParentSpaces(Document)}
-	 */
-	@Override
-	public void storeDocAndCreateParentSpaces(File file, String name, String mimeType,
-											  String spacePath, String description, String contentModelNamespace,
-											  String contentModelType, Map<String, String> meta,
-											  Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
-		Document document = new Document(file, name, mimeType, spacePath,
-				description, contentModelNamespace, contentModelType, meta,
-				multiValueMeta);
-		storeDocAndCreateParentSpaces(document);
-	}
-
 	@Override
 	public List<UploadResult> storeDocAndCreateParentSpaces(Document document)
 			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
@@ -921,103 +904,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			name = T.nextToken();
 		}
 		return name;
-	}
-
-	private void addDocumentToCML(File file, String mimeType,
-								  Reference parentSpace, String description,
-								  String contentModelNamespace, String contentModelType,
-								  Map<String, String> meta, Map<String, String> multiValueMeta, CML cml, String cmlId)
-			throws RepositoryAccessException, RepositoryException {
-		if (parentSpace == null) {
-			logger.warn("ParentSpace is null, can not store {}", file.getName());
-			throw new RepositoryException("ParentSpace is null");
-		}
-		ParentReference parentRef = new ParentReference(store,
-				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
-
-		logger.debug("Path {}", file.getAbsolutePath());
-
-		logger.debug("ContentModelNamespace {}", contentModelNamespace);
-		logger.debug("ContentModelType {}", contentModelType);
-
-		String fileName = file.getName();
-
-		logger.debug("Filename {}", fileName);
-
-		String contentDetails = putContent(file, mimeType);
-
-		// audtiable properties need a special handling, they can not be set
-		// like other
-		// properties,
-		int nbrOfAuditableProperties = 0;
-		if (meta != null) {
-			for (String auditablePropertyName : auditablePropertyNameSet) {
-				if (meta.keySet().contains(auditablePropertyName))
-					nbrOfAuditableProperties++;
-			}
-		}
-		int nbrOfNonAuditableProperties = ((meta != null) ? meta.size() : 0)
-				+ ((multiValueMeta != null) ? multiValueMeta.size() : 0) + 2 // fixed
-				// properties
-				- nbrOfAuditableProperties;
-
-		List<NamedValue> contentProps = new ArrayList<NamedValue>();
-
-		// these properties are always present
-		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, fileName));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,
-				contentDetails));
-
-		if (meta != null) {
-			// Enumeration<String> E = meta.;
-			// while (E.hasMoreElements()) {
-			processMetadata(contentModelNamespace, meta, contentProps);
-		}
-
-		// multiValue properties
-		if (multiValueMeta != null) {
-			processMultiValuedMetadata(contentModelNamespace, multiValueMeta,
-					contentProps);
-		}
-
-		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
-				+ fileName);
-		logger.debug("Childname set");
-
-		// a title aspect will always be added
-		NamedValue[] titledProps = new NamedValue[2];
-		titledProps[0] = Utils.createNamedValue(Constants.PROP_TITLE,
-				description);
-		titledProps[1] = Utils.createNamedValue(Constants.PROP_DESCRIPTION,
-				description);
-		CMLAddAspect titleAspect = new CMLAddAspect(Constants.ASPECT_TITLED,
-				titledProps, null, cmlId);
-
-		CMLCreate[] createsArray = cml.getCreate();
-		List<CMLCreate> creates;
-		if (createsArray == null) {
-			creates = new ArrayList<CMLCreate>();
-		} else {
-			creates = new ArrayList<CMLCreate>(Arrays.asList(createsArray));
-		}
-
-		CMLAddAspect[] addAspectsArray = cml.getAddAspect();
-		List<CMLAddAspect> addAspects;
-		if (addAspectsArray == null) {
-			addAspects = new ArrayList<CMLAddAspect>();
-		} else {
-			addAspects = new ArrayList<CMLAddAspect>(Arrays.asList(addAspectsArray));
-		}
-
-		CMLCreate create = new CMLCreate(cmlId, parentRef, parentSpace.getUuid(),
-				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
-				contentModelNamespace + contentModelType, contentProps.toArray(new NamedValue[0]));
-
-		creates.add(create);
-		addAspects.add(titleAspect);
-
-		cml.setCreate(creates.toArray(new CMLCreate[creates.size()]));
-		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
 	}
 
 	protected void processMultiValuedMetadata(String contentModelNamespace,

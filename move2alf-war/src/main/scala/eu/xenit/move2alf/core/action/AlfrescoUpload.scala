@@ -75,7 +75,11 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       val metadata: java.util.Map[String, String] = parameterMap.get(Parameters.PARAM_METADATA).asInstanceOf[java.util.Map[String, String]]
       val multiValueMetadata: java.util.Map[String, String] = parameterMap.get(Parameters.PARAM_MULTI_VALUE_METADATA).asInstanceOf[java.util.Map[String, String]]
       val file: File = parameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]
-      val name: String = getParameterWithDefault(parameterMap, Parameters.PARAM_NAME,file.getName())
+      var filename = ""
+      if(file!=null) {
+        filename = file.getName()
+      }
+      val name: String = getParameterWithDefault(parameterMap, Parameters.PARAM_NAME,filename)
       val contentUrl: String = parameterMap.get(Parameters.PARAM_CONTENTURL).asInstanceOf[String]
       val document: Document = new Document(file, name, mimeType, remotePath, description, namespace, contentType, metadata, multiValueMetadata, contentUrl)
       documentsToUpload.add(document)
