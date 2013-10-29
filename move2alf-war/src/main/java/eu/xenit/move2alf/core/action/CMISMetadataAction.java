@@ -90,7 +90,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                 } else if("cmis:contentStreamId".equals(property.getId())) {
                     contentStreamProp = val;
                 } else if("cmis:contentStreamLength".equals(property.getId())) {
-                    contentLengthProp = val;s
+                    contentLengthProp = val;
                 }
                 // set the rest of parameters
                 else if(!(property.getId().startsWith("cmis:")) &&
