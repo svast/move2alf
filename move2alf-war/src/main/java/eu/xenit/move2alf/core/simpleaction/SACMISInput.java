@@ -179,8 +179,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 in = messageIn.getBody(InputStream.class);
 
                 String uuid = extractUuid(cmisObjectId);
-		File file = null;
 
+		File file = null;
                 //final File file = new File(tempFolder, cmisName);
 
                 if(!getSkipContentUpload()) {
@@ -209,7 +209,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                     } catch (NullPointerException e) {
                         logger.debug("Empty message body (no content), will continue anyway!");
                     }
-		}
+                }
 
 				if (!failed) {
 
