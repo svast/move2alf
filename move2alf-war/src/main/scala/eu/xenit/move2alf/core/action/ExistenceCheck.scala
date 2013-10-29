@@ -14,7 +14,7 @@ class ExistenceCheck extends ActionWithDestination[FileInfo, Boolean]{
   protected def executeImpl(fileInfo: FileInfo) {
     val newParameterMap: FileInfo = new FileInfo
     newParameterMap.putAll(fileInfo)
-    val name: String = (newParameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]).getName
+    val name: String = newParameterMap.get(Parameters.PARAM_NAME).asInstanceOf[String]
     sendTaskToDestination(fileInfo, new CheckExistenceMessage(name), exists => {
       if(!exists){
         handleError(fileInfo, "The file was not found in the repository.")

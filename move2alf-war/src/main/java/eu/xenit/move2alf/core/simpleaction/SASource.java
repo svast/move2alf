@@ -19,7 +19,7 @@ import java.util.List;
 @ClassInfo(classId = "SASource",
             category = ConfigurableObject.CAT_DEFAULT,
             description = "Reads files from the filesystem and sends fileinfo messages")
-public class SASource extends Move2AlfReceivingAction<Object>{
+public class SASource extends Move2AlfReceivingAction<Object> {
     
     private static final Logger logger = LoggerFactory.getLogger(SASource.class);
 
@@ -27,8 +27,23 @@ public class SASource extends Move2AlfReceivingAction<Object>{
 		return "Listing documents";
 	}
 
+    private Boolean skipContentUpload;
+
+    public Boolean getSkipContentUpload() {
+        return skipContentUpload;
+    }
+
+    public void setSkipContentUpload(Boolean skipContentUpload) {
+        this.skipContentUpload = skipContentUpload;
+    }
+
+    public void setSkipContentUpload(String skipContentUpload) {
+        this.skipContentUpload = Boolean.valueOf(skipContentUpload);
+    }
+
     public static final String PARAM_INPUTPATHS = "inputPaths";
     private List<String> inputPaths;
+
     public void setInputPaths(String inputPaths){
         this.inputPaths = Arrays.asList(inputPaths.split("\\|"));
     }

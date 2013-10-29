@@ -26,12 +26,11 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
 
     @Override
     protected void executeImpl(FileInfo fileInfo) {
-        logger.debug("Entering executeImpl in CMISMetadataAction");
         Map<String, Object> headers = (Map)fileInfo.get(SACMISInput.PARAM_CAMEL_HEADER);
         String path = ((String)fileInfo.get(Parameters.PARAM_RELATIVE_PATH));
         if(!path.endsWith("/"))
             path = path.concat("/");
-        path = path.concat(((File)fileInfo.get(Parameters.PARAM_FILE)).getName());
+        path = path.concat(Parameters.PARAM_NAME);
 
         fileInfo.remove(SACMISInput.PARAM_CAMEL_HEADER);
 
@@ -51,7 +50,6 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                 if(Mappings.mappingNamespaces.get(namespace)!=null)
                     fileInfo.put(Parameters.PARAM_NAMESPACE, Mappings.mappingNamespaces.get(namespace));
                 String newContentType = alfrescoType.substring(idx2+1);
-                logger.debug("newContentType=" + newContentType);
                 fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
             } else { // Sharepoint types: 0x01010B006DBEC9104B358340916826B490EC2063, mapped to sharepoint:dublin_core_columns
                 int idx1 = alfrescoType.indexOf(":");
@@ -87,6 +85,8 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
 
         logger.debug("Setting properties");
         HashMap props = new HashMap();
+        String contentStreamProp = "", mimeTypeProp = "", contentLengthProp = "", encodingProp = "", localeProp = "";
+
         if(headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES)!=null) {
             Collection<PropertyImpl> properties = (Collection<PropertyImpl>)headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES);
             for(PropertyImpl property : properties) {
@@ -101,11 +101,22 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                 // set auditable properties
                 if(isAuditable(property.getId())) {
                     props.put(Mappings.mappingAuditables.get(property.getId()),val);
-                } else if("cm:description".equals(property.getId())){
+                }
+                // set parameters which are put directly in fileInfo
+                else if("cm:description".equals(property.getId())) {
                     fileInfo.put(Parameters.PARAM_DESCRIPTION,val);
-                } else if(!(property.getId().startsWith("cmis:")) && !(property.getLocalName().contains("nodeRef")) && val!=null &&
-                          !("null".equals(val) &&
-                          !(val.isEmpty()))) {
+                } else if("cmis:contentStreamMimeType".equals(property.getId())) {
+                    fileInfo.put(Parameters.PARAM_MIMETYPE,val);
+                    mimeTypeProp = val;
+                } else if("cmis:contentStreamId".equals(property.getId())) {
+                    contentStreamProp = val;
+                } else if("cmis:contentStreamLength".equals(property.getId())) {
+                    contentLengthProp = val;s
+                }
+                // set the rest of parameters
+                else if(!(property.getId().startsWith("cmis:")) &&
+                          !(property.getLocalName().contains("nodeRef")) &&
+                          valid(val)) {
                     // add the property with the namespace, if namespace is present
                     if(property.getId().indexOf(":")!=-1) {
                         String ns = property.getId().substring(0,property.getId().indexOf(":"));
@@ -119,10 +130,20 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             }
         }
 
-
+        fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
         fileInfo.put(Parameters.PARAM_METADATA,props);
         logger.info("*******************fileInfo=" + fileInfo);
         sendMessage(fileInfo);
+    }
+
+    private String buildContentUrl(String contentStreamProp, String mimeTypeProp, String contentLengthProp) {
+        return "contentUrl=" + contentStreamProp + "|mimetype=" + mimeTypeProp + "|size=" + contentLengthProp + "|encoding=UTF-8";
+    }
+
+    private boolean valid(String val) {
+          return (val !=null &&
+                  !("null".equals(val) &&
+                  !(val.isEmpty())));
     }
 
     // remove domain

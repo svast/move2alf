@@ -107,6 +107,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		Mode mode = null;
 		boolean ignorePath = false;
 
+        boolean skipContentUpload = false;
 		String metadata = "";
 		String transform = "";
 		boolean moveBeforeProcessing = false;
@@ -131,12 +132,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 String path = action.getParameter(SASource.PARAM_INPUTPATHS);
                 inputSource = InputSource.FILESYSTEM;
                 inputFolder = Arrays.asList(path.split("\\|"));
+                skipContentUpload = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD));
 			} else if (SOURCE_CMIS_ID.equals(action.getActionId())) {
                 inputSource = InputSource.CMIS;
                 cmisURL = action.getParameter(SACMISInput.PARAM_CMIS_URL);
                 cmisUsername = action.getParameter(SACMISInput.PARAM_CMIS_USERNAME);
                 cmisPassword = action.getParameter(SACMISInput.PARAM_CMIS_PASSWORD);
                 cmisQuery = action.getParameter(SACMISInput.PARAM_CMIS_QUERY);
+                skipContentUpload = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD));
             } else if (UPLOAD_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
@@ -199,6 +202,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             }
 		}
 
+        jobModel.setSkipContentUpload(skipContentUpload);
         jobModel.setInputSource(inputSource);
 		jobModel.setInputFolder(inputFolder);
         jobModel.setCmisURL(cmisURL);
@@ -335,8 +339,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = executeCommandBefore;
         }
 
+        boolean filesystemSource = false;
         ConfiguredAction sourceAction = new ConfiguredAction();
         if (jobModel.getInputSource() == null || InputSource.FILESYSTEM.equals(jobModel.getInputSource())) {
+            filesystemSource = true;
             sourceAction.setActionId(SOURCE_ID);
             sourceAction.setClassId(actionClassService.getClassId(SASource.class));
             sourceAction.setParameter(SASource.PARAM_INPUTPATHS, encodeStringList(jobModel.getInputFolder()));
@@ -350,6 +356,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             sourceAction.setDispatcher(PINNED_DISPATCHER);
 
         }
+        sourceAction.setParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD, String.valueOf(jobModel.getSkipContentUpload()));
         sourceAction.setNmbOfWorkers(1);
         sourceAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, sourceAction);
@@ -401,29 +408,32 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = transformAction;
 		}
 
-        ConfiguredAction mimeTypeAction = new ConfiguredAction();
-        mimeTypeAction.setActionId(MIME_TYPE_ID);
-        mimeTypeAction.setClassId(actionClassService.getClassId(SAMimeType.class));
-        mimeTypeAction.setNmbOfWorkers(1);
-        mimeTypeAction.addReceiver(REPORTER, reporter);
-        end.addReceiver(DEFAULT_RECEIVER, mimeTypeAction);
-        end = mimeTypeAction;
+        if(!jobModel.getSkipContentUpload() && filesystemSource) {
+            ConfiguredAction mimeTypeAction = new ConfiguredAction();
+            mimeTypeAction.setActionId(MIME_TYPE_ID);
+            mimeTypeAction.setClassId(actionClassService.getClassId(SAMimeType.class));
+            mimeTypeAction.setNmbOfWorkers(1);
+            mimeTypeAction.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, mimeTypeAction);
+            end = mimeTypeAction;
+        }
 
 
 		if (Mode.WRITE == jobModel.getMode()) {
-            final ConfiguredAction putContentAction = new ConfiguredAction();
-            putContentAction.setActionId(PUT_CONTENT);
-            putContentAction.setClassId(actionClassService.getClassId(PutContentAction.class));
-            putContentAction.setNmbOfWorkers(1);
-            putContentAction.addReceiver(REPORTER, reporter);
-            int destinationId = jobModel.getDest();
-            if(jobModel.getContentStoreId() != -1){
-                destinationId = jobModel.getContentStoreId();
+            if(!jobModel.getSkipContentUpload()) {
+                final ConfiguredAction putContentAction = new ConfiguredAction();
+                putContentAction.setActionId(PUT_CONTENT);
+                putContentAction.setClassId(actionClassService.getClassId(PutContentAction.class));
+                putContentAction.setNmbOfWorkers(1);
+                putContentAction.addReceiver(REPORTER, reporter);
+                int destinationId = jobModel.getDest();
+                if(jobModel.getContentStoreId() != -1){
+                    destinationId = jobModel.getContentStoreId();
+                }
+                putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(destinationId));
+                end.addReceiver(DEFAULT_RECEIVER, putContentAction);
+                end = putContentAction;
             }
-
-            putContentAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(destinationId));
-            end.addReceiver(DEFAULT_RECEIVER, putContentAction);
-            end = putContentAction;
 
             final ConfiguredAction batchAction = new ConfiguredAction();
             batchAction.setActionId(BATCH_ACTION);

@@ -46,7 +46,7 @@ class ListAction extends ActionWithDestination[FileInfo, Boolean]{
       }
     }
     remotePath = remotePath.substring(0, remotePath.length - 1)
-    val name: String = (newParameterMap.get(Parameters.PARAM_FILE).asInstanceOf[File]).getName
+    val name: String = newParameterMap.get(Parameters.PARAM_NAME).asInstanceOf[String]
 
     sendTaskToDestination(fileInfo, new ListMessage(remotePath, name), result => {
       if(result) {

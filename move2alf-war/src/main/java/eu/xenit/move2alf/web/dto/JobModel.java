@@ -63,6 +63,8 @@ public class JobModel {
 	@NotEmpty(message="Please enter a destination path.")
 	private String destinationFolder="/move2alf";
 
+    private Boolean skipContentUpload = false;
+
 	private List<String> cron = new ArrayList<String>();
 
 
@@ -268,6 +270,18 @@ public class JobModel {
 	public void setMoveBeforeProc(String moveBeforeProc) {
 		this.moveBeforeProc = Boolean.valueOf(moveBeforeProc);
 	}
+
+    public void setSkipContentUpload(String skipContentUpload) {
+        this.skipContentUpload = Boolean.valueOf(skipContentUpload);
+    }
+
+    public void setSkipContentUpload(boolean skipContentUpload) {
+        this.skipContentUpload = skipContentUpload;
+    }
+
+    public boolean getSkipContentUpload() {
+        return skipContentUpload;
+    }
 	
 	public void setMoveBeforeProc(boolean moveBeforeProc) {
 		this.moveBeforeProc = moveBeforeProc;

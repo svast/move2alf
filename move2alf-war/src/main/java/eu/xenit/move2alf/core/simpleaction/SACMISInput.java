@@ -40,6 +40,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 	public static final String PARAM_CMIS_USERNAME = "cmisUsername";
 	public static final String PARAM_CMIS_PASSWORD = "cmisPassword";
     public static final String PARAM_CMIS_QUERY = "cmisQuery";
+    public static final String PARAM_SKIP_CONTENT_UPLOAD = "skipContentUpload";
 
 	public static final String PARAM_CAMEL_HEADER = "camelHeader";
 
@@ -47,6 +48,19 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 	private String cmisUsername;
 	private String cmisPassword;
     private String cmisQuery;
+    private Boolean skipContentUpload;
+
+    public Boolean getSkipContentUpload() {
+        return skipContentUpload;
+    }
+
+    public void setSkipContentUpload(Boolean skipContentUpload) {
+        this.skipContentUpload = skipContentUpload;
+    }
+
+    public void setSkipContentUpload(String skipContentUpload) {
+        this.skipContentUpload = Boolean.valueOf(skipContentUpload);
+    }
 
     public String getCmisQuery() {
         return cmisQuery;
@@ -157,31 +171,35 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 in = messageIn.getBody(InputStream.class);
 
                 String uuid = extractUuid(cmisObjectId);
-				final File file = new File(tempFolder, uuid);
+				File file = null;
                 //final File file = new File(tempFolder, cmisName);
-				try {
+
+                if(!getSkipContentUpload()) {
+                    file = new File(tempFolder, uuid);
+                    try {
 //					logger.debug("Stream: " + in);
-					ByteStreams.copy(in, new FileOutputStream(file));
-					in.close();
-				} catch (FileNotFoundException e) {
-					// file is actually a folder. should never happen
-					throw new Move2AlfException(e);
-				} catch (IOException e) {
-					logger.error(String.format("'%s' failed", cmisName), e);
-					Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
-					ProcessedDocumentParameter parameter = new ProcessedDocumentParameter();
-					parameter.setName(PARAM_ERROR_MESSAGE);
-					parameter.setValue(e.toString());
-					params.add(parameter);
-					ReportMessage reportMessage = new ReportMessage(file.getName(),
-							new Date(),
-							VALUE_FAILED,
-							params,
-							null);
-					sendMessage(PipelineAssemblerImpl.REPORTER, reportMessage);
-					failed = true;
-				} catch (NullPointerException e) {
-                    logger.debug("Empty message body (no content), will continue anyway!");
+                        ByteStreams.copy(in, new FileOutputStream(file));
+                        in.close();
+                    } catch (FileNotFoundException e) {
+                        // file is actually a folder. should never happen
+                        throw new Move2AlfException(e);
+                    } catch (IOException e) {
+                        logger.error(String.format("'%s' failed", cmisName), e);
+                        Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
+                        ProcessedDocumentParameter parameter = new ProcessedDocumentParameter();
+                        parameter.setName(PARAM_ERROR_MESSAGE);
+                        parameter.setValue(e.toString());
+                        params.add(parameter);
+                        ReportMessage reportMessage = new ReportMessage(file.getName(),
+                                new Date(),
+                                VALUE_FAILED,
+                                params,
+                                null);
+                        sendMessage(PipelineAssemblerImpl.REPORTER, reportMessage);
+                        failed = true;
+                    } catch (NullPointerException e) {
+                        logger.debug("Empty message body (no content), will continue anyway!");
+                    }
                 }
 
 				if (!failed) {
