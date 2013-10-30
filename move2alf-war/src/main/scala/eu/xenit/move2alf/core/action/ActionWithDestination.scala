@@ -41,10 +41,10 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
       eocBlockingContext.blockEOC
     }
     val key: String = Integer.toString(message.hashCode)
-    destinationService.sendTaskToDestination(destination, key, message, stateContext.getActorRef)
     replyHandlers.put(key, replyHandler)
     messages.put(key, message)
     originals.put(key, original)
+    destinationService.sendTaskToDestination(destination, key, message, stateContext.getActorRef)
   }
 
   def acceptReply(key: String, message: AnyRef) {
