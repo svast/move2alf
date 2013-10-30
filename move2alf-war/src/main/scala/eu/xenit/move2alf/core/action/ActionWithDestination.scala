@@ -35,12 +35,14 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
   private val replyHandlers: mutable.Map[String, (U => Unit)] = new mutable.HashMap
   private val messages: mutable.Map[String, AnyRef] = new mutable.HashMap
   private val originals: mutable.Map[String, T] = new mutable.HashMap
+  private var messageCounter = 0
 
   protected def sendTaskToDestination(original: T, message: AnyRef, replyHandler: (U => Unit)) {
     if (replyHandlers.size == 0) {
       eocBlockingContext.blockEOC
     }
-    val key: String = Integer.toString(message.hashCode)
+    val key: String = stateContext.getActorRef().toString()+" "+messageCounter;
+    messageCounter = messageCounter + 1
     replyHandlers.put(key, replyHandler)
     messages.put(key, message)
     originals.put(key, original)
@@ -53,6 +55,7 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
       case message: Exception => handleErrorReply(originals.get(key).get, messages.get(key).get, message)
       case message: U@unchecked => replyHandlers.get(key).getOrElse({message: AnyRef => {
         logger.error("No reply method for message "+message.toString+ " Message key: "+key)
+        handleError(message, "Something went wrong while putting message.")
       }}).apply(message)
     }
     replyHandlers.remove(key)

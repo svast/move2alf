@@ -809,7 +809,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
 				reference = nodes[0].getReference();
 
-				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
+				logger.debug("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
 				if (useCache) {
 					referenceCache.put(escapedPath.toLowerCase(), reference);
 				}
