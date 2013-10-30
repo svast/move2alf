@@ -44,13 +44,16 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
     replyHandlers.put(key, replyHandler)
     messages.put(key, message)
     originals.put(key, original)
+    logger.debug("Sending message from actor {} to destination {}", stateContext.getActorRef().toString(), destination)
     destinationService.sendTaskToDestination(destination, key, message, stateContext.getActorRef)
   }
 
   def acceptReply(key: String, message: AnyRef) {
     message match {
       case message: Exception => handleErrorReply(originals.get(key).get, messages.get(key).get, message)
-      case message: U@unchecked => replyHandlers.get(key).get.apply(message)
+      case message: U@unchecked => replyHandlers.get(key).getOrElse({message: AnyRef => {
+        logger.error("No reply method for message "+message.toString+ " Message key: "+key)
+      }}).apply(message)
     }
     replyHandlers.remove(key)
     messages.remove(key)

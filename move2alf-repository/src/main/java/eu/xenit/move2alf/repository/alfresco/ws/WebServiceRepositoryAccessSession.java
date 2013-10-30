@@ -1,25 +1,6 @@
 package eu.xenit.move2alf.repository.alfresco.ws;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.concurrent.Semaphore;
-
-import javax.management.RuntimeErrorException;
-
+import eu.xenit.move2alf.repository.*;
 import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
@@ -30,45 +11,20 @@ import org.alfresco.webservice.content.Content;
 import org.alfresco.webservice.content.ContentFault;
 import org.alfresco.webservice.content.ContentServiceSoapBindingStub;
 import org.alfresco.webservice.dictionary.DictionaryServiceSoapBindingStub;
-import org.alfresco.webservice.repository.QueryResult;
-import org.alfresco.webservice.repository.RepositoryFault;
-import org.alfresco.webservice.repository.RepositoryServiceLocator;
-import org.alfresco.webservice.repository.RepositoryServiceSoapBindingStub;
-import org.alfresco.webservice.repository.UpdateResult;
-import org.alfresco.webservice.types.CML;
-import org.alfresco.webservice.types.CMLAddAspect;
-import org.alfresco.webservice.types.CMLCreate;
-import org.alfresco.webservice.types.CMLDelete;
-import org.alfresco.webservice.types.CMLUpdate;
-import org.alfresco.webservice.types.NamedValue;
-import org.alfresco.webservice.types.Node;
-import org.alfresco.webservice.types.ParentReference;
-import org.alfresco.webservice.types.Predicate;
-import org.alfresco.webservice.types.Query;
-import org.alfresco.webservice.types.QueryConfiguration;
-import org.alfresco.webservice.types.Reference;
-import org.alfresco.webservice.types.ResultSet;
-import org.alfresco.webservice.types.ResultSetRow;
-import org.alfresco.webservice.types.ResultSetRowNode;
-import org.alfresco.webservice.types.Store;
-import org.alfresco.webservice.util.ActionUtils;
-import org.alfresco.webservice.util.AuthenticationUtils;
-import org.alfresco.webservice.util.Constants;
-import org.alfresco.webservice.util.ContentUtils;
-import org.alfresco.webservice.util.Utils;
-import org.alfresco.webservice.util.WebServiceException;
-import org.alfresco.webservice.util.WebServiceFactory;
+import org.alfresco.webservice.repository.*;
+import org.alfresco.webservice.types.*;
+import org.alfresco.webservice.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.xenit.move2alf.repository.DocumentNotFoundException;
-import eu.xenit.move2alf.repository.IllegalDocumentException;
-import eu.xenit.move2alf.repository.IllegalDuplicateException;
-import eu.xenit.move2alf.repository.RepositoryAccessException;
-import eu.xenit.move2alf.repository.RepositoryAccessSession;
-import eu.xenit.move2alf.repository.RepositoryException;
-import eu.xenit.move2alf.repository.RepositoryFatalException;
-import eu.xenit.move2alf.repository.UploadResult;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class WebServiceRepositoryAccessSession implements RepositoryAccessSession {
 
@@ -890,7 +846,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				throw new RepositoryAccessException(e.getMessage(), e);
 			}
 		} else {
-			logger.info("Obtained reference from cache {}", escapedPath);
+			logger.debug("Obtained reference from cache {}", escapedPath);
 		}
 		return reference;
 	}
