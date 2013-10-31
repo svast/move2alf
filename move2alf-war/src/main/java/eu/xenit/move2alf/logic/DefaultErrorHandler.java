@@ -45,10 +45,11 @@ public class DefaultErrorHandler implements ErrorHandler {
 
             // TODO: handle cleaner?
             File file = (File) fileInfo.get(Parameters.PARAM_FILE);
+            String name = (String) fileInfo.get(Parameters.PARAM_NAME);
 
             if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
                 sendingContext.sendMessage(
-                        new ReportMessage(file.getName(),
+                        new ReportMessage(name,
                                 new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
             }
 

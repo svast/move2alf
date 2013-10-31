@@ -136,7 +136,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
 
         fileInfo.put(Parameters.PARAM_METADATA,props);
-        logger.info("*******************fileInfo=" + fileInfo);
+        logger.info("fileInfo=" + fileInfo.get(Parameters.PARAM_NAME));
         sendMessage(fileInfo);
     }
 
