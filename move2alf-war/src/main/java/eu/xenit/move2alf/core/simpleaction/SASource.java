@@ -37,6 +37,10 @@ public class SASource extends Move2AlfReceivingAction<Object> {
         this.skipContentUpload = Boolean.valueOf(skipContentUpload);
     }
 
+    public void setSkipContentUpload(Boolean skipContentUpload) {
+        this.skipContentUpload = skipContentUpload;
+    }
+
     public static final String PARAM_INPUTPATHS = "inputPaths";
     private List<String> inputPaths;
 
