@@ -211,7 +211,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
 					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 
-                    logger.debug("**************** fileInfo=" + fileInfo);
+                    logger.debug("fileInfo=" + fileInfo.get(PARAM_NAME));
 					sendMessage(fileInfo);
 				}
             }

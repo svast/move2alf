@@ -33,12 +33,12 @@ public class SASource extends Move2AlfReceivingAction<Object> {
         return skipContentUpload;
     }
 
-    public void setSkipContentUpload(Boolean skipContentUpload) {
-        this.skipContentUpload = skipContentUpload;
-    }
-
     public void setSkipContentUpload(String skipContentUpload) {
         this.skipContentUpload = Boolean.valueOf(skipContentUpload);
+    }
+
+    public void setSkipContentUpload(Boolean skipContentUpload) {
+        this.skipContentUpload = skipContentUpload;
     }
 
     public static final String PARAM_INPUTPATHS = "inputPaths";
@@ -74,6 +74,7 @@ public class SASource extends Move2AlfReceivingAction<Object> {
             if (file.isFile()) {
                 FileInfo fileMap = new FileInfo();
                 fileMap.put(Parameters.PARAM_FILE, file);
+                fileMap.put(Parameters.PARAM_NAME, file.getName());
                 fileMap.put(Parameters.PARAM_INPUT_FILE, file);
                 List<File> transformFiles = new ArrayList<File>();
                 transformFiles.add(file);
