@@ -16,6 +16,7 @@ class ListAction extends ActionWithDestination[FileInfo, Boolean]{
     this.path = path
   }
   protected def executeImpl(fileInfo: FileInfo) {
+    logger.debug("fileInfo=" + fileInfo.get(Parameters.PARAM_NAME))
     val newParameterMap: FileInfo = new FileInfo
     newParameterMap.putAll(fileInfo)
     var basePath: String = path
@@ -52,7 +53,7 @@ class ListAction extends ActionWithDestination[FileInfo, Boolean]{
       if(result) {
         fileInfo.put(Parameters.PARAM_STATUS, Parameters.VALUE_OK)
         sendMessage(fileInfo)
-      } else handleError(fileInfo, "This file is not in the repository.")
+      } else {handleError(fileInfo, "This file is not in the repository.")}
     })
   }
 }

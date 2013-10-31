@@ -18,12 +18,12 @@ class DeleteAction extends ActionWithDestination[FileInfo, Boolean] {
   }
 
   private var deleteOption: DeleteOption = null
-  def setDeleteOption(deleteOption: DeleteOption) {
-    this.deleteOption = deleteOption
+
+  def setDeleteOption(deleteOption: String) {
+    this.deleteOption = DeleteOption.valueOf(deleteOption)
   }
 
-
-  protected def executeImpl(fileInfo: FileInfo) {
+   protected def executeImpl(fileInfo: FileInfo) {
     val newParameterMap: FileInfo = new FileInfo
     newParameterMap.putAll(fileInfo)
     var basePath: String = path
