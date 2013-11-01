@@ -1,10 +1,34 @@
-	<fieldset>
+<div class="bs-jobedit">
+
+    <div id="navjob" class="nav nav-tabs">
+      <div class="bavbar-inner">
+    <div class="container" style="width: auto;">
+    <ul class="nav nav-tabs"-->
+        <li class="active"><a href="#general">General</a></li>
+        <li><a href="#input">Input</a></li>
+        <li><a href="#import">Import</a></li>
+        <li><a href="#schedule">Schedule</a></li>
+        <li><a href="#processing">Processing</a></li>
+        <li><a href="#options">Options</a></li>
+        <li><a href="#reporting">Reporting</a></li>
+    </ul>
+    </div>
+    </div>
+    </div>
+
+
+    <div data-spy="scroll" data-target="#navjob" data-offset="200" class="scrollspy-example">
+	<div id="general">
+        <fieldset>
 		<legend>General</legend>
 		<@labeledSingleLineTextInput label="Name" name="name" binding="job.name" attributes="maxlength='${job.jobNameMaxLength}'" />
 
 		<@textArea label="Description" name="description" binding="job.description" attributes="maxlength='${job.jobDescriptionMaxLength}'" />
 
-	</fieldset>
+	    </fieldset>
+    </div>
+
+    <div id="input">
 	<fieldset>
 		<legend>Input source</legend>
 		<script>
@@ -88,8 +112,11 @@
 		<@labeledSingleLineTextInput label="Username" name="cmisUsername" binding="job.cmisUsername"/>
 		<@labeledSingleLineTextInput label="Password" name="cmisPassword" binding="job.cmisPassword"/>
 		</div>
-	</fieldset>
 
+	  </fieldset>
+    </div>
+
+	<div id="import">
 	<fieldset>
 		<legend>Import</legend>
 
@@ -114,7 +141,13 @@
         <@checkboxWithTextBefore binding="job.skipContentUpload" label="Skip content upload" helpText="Makes sense only when the parser sets the content url, e.g. for a CMIS import" />
 
     </fieldset>
+    </div>
+
+	<div id="schedule">
 	<#include "schedule.ftl">
+    </div>
+
+    <div id="processing">
 	<fieldset>
 		<legend>Processing</legend>
 
@@ -141,7 +174,9 @@
 		<@labeledSingleLineTextInput label="Command after" name="commandafter" binding="job.commandAfter" helpText="Execute command after processing." attributes="maxlength='${job.commandMaxLength}'" />
 
 	</fieldset>
+	</div>
 
+	<div id="options">
 	<fieldset>
 		<legend>Options</legend>
 
@@ -200,7 +235,9 @@
 			<@checkboxWithOption binding="job.moveNotLoad" label="Move not loaded files to path" textboxValue=job.notLoadPath attributes="maxlength='${job.pathMaxLength}'" />
 		</@unLabeledInput>
 	</fieldset>
+	</div>
 
+	<div id="reporting">
 	<fieldset>
 		<legend>Error reporting</legend>
 		<@unLabeledInput helpText="Separate multiple e-mail addresses with commas">
@@ -210,6 +247,9 @@
 			<@checkboxWithOption binding="job.sendReport" label="Send load reporting e-mails to" textboxValue=job.emailAddressRep attributes="maxlength='${job.emailMaxLength}'" />
 		</@unLabeledInput>
 	</fieldset>
+	</div>
+    </div>
+</div>
 
 	<input class="btn btn-success" type="submit" value="Save" />
 	<a class="btn btn-inverse" href="<@spring.url relativeUrl="/job/dashboard" />">Cancel</a>
@@ -223,3 +263,4 @@
         }
     </script>
     </#if>
+

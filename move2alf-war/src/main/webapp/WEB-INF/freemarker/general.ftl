@@ -18,6 +18,7 @@
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-twipsy.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-tooltip.js" />"> </script>
 		<script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-popover.js" />"> </script>
+        <script type="text/javascript" src="<@spring.url relativeUrl="/js/bootstrap-scrollspy.js" />"> </script>
 		<script type="text/javascript">
 			var basePath = "<@spring.url relativeUrl="" />";
 		</script>
