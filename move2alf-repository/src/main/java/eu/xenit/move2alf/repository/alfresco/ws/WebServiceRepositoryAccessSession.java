@@ -105,7 +105,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 		host = alfrescoUrl.getHost();
 		port = alfrescoUrl.getPort();
-		webapp = alfrescoUrl.getPath().split("/")[0];
+		webapp = alfrescoUrl.getPath().split("/")[1];
 		logger.debug("Host: " + host);
 		logger.debug("Port: " + port);
 		logger.debug("Path: " + webapp);
