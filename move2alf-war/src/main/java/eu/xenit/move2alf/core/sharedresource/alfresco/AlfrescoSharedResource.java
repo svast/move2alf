@@ -345,9 +345,9 @@ public class AlfrescoSharedResource extends SharedResource {
 
     public void setUrl(String url) {
         if (url.endsWith("/")) {
-            this.url = url + "api/";
+            this.url = url;
         } else {
-            this.url = url + "/api/";
+            this.url = url + "/";
         }
     }
 
