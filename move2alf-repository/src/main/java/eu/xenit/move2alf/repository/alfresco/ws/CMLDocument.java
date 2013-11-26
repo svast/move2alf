@@ -87,7 +87,6 @@ public class CMLDocument {
 			session.processMultiValuedMetadata(doc.contentModelNamespace, doc.multiValueMeta, contentProps);
 		}
 
-
         boolean hasTitle = false;
         boolean hasDescription = false;
         for(NamedValue value:contentProps) {

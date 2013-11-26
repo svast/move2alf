@@ -110,7 +110,6 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             }
         }
 
-<<<<<<< HEAD
 
 	    /*        logger.debug("Setting acls");
         AccessControlListImpl acli = (AccessControlListImpl)headers.get(CamelCMISConstants.CAMEL_CMIS_ACL);
@@ -136,9 +135,6 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
 
         fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
 
-=======
-        fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
->>>>>>> 1) Cleaning: remove deprecated or not used methods and tests.
         fileInfo.put(Parameters.PARAM_METADATA,props);
         logger.info("fileInfo=" + fileInfo.get(Parameters.PARAM_NAME));
         sendMessage(fileInfo);
