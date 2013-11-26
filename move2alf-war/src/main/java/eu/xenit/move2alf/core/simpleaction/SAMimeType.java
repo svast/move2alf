@@ -15,7 +15,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 
 @ClassInfo(classId = "SAMimeType",
             description = "Detects the mimetype of a file and adds it to the metadata")
-public class SAMimeType extends Move2AlfReceivingAction<FileInfo> {
+public class    SAMimeType extends Move2AlfReceivingAction<FileInfo> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SAMimeType.class);
 	private static final Tika tika = new Tika();
