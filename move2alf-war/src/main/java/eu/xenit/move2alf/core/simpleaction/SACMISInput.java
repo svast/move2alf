@@ -180,6 +180,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
                 String uuid = extractUuid(cmisObjectId);
 		File file = null;
+
                 //final File file = new File(tempFolder, cmisName);
 
                 if(!getSkipContentUpload()) {

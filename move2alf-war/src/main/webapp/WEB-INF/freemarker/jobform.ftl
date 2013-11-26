@@ -111,7 +111,8 @@
 
 		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />
 
-        <@checkboxWithTextBefore binding="job.skipContentUpload" label="Skip content upload" helpText="Makes sense only when the parser sets the content url, e.g. for a CMIS import" />
+
+        <@checkboxWithTextBefore binding="job.skipContentUpload" label="Skip content upload" helpText="Makes sense only when the parser sets the content url and mime type" />
 
     </fieldset>
 	<#include "schedule.ftl">

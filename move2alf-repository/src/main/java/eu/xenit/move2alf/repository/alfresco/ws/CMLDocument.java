@@ -77,8 +77,6 @@ public class CMLDocument {
 		// these properties are always present
 		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, doc.name));
 		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,getContentDetails()));
-        contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
-        contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
 
 		if (doc.meta != null) {
 			// Enumeration<String> E = meta.;
@@ -88,6 +86,7 @@ public class CMLDocument {
 		if (doc.multiValueMeta != null) {
 			session.processMultiValuedMetadata(doc.contentModelNamespace, doc.multiValueMeta, contentProps);
 		}
+
 
         boolean hasTitle = false;
         boolean hasDescription = false;
