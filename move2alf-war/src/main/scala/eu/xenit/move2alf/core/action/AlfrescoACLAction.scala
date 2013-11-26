@@ -27,7 +27,6 @@ class AlfrescoACLAction extends ActionWithDestination[BatchACLMessage, Boolean]{
       val newParameterMap = new FileInfo()
       val inputFile = message.batch.get(idx).get(Parameters.PARAM_INPUT_FILE)
       val inputPath = message.batch.get(0).get(Parameters.PARAM_INPUT_PATH)
-      newParameterMap.put(Parameters.PARAM_INPUT_PATH, inputPath)
       newParameterMap.put(Parameters.PARAM_FILE, result.getDocument().file)
       newParameterMap.put(Parameters.PARAM_NAME, result.getDocument().name)
       newParameterMap.put(Parameters.PARAM_STATUS, if (result.getStatus() == UploadResult.VALUE_OK)
