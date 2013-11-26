@@ -179,6 +179,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 in = messageIn.getBody(InputStream.class);
 
                 String uuid = extractUuid(cmisObjectId);
+
 		File file = null;
 
                 //final File file = new File(tempFolder, cmisName);
