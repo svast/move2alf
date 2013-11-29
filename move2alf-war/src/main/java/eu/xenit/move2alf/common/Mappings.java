@@ -82,6 +82,10 @@ public class Mappings {
         mappingNamespaces.put("fred","{http://www.xenit.eu/fred/example/model/0.1}");
         mappingNamespaces.put("demo","{http://www.xenit.eu/model/demo/1.0}");
         mappingNamespaces.put("sharepoint","{http://www.xenit.eu/sharepoint/example/model/0.1}");
+        mappingNamespaces.put("hr","{hr.model}");
+        mappingNamespaces.put("eb","{eb.model}");
+        mappingNamespaces.put("pv","{pv.model}");
+        mappingNamespaces.put("wfl","{wfl.model}");
 
         mappingTypes.put("0x01010B006DBEC9104B358340916826B490EC2063","sharepoint:dublin_core_columns");
     }
