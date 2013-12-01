@@ -22,12 +22,15 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultConsumerTemplate;
+import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.model.RouteDefinition;
 import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisExtensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * SACMISInput
@@ -88,22 +91,26 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 	public String getEndpoint() {
         cmisURL = cmisURL.replace("?","QUESTIONMARK");  // Sharepoint endpoint contains parameters in the url; temporary hide them, otherwise problems parsing the cmis parameters
         if(cmisQuery.isEmpty())
-            return String.format("cmis://%s?username=%s&password=%s&readContent=true&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl", cmisURL, cmisUsername, cmisPassword);
+            return String.format("cmis://%s?username=%s&password=%s&readContent=%s&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl", cmisURL, cmisUsername, cmisPassword,!getSkipContentUpload());
         else
-            return String.format("cmis://%s?username=%s&password=%s&readContent=true&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl&query=%s", cmisURL, cmisUsername, cmisPassword, cmisQuery);
+            return String.format("cmis://%s?username=%s&password=%s&readContent=%s&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl&query=%s", cmisURL, cmisUsername, cmisPassword,!getSkipContentUpload(),cmisQuery);
  	}
 
 	@Override
 	protected void executeImpl(Object message) {
 		final CamelContext camel = new DefaultCamelContext();
         logger.debug("Endpoint=" + getEndpoint());
+        RouteDefinition route = new RouteDefinition();
+        route.from(getEndpoint());
+        route.to(DIRECT_ENDPOINT);
 		try {
-			camel.addRoutes(new RouteBuilder() {
+			/*camel.addRoutes(new RouteBuilder() {
 				@Override
 				public void configure() throws Exception {
 					from(getEndpoint()).to(DIRECT_ENDPOINT);
 				}
-			});
+			});*/
+            ((ModelCamelContext)camel).addRouteDefinition(route);
 			camel.start();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -229,7 +236,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
 		try {
             logger.debug("shutting down");
-			camel.stop();
+			//camel.stop();
+            camel.stopRoute(route.getId(),10, TimeUnit.SECONDS);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Move2AlfException("Camel exception", e);
