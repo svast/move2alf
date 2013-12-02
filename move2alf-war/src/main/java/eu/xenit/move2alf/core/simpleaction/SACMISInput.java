@@ -39,20 +39,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(SACMISInput.class);
+    private static final Logger logger = LoggerFactory.getLogger(SACMISInput.class);
 
-	private static final String DIRECT_ENDPOINT = "direct:input";
-	public static final String PARAM_CMIS_URL = "cmisUrl";
-	public static final String PARAM_CMIS_USERNAME = "cmisUsername";
-	public static final String PARAM_CMIS_PASSWORD = "cmisPassword";
+    private static final String DIRECT_ENDPOINT = "direct:input";
+    public static final String PARAM_CMIS_URL = "cmisUrl";
+    public static final String PARAM_CMIS_USERNAME = "cmisUsername";
+    public static final String PARAM_CMIS_PASSWORD = "cmisPassword";
     public static final String PARAM_CMIS_QUERY = "cmisQuery";
     public static final String PARAM_SKIP_CONTENT_UPLOAD = "skipContentUpload";
 
-	public static final String PARAM_CAMEL_HEADER = "camelHeader";
+    public static final String PARAM_CAMEL_HEADER = "camelHeader";
 
-	private String cmisURL;
-	private String cmisUsername;
-	private String cmisPassword;
+    private String cmisURL;
+    private String cmisUsername;
+    private String cmisPassword;
     private String cmisQuery;
     private Boolean skipContentUpload;
 
@@ -77,33 +77,33 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
     }
 
     public void setCmisUrl(String cmisURL) {
-		this.cmisURL = cmisURL;
-	}
+        this.cmisURL = cmisURL;
+    }
 
-	public void setCmisUsername(final String cmisUsername) {
-		this.cmisUsername = cmisUsername;
-	}
+    public void setCmisUsername(final String cmisUsername) {
+        this.cmisUsername = cmisUsername;
+    }
 
-	public void setCmisPassword(final String cmisPassword) {
-		this.cmisPassword = cmisPassword;
-	}
+    public void setCmisPassword(final String cmisPassword) {
+        this.cmisPassword = cmisPassword;
+    }
 
-	public String getEndpoint() {
+    public String getEndpoint() {
         cmisURL = cmisURL.replace("?","QUESTIONMARK");  // Sharepoint endpoint contains parameters in the url; temporary hide them, otherwise problems parsing the cmis parameters
         if(cmisQuery.isEmpty())
             return String.format("cmis://%s?username=%s&password=%s&readContent=%s&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl", cmisURL, cmisUsername, cmisPassword,!getSkipContentUpload());
         else
             return String.format("cmis://%s?username=%s&password=%s&readContent=%s&objectFactoryClass=org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl&query=%s", cmisURL, cmisUsername, cmisPassword,!getSkipContentUpload(),cmisQuery);
- 	}
+    }
 
-	@Override
-	protected void executeImpl(Object message) {
-		final CamelContext camel = new DefaultCamelContext();
+    @Override
+    protected void executeImpl(Object message) {
+        final CamelContext camel = new DefaultCamelContext();
         logger.debug("Endpoint=" + getEndpoint());
         RouteDefinition route = new RouteDefinition();
         route.from(getEndpoint());
         route.to(DIRECT_ENDPOINT);
-		try {
+        try {
 			/*camel.addRoutes(new RouteBuilder() {
 				@Override
 				public void configure() throws Exception {
@@ -111,46 +111,54 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 				}
 			});*/
             ((ModelCamelContext)camel).addRouteDefinition(route);
-			camel.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new Move2AlfException("Camel exception", e);
-		}
+            camel.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Move2AlfException("Camel exception", e);
+        }
 
-		final ConsumerTemplate template = new DefaultConsumerTemplate(camel);
+        final ConsumerTemplate template = new DefaultConsumerTemplate(camel);
         template.setMaximumCacheSize(100);
-		try {
-			template.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new Move2AlfException("Camel exception", e);
-		}
+        try {
+            template.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Move2AlfException("Camel exception", e);
+        }
 
         logger.debug("maximum cache size=" + template.getMaximumCacheSize() + " and current=" + template.getCurrentCacheSize());
-		// Create temporary folder
-		final File tempFolder = Files.createTempDir();
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Using temporary folder: %s", tempFolder.toString()));
-		}
+        // Create temporary folder
+        final File tempFolder = Files.createTempDir();
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Using temporary folder: %s", tempFolder.toString()));
+        }
 
-		boolean done = false;
-		boolean firstLoop = true;
-		String first = null;
-		while (!done) {
-			Exchange exchange = template.receive(DIRECT_ENDPOINT,5000);
+        boolean done = false;
+        boolean firstLoop = true;
+        String first = null;
+        int retries = 0;
+        while (!done) {
+            Exchange exchange = template.receive(DIRECT_ENDPOINT,5000);
             if(exchange==null) {
-                logger.debug("exchange=null, trying again");
-                //done=true;
-                continue;
+                if(retries<3) {
+                    logger.debug("exchange=null, trying again");
+                    retries++;
+                    continue;
+                }   else {
+                    logger.error("Too many retries with exchange=null, exiting");
+                    done=true;
+                    break;
+                }
             }
+
             final Message messageIn = exchange.getIn();
 
-			// CMIS specific
-			final String folderPath = (String) messageIn.getHeader(CamelCMISConstants.CMIS_FOLDER_PATH);
-			final String cmisName = (String) messageIn.getHeader("cmis:name");
-			final String cmisPath = (String) messageIn.getHeader("cmis:path");
+            // CMIS specific
+            final String folderPath = (String) messageIn.getHeader(CamelCMISConstants.CMIS_FOLDER_PATH);
+            final String cmisName = (String) messageIn.getHeader("cmis:name");
+            final String cmisPath = (String) messageIn.getHeader("cmis:path");
             final String cmisObjectId = (String) messageIn.getHeader("cmis:objectId");
-			logger.debug(String.format("folderPath: %s, cmisName: %s, cmisPath: %s", folderPath, cmisName, cmisPath));
+            logger.debug(String.format("folderPath: %s, cmisName: %s, cmisPath: %s", folderPath, cmisName, cmisPath));
 
 			/*// log all headers
 			for (Map.Entry<String, Object> header : messageIn.getHeaders().entrySet()) {
@@ -162,13 +170,13 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 				}
 			}*/
 
-			final boolean isFile = (cmisPath == null);
-			final String path = isFile ? folderPath + "/" + cmisName : cmisPath;
+            final boolean isFile = (cmisPath == null);
+            final String path = isFile ? folderPath + "/" + cmisName : cmisPath;
 
-			if (first == null) {
+            if (first == null) {
 //				logger.debug("First file encountered: " + path);
-				first = path;
-			}
+                first = path;
+            }
 
             if (path.equals(first) && !firstLoop) {
                 logger.debug("done=true, will stop, got again to first");
@@ -177,8 +185,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 break;
             }
 
-			if (isFile) {
-				boolean failed = false;
+            if (isFile) {
+                boolean failed = false;
 
 //				logger.debug("This is a file, writing to filesystem");
                 final InputStream in;
@@ -187,7 +195,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
                 String uuid = extractUuid(cmisObjectId);
 
-		File file = null;
+                File file = null;
                 //final File file = new File(tempFolder, cmisName);
 
                 if(!getSkipContentUpload()) {
@@ -218,31 +226,31 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                     }
                 }
 
-				if (!failed) {
+                if (!failed) {
 
-					final FileInfo fileInfo = new FileInfo();
-					fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
-					fileInfo.put(PARAM_FILE, file);
+                    final FileInfo fileInfo = new FileInfo();
+                    fileInfo.put(PARAM_RELATIVE_PATH, folderPath);
+                    fileInfo.put(PARAM_FILE, file);
                     fileInfo.put(PARAM_NAME, cmisName);
 
-					fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
+                    fileInfo.put(PARAM_CAMEL_HEADER, messageIn.getHeaders());
 
-					sendMessage(fileInfo);
-				}
+                    sendMessage(fileInfo);
+                }
             }
-			firstLoop = false;
+            firstLoop = false;
             template.doneUoW(exchange);
-		}
+        }
 
-		try {
+        try {
             logger.debug("shutting down");
-			//camel.stop();
+            //camel.stop();
             camel.stopRoute(route.getId(),10, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new Move2AlfException("Camel exception", e);
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Move2AlfException("Camel exception", e);
+        }
+    }
 
     private String extractUuid(String cmisObjectId) {
         // for Alfresco, ids contain the space e.g. workspace/SpacesStore; remove it
