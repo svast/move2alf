@@ -1,16 +1,10 @@
 package eu.xenit.move2alf.core.simpleaction;
 
-import static eu.xenit.move2alf.common.Parameters.*;
-
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.action.CMISMetadataAction;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
-import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
@@ -18,19 +12,21 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultConsumerTemplate;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisExtensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static eu.xenit.move2alf.common.Parameters.*;
 
 /**
  * SACMISInput
@@ -58,10 +54,6 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
     public Boolean getSkipContentUpload() {
         return skipContentUpload;
-    }
-
-    public void setSkipContentUpload(Boolean skipContentUpload) {
-        this.skipContentUpload = skipContentUpload;
     }
 
     public void setSkipContentUpload(String skipContentUpload) {
