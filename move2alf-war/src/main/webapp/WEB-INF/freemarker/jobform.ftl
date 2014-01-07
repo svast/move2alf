@@ -125,7 +125,7 @@
         </div>
 
         <div id="importOptions-CMIS" class="importOptions">
-        <@labeledSingleLineTextInput label="CMIS query" name="cmisQuery" binding="job.cmisQuery" />
+        <@textArea label="CMIS query" name="cmisQuery" binding="job.cmisQuery" attributes="maxlength='${job.cmisQueryMaxLength}'" />
         </div>
 
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>

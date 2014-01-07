@@ -1,16 +1,10 @@
 package eu.xenit.move2alf.core.simpleaction;
 
-import static eu.xenit.move2alf.common.Parameters.*;
-
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.action.CMISMetadataAction;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
-import eu.xenit.move2alf.core.action.Move2AlfStartAction;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
@@ -18,19 +12,22 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultConsumerTemplate;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.chemistry.opencmis.commons.impl.jaxb.CmisExtensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static eu.xenit.move2alf.common.Parameters.*;
 
 /**
  * SACMISInput
@@ -103,6 +100,10 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         RouteDefinition route = new RouteDefinition();
         route.from(getEndpoint());
         route.to(DIRECT_ENDPOINT);
+
+        camel.getShutdownStrategy().setShutdownNowOnTimeout(true);
+        camel.getShutdownStrategy().setTimeout(600);
+
         try {
 			/*camel.addRoutes(new RouteBuilder() {
 				@Override
@@ -140,7 +141,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         while (!done) {
             Exchange exchange = template.receive(DIRECT_ENDPOINT,5000);
             if(exchange==null) {
-                if(retries<3) {
+  /*              if(retries<10) {
                     logger.debug("exchange=null, trying again");
                     retries++;
                     continue;
@@ -148,19 +149,20 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                     logger.error("Too many retries with exchange=null, exiting");
                     done=true;
                     break;
-                }
+                }*/
+                continue;
             }
 
             final Message messageIn = exchange.getIn();
 
             // CMIS specific
             final String folderPath = (String) messageIn.getHeader(CamelCMISConstants.CMIS_FOLDER_PATH);
-            final String cmisName = (String) messageIn.getHeader("cmis:name");
-            final String cmisPath = (String) messageIn.getHeader("cmis:path");
-            final String cmisObjectId = (String) messageIn.getHeader("cmis:objectId");
+            String cmisName = (String) messageIn.getHeader("cmis:name");
+            String cmisPath = (String) messageIn.getHeader("cmis:path");
+            String cmisObjectId = (String) messageIn.getHeader("cmis:objectId");
             logger.debug(String.format("folderPath: %s, cmisName: %s, cmisPath: %s", folderPath, cmisName, cmisPath));
 
-			/*// log all headers
+			// log all headers
 			for (Map.Entry<String, Object> header : messageIn.getHeaders().entrySet()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Message ID: '%s' - Header name: '%s' value: '%s'",
@@ -168,7 +170,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                             header.getKey(),
                             (header.getValue() != null) ? header.getValue().toString() : "null"));
 				}
-			}*/
+			}
 
             final boolean isFile = (cmisPath == null);
             final String path = isFile ? folderPath + "/" + cmisName : cmisPath;
@@ -178,8 +180,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
                 first = path;
             }
 
-            if (path.equals(first) && !firstLoop) {
-                logger.debug("done=true, will stop, got again to first");
+            if (path.equals(first) && !(firstLoop)) {
+                logger.info("done=true, will stop, got again to first");
                 done = true;
                 template.doneUoW(exchange);
                 break;
@@ -243,9 +245,9 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         }
 
         try {
-            logger.debug("shutting down");
+            logger.info("shutting down");
             //camel.stop();
-            camel.stopRoute(route.getId(),10, TimeUnit.SECONDS);
+            camel.stopRoute(route.getId(),300, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             throw new Move2AlfException("Camel exception", e);

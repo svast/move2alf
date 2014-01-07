@@ -16,7 +16,7 @@
     	<map name="parameters" table="configuredActionParameter" cascade="all" lazy="false">
     		<key column="configuredActionId"/>
     		<map-key column="name" type="string"/>
-    		<element column="value" type="string"/>
+    		<element column="value" type="text"/>
     	</map>
 
         <map name="receivers" table="sender_receiver" inverse="false" lazy="true" cascade="all">

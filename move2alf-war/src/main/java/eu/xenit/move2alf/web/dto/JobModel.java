@@ -17,9 +17,11 @@ import java.util.List;
 public class JobModel {
 	static private final int CONST_50 = 50;
 	static private final int CONST_255 = 255;
+    static private final int CONST_5000 = 5000;
 
 	private final int jobNameMaxLength = CONST_50;
 	private final int jobDescriptionMaxLength = CONST_255;
+    private final int cmisQueryMaxLength = CONST_5000;
 	private final int pathMaxLength = CONST_255;
 	private final int extensionMaxLength = CONST_255;
 	private final int commandMaxLength = CONST_255;
@@ -54,6 +56,8 @@ public class JobModel {
     private String cmisURL;
     private String cmisUsername;
     private String cmisPassword;
+
+    @Size(min=0, max=cmisQueryMaxLength, message="Max length of cmis query is " + cmisQueryMaxLength)
     private String cmisQuery;
 
 	@CSVsize(max=pathMaxLength, message="Max length of the concatenated input paths is " + pathMaxLength)
@@ -485,6 +489,10 @@ public class JobModel {
 	public int getJobDescriptionMaxLength() {
 		return jobDescriptionMaxLength;
 	}
+
+    public int getCmisQueryMaxLength() {
+        return cmisQueryMaxLength;
+    }
 
 	public int getPathMaxLength() {
 		return pathMaxLength;

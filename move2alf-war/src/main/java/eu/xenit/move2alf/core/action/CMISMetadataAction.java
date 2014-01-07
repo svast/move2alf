@@ -9,6 +9,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import org.apache.camel.component.cmis.CamelCMISConstants;
 import org.apache.chemistry.opencmis.client.runtime.PropertyImpl;
 import org.apache.chemistry.opencmis.commons.data.Ace;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlListImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,8 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
 
     @Override
     protected void executeImpl(FileInfo fileInfo) {
-        Map<String, Object> headers = (Map)fileInfo.get(SACMISInput.PARAM_CAMEL_HEADER);
+        HashMap<String, Object> headers = new HashMap();
+        headers.putAll((Map)(fileInfo.get(SACMISInput.PARAM_CAMEL_HEADER)));
         String path = ((String)fileInfo.get(Parameters.PARAM_RELATIVE_PATH));
         if(!path.endsWith("/"))
             path = path.concat("/");
@@ -66,46 +68,47 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         HashMap props = new HashMap();
         String contentStreamProp = "", mimeTypeProp = "", contentLengthProp = "", encodingProp = "", localeProp = "";
 
-        if(headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES)!=null) {
-            Collection<PropertyImpl> properties = (Collection<PropertyImpl>)headers.get(CamelCMISConstants.CAMEL_CMIS_PROPERTIES);
-            for(PropertyImpl property : properties) {
-                String val = property.getValueAsString();
-                if(val==null)
-                    continue;
-                if(property.getValue() instanceof Calendar) {
-                    val = Util.ISO8601format(((Calendar)property.getValue()).getTime());
-                } else {  // for creator and modifier remove domain name (present in e.g. sharepoint)
-                    val = normalize(val);
-                }
-                // set auditable properties
-                if(isAuditable(property.getId())) {
-                    props.put(Mappings.mappingAuditables.get(property.getId()),val);
-                }
-                // set parameters which are put directly in fileInfo
-                else if("cm:description".equals(property.getId())) {
-                    fileInfo.put(Parameters.PARAM_DESCRIPTION,val);
-                } else if("cmis:contentStreamMimeType".equals(property.getId())) {
-                    fileInfo.put(Parameters.PARAM_MIMETYPE,val);
-                    mimeTypeProp = val;
-                } else if("cmis:contentStreamId".equals(property.getId())) {
-                    contentStreamProp = val;
-                } else if("cmis:contentStreamLength".equals(property.getId())) {
-                    contentLengthProp = val;
-                }
-                // set the rest of parameters
-                else if(!(property.getId().startsWith("cmis:")) &&
-                          !(property.getLocalName().contains("nodeRef")) &&
-                          valid(val)) {
-                    // add the property with the namespace, if namespace is present
-                    if(property.getId().indexOf(":")!=-1) {
-                        String ns = property.getId().substring(0,property.getId().indexOf(":"));
-                        String fullns = Mappings.mappingNamespaces.get(ns);
-                        logger.debug("fullns for " + ns + " is " + fullns);
-                        if(fullns !=null)
-                            props.put(fullns+property.getLocalName(),val);
-                     } else {
-                        props.put(property.getLocalName(),val);
-                    }
+        for(String property : headers.keySet()) {
+            Object val = headers.get(property);
+            if(val==null)
+                continue;
+            if(val instanceof Calendar) {
+                val = Util.ISO8601format(((Calendar)val).getTime());
+            } else {  // for creator and modifier remove domain name (present in e.g. sharepoint)
+                val = normalize(val.toString());
+            }
+            // set auditable properties
+            if(isAuditable(property)) {
+                props.put(Mappings.mappingAuditables.get(property),val);
+            }
+            // set parameters which are put directly in fileInfo
+            else if("cm:description".equals(property)) {
+                fileInfo.put(Parameters.PARAM_DESCRIPTION,val);
+            } else if("cmis:contentStreamMimeType".equals(property)) {
+                fileInfo.put(Parameters.PARAM_MIMETYPE,val);
+                mimeTypeProp = (String)val;
+            } else if("cmis:contentStreamId".equals(property)) {
+                contentStreamProp = (String)val;
+            } else if("cmis:contentStreamLength".equals(property)) {
+                contentLengthProp = (String)val;
+            }
+            // set the rest of parameters
+            else if(!(property.startsWith("cmis:")) &&
+                    !(property.contains("nodeRef")) &&
+                    !(property.contains("camel")) &&
+                    !(property.contains("Camel")) &&
+                    !(property.contains("breadcrumb")) &&
+                    valid((String)val)) {
+                // add the property with the namespace, if namespace is present
+                if(property.indexOf(":")!=-1) {
+                    String ns = property.substring(0,property.indexOf(":"));
+                    String localProperty = property.substring(property.indexOf(":")+1);
+                    String fullns = Mappings.mappingNamespaces.get(ns);
+                    logger.debug("fullns for " + ns + " is " + fullns + " for property " + localProperty);
+                    if(fullns !=null)
+                        props.put(fullns+localProperty,val);
+                } else {
+                    props.put(property,val);
                 }
             }
         }
@@ -135,7 +138,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
 
         fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
         fileInfo.put(Parameters.PARAM_METADATA,props);
-        logger.info("fileInfo=" + fileInfo.get(Parameters.PARAM_NAME));
+        logger.info("fileInfo=" + fileInfo);
         sendMessage(fileInfo);
     }
 
