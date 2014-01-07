@@ -57,10 +57,6 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         return skipContentUpload;
     }
 
-    public void setSkipContentUpload(Boolean skipContentUpload) {
-        this.skipContentUpload = skipContentUpload;
-    }
-
     public void setSkipContentUpload(String skipContentUpload) {
         this.skipContentUpload = Boolean.valueOf(skipContentUpload);
     }
