@@ -98,7 +98,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         route.to(DIRECT_ENDPOINT);
 
         camel.getShutdownStrategy().setShutdownNowOnTimeout(true);
-        camel.getShutdownStrategy().setTimeout(600);
+        camel.getShutdownStrategy().setTimeout(6000);
 
         try {
 			/*camel.addRoutes(new RouteBuilder() {
@@ -135,7 +135,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         String first = null;
         int retries = 0;
         while (!done) {
-            Exchange exchange = template.receive(DIRECT_ENDPOINT,5000);
+            Exchange exchange = template.receive(DIRECT_ENDPOINT);
             if(exchange==null) {
   /*              if(retries<10) {
                     logger.debug("exchange=null, trying again");
