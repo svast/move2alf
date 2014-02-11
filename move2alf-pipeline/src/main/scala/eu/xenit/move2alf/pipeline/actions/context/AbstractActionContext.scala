@@ -17,7 +17,7 @@ import akka.routing.Broadcast
  * Date: 3/5/13
  * Time: 2:54 PM
  */
-abstract class AbstractActionContext(val id: String, protected val receivers: Map[String, ActorRef])(implicit protected val jobContext: JobContext, implicit val context: ActorContext) extends LogHelper {
+abstract class AbstractActionContext(val id: String, protected val receivers: Set[String], getActorRef: String => ActorRef)(implicit protected val jobContext: JobContext, implicit val context: ActorContext) extends LogHelper {
 
   val action: Any
 
@@ -64,7 +64,11 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
   }
 
   def sendStartMessage(){
-    receivers foreach { case (_,receiver) => receiver ! Broadcast(Start)}
+    receivers foreach { receiver => getActorRef(receiver) ! Broadcast(Start)}
+  }
+
+  def broadCast(message: AnyRef){
+    receivers foreach { receiver => getActorRef(receiver) ! Broadcast(message)}
   }
 
   def broadCastEOC(){
@@ -73,8 +77,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
       case _ =>
     }
     logger.debug(context.self+"Sending EOC message")
-    receivers foreach { case (_,receiver) => receiver ! Broadcast(EOC) }
-
+    broadCast(EOC)
   }
 
   /**
@@ -96,12 +99,16 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Ma
   }
 
 
+  //only used to track if a message has been sent
+  var messageSent = false
+
   final def sendMessage(message: AnyRef, receiver: String = "default"){
     if (receivers.contains(receiver)){
       taskKey match {
-        case None => receivers.get(receiver).get ! M2AMessage(message)
-        case Some(key) => receivers.get(receiver).get ! TaskMessage(key, message, replyTo.get)
+        case None => getActorRef(receiver) ! M2AMessage(message)
+        case Some(key) => getActorRef(receiver) ! TaskMessage(key, message, replyTo.get)
       }
+      messageSent == true
     } else {
       logger.error("Actor: "+context.self+" has no receiver called "+receiver);
     }

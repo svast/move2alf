@@ -11,11 +11,11 @@ import eu.xenit.move2alf.pipeline.actions.{Action, ActionFactory}
   * Time: 10:39 AM
   * To change this template use File | Settings | File Templates.
   */
-class EndActionContextFactory(id: String, actionFactory: ActionFactory, receiver: (String, ActorRef))(implicit jobContext: JobContext) extends AbstractActionContextFactory(id, actionFactory) {
+class EndActionContextFactory(id: String, actionFactory: ActionFactory, receivers: Set[String], getActorRef: String => ActorRef)(implicit jobContext: JobContext) extends AbstractActionContextFactory(id, actionFactory) {
 
    protected def constructActionContext(basicAction: Action)(implicit context: ActorContext) = {
 //     logger.debug("Constructing EndAction")
-     val actionContext = new AbstractActionContext(id, Map(receiver)){
+     val actionContext = new AbstractActionContext(id, receivers, getActorRef){
        val action = basicAction
      }
      actionContext

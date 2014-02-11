@@ -1,7 +1,7 @@
 package eu.xenit.move2alf.pipeline.actors
 
 import eu.xenit.move2alf.pipeline.actions.ActionConfig
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.collection.JavaConversions._
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
@@ -18,50 +18,59 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
   def generateActors(config: ActionConfig): (Map[String, ActorRef], Int) = {
     val actorRefs: mutable.Map[String, ActorRef] = new mutable.HashMap[String, ActorRef]()
-    val countedActionConfigs = new mutable.HashMap[ActionConfig, Int]()
+    val countedActionConfigs = new mutable.HashMap[ActionConfig, (Int, Int)]()
     var nmbEndActions = 0
 
-    var counted = new mutable.HashSet[ActionConfig]()
-    def countSenders(config: ActionConfig) {
-      config.getReceivers() foreach {
+    countedActionConfigs.update(config, (1,0))
+    val nonEndActions = new mutable.HashSet[ActionConfig]()
+    val counted = new mutable.HashSet[ActionConfig]()
+
+    def countSenders(config:ActionConfig, loopList: immutable.Set[ActionConfig]) {
+      counted += config
+      config.getReceivers foreach {
         case (_, ac) => {
-          val nmbSenders = countedActionConfigs.getOrElseUpdate(ac, 0)
-          countedActionConfigs.update(ac, nmbSenders + config.getNmbOfWorkers)
-          if (!counted.contains(ac)) countSenders(ac)
-        }
-      }
-      counted.+=(config)
-    }
-    countSenders(config)
+          if(!countedActionConfigs.contains(ac)){
+            countedActionConfigs.update(ac, (0,0))
+          }
 
-    def makeActors(config: ActionConfig) {
-      config.getReceivers() foreach {
-        case (_, ac) => {
-          makeActors(ac)
-        }
-      }
-      if(!actorRefs.contains(config.getId)){
-        val nmbSenders = countedActionConfigs.get(config).getOrElse(0)
-
-        def receiversToMap = {
-          config.getReceivers map {
-            case (key, receiver) => (key, actorRefs.get(receiver.getId).get)
-          } toMap
-        }
-
-        val actionContextFactory: AbstractActionContextFactory = {
-         if (config.getReceivers.isEmpty) {
-            nmbEndActions += config.getNmbOfWorkers
-            new EndActionContextFactory(config.getId, config.getActionFactory, ("default", jobActor))
+          val (senders, loopSenders) = countedActionConfigs.get(ac).get
+          if(loopList.contains(ac)){
+            countedActionConfigs.update(ac, (senders, loopSenders + config.getNmbOfWorkers))
           } else {
-            new BasicActionContextFactory(config.getId, config.getActionFactory, receiversToMap)
+            nonEndActions += config
+            countedActionConfigs.update(ac, (senders + config.getNmbOfWorkers, loopSenders))
+            if(!counted.contains(ac)) countSenders(ac, loopList + config)
           }
         }
-        val factory = new ActionActorFactory(config.getId, actionContextFactory, if(nmbSenders==0) 1 else nmbSenders, config.getNmbOfWorkers, config.getDispatcher)
-        actorRefs.put(config.getId, factory.createActor)
       }
     }
-    makeActors(config)
+
+    countSenders(config, new immutable.HashSet[ActionConfig]())
+
+    counted foreach { config =>
+      val nmbSenders = countedActionConfigs.get(config).get
+      val jobActorId = "JOBACTOR" + jobContext.jobId
+
+      def getActorRefForId(id: String) = {
+        if(id == jobActorId){
+          jobActor
+        } else {
+          actorRefs.get(config.getReceivers.get(id).getId).get
+        }
+      }
+
+      val actionContextFactory = {
+        if(nonEndActions.contains(config)){
+          new BasicActionContextFactory(config.getId, config.getActionFactory, config.getReceivers.keySet().toSet, getActorRefForId)
+        } else {
+          nmbEndActions += config.getNmbOfWorkers
+          new EndActionContextFactory(config.getId, config.getActionFactory, config.getReceivers.keySet().+(jobActorId).toSet, getActorRefForId)
+        }
+      }
+
+      val factory = new ActionActorFactory(config.getId, actionContextFactory, nmbSenders._1, nmbSenders._2, config.getNmbOfWorkers, config.getDispatcher)
+      actorRefs.put(config.getId, factory.createActor)
+    }
 
     return (actorRefs.toMap, nmbEndActions)
 

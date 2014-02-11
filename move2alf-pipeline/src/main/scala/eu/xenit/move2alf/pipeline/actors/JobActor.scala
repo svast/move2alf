@@ -1,14 +1,9 @@
 package eu.xenit.move2alf.pipeline.actors
 
 import akka.actor.{ActorRef, Actor, FSM}
-import scala.collection.immutable.HashMap
 import eu.xenit.move2alf.pipeline._
-import akka.routing.Broadcast
-import eu.xenit.move2alf.pipeline.actions.{JobConfig, ActionConfig}
-import scala.collection.mutable
-import scala.collection.JavaConversions._
+import eu.xenit.move2alf.pipeline.actions.JobConfig
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actors.CycleData
 import akka.routing.Broadcast
 
 

@@ -9,10 +9,10 @@ import eu.xenit.move2alf.pipeline.actions.{Action, ActionFactory, HasStateContex
  * Date: 4/30/13
  * Time: 9:55 AM
  */
-class BasicActionContextFactory(id: String, actionFactory: ActionFactory, receivers: Map[String, ActorRef])(implicit jobContext: JobContext) extends AbstractActionContextFactory(id, actionFactory){
+class BasicActionContextFactory(id: String, actionFactory: ActionFactory, receivers: Set[String], getActorRef: String => ActorRef)(implicit jobContext: JobContext) extends AbstractActionContextFactory(id, actionFactory){
 
   protected def constructActionContext(basicAction: Action)(implicit context: ActorContext) = {
-    val actionContext = new AbstractActionContext(id, receivers){
+    val actionContext = new AbstractActionContext(id, receivers, getActorRef){
         val action = basicAction
      }
     addSendingContext(basicAction, actionContext)
