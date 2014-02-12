@@ -129,4 +129,19 @@ class M2AActorTest {
     })
   }
 
+  @Test
+  def testNegotiateToFlushToDeath {
+    val testFSM= TestFSMRef(new M2AActor(actionContextFactory, 2,3))
+    assert(testFSM.stateName==Death)
+    testFSM ! Start
+    testFSM ! EOC
+    testFSM ! EOC
+    (1 to 3).foreach(ignored => testFSM ! Negotiate(Seq(testFSM)))
+    assert(testFSM.stateName == Flushing)
+    (1 to 3).foreach(ignored => testFSM ! Flush(Seq(testFSM)))
+    assert(testFSM.stateName == NearDeath)
+    (1 to 3).foreach(ignored => testFSM ! ReadyToDie)
+    assert(testFSM.stateName == Death)
+  }
+
 }

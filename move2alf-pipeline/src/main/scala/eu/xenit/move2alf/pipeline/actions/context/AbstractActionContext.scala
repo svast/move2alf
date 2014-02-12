@@ -71,13 +71,11 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
     receivers foreach { receiver => getActorRef(receiver) ! Broadcast(message)}
   }
 
-  def broadCastEOC(){
+  def flush(){
     action match {
       case a: EOCAware => a.beforeSendEOC()
       case _ =>
     }
-    logger.debug(context.self+"Sending EOC message")
-    broadCast(EOC)
   }
 
   /**
