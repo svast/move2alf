@@ -46,7 +46,7 @@ class M2AActorTest {
 
   @Test
   def testAliveTransition {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 3, 0))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 3, 0, actionId => 0))
     assert(testFSM.stateName==Death)
     testFSM ! Start
     assert(testFSM.stateName==Alive)
@@ -60,7 +60,7 @@ class M2AActorTest {
 
   @Test
   def testNegotiatingTransition {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 1))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 1, actionId => 0))
     assert(testFSM.stateName==Death)
     testFSM ! Start
     assert(testFSM.stateName==Alive)
@@ -72,7 +72,7 @@ class M2AActorTest {
 
   @Test
   def testRenegotiateReply {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 1))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 1, actionId => 0))
     val testRef = TestActorRef[TestActor]
     assert(testFSM.stateName==Death)
     testFSM ! Start
@@ -93,7 +93,7 @@ class M2AActorTest {
 
   @Test
   def testAliveForwardNegotiate {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 2))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 2, actionId => 0))
     val testRef = TestActorRef[TestActor]
     assert(testFSM.stateName==Death)
     testFSM ! Start
@@ -111,7 +111,7 @@ class M2AActorTest {
 
   @Test
   def testRenegotiateSend {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 3, 2))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 3, 2, actionId => 0))
     val testRef = TestActorRef[TestActor]
     assert(testFSM.stateName==Death)
     testFSM ! Start
@@ -131,7 +131,7 @@ class M2AActorTest {
 
   @Test
   def testNegotiateToFlushToDeath {
-    val testFSM= TestFSMRef(new M2AActor(actionContextFactory, 2,3))
+    val testFSM= TestFSMRef(new M2AActor(actionContextFactory, 2,3, actionId => 0))
     assert(testFSM.stateName==Death)
     testFSM ! Start
     testFSM ! EOC

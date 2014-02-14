@@ -69,7 +69,7 @@ case class AliveData(nmbOfEOC: Int, nmbOfReadyToDie: Int, counter: Int, negotiat
  * Time: 10:05 AM
  * To change this template use File | Settings | File Templates.
  */
-class M2AActor(protected val factory: AbstractActionContextFactory, protected val nmbOfNonLoopedSenders: Int, protected val nmbOfLoopedSenders: Int) extends Actor with FSM[ActorState, ActorData] with LogHelper{
+class M2AActor(protected val factory: AbstractActionContextFactory, protected val nmbOfNonLoopedSenders: Int, protected val nmbOfLoopedSenders: Int, val actionIdToNumberOfSenders: String => Int) extends Actor with FSM[ActorState, ActorData] with LogHelper{
 
 //  logger.debug("Creating actor: "+context.self+" with number of senders: "+nmbOfSenders)
   private val action = factory.createActionContext(context)

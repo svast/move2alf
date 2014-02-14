@@ -5,7 +5,7 @@ import scala.collection.{immutable, mutable}
 import scala.collection.JavaConversions._
 import akka.actor.{ActorContext, ActorRef}
 import eu.xenit.move2alf.pipeline.state.JobContext
-import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContextFactory, EndActionContextFactory, BasicActionContextFactory}
+import eu.xenit.move2alf.pipeline.actions.context.{EndActionContextFactory, BasicActionContextFactory}
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,10 +18,10 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
   def generateActors(config: ActionConfig): (Map[String, ActorRef], Int) = {
     val actorRefs: mutable.Map[String, ActorRef] = new mutable.HashMap[String, ActorRef]()
-    val countedActionConfigs = new mutable.HashMap[ActionConfig, (Int, Int)]()
+    val countedActionConfigs = new mutable.HashMap[ActionConfig, (Int, Int, mutable.Map[String, Int])]()
     var nmbEndActions = 0
 
-    countedActionConfigs.update(config, (1,0))
+    countedActionConfigs.update(config, (1,0, new mutable.HashMap[String, Int]()))
     val nonEndActions = new mutable.HashSet[ActionConfig]()
     val counted = new mutable.HashSet[ActionConfig]()
 
@@ -30,16 +30,21 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
       config.getReceivers foreach {
         case (_, ac) => {
           if(!countedActionConfigs.contains(ac)){
-            countedActionConfigs.update(ac, (0,0))
+            countedActionConfigs.update(ac, (0,0,new mutable.HashMap[String, Int]))
           }
 
-          val (senders, loopSenders) = countedActionConfigs.get(ac).get
+          val (senders, loopedSenders, map) = countedActionConfigs.get(ac).get
           if(loopList.contains(ac)){
-            countedActionConfigs.update(ac, (senders, loopSenders + config.getNmbOfWorkers))
+            loopList.foreach(sender => {
+              val map = countedActionConfigs.get(ac).get._3
+              val count = map.get(sender.getId).getOrElse(0)
+              map.update(sender.getId, count+config.getNmbOfWorkers)
+            })
+            if(!counted.contains(config)) countedActionConfigs.update(ac, (senders, loopedSenders+config.getNmbOfWorkers, map))
           } else {
-            nonEndActions += config
-            countedActionConfigs.update(ac, (senders + config.getNmbOfWorkers, loopSenders))
-            if(!counted.contains(ac)) countSenders(ac, loopList + config)
+            countedActionConfigs.update(ac, (senders + config.getNmbOfWorkers,loopedSenders, map))
+            nonEndActions+=config
+            countSenders(ac, loopList + config)
           }
         }
       }
@@ -68,7 +73,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
         }
       }
 
-      val factory = new ActionActorFactory(config.getId, actionContextFactory, nmbSenders._1, nmbSenders._2, config.getNmbOfWorkers, config.getDispatcher)
+      val factory = new ActionActorFactory(config.getId, actionContextFactory, nmbSenders._1, nmbSenders._2, actionId => countedActionConfigs.get(config).get._3.get(actionId).getOrElse(0), config.getNmbOfWorkers, config.getDispatcher)
       actorRefs.put(config.getId, factory.createActor)
     }
 
