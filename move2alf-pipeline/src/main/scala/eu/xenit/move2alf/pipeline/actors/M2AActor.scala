@@ -11,39 +11,6 @@ import scala.Some
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.ReplyMessage
 
-class MultiDimensionalMap[K, V] {
-  var value: V = _
-  val map: mutable.Map[K, MultiDimensionalMap[K,V]] = new mutable.HashMap[K,MultiDimensionalMap[K,V]]()
-
-  def putValue(keys: Seq[K], value: V){
-    if(keys.size == 0){
-      this.value = value
-    } else {
-      map.get(keys.head).getOrElse({
-        val multiMap =  new MultiDimensionalMap[K,V]
-        map.put(keys.head, multiMap)
-        multiMap
-      }).putValue(keys.tail, value)
-    }
-  }
-
-  def getValue(keys: Seq[K]): Option[V] = {
-    if(keys.size == 0){
-      Some(this.value)
-    } else {
-      if(map.contains(keys.head)){
-        map.get(keys.head).get.getValue(keys.tail)
-      } else {
-        None
-      }
-    }
-  }
-
-  def getValue(key: K): V = {
-    this.value
-  }
-}
-
 sealed trait ActorState
 case object Death extends ActorState
 case object Alive extends ActorState
@@ -52,14 +19,14 @@ case object Flushing extends ActorState
 case object NearDeath extends ActorState
 
 sealed trait ActorMessage
-case class Negotiate(actors: Seq[ActorRef]) extends ActorMessage
-case class Flush(actors: Seq[ActorRef]) extends ActorMessage
+case class Negotiate(actors: Seq[(String, ActorRef)]) extends ActorMessage
+case class Flush(actors: Seq[(String, ActorRef)]) extends ActorMessage
 case object ReadyToDie extends ActorMessage
 case object BackAlive extends ActorMessage
 
 sealed trait ActorData
 case object Empty extends ActorData
-case class AliveData(nmbOfEOC: Int, nmbOfReadyToDie: Int, counter: Int, negotiateCounters: MultiDimensionalMap[ActorRef, Int], flushCounters: MultiDimensionalMap[ActorRef, Int]) extends ActorData
+case class AliveData(nmbOfEOC: Int, nmbOfReadyToDie: Int, counter: Int, negotiateCounters: Map[Seq[(String,ActorRef)], Int], flushCounters: Map[Seq[(String,ActorRef)], Int]) extends ActorData
 
 
 /**
@@ -79,7 +46,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   when(Death) {
     case Event(Start | Broadcast(Start), _) => {
       action.sendStartMessage()
-      goto(Alive) using AliveData(nmbOfEOC = 0, nmbOfReadyToDie = 0, counter = 0, negotiateCounters =  new MultiDimensionalMap[ActorRef, Int], flushCounters =  new MultiDimensionalMap[ActorRef, Int])
+      goto(Alive) using AliveData(nmbOfEOC = 0, nmbOfReadyToDie = 0, counter = 0, negotiateCounters =  Map(), flushCounters =  Map())
     }
   }
 
@@ -162,55 +129,48 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
 
 
-  private def aliveNegotiate(data: AliveData, actors: Seq[ActorRef]): State = {
-    aliveNegotiateOrFlush(actors, data.negotiateCounters, outActors => action.broadCast(Negotiate(outActors)))
+  private def aliveNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
+    aliveNegotiateOrFlush(actors, data.negotiateCounters, outActors => action.broadCast(Negotiate(outActors)), counters => data.copy(flushCounters = counters))
   }
 
-  private def aliveFlushNegotiate(data: AliveData, actors: Seq[ActorRef]): State = {
+  private def aliveFlushNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
     aliveNegotiateOrFlush(actors, data.flushCounters, outActors => {
       action.flush()
       action.broadCast(Flush(outActors))
-    })
+    }, counters  => data.copy(negotiateCounters = counters))
   }
 
 
-  def aliveNegotiateOrFlush(actors: Seq[ActorRef], counters: MultiDimensionalMap[ActorRef, Int], broadCastFunction: Seq[ActorRef] => Unit): M2AActor.this.type#State = {
-    val count = counters.getValue(actors).getOrElse(0) + 1
-    if (actors.last == context.self) {
+  def aliveNegotiateOrFlush(actors: Seq[(String,ActorRef)], counters: Map[Seq[(String,ActorRef)], Int], broadCastFunction: Seq[(String, ActorRef)] => Unit, stateFunction: Map[Seq[(String, ActorRef)], Int] => ActorData): M2AActor.this.type#State = {
+    val count = counters.get(actors).getOrElse(0) + 1
+    if (actors.last == (action.id, context.self)) {
       //self sent negotiation
       if (count == nmbOfLoopedSenders + nmbOfNonLoopedSenders) {
         //not only from normal senders
         broadCastFunction(actors.slice(0, actors.size - 1)) //broadcast original message because succeeded negotiation
-        counters.putValue(actors, 0) //reset message counter
-        counters.putValue(actors.slice(0, actors.size - 1), -nmbOfLoopedSenders) //expect messages back from loops
-        stay()
+        stay() using stateFunction(counters - actors + (actors.slice(0, actors.size -1) -> -nmbOfLoopedSenders))
       } else {
-        counters.putValue(actors, count) //if not enough messages received, just augment counter
-        stay()
+        stay() using stateFunction(counters + (actors -> count))
       }
-    } else if (actors.contains(context.self)) {
+    } else if (actors.contains((action.id, context.self))) {
       if (count == nmbOfNonLoopedSenders) {
         //received enough
         broadCastFunction(actors) //broadcast the negotiation
-        counters.putValue(actors, -nmbOfLoopedSenders) //expect loop returns
-        stay()
+        stay() using stateFunction(counters + (actors -> -nmbOfLoopedSenders))
       } else {
-        counters.putValue(actors, count)
-        stay()
+        stay() using stateFunction(counters + (actors -> count))
       }
     } else if (count == nmbOfNonLoopedSenders) {
       //forward with extra negotiation
       if (nmbOfLoopedSenders > 0) {
-        counters.putValue(actors, 0)
-        broadCastFunction(actors.:+(context.self)) //add this negiotiation to list
-        stay()
+        broadCastFunction(actors.:+(action.id, context.self)) //add this negiotiation to list
+        stay() using stateFunction(counters - actors)
       } else {
         broadCastFunction(actors)
         stay()
       }
     } else {
-      counters.putValue(actors, count)
-      stay()
+      stay() using stateFunction(counters + (actors -> count))
     }
   }
 
@@ -233,7 +193,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     case event => handleCommonMessages(event)
   }
 
-  private def flushing(actors: Seq[ActorRef], data: AliveData): M2AActor.this.type#State = {
+  private def flushing(actors: Seq[(String, ActorRef)], data: AliveData): M2AActor.this.type#State = {
     negotiationOrFlushing(actors, data, Unit => goto(NearDeath) using data.copy(counter = nmbOfLoopedSenders), Unit => aliveFlushNegotiate(data, actors))
   }
 
@@ -315,13 +275,13 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
   }
 
-  private def negotiation(actors: Seq[ActorRef], data: AliveData): M2AActor.this.type#State = {
+  private def negotiation(actors: Seq[(String,ActorRef)], data: AliveData): M2AActor.this.type#State = {
     negotiationOrFlushing(actors, data, Unit => goto(Flushing) using data.copy(counter = nmbOfLoopedSenders), Unit =>  aliveNegotiate(data, actors))
   }
 
 
-  def negotiationOrFlushing(actors: Seq[ActorRef], data: AliveData, succeededAction: Unit => State, defaultAction: Unit => State): M2AActor.this.type#State = {
-    if (actors.size == 1 && actors.last == context.self) {
+  def negotiationOrFlushing(actors: Seq[(String, ActorRef)], data: AliveData, succeededAction: Unit => State, defaultAction: Unit => State): M2AActor.this.type#State = {
+    if (actors.size == 1 && actors.last == (action.id, context.self)) {
       val count = data.counter - 1
       if (count == 0) {
         if (action.messageSent) {
@@ -330,7 +290,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
           if(shouldGoAlive(data)){
             goto(Alive)
           } else {
-            action.broadCast(Negotiate(Seq(context.self)))
+            action.broadCast(Negotiate(Seq((action.id, context.self))))
             goto(Negotiating) using data.copy(counter = nmbOfLoopedSenders)
           }
         } else {
@@ -353,11 +313,11 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.onStart()
     }
     case Alive -> Negotiating => {
-      action.broadCast(Negotiate(Seq(context.self)))
+      action.broadCast(Negotiate(Seq((action.id, context.self))))
     }
     case Negotiating -> Flushing => {
       action.flush()
-      action.broadCast(Flush(Seq(context.self)))
+      action.broadCast(Flush(Seq((action.id, context.self))))
     }
     case Flushing -> NearDeath => {
       action.broadCast(ReadyToDie)
