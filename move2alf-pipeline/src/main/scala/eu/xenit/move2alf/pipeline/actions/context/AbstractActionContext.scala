@@ -63,10 +63,6 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
     blocked = false
   }
 
-  def sendStartMessage(){
-    receivers foreach { receiver => getActorRef(receiver) ! Broadcast(Start)}
-  }
-
   def broadCast(message: AnyRef){
     receivers foreach { receiver => getActorRef(receiver) ! Broadcast(message)}
   }

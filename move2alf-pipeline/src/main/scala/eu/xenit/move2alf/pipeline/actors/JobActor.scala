@@ -58,6 +58,9 @@ class JobActor(val id: String, private val config: JobConfig, private val jobInf
       firstActor ! TaskMessage(key, message, ref)
       stay
     }
+    case Event(Negotiate(_) | Broadcast(Negotiate(_)) | Flush(_) | Broadcast(Flush(_)), _) => {
+      stay()
+    }
   }
 
   onTransition {

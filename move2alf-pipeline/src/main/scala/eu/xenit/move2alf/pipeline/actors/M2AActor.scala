@@ -45,8 +45,13 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   when(Death) {
     case Event(Start | Broadcast(Start), _) => {
-      action.sendStartMessage()
+      action.broadCast(Start)
       goto(Alive) using AliveData(nmbOfEOC = 0, nmbOfReadyToDie = 0, counter = 0, negotiateCounters =  Map(), flushCounters =  Map())
+    }
+    case Event(e, _) => {
+      logger.error("Unexpected event {} in state Death for actionId {} and actorRef {}", e, action.id, context.self)
+      assert(false)
+      stay()
     }
   }
 
@@ -76,6 +81,9 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       }
       case Event(BackAlive | Broadcast(BackAlive), data: AliveData) => {
         stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie - 1)
+      }
+      case Event(Start | Broadcast(Start), _) => {
+        stay()
       }
     }
   }
@@ -130,30 +138,31 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
 
   private def aliveNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
-    aliveNegotiateOrFlush(actors, data.negotiateCounters, outActors => action.broadCast(Negotiate(outActors)), counters => data.copy(flushCounters = counters))
+    aliveNegotiateOrFlush(data, actors, data.negotiateCounters, outActors => action.broadCast(Negotiate(outActors)), counters => data.copy(negotiateCounters = counters))
   }
 
   private def aliveFlushNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
-    aliveNegotiateOrFlush(actors, data.flushCounters, outActors => {
+    aliveNegotiateOrFlush(data, actors, data.flushCounters, outActors => {
       action.flush()
       action.broadCast(Flush(outActors))
-    }, counters  => data.copy(negotiateCounters = counters))
+    }, counters  => data.copy(flushCounters = counters))
   }
 
 
-  def aliveNegotiateOrFlush(actors: Seq[(String,ActorRef)], counters: Map[Seq[(String,ActorRef)], Int], broadCastFunction: Seq[(String, ActorRef)] => Unit, stateFunction: Map[Seq[(String, ActorRef)], Int] => ActorData): M2AActor.this.type#State = {
+  def aliveNegotiateOrFlush(data: AliveData, actors: Seq[(String,ActorRef)], counters: Map[Seq[(String,ActorRef)], Int], broadCastFunction: Seq[(String, ActorRef)] => Unit, stateFunction: Map[Seq[(String, ActorRef)], Int] => ActorData): M2AActor.this.type#State = {
     val count = counters.get(actors).getOrElse(0) + 1
     if (actors.last == (action.id, context.self)) {
       //self sent negotiation
-      if (count == nmbOfLoopedSenders + nmbOfNonLoopedSenders) {
+      if (count == nmbOfLoopedSenders + nmbOfNonLoopedSenders - data.nmbOfEOC) {
         //not only from normal senders
-        broadCastFunction(actors.slice(0, actors.size - 1)) //broadcast original message because succeeded negotiation
-        stay() using stateFunction(counters - actors + (actors.slice(0, actors.size -1) -> -nmbOfLoopedSenders))
+        val newMessageBody = actors.slice(0, actors.size - 1)
+        broadCastFunction(newMessageBody) //broadcast original message because succeeded negotiation
+        stay() using stateFunction(counters - actors + (newMessageBody -> -nmbOfLoopedSenders))
       } else {
         stay() using stateFunction(counters + (actors -> count))
       }
     } else if (actors.contains((action.id, context.self))) {
-      if (count == nmbOfNonLoopedSenders) {
+      if (count == actionIdToNumberOfSenders(actors.last._1)) {
         //received enough
         broadCastFunction(actors) //broadcast the negotiation
         stay() using stateFunction(counters + (actors -> -nmbOfLoopedSenders))
@@ -256,7 +265,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   def stayNearlyDeadOrDie(eocCount: Int, readyToDieCount: Int, data: AliveData): FSM.State[ActorState, ActorData] = {
     if(eocCount == nmbOfNonLoopedSenders && nmbOfLoopedSenders == 0){
       goto(Death) using Empty
-    } else if (eocCount == nmbOfNonLoopedSenders && readyToDieCount == nmbOfNonLoopedSenders) {
+    } else if (eocCount + readyToDieCount == nmbOfNonLoopedSenders + nmbOfLoopedSenders) {
       if (!action.blocked) {
         goto(Death) using Empty
       } else {
@@ -323,6 +332,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.broadCast(ReadyToDie)
     }
     case NearDeath -> Death => {
+      action.broadCast(BackAlive)
       action.broadCast(EOC)
     }
     case NearDeath -> _ => {

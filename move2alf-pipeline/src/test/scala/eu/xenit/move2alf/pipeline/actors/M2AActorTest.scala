@@ -1,6 +1,6 @@
 package eu.xenit.move2alf.pipeline.actors
 
-import org.junit.{Test}
+import org.junit.{After, Before, Test}
 import akka.testkit.{TestActorRef, TestProbe, TestFSMRef}
 import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContext, AbstractActionContextFactory}
 import eu.xenit.move2alf.pipeline.actions.{ActionFactory, Action}
@@ -20,14 +20,31 @@ import akka.routing.Broadcast
  */
 class M2AActorTest {
 
-  implicit val system = ActorSystem("test")
-  val actionFactory = new ActionFactory {
-    def createAction(): Action = mock(classOf[Action])
+  implicit var system: ActorSystem = _
+  var actionFactory: ActionFactory = _
+  var testProbe: TestProbe = _
+  var actionContextFactory: AbstractActionContextFactory = _
+
+  @Before
+  def setupActorSystem{
+    system = ActorSystem("testM2AActorSystem")
+    testProbe = TestProbe()
+    actionFactory = new ActionFactory {
+      def createAction(): Action = mock(classOf[Action])
+    }
+    actionContextFactory = new AbstractActionContextFactory("test", actionFactory) {
+      protected def constructActionContext(basicAction: Action)(implicit context: ActorContext): AbstractActionContext = new AbstractActionContext(testFSMId, Set("receiver1"), getReceiver) {
+        val action: Any = actionFactory.createAction()
+      }
+    }
+  }
+
+  @After
+  def tearDown{
+    system.shutdown()
   }
 
   implicit val jobContext = mock(classOf[JobContext])
-
-  val testProbe = TestProbe()
 
   def getReceiver(s: String): ActorRef = {
     if(s=="receiver1"){
@@ -38,11 +55,7 @@ class M2AActorTest {
     }
   }
 
-  val actionContextFactory = new AbstractActionContextFactory("test", actionFactory) {
-    protected def constructActionContext(basicAction: Action)(implicit context: ActorContext): AbstractActionContext = new AbstractActionContext("TestActor", Set("receiver1"), getReceiver) {
-      val action: Any = actionFactory.createAction()
-    }
-  }
+  val testFSMId = "testFSM"
 
   @Test
   def testAliveTransition {
@@ -72,13 +85,8 @@ class M2AActorTest {
 
   @Test
   def testRenegotiateReply {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 1, actionId => 0))
-    val testRef = TestActorRef[TestActor]
-    assert(testFSM.stateName==Death)
-    testFSM ! Start
-    testProbe.expectMsg(Broadcast(Start))
-    assert(testFSM.stateName==Alive)
-    val negotiate = Negotiate(Seq(testRef, testFSM))
+    val (testRef, testFSM) = negotiateSetup(2,1)
+    val negotiate = Negotiate(Seq((testRefId, testRef), (testFSMId, testFSM)))
     testFSM ! negotiate
     testProbe.expectNoMsg()
     testFSM ! negotiate
@@ -86,37 +94,46 @@ class M2AActorTest {
     testFSM ! negotiate
     testProbe.expectMsgPF()( {
      case Broadcast(Negotiate(array)) => {
-       assert(array.last == testRef)
+       assert(array.last == (testRefId, testRef))
      }
     })
   }
 
-  @Test
-  def testAliveForwardNegotiate {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 2, 2, actionId => 0))
+
+  val testRefId = "testRef"
+
+  def negotiateSetup(nmbOfNormalSenders: Int, nmbOfLoopedSenders: Int) = {
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, nmbOfNormalSenders, nmbOfLoopedSenders, actionId => nmbOfLoopedSenders))
     val testRef = TestActorRef[TestActor]
-    assert(testFSM.stateName==Death)
+    assert(testFSM.stateName == Death)
     testFSM ! Start
     testProbe.expectMsg(Broadcast(Start))
-    val negotiate = Negotiate(Seq(testFSM, testRef))
+    assert(testFSM.stateName == Alive)
+    (testRef, testFSM)
+  }
+
+  @Test
+  def testAliveForwardNegotiate {
+    val (testRef, testFSM) = negotiateSetup(2,2)
+    val negotiate = Negotiate(Seq((testRefId, testRef), (testFSMId, testFSM)))
+    testFSM ! negotiate
+    testProbe.expectNoMsg()
+    testFSM ! negotiate
+    testProbe.expectNoMsg()
     testFSM ! negotiate
     testProbe.expectNoMsg()
     testFSM ! negotiate
     testProbe.expectMsgPF()( {
       case Broadcast(Negotiate(seq)) => {
-        assert(seq.equals(negotiate.actors))
+        assert(seq.equals(negotiate.actors.slice(0, negotiate.actors.size -1)))
       }
     })
   }
 
   @Test
   def testRenegotiateSend {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 3, 2, actionId => 0))
-    val testRef = TestActorRef[TestActor]
-    assert(testFSM.stateName==Death)
-    testFSM ! Start
-    testProbe.expectMsg(Broadcast(Start))
-    val negotiate = Negotiate(Seq(testRef))
+    val (testRef, testFSM) = negotiateSetup(3,2)
+    val negotiate = Negotiate(Seq((testRefId, testRef)))
     testFSM ! negotiate
     testProbe.expectNoMsg()
     testFSM ! negotiate
@@ -124,23 +141,25 @@ class M2AActorTest {
     testFSM ! negotiate
     testProbe.expectMsgPF()( {
       case Broadcast(Negotiate(seq)) => {
-        assert(seq.toSeq.equals(Seq(testRef, testFSM)))
+        assert(seq.toSeq.equals(Seq((testRefId, testRef), (testFSMId, testFSM))))
       }
     })
   }
 
   @Test
   def testNegotiateToFlushToDeath {
-    val testFSM= TestFSMRef(new M2AActor(actionContextFactory, 2,3, actionId => 0))
-    assert(testFSM.stateName==Death)
-    testFSM ! Start
+    val (_, testFSM) = negotiateSetup(2,3)
+    val sequence = Seq((testFSMId, testFSM))
     testFSM ! EOC
     testFSM ! EOC
-    (1 to 3).foreach(ignored => testFSM ! Negotiate(Seq(testFSM)))
+    (1 to 3).foreach(ignored => testFSM ! Negotiate(sequence))
     assert(testFSM.stateName == Flushing)
-    (1 to 3).foreach(ignored => testFSM ! Flush(Seq(testFSM)))
+    (1 to 3).foreach(ignored => testFSM ! Flush(sequence))
     assert(testFSM.stateName == NearDeath)
-    (1 to 3).foreach(ignored => testFSM ! ReadyToDie)
+    (1 to 3).foreach(i => {
+      testFSM ! ReadyToDie
+      if (i < 3) assert(testFSM.stateName==NearDeath)
+    })
     assert(testFSM.stateName == Death)
   }
 

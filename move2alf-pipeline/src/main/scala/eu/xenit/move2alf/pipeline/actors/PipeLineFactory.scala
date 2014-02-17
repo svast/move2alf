@@ -40,7 +40,8 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
               val count = map.get(sender.getId).getOrElse(0)
               map.update(sender.getId, count+config.getNmbOfWorkers)
             })
-            if(!counted.contains(config)) countedActionConfigs.update(ac, (senders, loopedSenders+config.getNmbOfWorkers, map))
+            map.update(config.getId, map.get(config.getId).getOrElse(0) + config.getNmbOfWorkers)
+            countedActionConfigs.update(ac, (senders, loopedSenders+config.getNmbOfWorkers, map))
           } else {
             countedActionConfigs.update(ac, (senders + config.getNmbOfWorkers,loopedSenders, map))
             nonEndActions+=config
