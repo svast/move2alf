@@ -1,7 +1,6 @@
 package eu.xenit.move2alf.logic;
 
 import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -21,15 +20,8 @@ public class JobExecutor implements org.quartz.Job {
 		JobService jobService = (JobService) context.getMergedJobDataMap().get(
 				SchedulerImpl.JOB_SERVICE);
 
-		UsageService usageService = (UsageService) context.getMergedJobDataMap().get(SchedulerImpl.USAGE_SERVICE);
 
-		if (checkLicense(usageService)) {
-				executeJob(jobId, jobService);
-		}
-	}
-
-	private boolean checkLicense(UsageService usageService) {
-		return usageService.isValid();
+		executeJob(jobId, jobService);
 	}
 
 	private void executeJob(Integer jobId, JobService jobService) {

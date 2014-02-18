@@ -12,7 +12,6 @@ import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.web.controller.destination.AlfrescoDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.CastorDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.model.ContentStoreModel;
@@ -48,7 +47,6 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private UsageService usageService;
     private ActionClassInfoService actionClassService;
 
     public ActionClassInfoService getActionClassService() {
@@ -69,30 +67,12 @@ public class JobController extends AbstractController{
 		return jobService;
 	}
 
-	
-	@Autowired
-	public void setUsageService(UsageService usageService) {
-		this.usageService = usageService;
-	}
-	
-	public UsageService getUsageService() {
-		return this.usageService;
-	}
 
 	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("jobInfoList", getJobService().getAllJobInfo());
 		mav.addObject("role", getRole());
-			
-		// license info
-		mav.addObject("licenseIsValid", getUsageService().isValid());
-		mav.addObject("licenseValidationFailureCause", getUsageService().getValidationFailureCause());
-		mav.addObject("licensee", getUsageService().getLicensee());
-		mav.addObject("expirationDate", getUsageService().getExpirationDate());
-		mav.addObject("documentCounter", getUsageService().getDocumentCounter());
-		mav.addObject("totalNumberOfDocuments", getUsageService().getTotalNumberOfDocuments());
-		
 		mav.setViewName("dashboard");
 		return mav;
 	}

@@ -5,7 +5,6 @@ import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.JobHandle;
 import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
@@ -53,9 +52,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
     @Autowired
     private PipelineAssembler pipelineAssembler;
-	
-	@Autowired
-	private UsageService usageService;
 
 	private UserService userService;
 
@@ -395,9 +391,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			doc.setProcessedDocumentParameterSet(params);
 			doc.setReference(reference);
 			getSessionFactory().getCurrentSession().save(doc);
-			if ( EProcessedDocumentStatus.OK.equals(doc.getStatus()) ) {
-				usageService.decrementDocumentCounter();
-			}
+
 		} catch (final Exception e) {
 			logger.error("Failed to write " + name + " to report.", e);
 		}

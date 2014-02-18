@@ -7,7 +7,6 @@ import eu.xenit.move2alf.core.sharedresource.alfresco.DeleteOption;
 import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
 import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
 import eu.xenit.move2alf.core.simpleaction.*;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.slf4j.Logger;
@@ -59,9 +58,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
     @Autowired
     private ActionClassInfoService actionClassService;
-
-    @Autowired
-	private UsageService usageService;
 
 
 	private static final Logger logger = LoggerFactory

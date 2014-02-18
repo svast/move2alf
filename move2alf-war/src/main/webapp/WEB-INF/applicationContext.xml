@@ -8,8 +8,6 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-	<import resource="applicationContext-h2db.xml"/>
-
     <aop:config expose-proxy="true"/>
 
 	<tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
@@ -44,7 +42,7 @@
 
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
 		<property name="driverClass">
-			<value>com.mysql.jdbc.Driver</value>
+			<value>${db.driver}</value>
 		</property>
 		<property name="jdbcUrl">
 			<value>${db.url}</value>
@@ -94,6 +92,7 @@
 				<prop key="hibernate.query.substitutions"> true 1, false 0 </prop>
                 <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
                 <prop key="hibernate.jdbc.batch_size">50</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
 			</props>
 		</property>
 	</bean>

@@ -109,25 +109,5 @@ $("span[rel=popover]").popover({
 });
 </script>
 
-<#if ! licenseValidationFailureCause?has_content || licenseValidationFailureCause!="nolicense" >
-        <div class="info">
-        <hr>
-        	This Move2Alf is licensed to ${licensee.companyName}.
-        
-            <#if expirationDate?has_content>
-	            <#if licenseValidationFailureCause?has_content && licenseValidationFailureCause=="validation" >
-	            	The license is expired since ${expirationDate?date}.
-	            <#else>
-	            	The license expires on ${expirationDate?date}.
-	            </#if>
-            </#if>
-            
-            <#if documentCounter?has_content>
-            Number of documents is ${documentCounter}/${totalNumberOfDocuments}.
-            </#if>
-            
-        </div>
-</#if>
-
 </@bodyMenu>
 </@html>

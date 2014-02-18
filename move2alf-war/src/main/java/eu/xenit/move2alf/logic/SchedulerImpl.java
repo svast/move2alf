@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 
 @Service("scheduler")
 public class SchedulerImpl extends AbstractHibernateService implements
@@ -29,8 +28,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			.getLogger(SchedulerImpl.class);
 
 	private JobService jobService;
-	
-	private UsageService usageService;
 
 	private org.quartz.Scheduler scheduler;
 
@@ -52,14 +49,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		return jobService;
 	}
 
-	@Autowired
-	public void setUsageService(UsageService usageService) {
-		this.usageService = usageService;
-	}
-	
-	public UsageService getUsageService() {
-		return this.usageService;
-	}
 	
 	@PostConstruct
 	public void init() {
@@ -117,7 +106,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		JobDataMap jobData = new JobDataMap();
 		jobData.put(JOB_ID, jobId);
 		jobData.put(JOB_SERVICE, getJobService());
-		jobData.put(USAGE_SERVICE, getUsageService());
 		return jobData;
 	}
 
