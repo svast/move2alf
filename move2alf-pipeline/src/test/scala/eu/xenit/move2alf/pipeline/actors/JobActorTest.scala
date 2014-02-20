@@ -5,7 +5,6 @@ import akka.testkit.TestFSMRef
 import org.junit.Test
 import eu.xenit.move2alf.pipeline.actions._
 import eu.xenit.move2alf.pipeline.{JobInfo, EOC, Start}
-import eu.xenit.move2alf.pipeline.actors.CycleData
 
 /**
  * Created with IntelliJ IDEA.

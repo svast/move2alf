@@ -103,7 +103,7 @@ class M2AActorTest {
   val testRefId = "testRef"
 
   def negotiateSetup(nmbOfNormalSenders: Int, nmbOfLoopedSenders: Int) = {
-    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, nmbOfNormalSenders, nmbOfLoopedSenders, actionId => nmbOfLoopedSenders))
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, nmbOfNormalSenders, nmbOfLoopedSenders, actionId => nmbOfNormalSenders))
     val testRef = TestActorRef[TestActor]
     assert(testFSM.stateName == Death)
     testFSM ! Start

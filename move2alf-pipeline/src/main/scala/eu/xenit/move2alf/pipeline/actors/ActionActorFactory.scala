@@ -22,10 +22,10 @@ class ActionActorFactory(val id: String, val actionContextFactory: AbstractActio
 //    logger.debug("number of routees: "+nmbActors)
     if(dispatcher != null) {
 //      logger.debug("Constructing actor with dispatcher: "+dispatcher)
-      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders, nmbOfLoopedSenders, actionIdToNumberOfSenders)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders, nmbOfLoopedSenders, actionIdToNumberOfSenders, nmbActors)).withDispatcher(dispatcher).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
     } else {
 //      logger.debug("Contructing actor with default dispatcher")
-      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders,nmbOfLoopedSenders, actionIdToNumberOfSenders)).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
+      context.actorOf(Props(new M2AActor(actionContextFactory, nmbOfSenders,nmbOfLoopedSenders, actionIdToNumberOfSenders, nmbActors)).withRouter(SmallestMailboxRouter(nmbActors)), name = URLEncoder.encode(id, "UTF-8"))
     }
   }
 

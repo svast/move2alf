@@ -5,6 +5,7 @@ import eu.xenit.move2alf.pipeline._
 import eu.xenit.move2alf.pipeline.actions.JobConfig
 import eu.xenit.move2alf.pipeline.state.JobContext
 import akka.routing.Broadcast
+import eu.xenit.move2alf.common.LogHelper
 
 
 sealed trait JobState
@@ -24,7 +25,7 @@ case class CycleData(counter: Int) extends Data
  * Time: 2:52 PM
  * To change this template use File | Settings | File Templates.
  */
-class JobActor(val id: String, private val config: JobConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data]{
+class JobActor(val id: String, private val config: JobConfig, private val jobInfo: JobInfo) extends Actor with FSM[JobState, Data] with LogHelper{
   implicit val jobContext = new JobContext(id)
 
   val (actorRefs, nmbOfSenders) = new PipeLineFactory(self).generateActors(config.getFirstAction)
@@ -44,6 +45,7 @@ class JobActor(val id: String, private val config: JobConfig, private val jobInf
 
   when(Running) {
     case Event(EOC | Broadcast(EOC), data: CycleData) => {
+      logger.debug(context.self+" received EOC, current counter = "+(data.counter-1))
       data.counter match {
         case 1 => goto(NotRunning) using Uninitialized
         case _ => stay using data.copy(counter = data.counter - 1)
@@ -58,7 +60,7 @@ class JobActor(val id: String, private val config: JobConfig, private val jobInf
       firstActor ! TaskMessage(key, message, ref)
       stay
     }
-    case Event(Negotiate(_) | Broadcast(Negotiate(_)) | Flush(_) | Broadcast(Flush(_)), _) => {
+    case Event(Negotiate(_) | Broadcast(Negotiate(_)) | Flush(_) | Broadcast(Flush(_)) | ReadyToDie | Broadcast(ReadyToDie) | BackAlive | Broadcast(BackAlive), _) => {
       stay()
     }
   }

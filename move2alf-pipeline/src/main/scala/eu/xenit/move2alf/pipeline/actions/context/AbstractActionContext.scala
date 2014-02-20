@@ -31,7 +31,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   }
 
   def receiveReply(key: String, message: AnyRef) {
-    logger.debug("Reply arrived at action: "+context.self)
+    logger.trace("Reply arrived at action: "+context.self)
 
     action match {
       case a: AcceptsReply => a.acceptReply(key, message)
@@ -39,7 +39,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   }
 
   protected def execute(message: AnyRef){
-    logger.debug("Message arrived at action: "+context.self)
+    logger.trace("Message arrived at action: "+context.self)
 
     action match {
       case a: ReceivingAction[AnyRef@unchecked] => a.execute(message)

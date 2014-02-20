@@ -36,7 +36,7 @@ case class AliveData(nmbOfEOC: Int, nmbOfReadyToDie: Int, counter: Int, negotiat
  * Time: 10:05 AM
  * To change this template use File | Settings | File Templates.
  */
-class M2AActor(protected val factory: AbstractActionContextFactory, protected val nmbOfNonLoopedSenders: Int, protected val nmbOfLoopedSenders: Int, val actionIdToNumberOfSenders: String => Int) extends Actor with FSM[ActorState, ActorData] with LogHelper{
+class M2AActor(protected val factory: AbstractActionContextFactory, protected val nmbOfNonLoopedSenders: Int, protected val nmbOfLoopedSenders: Int, val actionIdToNumberOfSenders: String => Int, val nmbOfWorkers: Int = 1) extends Actor with FSM[ActorState, ActorData] with LogHelper{
 
 //  logger.debug("Creating actor: "+context.self+" with number of senders: "+nmbOfSenders)
   private val action = factory.createActionContext(context)
@@ -45,8 +45,10 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   when(Death) {
     case Event(Start | Broadcast(Start), _) => {
-      action.broadCast(Start)
       goto(Alive) using AliveData(nmbOfEOC = 0, nmbOfReadyToDie = 0, counter = 0, negotiateCounters =  Map(), flushCounters =  Map())
+    }
+    case Event(BackAlive | Broadcast(BackAlive) | EOC | Broadcast(EOC), _) => {
+      stay()
     }
     case Event(e, _) => {
       logger.error("Unexpected event {} in state Death for actionId {} and actorRef {}", e, action.id, context.self)
@@ -101,7 +103,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
             stay() using data.copy(nmbOfEOC = count)
           }
         } else {
-          goto(Negotiating) using data.copy(nmbOfEOC = count, counter = nmbOfLoopedSenders)
+          goto(Negotiating) using data.copy(nmbOfEOC = count, counter = nmbOfLoopedSenders*nmbOfWorkers)
         }
       } else {
         stay() using data.copy(nmbOfEOC = count)
@@ -169,7 +171,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       } else {
         stay() using stateFunction(counters + (actors -> count))
       }
-    } else if (count == nmbOfNonLoopedSenders) {
+    } else if (count == actionIdToNumberOfSenders(actors.last._1)) {
       //forward with extra negotiation
       if (nmbOfLoopedSenders > 0) {
         broadCastFunction(actors.:+(action.id, context.self)) //add this negiotiation to list
@@ -203,7 +205,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   }
 
   private def flushing(actors: Seq[(String, ActorRef)], data: AliveData): M2AActor.this.type#State = {
-    negotiationOrFlushing(actors, data, Unit => goto(NearDeath) using data.copy(counter = nmbOfLoopedSenders), Unit => aliveFlushNegotiate(data, actors))
+    negotiationOrFlushing(actors, data, Unit => goto(NearDeath) using data.copy(counter = nmbOfLoopedSenders*nmbOfWorkers), Unit => aliveFlushNegotiate(data, actors))
   }
 
 
@@ -285,12 +287,12 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   }
 
   private def negotiation(actors: Seq[(String,ActorRef)], data: AliveData): M2AActor.this.type#State = {
-    negotiationOrFlushing(actors, data, Unit => goto(Flushing) using data.copy(counter = nmbOfLoopedSenders), Unit =>  aliveNegotiate(data, actors))
+    negotiationOrFlushing(actors, data, Unit => goto(Flushing) using data.copy(counter = nmbOfLoopedSenders*nmbOfWorkers), Unit =>  aliveNegotiate(data, actors))
   }
 
 
   def negotiationOrFlushing(actors: Seq[(String, ActorRef)], data: AliveData, succeededAction: Unit => State, defaultAction: Unit => State): M2AActor.this.type#State = {
-    if (actors.size == 1 && actors.last == (action.id, context.self)) {
+    if (actors.size == 1 && actors.last._1 == action.id) {
       val count = data.counter - 1
       if (count == 0) {
         if (action.messageSent) {
@@ -300,7 +302,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
             goto(Alive)
           } else {
             action.broadCast(Negotiate(Seq((action.id, context.self))))
-            goto(Negotiating) using data.copy(counter = nmbOfLoopedSenders)
+            goto(Negotiating) using data.copy(counter = nmbOfLoopedSenders*nmbOfWorkers)
           }
         } else {
           if(shouldGoAlive(data)){
@@ -319,24 +321,38 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   onTransition {
     case Death -> Alive => {
+      logger.debug(context.self +" is going from Death to Alive")
+      action.broadCast(Start)
       action.onStart()
     }
     case Alive -> Negotiating => {
+      logger.debug(context.self +" is going from Alive to Negotiating")
       action.broadCast(Negotiate(Seq((action.id, context.self))))
     }
+    case Alive -> NearDeath => {
+      logger.debug(context.self +" is going from Alive to NearDeath")
+      action.broadCast(ReadyToDie)
+    }
     case Negotiating -> Flushing => {
+      logger.debug(context.self +" is going from Negotiating to Flushing")
       action.flush()
       action.broadCast(Flush(Seq((action.id, context.self))))
     }
     case Flushing -> NearDeath => {
+      logger.debug(context.self +" is going from Flushing to NearDeath")
       action.broadCast(ReadyToDie)
     }
     case NearDeath -> Death => {
+      logger.debug(context.self +" is going from NearDeath to Death")
       action.broadCast(BackAlive)
       action.broadCast(EOC)
     }
-    case NearDeath -> _ => {
+    case NearDeath -> b => {
+      logger.debug(context.self +" is going from NearDeath to "+b)
       action.broadCast(BackAlive)
+    }
+    case a -> b => {
+      logger.debug(context.self +" is going from "+a+" to "+b)
     }
   }
 }
