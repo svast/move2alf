@@ -70,32 +70,9 @@ class PipelineBehaviorTest{
     testActor ! Start
     testProbe.expectMsg(Broadcast(Start))
     testActor ! EOC
-//    testProbe.expectMsgPF()( {
-//      case Broadcast(Negotiate(Seq(el))) => {
-//        assert(el._1 == "start")
-//      }
-//    })
-//    testProbe.expectMsgPF()( {
-//      case Broadcast(Flush(Seq(el))) => {
-//        assert(el._1 == "start")
-//      }
-//    })
-//    testProbe.expectMsg(Broadcast(ReadyToDie))
-//    testProbe.expectMsg(Broadcast(BackAlive))
-//    testProbe.expectMsg(Broadcast(EOC))
 
-    var count = 0
-    testProbe.fishForMessage()( {
-      case Broadcast(EOC) => {
-        if(count == 1){
-          true
-        } else {
-          count=count+1
-          false
-        }
-      }
-      case _ => false
-    })
+   checkForEOC(testProbe, 2)
+    system.shutdown()
   }
 
   @Test
@@ -132,6 +109,7 @@ class PipelineBehaviorTest{
     testActor ! EOC
 
     checkForEOC(testProbe, 2)
+    system.shutdown()
 
   }
 
@@ -158,9 +136,7 @@ class PipelineBehaviorTest{
 
     def setupMethod()(context:ActorContext): ActorRef = {
       implicit val jobContext = mock(classOf[JobContext])
-      val start = new ActionConfig("start", new ActionFactory {
-        def createAction(): Action = new JavaActionImpl[String]
-      }, 1)
+      val start = new ActionConfig("start", getActionFactory, 1)
 
       start.addReceiver("loop", start)
       new PipeLineFactory(testProbe.ref)(context, jobContext).generateActors(start)._1.get("start").get
@@ -171,6 +147,41 @@ class PipelineBehaviorTest{
     testActor ! EOC
 
     checkForEOC(testProbe, 1)
+    system.shutdown()
+  }
+
+
+  def getActionFactory: ActionFactory with Object {def createAction(): Action} = {
+    new ActionFactory {
+      def createAction(): Action = new JavaActionImpl[String]
+    }
+  }
+
+  @Test
+  def otherDoubleLoopTest {
+    implicit val system = ActorSystem("otherDoubleSelfLoopSystem")
+    val testProbe = TestProbe()
+
+    def setupMethod()(context:ActorContext): ActorRef = {
+      implicit val jobContext = mock(classOf[JobContext])
+      val start = new ActionConfig("start", getActionFactory, 2)
+      val middle = new ActionConfig("middle", getActionFactory, 1)
+      val end = new ActionConfig("end", getActionFactory, 2)
+
+      start.addReceiver("default", middle)
+      middle.addReceiver("default", end)
+      middle.addReceiver("loop", start)
+      end.addReceiver("loop", middle)
+
+      new PipeLineFactory(testProbe.ref)(context,jobContext).generateActors(start)._1.get("start").get
+    }
+
+    val testActor = system.actorOf(Props(new TestActor(setupMethod())))
+    testActor ! Start
+    testActor ! EOC
+
+    checkForEOC(testProbe, 2)
+    system.shutdown()
   }
 
 }

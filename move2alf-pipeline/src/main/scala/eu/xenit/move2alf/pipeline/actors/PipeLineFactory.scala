@@ -26,7 +26,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
     val countedConnections = new mutable.HashSet[(ActionConfig, String, ActionConfig)]()
     val counted = new mutable.HashSet[ActionConfig]()
 
-    def countSenders(config:ActionConfig, loopList: immutable.Set[ActionConfig]) {
+    def countSenders(config:ActionConfig, loopList: List[ActionConfig]) {
       counted += config
       config.getReceivers foreach {
         case (senderId, ac) => {
@@ -38,7 +38,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
           map.update(config.getId, map.get(config.getId).getOrElse(0) + 1)
           if(loopList.contains(ac) | ac == config){
             val map2 = countedActionConfigs.get(ac).get._3
-            loopList.foreach(sender => {
+            loopList.slice(loopList.indexOf(ac), loopList.size).foreach(sender => {
               val count = map2.get(sender.getId).getOrElse(0)
               map2.update(sender.getId, count+config.getNmbOfWorkers)
             })
@@ -52,13 +52,13 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
               countedConnections.+=((config,senderId, ac))
             }
             nonEndActions+=config
-            countSenders(ac, loopList + config)
+            countSenders(ac, loopList :+ config)
           }
         }
       }
     }
 
-    countSenders(config, new immutable.HashSet[ActionConfig]())
+    countSenders(config, List[ActionConfig]())
 
 
     counted foreach { config =>

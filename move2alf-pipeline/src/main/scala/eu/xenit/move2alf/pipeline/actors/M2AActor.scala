@@ -4,14 +4,11 @@ import akka.actor._
 import eu.xenit.move2alf.pipeline._
 import eu.xenit.move2alf.common.LogHelper
 import eu.xenit.move2alf.pipeline.actions.context.AbstractActionContextFactory
-import scala.collection.mutable
 import eu.xenit.move2alf.pipeline.M2AMessage
 import eu.xenit.move2alf.pipeline.TaskMessage
 import scala.Some
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.ReplyMessage
-import eu.xenit.move2alf.pipeline
-import eu.xenit.move2alf.pipeline.actors.Flushing
 
 sealed trait ActorState
 case object Death extends ActorState
@@ -131,7 +128,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       if(nmbOfLoopedSenders == 0 && count == nmbOfNonLoopedSenders){
         goto(NearDeath) using data.copy(nmbOfReadyToDie = count)
       } else if(nmbOfNonLoopedSenders > 0 && count == nmbOfNonLoopedSenders){
-        goto(Negotiating) using data.copy(nmbOfReadyToDie = count)
+        goto(Negotiating) using data.copy(nmbOfReadyToDie = count, counter = nmbOfLoopedSenders * nmbOfWorkers)
       } else {
         stay() using data.copy(nmbOfReadyToDie = count)
       }
@@ -165,7 +162,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       } else {
         stay() using stateFunction(counters + (actors -> count))
       }
-    } else if (actors.contains((action.id, context.self))) {
+    } else if (messageContainsThisAction(actors)) {
       if (count == actionIdToNumberOfSenders(actors.last._1)) {
         //received enough
         broadCastFunction(actors) //broadcast the negotiation
@@ -185,6 +182,10 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     } else {
       stay() using stateFunction(counters + (actors -> count))
     }
+  }
+
+  def messageContainsThisAction(actors: Seq[(String, ActorRef)]): Boolean = {
+    actors.exists( tuple => tuple._1==action.id)
   }
 
   when(Negotiating) {
@@ -249,7 +250,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       stayNearlyDeadOrDie(data.nmbOfEOC, data.nmbOfReadyToDie + 1, data)
     }
     case Event(BackAlive | Broadcast(BackAlive), data: AliveData) => {
-      stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie+1)
+      stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie-1)
     }
     case Event(M2AMessage(message), data: AliveData) => {
       action.receive(message)
@@ -269,6 +270,10 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.receiveReply(key, message)
       handleNormalMessagesNearlyDead(data)
     }
+    case Event(Negotiate(_) | Broadcast(Negotiate(_)), data: AliveData) => {
+      stay()
+    }
+
   }
 
 

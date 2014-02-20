@@ -30,7 +30,7 @@ class JobActorTest{
     }, 1)
     startAction.addReceiver("default",middleAction)
     middleAction.addReceiver("default",endAction)
-    implicit val system = ActorSystem("TestSystem3")
+    implicit val system = ActorSystem("testSetStatesActorSystem")
     val actorRef = TestFSMRef(new JobActor("TestId", new JobConfig(startAction, false), new JobInfo))
 
     assert(actorRef.stateName == NotRunning)
@@ -44,7 +44,7 @@ class JobActorTest{
     assert(actorRef.stateName == NotRunning)
     assert(actorRef.stateData == Uninitialized)
 
-    system.shutdown()
+   system.shutdown()
   }
 
   @Test
@@ -62,7 +62,7 @@ class JobActorTest{
     startAction.addReceiver("default",middleAction)
     middleAction.addReceiver("default",endAction)
     endAction.addReceiver("loop", startAction)
-    implicit val system = ActorSystem("TestSystem4")
+    implicit val system = ActorSystem("LoopTestActorSystem")
     val actorRef = TestFSMRef(new JobActor("TestId", new JobConfig(startAction, true), new JobInfo))
 
     assert(actorRef.stateName == NotRunning)
