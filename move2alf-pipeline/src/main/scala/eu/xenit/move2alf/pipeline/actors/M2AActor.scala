@@ -10,6 +10,8 @@ import eu.xenit.move2alf.pipeline.TaskMessage
 import scala.Some
 import akka.routing.Broadcast
 import eu.xenit.move2alf.pipeline.ReplyMessage
+import eu.xenit.move2alf.pipeline
+import eu.xenit.move2alf.pipeline.actors.Flushing
 
 sealed trait ActorState
 case object Death extends ActorState
@@ -217,15 +219,24 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       flushing(actors,data)
     }
     case Event(Negotiate(actors), data: AliveData) => {
-      aliveNegotiate(data, actors)
+      sameIdNegotiateWhenFlushing(actors, data)
     }
     case Event(Broadcast(Negotiate(actors)), data:AliveData) => {
-      aliveNegotiate(data, actors)
+      sameIdNegotiateWhenFlushing(actors, data)
     }
     case Event(ReadyToDie | Broadcast(ReadyToDie), data:AliveData) => {
       stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie+1)
     }
     case event => handleCommonMessages(event)
+  }
+
+
+  def sameIdNegotiateWhenFlushing(actors: Seq[(String, ActorRef)], data: AliveData): M2AActor.this.type#State = {
+    if (actors.head._1 == action.id) {
+      goto(Negotiating) using data.copy(counter = nmbOfWorkers * nmbOfLoopedSenders - 1)
+    } else {
+      aliveNegotiate(data, actors)
+    }
   }
 
   when(NearDeath){
@@ -244,6 +255,12 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.receive(message)
       handleNormalMessagesNearlyDead(data)
     }
+    case Event(Flush(actors), data:AliveData) => {
+      sameIdFlushWhenNearlyDead(actors, data)
+    }
+    case Event(Broadcast(Flush(actors)), data:AliveData) => {
+      sameIdFlushWhenNearlyDead(actors,data)
+    }
     case Event(TaskMessage(key, message, replyTo), data: AliveData) => {
       action.receive(message, Some(key), Some(replyTo))
       handleNormalMessagesNearlyDead(data)
@@ -254,6 +271,14 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
   }
 
+
+  def sameIdFlushWhenNearlyDead(actors: Seq[(String, ActorRef)], data: AliveData): M2AActor.this.type#State = {
+    if (actors.head._1 == action.id) {
+      goto(Flushing) using data.copy(counter = nmbOfWorkers * nmbOfLoopedSenders - 1)
+    } else {
+      stay()
+    }
+  }
 
   private def handleNormalMessagesNearlyDead(data: AliveData): FSM.State[ActorState, ActorData] = {
     if (action.messageSent) {

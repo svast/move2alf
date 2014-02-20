@@ -72,8 +72,6 @@ class JobActorTest{
     assert(actorRef.stateName == Running)
     assert(actorRef.stateData.asInstanceOf[CycleData].counter == 1)
 
-
-
   }
 
 
