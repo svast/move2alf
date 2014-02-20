@@ -25,25 +25,30 @@ import scala.concurrent.duration
  */
 class PipelineBehaviorTest{
 
+  class TestActor(val setupMethod: (ActorContext) => ActorRef) extends Actor{
+    def receive: this.type#Receive = {
+      case Start => {
+        startRef ! Broadcast(Start)
+      }
+      case EOC => {
+        startRef ! Broadcast(EOC)
+      }
+    }
+
+
+    val startRef: ActorRef = setupMethod(context)
+
+
+
+  }
+
 
   @Test
   def loopBehaviorTest {
     implicit val system = ActorSystem("loopBehaviorTest")
     val testProbe = TestProbe()
 
-    var startRef: ActorRef = null
-
-    class TestActor(val testProbe: TestProbe) extends Actor{
-      def receive: this.type#Receive = {
-        case Start => {
-          startRef ! Broadcast(Start)
-        }
-        case EOC => {
-          startRef ! Broadcast(EOC)
-        }
-      }
-
-
+    def setupMethod()(context: ActorContext): ActorRef = {
       implicit val jobContext = mock(classOf[JobContext])
 
       val start = new ActionConfig("start", new ActionFactory {
@@ -57,11 +62,11 @@ class PipelineBehaviorTest{
       start.addReceiver("default", end)
       end.addReceiver("loop", start)
 
-      val pipeLineFactory = new PipeLineFactory(testProbe.ref)
-      startRef = pipeLineFactory.generateActors(start)._1.get("start").get
+      val pipeLineFactory = new PipeLineFactory(testProbe.ref)(context, jobContext)
+      pipeLineFactory.generateActors(start)._1.get("start").get
     }
 
-    val testActor = system.actorOf(Props(new TestActor(testProbe)))
+    val testActor = system.actorOf(Props(new TestActor(setupMethod())))
     testActor ! Start
     testProbe.expectMsg(Broadcast(Start))
     testActor ! EOC
@@ -82,11 +87,90 @@ class PipelineBehaviorTest{
     var count = 0
     testProbe.fishForMessage()( {
       case Broadcast(EOC) => {
-        //if(count == 2) true else count=count+1; false
-        true
+        if(count == 1){
+          true
+        } else {
+          count=count+1
+          false
+        }
       }
       case _ => false
     })
+  }
+
+  @Test
+  def doubleLoopTest {
+    implicit val system = ActorSystem("doubleLoopBehaviorTest")
+    val testProbe = TestProbe()
+
+    def setupMethod()(context: ActorContext): ActorRef = {
+      implicit val jobContext = mock(classOf[JobContext])
+
+      val start = new ActionConfig("start", new ActionFactory {
+        def createAction(): Action = return new JavaActionImpl[String]()
+      }, 2)
+
+      val middle = new ActionConfig("middle", new ActionFactory {
+        def createAction(): Action = return new JavaActionImpl[String]()
+      }, 1)
+
+      val end = new ActionConfig("end", new ActionFactory {
+        def createAction(): Action = return new JavaActionImpl[String]()
+      }, 2)
+
+      start.addReceiver("default", middle)
+      middle.addReceiver("default", end)
+      end.addReceiver("loop1", start)
+      middle.addReceiver("loop2", start)
+
+      val pipeLineFactory = new PipeLineFactory(testProbe.ref)(context, jobContext)
+      pipeLineFactory.generateActors(start)._1.get("start").get
+    }
+
+    val testActor = system.actorOf(Props(new TestActor(setupMethod())))
+    testActor ! Start
+    testActor ! EOC
+
+    checkForEOC(testProbe, 2)
+
+  }
+
+
+  def checkForEOC(testProbe: TestProbe, amount: Int) {
+    var count: Int = 1
+    testProbe.fishForMessage(Duration(9999, duration.SECONDS))({
+      case Broadcast(EOC) => {
+        if (count == amount) {
+          true
+        } else {
+          count = count + 1
+          false
+        }
+      }
+      case _ => false
+    })
+  }
+
+  @Test
+  def selfLoopTest {
+    implicit val system = ActorSystem("selfLoopTestSystem")
+    val testProbe = TestProbe()
+
+    def setupMethod()(context:ActorContext): ActorRef = {
+      implicit val jobContext = mock(classOf[JobContext])
+      val start = new ActionConfig("start", new ActionFactory {
+        def createAction(): Action = new JavaActionImpl[String]
+      }, 1)
+
+      start.addReceiver("loop", start)
+      new PipeLineFactory(testProbe.ref)(context, jobContext).generateActors(start)._1.get("start").get
+    }
+
+    val testActor = system.actorOf(Props(new TestActor(setupMethod())))
+    testActor ! Start
+    testActor ! EOC
+
+    checkForEOC(testProbe, 1)
   }
 
 }

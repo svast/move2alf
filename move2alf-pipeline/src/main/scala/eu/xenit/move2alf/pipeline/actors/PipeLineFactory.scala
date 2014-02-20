@@ -36,7 +36,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
 
           val (senders, loopedSenders, map) = countedActionConfigs.get(ac).get
           map.update(config.getId, map.get(config.getId).getOrElse(0) + 1)
-          if(loopList.contains(ac)){
+          if(loopList.contains(ac) | ac == config){
             val map2 = countedActionConfigs.get(ac).get._3
             loopList.foreach(sender => {
               val count = map2.get(sender.getId).getOrElse(0)
@@ -79,7 +79,7 @@ class PipeLineFactory(private val jobActor: ActorRef)(implicit val context: Acto
         }
       }
 
-      val factory = new ActionActorFactory(config.getId, actionContextFactory, nmbSenders._1, nmbSenders._2, actionId => countedActionConfigs.get(config).get._3.get(actionId).getOrElse(0), config.getNmbOfWorkers, config.getDispatcher)
+      val factory = new ActionActorFactory(config.getId, actionContextFactory, nmbSenders._1, nmbSenders._2, actionId => countedActionConfigs.get(config).get._3.get(actionId).getOrElse(nmbSenders._1), config.getNmbOfWorkers, config.getDispatcher)
       actorRefs.put(config.getId, factory.createActor)
     }
 

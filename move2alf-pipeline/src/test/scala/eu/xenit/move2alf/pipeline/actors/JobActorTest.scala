@@ -2,7 +2,7 @@ package eu.xenit.move2alf.pipeline.actors
 
 import akka.actor._
 import akka.testkit.TestFSMRef
-import org.junit.Test
+import org.junit.{AfterClass, Test}
 import eu.xenit.move2alf.pipeline.actions._
 import eu.xenit.move2alf.pipeline.{JobInfo, EOC, Start}
 
@@ -71,8 +71,7 @@ class JobActorTest{
     actorRef ! Start
     assert(actorRef.stateName == Running)
     assert(actorRef.stateData.asInstanceOf[CycleData].counter == 1)
-
+    system.shutdown()
   }
-
 
 }
