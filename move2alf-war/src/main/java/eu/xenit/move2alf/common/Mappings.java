@@ -85,6 +85,11 @@ public class Mappings {
         mappingNamespaces.put("hr","{hr.model}");
         mappingNamespaces.put("eb","{eb.model}");
         mappingNamespaces.put("pv","{pv.model}");
+        mappingNamespaces.put("li","{li.model}");
+        mappingNamespaces.put("nl","{nl.model}");
+        mappingNamespaces.put("cmn","{cmn.model}");
+        mappingNamespaces.put("portal","{portal.model}");
+        mappingNamespaces.put("claims","{claims.model}");
         mappingNamespaces.put("wfl","{wfl.model}");
         mappingNamespaces.put("br","{http://www.brutex.com/model/0.2}");
 

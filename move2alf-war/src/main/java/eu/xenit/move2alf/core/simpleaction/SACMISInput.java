@@ -242,8 +242,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
         try {
             logger.info("shutting down");
-            //camel.stop();
-            camel.stopRoute(route.getId(),300, TimeUnit.SECONDS);
+            //camel.stopRoute(route.getId(),30, TimeUnit.SECONDS);
+            camel.stop();
         } catch (Exception e) {
             e.printStackTrace();
             throw new Move2AlfException("Camel exception", e);
