@@ -42,6 +42,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String COMMAND_BEFORE_ID = "CommandBefore";
     public static final String COMMAND_AFTER_ID = "CommandAfter";
     public static final String DEFAULT_RECEIVER = "default";
+    public static final String RECURSIVE_RECEIVER = "recursive";
     public static final String REPORTER = "reporter";
     public static final String END_ACTION = "EndAction";
     public static final String START = "Start";
@@ -52,13 +53,16 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String PINNED_DISPATCHER = "pinned-dispatcher";
     public static final String ALFRESCO_ACL_ACTION = "AlfrescoAclAction";
     public static final String VALIDATE_DESTINATION = "ValidateDestination";
+    public static final String RECURSIVE_CMIS = "RecursiveCmis" ;
+    public static final String CMIS_QUERY = "CmisQuery" ;
 
     // name/values for metadata and transform parameters are kept in a single string using this separator
     public static final String SEPARATOR = "@@@";
 
+
+
     @Autowired
     private ActionClassInfoService actionClassService;
-
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PipelineAssemblerImpl.class);
@@ -76,7 +80,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     private Map<String, ConfiguredAction> getAllConfiguredActions(ConfiguredAction action, Map<String, ConfiguredAction> configuredActionMap){
         configuredActionMap.put(action.getActionId(), action);
         for(ConfiguredAction receiver: action.getReceivers().values()){
-            getAllConfiguredActions(receiver, configuredActionMap);
+            if(!configuredActionMap.containsKey(action.getActionId()))
+                getAllConfiguredActions(receiver, configuredActionMap);
         }
         return configuredActionMap;
     }
@@ -99,6 +104,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         String cmisUsername = "";
         String cmisPassword = "";
         String cmisQuery = "";
+        boolean cmisRecursive = false;
 		String destinationFolder = "";
 		int dest = 0;
         int contentStoreId = -1;
@@ -140,6 +146,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 cmisPassword = action.getParameter(SACMISInput.PARAM_CMIS_PASSWORD);
                 cmisQuery = action.getParameter(SACMISInput.PARAM_CMIS_QUERY);
                 skipContentUpload = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD));
+                cmisRecursive = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_RECURSIVE));
             } else if (UPLOAD_ID.equals(action
                     .getActionId())) {
 				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
@@ -209,6 +216,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         jobModel.setCmisUsername(cmisUsername);
         jobModel.setCmisPassword(cmisPassword);
         jobModel.setCmisQuery(cmisQuery);
+        jobModel.setCmisRecursive(cmisRecursive);
 		jobModel.setDestinationFolder(destinationFolder);
 		jobModel.setDest(dest);
         jobModel.setContentStoreId(contentStoreId);
@@ -272,21 +280,27 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
     @Override
     public ActionConfig getActionConfig(ConfiguredAction configuredAction){
-        return configuredActionToActionConfig(configuredAction, new HashMap<String, ActionConfig>());
+        HashMap<String, ActionConfig> map = new HashMap<String, ActionConfig>();
+        M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
+        ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
+        map.put(configuredAction.getActionId(), actionConfig);
+        configuredActionToActionConfig(configuredAction, map);
+        return actionConfig;
     }
 
     private ActionConfig configuredActionToActionConfig(ConfiguredAction configuredAction, Map<String, ActionConfig> actionConfigMap) {
         Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
-
-        M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
-        ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
+        ActionConfig actionConfig = actionConfigMap.get(configuredAction.getActionId());
 
         for(String key: configuredActionReceivers.keySet()){
-            if(!actionConfigMap.containsKey(configuredActionReceivers.get(key).getActionId())){
-                ActionConfig receiver = configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
+            ConfiguredAction configuredActionReceiver = configuredActionReceivers.get(key);
+            if(!actionConfigMap.containsKey(configuredActionReceiver.getActionId())){
+                M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredActionReceiver.getClassId()).getClazz(), configuredActionReceiver.getParameters(), beanFactory);
+                ActionConfig receiver = new ActionConfig(configuredActionReceiver.getActionId(), factory, configuredActionReceiver.getNmbOfWorkers());
                 actionConfigMap.put(configuredActionReceivers.get(key).getActionId(), receiver);
+                configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
             }
-            actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceivers.get(key).getActionId()));
+            actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceiver.getActionId()));
         }
 
         actionConfig.setDispatcher(configuredAction.getDispatcher());
@@ -353,14 +367,40 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobModel.getCmisUsername());
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobModel.getCmisPassword());
             sourceAction.setParameter(SACMISInput.PARAM_CMIS_QUERY, jobModel.getCmisQuery());
+            sourceAction.setParameter(SACMISInput.PARAM_RECURSIVE, String.valueOf(jobModel.getCmisRecursive()));
             sourceAction.setDispatcher(PINNED_DISPATCHER);
-
         }
         sourceAction.setParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD, String.valueOf(jobModel.getSkipContentUpload()));
         sourceAction.setNmbOfWorkers(1);
         sourceAction.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, sourceAction);
         end = sourceAction;
+
+        if(jobModel.getCmisRecursive()) {
+            ConfiguredAction cmisRecursive = new ConfiguredAction();
+            cmisRecursive.setActionId(RECURSIVE_CMIS);
+            cmisRecursive.setClassId(actionClassService.getClassId(RecursiveCmis.class));
+            cmisRecursive.setParameter(SACMISInput.PARAM_CMIS_QUERY, jobModel.getCmisQuery());
+            cmisRecursive.setNmbOfWorkers(1);
+            cmisRecursive.addReceiver(REPORTER, reporter);
+            end.addReceiver(DEFAULT_RECEIVER, cmisRecursive);
+            end = cmisRecursive;
+
+            ConfiguredAction cmisQuery = new ConfiguredAction();
+            cmisQuery.setActionId(CMIS_QUERY);
+            cmisQuery.setClassId(actionClassService.getClassId(CmisQuery.class));
+            cmisQuery.setParameter(SACMISInput.PARAM_CMIS_URL, jobModel.getCmisURL());
+            cmisQuery.setParameter(SACMISInput.PARAM_CMIS_USERNAME, jobModel.getCmisUsername());
+            cmisQuery.setParameter(SACMISInput.PARAM_CMIS_PASSWORD, jobModel.getCmisPassword());
+            cmisQuery.setParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD, String.valueOf(jobModel.getSkipContentUpload()));
+            cmisQuery.setNmbOfWorkers(1);
+            cmisQuery.addReceiver(REPORTER, reporter);
+            cmisQuery.addReceiver(RECURSIVE_CMIS, cmisRecursive);
+            end.addReceiver(DEFAULT_RECEIVER, cmisQuery);
+            end = cmisQuery;
+
+            cmisRecursive.addReceiver(RECURSIVE_RECEIVER, cmisQuery);
+        }
 
         if(jobModel.getMoveBeforeProc()){
             ConfiguredAction moveAction = new ConfiguredAction();

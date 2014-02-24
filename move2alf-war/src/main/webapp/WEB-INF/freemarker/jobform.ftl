@@ -128,6 +128,10 @@
         <@textArea label="CMIS query" name="cmisQuery" binding="job.cmisQuery" attributes="maxlength='${job.cmisQueryMaxLength}'" />
         </div>
 
+        <div id="importOptions-CMIS" class="importOptions">
+        <@checkboxWithTextBefore binding="job.cmisRecursive" label="Recursive with query" helpText="The query needs to take care of joining with the relevant aspects. Filters are allowed." />
+        </div>
+
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
 				<option value="${destination.id}" <#if (job.dest?? && job.dest==destination.id)>selected="selected"</#if>>${destination.name}</option>
 		</@labeledSelectList>
