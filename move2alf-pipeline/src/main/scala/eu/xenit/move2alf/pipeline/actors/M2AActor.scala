@@ -50,8 +50,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       stay()
     }
     case Event(e, _) => {
-      logger.error("Unexpected event {} in state Death for actionId {} and actorRef {}", e, action.id, context.self)
-      assert(false)
+      logger.error("Unexpected event "+e+" in state Death for actionId "+action.id+" and "+context.self)
       stay()
     }
   }
