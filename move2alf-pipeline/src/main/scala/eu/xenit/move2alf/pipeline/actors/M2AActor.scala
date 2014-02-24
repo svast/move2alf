@@ -51,6 +51,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
     case Event(e, _) => {
       logger.error("Unexpected event "+e+" in state Death for actionId "+action.id+" and "+context.self)
+      logger.error("Message coming from "+sender)
       stay()
     }
   }
@@ -58,8 +59,6 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   private def stayOrDie(data: AliveData): M2AActor.this.type#State = {
     if (!action.blocked && data.nmbOfEOC == nmbOfNonLoopedSenders) {
       if(nmbOfLoopedSenders == 0){
-        action.flush()
-        action.broadCast(EOC)
         goto(Death) using Empty
       } else {
         goto(Negotiating) using data.copy(counter = nmbOfLoopedSenders*nmbOfWorkers)
@@ -89,6 +88,11 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       case Event(Start | Broadcast(Start), _) => {
         stay()
       }
+      case Event(e, _) => {
+        logger.error("Unexpected event "+e+" in state "+stateName+" for actionId "+action.id+" and "+context.self)
+        logger.error("Message coming from "+sender)
+        stay()
+      }
     }
   }
 
@@ -98,8 +102,6 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       if(count == nmbOfNonLoopedSenders){
         if(nmbOfLoopedSenders == 0){
           if(!action.blocked){
-            action.flush()
-            action.broadCast(EOC)
             goto(Death) using Empty
           } else {
             stay() using data.copy(nmbOfEOC = count)
@@ -317,14 +319,14 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.messageSent = false
       goto(Negotiating) using data
     } else {
-      stayNearlyDeadOrDie(data.nmbOfEOC, data.nmbOfReadyToDie, data)
+      stayNearlyDeadOrDie(data.nmbOfEOC, data.nmbOfReadyToDie, data, true)
     }
   }
 
-  def stayNearlyDeadOrDie(eocCount: Int, readyToDieCount: Int, data: AliveData): FSM.State[ActorState, ActorData] = {
+  def stayNearlyDeadOrDie(eocCount: Int, readyToDieCount: Int, data: AliveData, normalMessage: Boolean = false): FSM.State[ActorState, ActorData] = {
     if(eocCount == nmbOfNonLoopedSenders && nmbOfLoopedSenders == 0){
       checkBlockedAndStayOrDie(data, eocCount, readyToDieCount)
-    } else if (eocCount + readyToDieCount == nmbOfNonLoopedSenders + nmbOfLoopedSenders) {
+    } else if (!normalMessage && eocCount + readyToDieCount == nmbOfNonLoopedSenders + nmbOfLoopedSenders) {
       checkBlockedAndStayOrDie(data, eocCount, readyToDieCount)
     } else {
       stay using data.copy(nmbOfEOC = eocCount, nmbOfReadyToDie = readyToDieCount)
@@ -395,6 +397,11 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       logger.debug(context.self +" is going from Alive to NearDeath")
       action.broadCast(ReadyToDie)
     }
+    case Alive -> Death => {
+      logger.debug(context.self +" is going from Alive to Death")
+      action.flush()
+      action.broadCast(EOC)
+    }
     case Negotiating -> Flushing => {
       logger.debug(context.self +" is going from Negotiating to Flushing")
       action.flush()
@@ -406,6 +413,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
     case NearDeath -> Death => {
       logger.debug(context.self +" is going from NearDeath to Death")
+      action.flush()
       action.broadCast(BackAlive)
       action.broadCast(EOC)
     }

@@ -64,7 +64,10 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   }
 
   def broadCast(message: AnyRef){
-    receivers foreach { receiver => getActorRef(receiver) ! Broadcast(message)}
+    receivers foreach { receiver => {
+      logger.debug(context.self+" broadcasting "+message+" to "+getActorRef(receiver))
+      getActorRef(receiver).tell(Broadcast(message), context.self)
+    }}
   }
 
   def flush(){
@@ -99,8 +102,8 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   final def sendMessage(message: AnyRef, receiver: String = "default"){
     if (receivers.contains(receiver)){
       taskKey match {
-        case None => getActorRef(receiver) ! M2AMessage(message)
-        case Some(key) => getActorRef(receiver) ! TaskMessage(key, message, replyTo.get)
+        case None => getActorRef(receiver).tell(M2AMessage(message), context.self)
+        case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
       }
       messageSent == true
     } else {
