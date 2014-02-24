@@ -6,15 +6,9 @@ import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.SACMISInput;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import org.apache.camel.component.cmis.CamelCMISConstants;
-import org.apache.chemistry.opencmis.client.runtime.PropertyImpl;
-import org.apache.chemistry.opencmis.commons.data.Ace;
-import org.apache.chemistry.opencmis.commons.data.PropertyData;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlListImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.*;
 
 @ClassInfo(classId = "CMISMetadataAction",
@@ -28,14 +22,13 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
     @Override
     protected void executeImpl(FileInfo fileInfo) {
         HashMap<String, Object> headers = new HashMap();
-        headers.putAll((Map)(fileInfo.get(SACMISInput.PARAM_CAMEL_HEADER)));
+        headers.putAll((Map)(fileInfo.get(Parameters.PARAM_CMIS_PROPERTIES)));
         String path = ((String)fileInfo.get(Parameters.PARAM_RELATIVE_PATH));
         if(!path.endsWith("/"))
             path = path.concat("/");
         path = path.concat(Parameters.PARAM_NAME);
 
-        fileInfo.remove(SACMISInput.PARAM_CAMEL_HEADER);
-
+        fileInfo.remove(Parameters.PARAM_CMIS_PROPERTIES);
         String type = (String)headers.get(CMIS_OBJECT_TYPE_ID);
         logger.debug("Setting type and namespace for " + type + " for " + fileInfo.get(Parameters.PARAM_FILE));
 

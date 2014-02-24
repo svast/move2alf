@@ -64,6 +64,8 @@ public class Parameters {
 	 */
 	public static final String PARAM_NAMESPACE = "namespace";
 
+
+    public static final String PARAM_CMIS_PROPERTIES = "cmisProperties";
 	/**
 	 * Mimtype of the file. Type: String
 	 */

@@ -6,6 +6,7 @@ import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.pipeline.JobHandle;
+import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
@@ -505,7 +506,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
             Job job = getJob(jobId);
             String name = job.getName();
             ConfiguredAction configuredAction = job.getFirstConfiguredAction();
-            JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(pipelineAssembler.getActionConfig(configuredAction)));
+            ActionConfig actionConfig = pipelineAssembler.getActionConfig(configuredAction);
+            JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(actionConfig));
             jobMap.put(job.getId(), jobHandle);
         }
         JobHandle handle = jobMap.get(jobId);
