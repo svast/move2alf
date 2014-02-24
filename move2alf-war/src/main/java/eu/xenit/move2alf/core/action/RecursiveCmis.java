@@ -65,7 +65,7 @@ public class RecursiveCmis extends Move2AlfReceivingAction<Object> implements St
         } else {
             String errorMessage = "Query " + cmisQuery + " is not suited for the recursive CMIS, it should contain an IN_TREE operator";
             logger.error(errorMessage);
-            throw new Move2AlfException("Recursive CMIS exception " + errorMessage);
+            handleError("onStart", errorMessage);
         }
     }
 }

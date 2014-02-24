@@ -398,7 +398,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end.addReceiver(DEFAULT_RECEIVER, cmisQuery);
             end = cmisQuery;
 
-            cmisRecursive.addReceiver(RECURSIVE_RECEIVER, cmisQuery);
         }
 
         if(jobModel.getMoveBeforeProc()){
