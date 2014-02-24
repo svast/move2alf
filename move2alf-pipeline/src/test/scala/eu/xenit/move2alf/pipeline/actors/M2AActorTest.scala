@@ -3,10 +3,10 @@ package eu.xenit.move2alf.pipeline.actors
 import org.junit.{After, Before, Test}
 import akka.testkit.{TestActorRef, TestProbe, TestFSMRef}
 import eu.xenit.move2alf.pipeline.actions.context.{AbstractActionContext, AbstractActionContextFactory}
-import eu.xenit.move2alf.pipeline.actions.{ActionFactory, Action}
+import eu.xenit.move2alf.pipeline.actions.{JavaActionImpl, ActionFactory, Action}
 import akka.actor._
 import org.mockito.Mockito._
-import eu.xenit.move2alf.pipeline.{Start, EOC}
+import eu.xenit.move2alf.pipeline.{M2AMessage, Start, EOC}
 import eu.xenit.move2alf.pipeline.state.JobContext
 import akka.routing.Broadcast
 
@@ -30,7 +30,7 @@ class M2AActorTest {
     system = ActorSystem("testM2AActorSystem")
     testProbe = TestProbe()
     actionFactory = new ActionFactory {
-      def createAction(): Action = mock(classOf[Action])
+      def createAction(): Action = new JavaActionImpl[String]
     }
     actionContextFactory = new AbstractActionContextFactory("test", actionFactory) {
       protected def constructActionContext(basicAction: Action)(implicit context: ActorContext): AbstractActionContext = new AbstractActionContext(testFSMId, Set("receiver1"), getReceiver) {
@@ -80,6 +80,18 @@ class M2AActorTest {
     testFSM ! EOC
     assert(testFSM.stateName==Alive)
     testFSM ! EOC
+    assert(testFSM.stateName==Negotiating)
+  }
+
+  @Test
+  def testNegotiatingGetMessage {
+    val testFSM = TestFSMRef(new M2AActor(actionContextFactory, 1, 1, actoinId => 0))
+    assert(testFSM.stateName==Death)
+    testFSM ! Start
+    assert(testFSM.stateName==Alive)
+    testFSM ! EOC
+    assert(testFSM.stateName==Negotiating)
+    testFSM ! M2AMessage("HELLO")
     assert(testFSM.stateName==Negotiating)
   }
 

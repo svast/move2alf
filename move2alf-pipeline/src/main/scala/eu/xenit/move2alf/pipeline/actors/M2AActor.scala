@@ -58,9 +58,13 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   private def stayOrDie(data: AliveData): M2AActor.this.type#State = {
     if (!action.blocked && data.nmbOfEOC == nmbOfNonLoopedSenders) {
-      action.flush()
-      action.broadCast(EOC)
-      goto(Death) using Empty
+      if(nmbOfLoopedSenders == 0){
+        action.flush()
+        action.broadCast(EOC)
+        goto(Death) using Empty
+      } else {
+        goto(Negotiating) using data.copy(counter = nmbOfLoopedSenders*nmbOfWorkers)
+      }
     } else {
       stay()
     }
@@ -204,6 +208,18 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     case Event(ReadyToDie | Broadcast(ReadyToDie), data:AliveData) => {
       stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie+1)
     }
+    case Event(M2AMessage(message), data: AliveData) => {
+      action.receive(message)
+      stay()
+    }
+    case Event(TaskMessage(key, message, replyTo), data: AliveData) => {
+      action.receive(message, Some(key), Some(replyTo))
+      stay()
+    }
+    case Event(ReplyMessage(key, message), data: AliveData) => {
+      action.receiveReply(key, message)
+      stay()
+    }
     case event => handleCommonMessages(event)
   }
 
@@ -227,6 +243,18 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     }
     case Event(ReadyToDie | Broadcast(ReadyToDie), data:AliveData) => {
       stay() using data.copy(nmbOfReadyToDie = data.nmbOfReadyToDie+1)
+    }
+    case Event(M2AMessage(message), data: AliveData) => {
+      action.receive(message)
+      stay()
+    }
+    case Event(TaskMessage(key, message, replyTo), data: AliveData) => {
+      action.receive(message, Some(key), Some(replyTo))
+      stay()
+    }
+    case Event(ReplyMessage(key, message), data: AliveData) => {
+      action.receiveReply(key, message)
+      stay()
     }
     case event => handleCommonMessages(event)
   }
@@ -296,20 +324,25 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   def stayNearlyDeadOrDie(eocCount: Int, readyToDieCount: Int, data: AliveData): FSM.State[ActorState, ActorData] = {
     if(eocCount == nmbOfNonLoopedSenders && nmbOfLoopedSenders == 0){
-      goto(Death) using Empty
+      checkBlockedAndStayOrDie(data, eocCount, readyToDieCount)
     } else if (eocCount + readyToDieCount == nmbOfNonLoopedSenders + nmbOfLoopedSenders) {
-      if (!action.blocked) {
-        goto(Death) using Empty
-      } else {
-        stay using data.copy(nmbOfEOC = eocCount, nmbOfReadyToDie = readyToDieCount)
-      }
+      checkBlockedAndStayOrDie(data, eocCount, readyToDieCount)
+    } else {
+      stay using data.copy(nmbOfEOC = eocCount, nmbOfReadyToDie = readyToDieCount)
+    }
+  }
+
+
+  def checkBlockedAndStayOrDie(data: AliveData, eocCount: Int, readyToDieCount: Int): FSM.State[ActorState, ActorData] = {
+    if (!action.blocked) {
+      goto(Death) using Empty
     } else {
       stay using data.copy(nmbOfEOC = eocCount, nmbOfReadyToDie = readyToDieCount)
     }
   }
 
   private def shouldGoAlive(data: AliveData): Boolean = {
-    if(data.nmbOfEOC + data.nmbOfReadyToDie == nmbOfNonLoopedSenders){
+    if(data.nmbOfEOC + data.nmbOfReadyToDie == nmbOfNonLoopedSenders && !action.blocked){
       false
     } else {
       true
