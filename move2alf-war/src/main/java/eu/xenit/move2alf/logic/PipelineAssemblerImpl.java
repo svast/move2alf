@@ -80,7 +80,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     private Map<String, ConfiguredAction> getAllConfiguredActions(ConfiguredAction action, Map<String, ConfiguredAction> configuredActionMap){
         configuredActionMap.put(action.getActionId(), action);
         for(ConfiguredAction receiver: action.getReceivers().values()){
-            if(!configuredActionMap.containsKey(action.getActionId()))
+            if(!configuredActionMap.containsKey(receiver.getActionId()))
                 getAllConfiguredActions(receiver, configuredActionMap);
         }
         return configuredActionMap;
@@ -132,14 +132,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		Map<String, String> metadataParameterMap = new HashMap<String, String>();
 		Map<String, String> transformParameterMap = new HashMap<String, String>();
 
-		for(ConfiguredAction action: configuredActionMap.values()) {
-			if (SOURCE_ID.equals(action
+		for(ConfiguredAction action: configuredActionMap.values())
+            if (SOURCE_ID.equals(action
                     .getActionId())) {
                 String path = action.getParameter(SASource.PARAM_INPUTPATHS);
                 inputSource = InputSource.FILESYSTEM;
                 inputFolder = Arrays.asList(path.split("\\|"));
                 skipContentUpload = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD));
-			} else if (SOURCE_CMIS_ID.equals(action.getActionId())) {
+            } else if (SOURCE_CMIS_ID.equals(action.getActionId())) {
                 inputSource = InputSource.CMIS;
                 cmisURL = action.getParameter(SACMISInput.PARAM_CMIS_URL);
                 cmisUsername = action.getParameter(SACMISInput.PARAM_CMIS_USERNAME);
@@ -149,65 +149,64 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 cmisRecursive = Boolean.valueOf(action.getParameter(SACMISInput.PARAM_RECURSIVE));
             } else if (UPLOAD_ID.equals(action
                     .getActionId())) {
-				destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
-				dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-				writeOption = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION());
-				mode = Mode.WRITE;
-			} else if (DELETE_ID
-					.equals(action.getActionId())) {
-				destinationFolder = action.getParameter(DeleteAction$.MODULE$.PARAM_PATH());
+                destinationFolder = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_PATH());
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-				deleteOption = action.getParameter(DeleteAction$.MODULE$.PARAM_DELETEOPTION());
-				mode = Mode.DELETE;
-			} else if (LIST_ID.equals(action
+                writeOption = action.getParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION());
+                mode = Mode.WRITE;
+            } else if (DELETE_ID
+                    .equals(action.getActionId())) {
+                destinationFolder = action.getParameter(DeleteAction$.MODULE$.PARAM_PATH());
+                dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
+                deleteOption = action.getParameter(DeleteAction$.MODULE$.PARAM_DELETEOPTION());
+                mode = Mode.DELETE;
+            } else if (LIST_ID.equals(action
                     .getActionId())) {
-				destinationFolder = action.getParameter(ListAction$.MODULE$.PARAM_PATH());
+                destinationFolder = action.getParameter(ListAction$.MODULE$.PARAM_PATH());
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
-				ignorePath = false;
-				mode = Mode.LIST;
-			} else if (EXISTENCE_CHECK_ID.equals(action.getActionId())){
+                ignorePath = false;
+                mode = Mode.LIST;
+            } else if (EXISTENCE_CHECK_ID.equals(action.getActionId())) {
                 ignorePath = true;
                 mode = Mode.LIST;
                 dest = Integer.parseInt(action.getParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION()));
                 destinationFolder = action.getParameter(ListAction$.MODULE$.PARAM_PATH());
             } else if (MOVE_BEFORE_ID
-					.equals(action.getActionId())) {
-				moveBeforeProcessing = true;
-				moveBeforeProcessingPath = action
-						.getParameter(MoveAction.PARAM_PATH);
+                    .equals(action.getActionId())) {
+                moveBeforeProcessing = true;
+                moveBeforeProcessingPath = action
+                        .getParameter(MoveAction.PARAM_PATH);
             } else if (MOVE_AFTER_ID.equals(action.getActionId())) {
-				moveAfterLoad = true;
-				moveAfterLoadPath = action
-						.getParameter(MoveAction.PARAM_PATH);
+                moveAfterLoad = true;
+                moveAfterLoadPath = action
+                        .getParameter(MoveAction.PARAM_PATH);
             } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId())) {
-				moveNotLoaded = true;
-				moveNotLoadedPath = action
-						.getParameter(MoveAction.PARAM_PATH);
-			} else if (END_ACTION
-					.equals(action.getActionId())) {
-				sendNotification = action.getParameter(M2AlfEndAction.PARAM_SENDERROR);
-				emailAddressNotification = action
-						.getParameter(M2AlfEndAction.PARAM_ERROR_TO);
-				sendReport = action.getParameter(M2AlfEndAction.PARAM_SENDREPORT);
-				emailAddressReport = action.getParameter(M2AlfEndAction.PARAM_REPORT_TO);
-			} else if (FILTER_ID
-					.equals(action.getActionId())) {
-				extension = action.getParameter(SAFilter.PARAM_EXTENSION);
-			} else if (COMMAND_BEFORE_ID
-					.equals(action.getActionId())) {
-					commandBefore = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+                moveNotLoaded = true;
+                moveNotLoadedPath = action
+                        .getParameter(MoveAction.PARAM_PATH);
+            } else if (END_ACTION
+                    .equals(action.getActionId())) {
+                sendNotification = action.getParameter(M2AlfEndAction.PARAM_SENDERROR);
+                emailAddressNotification = action
+                        .getParameter(M2AlfEndAction.PARAM_ERROR_TO);
+                sendReport = action.getParameter(M2AlfEndAction.PARAM_SENDREPORT);
+                emailAddressReport = action.getParameter(M2AlfEndAction.PARAM_REPORT_TO);
+            } else if (FILTER_ID
+                    .equals(action.getActionId())) {
+                extension = action.getParameter(SAFilter.PARAM_EXTENSION);
+            } else if (COMMAND_BEFORE_ID
+                    .equals(action.getActionId())) {
+                commandBefore = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
             } else if (COMMAND_AFTER_ID.equals(action.getActionId())) {
                 commandAfter = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
-			} else if (METADATA_ACTION_ID.equals(action.getActionId())) {
-                        metadata = action.getClassId();
-						metadataParameterMap = action.getParameters();
-		    } else if (TRANSFORM_ACTION_ID.equals(action.getActionId())) {
-                        transform = action.getClassId();
-						transformParameterMap = action.getParameters();
-            } else if (PUT_CONTENT.equals(action.getActionId())){
+            } else if (METADATA_ACTION_ID.equals(action.getActionId())) {
+                metadata = action.getClassId();
+                metadataParameterMap = action.getParameters();
+            } else if (TRANSFORM_ACTION_ID.equals(action.getActionId())) {
+                transform = action.getClassId();
+                transformParameterMap = action.getParameters();
+            } else if (PUT_CONTENT.equals(action.getActionId())) {
                 contentStoreId = Integer.parseInt(action.getParameter(PutContentAction.PARAM_DESTINATION()));
             }
-		}
 
         jobModel.setSkipContentUpload(skipContentUpload);
         jobModel.setInputSource(inputSource);
