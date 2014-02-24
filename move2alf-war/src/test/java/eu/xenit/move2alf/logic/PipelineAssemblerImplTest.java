@@ -59,7 +59,7 @@ public class PipelineAssemblerImplTest {
         end.addReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
 
-        C/*onfiguredAction listAction;
+        /*onfiguredAction listAction;
 
             listAction = new ConfiguredAction();
             listAction.setActionId(EXISTENCE_CHECK_ID);
@@ -79,6 +79,7 @@ public class PipelineAssemblerImplTest {
         endAction.setParameter(M2AlfEndAction.PARAM_SENDERROR, Boolean.toString(jobModel.getSendNotification()));
         endAction.setParameter(M2AlfEndAction.PARAM_ERROR_TO, jobModel.getSendNotificationText());
         end.addReceiver(DEFAULT_RECEIVER, endAction);*/
+        return null;
     }
 
     void getActionConfigTest(){
