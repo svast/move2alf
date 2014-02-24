@@ -69,6 +69,8 @@ public class JobModel {
 
     private Boolean skipContentUpload = false;
 
+    private Boolean cmisRecursive = false;
+
 	private List<String> cron = new ArrayList<String>();
 
 
@@ -210,6 +212,18 @@ public class JobModel {
 
     public void setCmisQuery(final String cmisQuery) {
         this.cmisQuery = cmisQuery;
+    }
+
+    public boolean getCmisRecursive() {
+        return cmisRecursive;
+    }
+
+    public void setCmisRecursive(final String cmisRecursive) {
+        this.cmisRecursive = Boolean.valueOf(cmisRecursive);
+    }
+
+    public void setCmisRecursive(final boolean cmisRecursive) {
+        this.cmisRecursive = cmisRecursive;
     }
 
     public void setInputFolder(List<String> inputFolders) {
