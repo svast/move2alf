@@ -97,7 +97,7 @@ public class CmisQuery extends Move2AlfReceivingAction<Object> implements StartA
                         String pathFolder = path + "/" + nameFolder;
 
                         // send message to RecursiveCmis with objectId, pathFolder
-                        RecursiveCmisMessage outMessage = new RecursiveCmisMessage(objectId,type,path,query);
+                        RecursiveCmisMessage outMessage = new RecursiveCmisMessage(objectId,type,pathFolder,query);
                         sendMessage(PipelineAssemblerImpl.RECURSIVE_CMIS,outMessage);
                     } else {
                         List<? extends PropertyData<?>> props = item.getProperties();
