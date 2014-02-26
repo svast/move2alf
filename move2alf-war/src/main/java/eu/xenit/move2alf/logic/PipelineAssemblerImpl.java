@@ -59,13 +59,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     // name/values for metadata and transform parameters are kept in a single string using this separator
     public static final String SEPARATOR = "@@@";
 
-
+    public void setActionClassService(ActionClassInfoService actionClassService) {
+        this.actionClassService = actionClassService;
+    }
 
     @Autowired
     private ActionClassInfoService actionClassService;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(PipelineAssemblerImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(PipelineAssemblerImpl.class);
 
 	@Value(value = "#{'${default.batch.size}'}")
 	private int defaultBatchSize;
@@ -276,7 +277,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		return jobModel;
 	}
 
-
     @Override
     public ActionConfig getActionConfig(ConfiguredAction configuredAction){
         HashMap<String, ActionConfig> map = new HashMap<String, ActionConfig>();
@@ -291,15 +291,17 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         Map<String, ConfiguredAction> configuredActionReceivers = configuredAction.getReceivers();
         ActionConfig actionConfig = actionConfigMap.get(configuredAction.getActionId());
 
-        for(String key: configuredActionReceivers.keySet()){
-            ConfiguredAction configuredActionReceiver = configuredActionReceivers.get(key);
-            if(!actionConfigMap.containsKey(configuredActionReceiver.getActionId())){
-                M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredActionReceiver.getClassId()).getClazz(), configuredActionReceiver.getParameters(), beanFactory);
-                ActionConfig receiver = new ActionConfig(configuredActionReceiver.getActionId(), factory, configuredActionReceiver.getNmbOfWorkers());
-                actionConfigMap.put(configuredActionReceivers.get(key).getActionId(), receiver);
-                configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
+        if(configuredActionReceivers != null) {
+            for(String key: configuredActionReceivers.keySet()){
+                ConfiguredAction configuredActionReceiver = configuredActionReceivers.get(key);
+                if(!actionConfigMap.containsKey(configuredActionReceiver.getActionId())){
+                    M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredActionReceiver.getClassId()).getClazz(), configuredActionReceiver.getParameters(), beanFactory);
+                    ActionConfig receiver = new ActionConfig(configuredActionReceiver.getActionId(), factory, configuredActionReceiver.getNmbOfWorkers());
+                    actionConfigMap.put(configuredActionReceivers.get(key).getActionId(), receiver);
+                    configuredActionToActionConfig(configuredActionReceivers.get(key), actionConfigMap);
+                }
+                actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceiver.getActionId()));
             }
-            actionConfig.addReceiver(key, actionConfigMap.get(configuredActionReceiver.getActionId()));
         }
 
         actionConfig.setDispatcher(configuredAction.getDispatcher());
