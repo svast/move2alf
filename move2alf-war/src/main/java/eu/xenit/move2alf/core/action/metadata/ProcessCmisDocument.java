@@ -35,6 +35,7 @@ public class ProcessCmisDocument {
         boolean failed = false;
 
         String uuid = extractUuid(cmisObjectId);
+        logger.debug("Processing document " + uuid + " skipContentUpload=" + skipContentUpload);
 
         File file = null;
         if(!skipContentUpload) {

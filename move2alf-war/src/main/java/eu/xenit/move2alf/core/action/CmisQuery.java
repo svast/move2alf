@@ -35,7 +35,7 @@ import static eu.xenit.move2alf.common.Parameters.*;
  * Date: 2/3/14
  * Time: 4:55 PM
  */
-public class CmisQuery extends Move2AlfReceivingAction<Object> implements StartAware {
+public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> implements StartAware, Parameterized {
     private static final Logger logger = LoggerFactory.getLogger(CmisQuery.class);
     public static final String TYPE_FOLDER = "folder";
     public static final String TYPE_DOCUMENT = "document";
@@ -43,42 +43,16 @@ public class CmisQuery extends Move2AlfReceivingAction<Object> implements StartA
 
     private static final int pageSize = 1000;
 
-    private Boolean skipContentUpload;
-    private String cmisQuery;
-    private String cmisUrl;
-    private String cmisUsername;
-    private String cmisPassword;
-
     final static File tempFolder = Files.createTempDir();
 
-    public void setSkipContentUpload(String skipContentUpload) {
-        this.skipContentUpload = Boolean.valueOf(skipContentUpload);
-    }
-
-    public void setCmisQuery(String cmisQuery) {
-        this.cmisQuery = cmisQuery;
-    }
-
-    public void setCmisUrl(String cmisUrl) {
-        this.cmisUrl = cmisUrl;
-    }
-
-    public void setCmisUsername(String cmisUsername) {
-        this.cmisUsername = cmisUsername;
-    }
-
-    public void setCmisPassword(String cmisPassword) {
-        this.cmisPassword = cmisPassword;
-    }
 
     @Override
-    protected void executeImpl(Object message) {
-        RecursiveCmisMessage m = (RecursiveCmisMessage)message;
+    protected void executeImpl(RecursiveCmisMessage m) {
         String query = m.getQuery();
         String path = m.getPath();
         String type = m.getType();
 
-
+        boolean skipContentUpload = Boolean.parseBoolean(getParameter(SACMISInput.PARAM_SKIP_CONTENT_UPLOAD));
         int count =0 ;
         int pageNumber = 0;
         boolean finished = false;
@@ -113,6 +87,7 @@ public class CmisQuery extends Move2AlfReceivingAction<Object> implements StartA
                             if (!(skipContentUpload) && CamelCMISConstants.CMIS_DOCUMENT.equals(objectBaseTypeId)) {
                                 inputStream = getContentStreamFor(item);
                             }
+                            logger.debug("Will process document " + objectIdDocument + " with name " + nameDocument + " and path " + path + " and inputStream=" + inputStream + " and skipContentUpload=" + skipContentUpload);
                             ProcessCmisDocument.processDocument(objectIdDocument,nameDocument,path, tempFolder, inputStream, properties, skipContentUpload, sendingContext);
                         }  catch (Exception e) {
                             logger.error("Skipping " + objectIdDocument + ", exception: " + e);
@@ -166,16 +141,15 @@ public class CmisQuery extends Move2AlfReceivingAction<Object> implements StartA
     }
 
     private Session createSession() {
-        logger.info("cmisUrl=" + cmisUrl + " and cmisUser=" + cmisUsername + " and cmisPassword=" + cmisPassword);
         SessionFactory factory = SessionFactoryImpl.newInstance();
         Map<String, String> parameter = new HashMap<String, String>();
 
         // user credentials
-        parameter.put(SessionParameter.USER, cmisUsername);
-        parameter.put(SessionParameter.PASSWORD, cmisPassword);
+        parameter.put(SessionParameter.USER, getParameter(SACMISInput.PARAM_CMIS_USERNAME));
+        parameter.put(SessionParameter.PASSWORD, getParameter(SACMISInput.PARAM_CMIS_PASSWORD));
 
         // connection settings
-        parameter.put(SessionParameter.ATOMPUB_URL, cmisUrl);
+        parameter.put(SessionParameter.ATOMPUB_URL, getParameter(SACMISInput.PARAM_CMIS_URL));
         parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 
         List<Repository> repositories = factory.getRepositories(parameter);
