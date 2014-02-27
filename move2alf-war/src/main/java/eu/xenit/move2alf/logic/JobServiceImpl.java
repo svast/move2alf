@@ -530,6 +530,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
             handle.destroy();
         }
         actorSystem.shutdown();
+        actorSystem.awaitTermination();
     }
 
 }

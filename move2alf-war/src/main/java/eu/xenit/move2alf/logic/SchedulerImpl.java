@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -56,6 +57,11 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		Util.authenticateAsSystem();
 		reloadSchedules();
 	}
+
+    @PreDestroy
+    public void preDestroy() throws SchedulerException {
+        scheduler.shutdown();
+    }
 
 	public void reloadSchedules() {
 		getJobService().resetCycles();
