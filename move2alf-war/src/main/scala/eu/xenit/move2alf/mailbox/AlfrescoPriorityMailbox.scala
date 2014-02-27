@@ -4,7 +4,7 @@ import akka.dispatch.{PriorityGenerator, UnboundedPriorityMailbox}
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import eu.xenit.move2alf.core.action.messages._
-import eu.xenit.move2alf.pipeline.{EOC, M2AMessage}
+import eu.xenit.move2alf.pipeline.{TaskMessage, EOC, M2AMessage}
 import eu.xenit.move2alf.pipeline.actors.{ReadyToDie, Negotiate, Flush}
 
 /**
@@ -16,11 +16,22 @@ class AlfrescoPriorityMailbox(settings: ActorSystem.Settings, config: Config) ex
   PriorityGenerator {
     case M2AMessage(m) => {
       m match {
-        case m:SendBatchMessage => 0
-        case m:DeleteMessage => 0
-        case m:BatchACLMessage => 0
-        case m:ListMessage => 0
-        case m:CheckExistenceMessage => 0
+        case n:SendBatchMessage => 0
+        case n:DeleteMessage => 0
+        case n:BatchACLMessage => 0
+        case n:ListMessage => 0
+        case n:CheckExistenceMessage => 0
+        case _ => 1
+      }
+    }
+    case TaskMessage(_,m,_) => {
+      m match {
+        case n:SendBatchMessage => 0
+        case n:DeleteMessage => 0
+        case n:BatchACLMessage => 0
+        case n:SetAclMessage => 0
+        case n:ListMessage => 0
+        case n:CheckExistenceMessage => 0
         case _ => 1
       }
     }
