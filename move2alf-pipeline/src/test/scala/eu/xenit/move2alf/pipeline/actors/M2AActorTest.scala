@@ -175,4 +175,44 @@ class M2AActorTest {
     assert(testFSM.stateName == Death)
   }
 
+  class DummyActionContextFactory(actionContext: AbstractActionContext) extends AbstractActionContextFactory(actionContext.id, mock(classOf[ActionFactory])) {
+    protected def constructActionContext(basicAction: Action)(implicit context: ActorContext): AbstractActionContext = actionContext
+  }
+
+  @Test
+  def testFailedNegotiation {
+    val actionContext = mock(classOf[AbstractActionContext])
+    val actionId = "TestActionContext"
+    when(actionContext.id).thenReturn(actionId)
+    when(actionContext.blocked).thenReturn(false)
+    when(actionContext.messageSent).thenReturn(false)
+    val dummyActionContextFactory = new DummyActionContextFactory(actionContext)
+    val testFSM = TestFSMRef(new M2AActor(dummyActionContextFactory, 2, 1, actionId => 2))
+    assert(testFSM.stateName==Death)
+    testFSM ! Start
+    assert(testFSM.stateName==Alive)
+    when(actionContext.blocked).thenReturn(true)
+    (1 to 2).foreach(ignored => testFSM ! EOC)
+    assert(testFSM.stateName==Negotiating)
+    testFSM ! Negotiate(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==Alive)
+    when(actionContext.blocked).thenReturn(false)
+    testFSM ! M2AMessage("hello")
+    assert(testFSM.stateName==Negotiating)
+    when(actionContext.messageSent).thenReturn(true)
+    testFSM ! Negotiate(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==Negotiating)
+    when(actionContext.messageSent).thenReturn(false)
+    testFSM ! Negotiate(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==Flushing)
+    when(actionContext.messageSent).thenReturn(true)
+    testFSM ! Flush(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==Negotiating)
+    when(actionContext.messageSent).thenReturn(false)
+    testFSM ! Negotiate(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==Flushing)
+    testFSM ! Flush(Seq((actionId, testFSM)))
+    assert(testFSM.stateName==NearDeath)
+  }
+
 }
