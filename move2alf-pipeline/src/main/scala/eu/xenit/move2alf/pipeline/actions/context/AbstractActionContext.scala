@@ -105,7 +105,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
         case None => getActorRef(receiver).tell(M2AMessage(message), context.self)
         case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
       }
-      messageSent == true
+      messageSent = true
     } else {
       logger.error("Actor: "+context.self+" has no receiver called "+receiver);
     }
