@@ -316,6 +316,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
 
   private def handleNormalMessagesNearlyDead(data: AliveData): FSM.State[ActorState, ActorData] = {
     if (action.messageSent) {
+      logger.debug(context.self+" A message was sent, going back to negotiation")
       action.messageSent = false
       goto(Negotiating) using data
     } else {
@@ -360,6 +361,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       val count = data.counter - 1
       if (count == 0) {
         if (action.messageSent) {
+          logger.debug("A message was sent. Cannot go to next state.")
           action.messageSent = false
           //Negotiation failed, redo
           if(shouldGoAlive(data)){
