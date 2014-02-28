@@ -60,6 +60,7 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
         logger.info("query=" + query + " and path=" + path + " and type=" + type);
         ItemIterable<QueryResult> itemIterable = executeQuery(query);
         while (!finished) {
+            int countStart=count;
             logger.debug("Processing page " + pageNumber);
             try {
                 ItemIterable<QueryResult> currentPage = itemIterable.skipTo(count).getPage();
@@ -90,14 +91,25 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
                             logger.debug("Will process document " + objectIdDocument + " with name " + nameDocument + " and path " + path + " and inputStream=" + inputStream + " and skipContentUpload=" + skipContentUpload);
                             ProcessCmisDocument.processDocument(objectIdDocument,nameDocument,path, tempFolder, inputStream, properties, skipContentUpload, sendingContext);
                         }  catch (Exception e) {
-                            logger.error("Skipping " + objectIdDocument + ", exception: " + e);
+                            logger.error("Skipping document " + objectIdDocument + ", exception: " + e);
                         }
                     }
                     count++;
                  }
-                pageNumber++;
-                logger.debug("here count=" + count + " and pageNumberFolder=" + pageNumber + " and hasMoreItems=" + currentPage.getHasMoreItems() + " and total number of items=" + currentPage.getTotalNumItems());
-                //if(count==currentPage.getTotalNumItems()) {
+                if(!finished)
+                    if(currentPage.getTotalNumItems()*(pageNumber+1)==count) {
+                        pageNumber++;
+                        logger.debug("Increased page number, now path=" + path + " and count=" + count + " and pageNumber=" + pageNumber + " and hasMoreItems=" + currentPage.getHasMoreItems() + " and total number of items=" + currentPage.getTotalNumItems());
+                    } else {
+                        logger.error("Page " + pageNumber + " has not been processed correctly, count=" + count + " and total number of items=" + currentPage.getTotalNumItems());
+                        logger.error("Most probably cause for this are values too low for parameters system.acl.maxPermissionChecks and system.acl.maxPermissionCheckTimeMillis, increase those on your source Alfresco");
+                        count=countStart;
+                        finished = true;
+                    }
+                if(!(currentPage.getHasMoreItems())) {
+                    finished=true;
+                }
+
                 if (!currentPage.getHasMoreItems()) {
                     finished = true;
                 }
