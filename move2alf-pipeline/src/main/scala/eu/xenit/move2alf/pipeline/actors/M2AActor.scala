@@ -147,7 +147,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
     aliveNegotiateOrFlush(data, actors, data.negotiateCounters, outActors => action.broadCast(Negotiate(outActors)), counters => data.copy(negotiateCounters = counters))
   }
 
-  private def aliveFlushNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
+  private def  aliveFlushNegotiate(data: AliveData, actors:  Seq[(String,ActorRef)]): State = {
     aliveNegotiateOrFlush(data, actors, data.flushCounters, outActors => {
       action.flush()
       action.broadCast(Flush(outActors))

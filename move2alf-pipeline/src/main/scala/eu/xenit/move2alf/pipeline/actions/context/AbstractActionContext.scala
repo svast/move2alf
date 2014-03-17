@@ -106,7 +106,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
         case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
       }
       if(messageSent == false){
-        logger.debug(context.sender+" setting messageSent from false to true")
+        logger.debug(context.self+" setting messageSent from false to true")
         messageSent = true
       }
     } else {
@@ -124,7 +124,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   }
 
   final def reply(message: AnyRef) = {
-    replyTo.get ! ReplyMessage(taskKey.get, message)
+    replyTo.get.tell(ReplyMessage(taskKey.get, message), context.self)
   }
 
 }
