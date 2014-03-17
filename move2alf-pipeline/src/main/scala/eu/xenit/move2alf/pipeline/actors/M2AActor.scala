@@ -315,7 +315,7 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
   }
 
   private def handleNormalMessagesNearlyDead(data: AliveData): FSM.State[ActorState, ActorData] = {
-    if (action.messageSent) {
+    if (action.messageSent && nmbOfLoopedSenders > 0) {
       logger.debug(context.self+" A message was sent, going back to negotiation")
       action.messageSent = false
       goto(Negotiating) using data
@@ -418,6 +418,10 @@ class M2AActor(protected val factory: AbstractActionContextFactory, protected va
       action.flush()
       action.broadCast(BackAlive)
       action.broadCast(EOC)
+    }
+    case NearDeath -> Negotiating => {
+      logger.debug(context.self +" is going from NearDeath to Negotiating")
+      action.broadCast(Negotiate(Seq((action.id, context.self))))
     }
     case NearDeath -> b => {
       logger.debug(context.self +" is going from NearDeath to "+b)
