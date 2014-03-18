@@ -23,6 +23,46 @@ public class Job extends IdObject {
 	
 	private Set<Cycle> cycles;
 
+    private boolean sendReport;
+
+    public boolean isSendReport() {
+        return sendReport;
+    }
+
+    public void setSendReport(boolean sendReport) {
+        this.sendReport = sendReport;
+    }
+
+    public String getSendReportTo() {
+        return sendReportTo;
+    }
+
+    public void setSendReportTo(String sendReportTo) {
+        this.sendReportTo = sendReportTo;
+    }
+
+    public boolean isSendErrorReport() {
+        return sendErrorReport;
+    }
+
+    public void setSendErrorReport(boolean sendErrorReport) {
+        this.sendErrorReport = sendErrorReport;
+    }
+
+    public String getSendErrorReportTo() {
+        return sendErrorReportTo;
+    }
+
+    public void setSendErrorReportTo(String sendErrorReportTo) {
+        this.sendErrorReportTo = sendErrorReportTo;
+    }
+
+    private String sendReportTo;
+
+    private boolean sendErrorReport;
+
+    private String sendErrorReportTo;
+
 	public Job() {
 
 	}

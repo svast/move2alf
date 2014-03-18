@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorSystem;
+import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
@@ -13,17 +14,28 @@ import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.context.ThreadLocalSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
+import org.springframework.orm.hibernate3.SpringSessionContext;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
+import javax.transaction.TransactionManager;
 import java.util.*;
 
 @Service("jobService")
@@ -33,22 +45,22 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			.getLogger(JobServiceImpl.class);
 
     @Override
-    public int openCycleForJob(String jobId) {
-        return openCycleForJob(getJobIdByName(jobId));
-    }
-
-    @Override
     public void stopJob(int jobId) {
         jobMap.get(jobId).destroy();
         jobMap.remove(jobId);
         closeCycle(getLastCycleForJob(getJob(jobId)));
     }
 
-    private int getJobIdByName(String name) {
-        final List<Job> jobs = sessionFactory.getCurrentSession()
+    @Override
+    public Job getJobByName(String name) {
+        final List<Job> jobs = getSessionFactory().getCurrentSession()
                 .createQuery("from Job as j where j.name=?")
                 .setString(0, name).list();
-        return jobs.get(0).getId();
+        return jobs.get(0);
+    }
+
+    private int getJobIdByName(String name) {
+       return getJobByName(name).getId();
     }
 
     @Autowired
@@ -105,13 +117,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	// @Transactional(propagation=Propagation.REQUIRES_NEW)
 	public Job createJob(JobModel jobModel) {
-		final Date now = new Date();
+
 		final Job job = new Job();
-		job.setName(jobModel.getName());
-		job.setDescription(jobModel.getDescription());
-		job.setCreationDateTime(now);
-		job.setLastModifyDateTime(now);
-		job.setCreator(getUserService().getCurrentUser());
+        populateJobFields(jobModel, job);
 
         ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobModel);
         job.setFirstConfiguredAction(configuredAction);
@@ -121,16 +129,25 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return job;
 	}
 
-	@Override
+    private void populateJobFields(JobModel jobModel, Job job) {
+        final Date now = new Date();
+        job.setName(jobModel.getName());
+        job.setDescription(jobModel.getDescription());
+        job.setCreationDateTime(now);
+        job.setLastModifyDateTime(now);
+        job.setCreator(getUserService().getCurrentUser());
+        job.setSendErrorReport(jobModel.getSendNotification());
+        job.setSendErrorReportTo(jobModel.getSendNotificationText());
+        job.setSendReport(jobModel.getSendReport());
+        job.setSendReportTo(jobModel.getSendReportText());
+    }
+
+    @Override
 	public Job editJob(JobModel jobModel) {
-		final Date now = new Date();
 		final Job job = getJob(jobModel.getId());
-		job.setId(jobModel.getId());
-		job.setName(jobModel.getName());
-		job.setDescription(jobModel.getDescription());
-		job.setCreationDateTime(now);
-		job.setLastModifyDateTime(now);
-		job.setCreator(getUserService().getCurrentUser());
+
+        populateJobFields(jobModel, job);
+
         ConfiguredAction oldConfiguredAction = job.getFirstConfiguredAction();
         job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobModel));
         getSessionFactory().getCurrentSession().save(job);
@@ -207,7 +224,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public Cycle getLastCycleForJob(final Job job) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Cycle getLastCycleForJob(final Job job) {
 
 		@SuppressWarnings("unchecked")
 		final List<Cycle> list = getSessionFactory()
@@ -314,12 +332,14 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public List<ProcessedDocument> getProcessedDocuments(final int cycleId) {
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public List<ProcessedDocument> getProcessedDocuments(final int cycleId) {
 		return getProcessedDocuments(cycleId, 0, 0);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
+    @Transactional(propagation = Propagation.SUPPORTS)
 	public List<ProcessedDocument> getProcessedDocuments(final int cycleId,
 			final int first, final int count) {
 		final Query query = sessionFactory.getCurrentSession()
@@ -476,7 +496,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void closeCycle(final Cycle cycle) {
         final Session session = getSessionFactory().getCurrentSession();
 
@@ -500,18 +520,123 @@ public class JobServiceImpl extends AbstractHibernateService implements
         return cycle.getId();
     }
 
+    private Map<Integer, RunnableWithCycle> onStopJobActions = new HashMap<Integer, RunnableWithCycle>();
+
+    abstract class RunnableWithCycle implements Runnable {
+
+        public Cycle cycle;
+
+        @Override
+        public abstract void run();
+    }
+
+    @Value(value="#{'${mail.from}'}")
+    private String mailFrom;
+
+    @Value(value="#{'${url}'}")
+    private String url;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+
+
     @Override
     public void startJob(Integer jobId) {
         if(!jobMap.containsKey(jobId)){
-            Job job = getJob(jobId);
+            final Job job = getJob(jobId);
             String name = job.getName();
             ConfiguredAction configuredAction = job.getFirstConfiguredAction();
             ActionConfig actionConfig = pipelineAssembler.getActionConfig(configuredAction);
             JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(actionConfig));
+
+            RunnableWithCycle action = new RunnableWithCycle() {
+
+                @Autowired
+                JobService jobService;
+
+                @Override
+                @Transactional
+                public void run() {
+
+                    try {
+
+                        jobService.closeCycle(cycle);
+
+                        if(job.isSendReport() || job.isSendErrorReport()){
+                            int cycleId = cycle.getId();
+
+                            // only send report on errors
+                            boolean errorsOccured = false;
+                            int counter = 0;
+                            int amountFailed = 0;
+                            Date firstDocDateTime = null;
+                            List<ProcessedDocument> processedDocuments = jobService.getProcessedDocuments(cycle.getId());
+                            if (processedDocuments != null) {
+                                for (ProcessedDocument doc : processedDocuments) {
+                                    if (counter == 0) {
+                                        firstDocDateTime = doc.getProcessedDateTime();
+                                    }
+
+                                    if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
+                                        errorsOccured = true;
+                                        amountFailed += 1;
+                                    }
+                                    counter += 1;
+                                }
+                            }
+
+                            // Get cycle information
+                            long startDateTime = cycle.getStartDateTime().getTime();
+                            long endDateTime = cycle.getEndDateTime().getTime();
+                            long durationInSeconds = (endDateTime - startDateTime) / 1000;
+                            String duration = Util.formatDuration(durationInSeconds);
+
+
+                            List<String> addresses = new ArrayList<String>();
+                            if(job.isSendReport() && job.getSendReportTo()!=null){
+                                addresses.addAll(Arrays.asList(job.getSendReportTo()));
+                            }
+                            if(job.isSendErrorReport() && errorsOccured && job.getSendErrorReportTo() != null){
+                                addresses.addAll(Arrays.asList(job.getSendErrorReportTo()));
+                            }
+                            SimpleMailMessage mail = new SimpleMailMessage();
+                            mail.setFrom(mailFrom);
+                            mail.setTo(addresses.toArray(new String[addresses.size()]));
+                            mail.setSubject("Move2Alf error report");
+
+                            Job job = cycle.getJob();
+
+                            mail.setText("Cycle " + cycleId + " of job " + job.getName()
+                                    + " completed.\n" + "The full report can be found on "
+                                    + url + "/job/" + job.getId() + "/" + cycleId
+                                    + "/report" + "\n\nStatistics:" + "\nNr of files: "
+                                    + processedDocuments.size() + "\nNr of failed: "
+                                    + amountFailed + "\n\nTime to process: " + duration
+                                    + "\nStart date/time: " + startDateTime
+                                    + "\nTime first document loaded: " + firstDocDateTime
+                                    + "\n\nSent by Move2Alf");
+
+                            sendMail(mail);
+                        }
+
+
+                    } catch (Exception e) {
+                        logger.error("Error", e);
+                    }
+                }
+            };
+
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(action);
+            jobHandle.registerOnStopAction(action);
+            onStopJobActions.put(jobId, action);
             jobMap.put(job.getId(), jobHandle);
         }
+
         JobHandle handle = jobMap.get(jobId);
         if(!handle.isRunning()){
+            int cycleId = openCycleForJob(jobId);
+            onStopJobActions.get(jobId).cycle = getCycle(cycleId);
             jobMap.get(jobId).startJob();
         } else {
             logger.warn("Job " + handle.id() + " is already running. It cannot be started again");

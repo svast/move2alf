@@ -38,11 +38,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String DELETE_ID = "Delete";
     public static final String EXISTENCE_CHECK_ID = "ExistenceCheck";
     public static final String LIST_ID = "List";
-    public static final String EMAIL_ID = "Email";
     public static final String COMMAND_BEFORE_ID = "CommandBefore";
     public static final String COMMAND_AFTER_ID = "CommandAfter";
     public static final String DEFAULT_RECEIVER = "default";
-    public static final String RECURSIVE_RECEIVER = "recursive";
     public static final String REPORTER = "reporter";
     public static final String END_ACTION = "EndAction";
     public static final String START = "Start";
@@ -123,10 +121,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		String moveAfterLoadPath = "";
 		boolean moveNotLoaded = false;
 		String moveNotLoadedPath = "";
-		String sendNotification = "";
-		String emailAddressNotification = "";
-		String sendReport = "";
-		String emailAddressReport = "";
 		String extension = "*";
 		String commandBefore = "";
 		String commandAfter = "";
@@ -184,13 +178,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveNotLoaded = true;
                 moveNotLoadedPath = action
                         .getParameter(MoveAction.PARAM_PATH);
-            } else if (END_ACTION
-                    .equals(action.getActionId())) {
-                sendNotification = action.getParameter(M2AlfEndAction.PARAM_SENDERROR);
-                emailAddressNotification = action
-                        .getParameter(M2AlfEndAction.PARAM_ERROR_TO);
-                sendReport = action.getParameter(M2AlfEndAction.PARAM_SENDREPORT);
-                emailAddressReport = action.getParameter(M2AlfEndAction.PARAM_REPORT_TO);
             } else if (FILTER_ID
                     .equals(action.getActionId())) {
                 extension = action.getParameter(SAFilter.PARAM_EXTENSION);
@@ -236,10 +223,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 		jobModel.setMoveAfterLoadText(moveAfterLoadPath);
 		jobModel.setMoveNotLoad(moveNotLoaded);
 		jobModel.setMoveNotLoadText(moveNotLoadedPath);
-		jobModel.setSendNotification(sendNotification);
-		jobModel.setSendNotificationText(emailAddressNotification);
-		jobModel.setSendReport(sendReport);
-		jobModel.setSendReportText(emailAddressReport);
+		jobModel.setSendNotification(job.isSendErrorReport());
+		jobModel.setSendNotificationText(job.getSendErrorReportTo());
+		jobModel.setSendReport(job.isSendReport());
+        jobModel.setSendReportText(job.getSendReportTo());
 		jobModel.setExtension(extension);
 		jobModel.setCommand(commandBefore);
 		jobModel.setCommandAfter(commandAfter);
@@ -607,10 +594,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         endAction.setActionId(END_ACTION);
         endAction.setClassId(actionClassService.getClassId(M2AlfEndAction.class));
         endAction.setNmbOfWorkers(1);
-        endAction.setParameter(M2AlfEndAction.PARAM_SENDREPORT, Boolean.toString(jobModel.getSendReport()));
-        endAction.setParameter(M2AlfEndAction.PARAM_REPORT_TO, jobModel.getSendReportText());
-        endAction.setParameter(M2AlfEndAction.PARAM_SENDERROR, Boolean.toString(jobModel.getSendNotification()));
-        endAction.setParameter(M2AlfEndAction.PARAM_ERROR_TO, jobModel.getSendNotificationText());
         end.addReceiver(DEFAULT_RECEIVER, endAction);
 
 		return start;

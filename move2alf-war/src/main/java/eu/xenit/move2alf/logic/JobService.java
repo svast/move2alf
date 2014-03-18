@@ -91,9 +91,10 @@ public interface JobService {
 	/**
 	 * Return the last cycle for each job.
 	 * 
-	 * @return List<Cycle> A list of cycles
+	 * @return Cycle
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Cycle getLastCycleForJob(Job job);
 
 	/**
@@ -224,7 +225,7 @@ public interface JobService {
 
 	public void scheduleNow(int jobId);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     void closeCycle(Cycle cycle);
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -234,7 +235,7 @@ public interface JobService {
 
     JobModel getJobConfigForJob(int id);
 
-    int openCycleForJob(String jobId);
-
     void stopJob(int jobId);
+
+    Job getJobByName(String name);
 }
