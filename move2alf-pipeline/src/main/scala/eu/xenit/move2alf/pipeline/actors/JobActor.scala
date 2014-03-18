@@ -71,6 +71,10 @@ class JobActor(val id: String, private val config: JobConfig, private val jobInf
     }
     case _ -> NotRunning => {
       jobInfo.state = NotRunning
+      jobInfo.onStopActions.foreach(action => {
+        action.run()
+      }
+      )
     }
   }
 

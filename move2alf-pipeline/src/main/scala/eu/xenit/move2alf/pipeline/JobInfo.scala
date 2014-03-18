@@ -2,6 +2,7 @@ package eu.xenit.move2alf.pipeline
 
 import eu.xenit.move2alf.pipeline.actors.{NotRunning, JobState}
 import akka.actor.ActorRef
+import scala.collection.mutable
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,6 +23,12 @@ class JobInfo {
 
   def getActorRef(actionId: String){
     actorRefs.get(actionId).get
+  }
+
+  val onStopActions = new mutable.HashSet[Runnable]
+
+  def registerOnStopAction(action: Runnable){
+    onStopActions += action
   }
 
 }

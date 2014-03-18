@@ -5,6 +5,7 @@ import eu.xenit.move2alf.pipeline.actors.{Running, JobActor}
 import akka.actor._
 import eu.xenit.move2alf.common.LogHelper
 import java.net.URLEncoder
+import scala.collection.mutable
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,6 +21,10 @@ class JobHandle(val actorSystem: ActorSystem, val id: String, val config: JobCon
 
   def isRunning(): Boolean = {
     jobInfo.state == Running
+  }
+
+  def registerOnStopAction(action: Runnable){
+    jobInfo.registerOnStopAction(action)
   }
 
   def destroy(){
