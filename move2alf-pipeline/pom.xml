@@ -74,6 +74,11 @@
             <version>2.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scala-tools.testing</groupId>
+            <artifactId>specs_2.10</artifactId>
+            <version>1.6.9</version>
+        </dependency>
     </dependencies>
 
 	<build>
@@ -87,6 +92,7 @@
                         <id>compile</id>
                         <goals>
                             <goal>compile</goal>
+                            <goal>testCompile</goal>
                         </goals>
                         <phase>compile</phase>
                     </execution>

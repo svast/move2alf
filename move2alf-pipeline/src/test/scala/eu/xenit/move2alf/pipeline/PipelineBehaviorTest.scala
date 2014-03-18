@@ -14,6 +14,8 @@ import eu.xenit.move2alf.pipeline.actors.Flush
 import akka.routing.Broadcast
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 
 /**
@@ -23,7 +25,7 @@ import scala.concurrent.duration
  * Time: 5:36 PM
  * To change this template use File | Settings | File Templates.
  */
-class PipelineBehaviorTest{
+class PipelineBehaviorTest extends {
 
   class TestActor(val setupMethod: (ActorContext) => ActorRef) extends Actor{
     def receive: this.type#Receive = {

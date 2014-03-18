@@ -4,7 +4,7 @@ import org.junit.Test
 import akka.actor.{ActorContext, ActorSystem}
 import eu.xenit.move2alf.pipeline.state.JobContext
 import org.mockito.Mockito._
-import akka.testkit.{TestActor, TestActorRef}
+import akka.testkit.TestActorRef
 import eu.xenit.move2alf.pipeline.actions._
 
 /**
