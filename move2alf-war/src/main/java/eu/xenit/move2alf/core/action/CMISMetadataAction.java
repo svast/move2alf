@@ -1,11 +1,13 @@
 package eu.xenit.move2alf.core.action;
 
+import eu.xenit.move2alf.common.CMISHelper;
 import eu.xenit.move2alf.common.Mappings;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.SACMISInput;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
+import org.apache.chemistry.opencmis.client.runtime.CmisBindingHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import java.util.*;
 public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
     private static final Logger logger = LoggerFactory.getLogger(CMISMetadataAction.class);
 
-    public final static String CMIS_OBJECT_TYPE_ID = "cmis:objectTypeId";
+
 
     @Override
     protected void executeImpl(FileInfo fileInfo) {
@@ -29,7 +31,7 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
         path = path.concat(Parameters.PARAM_NAME);
 
         fileInfo.remove(Parameters.PARAM_CMIS_PROPERTIES);
-        String type = (String)headers.get(CMIS_OBJECT_TYPE_ID);
+        String type = (String)headers.get(CMISHelper.CMIS_OBJECT_TYPE_ID);
         logger.debug("Setting type and namespace for " + type + " for " + fileInfo.get(Parameters.PARAM_FILE));
 
         String alfrescoType = Mappings.mappingTypes.get(type);
@@ -88,8 +90,6 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             // set the rest of parameters
             else if(!(property.startsWith("cmis:")) &&
                     !(property.contains("nodeRef")) &&
-                    !(property.contains("camel")) &&
-                    !(property.contains("Camel")) &&
                     !(property.contains("breadcrumb")) &&
                     valid((String)val)) {
                 // add the property with the namespace, if namespace is present
@@ -106,28 +106,6 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             }
         }
 
-
-	    /*        logger.debug("Setting acls");
-        AccessControlListImpl acli = (AccessControlListImpl)headers.get(CamelCMISConstants.CAMEL_CMIS_ACL);
-        Map<String, Map<String, String>> acl = new HashMap<String, Map<String, String>>();
-        HashMap<String,String> acList = new HashMap<String,String>();
-        for(Ace ace : acli.getAces()) {
-            // only put the "direct" permissions
-            // we cant know the value of "inheritPermissions", so we don't set it at all (default=false)
-            int s = ace.getPermissions().size();
-            if(s > 0 && ace.isDirect()) {
-                String permission = Mappings.mappingPermissions.get(ace.getPermissions().get(s-1));
-                if(permission==null)
-                    permission = ace.getPermissions().get(s-1);
-                String user = Mappings.mappingUsers.get(ace.getPrincipalId());
-                if(user==null)
-                    user=ace.getPrincipalId();
-                if(!user.isEmpty())
-                    acList.put(normalize(user),permission);
-            }
-        }
-        acl.put(path,acList);
-        fileInfo.put(Parameters.PARAM_ACL,acl);*/
 
         fileInfo.put(Parameters.PARAM_CONTENTURL,buildContentUrl(contentStreamProp,mimeTypeProp,contentLengthProp));
         fileInfo.put(Parameters.PARAM_METADATA,props);

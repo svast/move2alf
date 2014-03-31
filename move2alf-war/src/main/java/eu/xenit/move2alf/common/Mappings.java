@@ -92,6 +92,7 @@ public class Mappings {
         mappingNamespaces.put("claims","{claims.model}");
         mappingNamespaces.put("wfl","{wfl.model}");
         mappingNamespaces.put("br","{http://www.brutex.com/model/0.2}");
+        mappingNamespaces.put("abbyy","{http://www.xenit.eu/abbyy/example/model/0.1}");
 
         mappingTypes.put("0x01010B006DBEC9104B358340916826B490EC2063","sharepoint:dublin_core_columns");
     }

@@ -25,7 +25,3 @@ mvn install:install-file -Dfile=src/main/webapp/WEB-INF/lib/padlock-2.2.jar \
 
 mvn install:install-file -Dfile=src/main/webapp/WEB-INF/lib/commons-codec-1.4.jar \
     -DgroupId=org.apache.commons.codec -DartifactId=commons-codec -Dversion=1.4 -Dpackaging=jar
-
-# Modified jar for camel-CMIS: repository xenit/camel
-
-mvn install:install-file -DgroupId=org.apache.camel -DartifactId=camel-cmis -Dversion=2.11.1-SNAPSHOT -Dfile=src/main/webapp/WEB-INF/lib/camel-cmis-2.11.1-SNAPSHOT.jar -Dpackaging=jar
