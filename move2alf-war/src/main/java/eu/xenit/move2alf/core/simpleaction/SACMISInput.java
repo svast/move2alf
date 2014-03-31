@@ -7,6 +7,7 @@ import eu.xenit.move2alf.core.action.CmisQuery;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
 import eu.xenit.move2alf.core.action.messages.RecursiveCmisMessage;
 import eu.xenit.move2alf.common.CMISHelper;
+import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.*;
 import eu.xenit.move2alf.core.action.metadata.ProcessCmisDocument;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
@@ -105,6 +106,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
 
     private void executeImplSimpleQuery(Object inputMessage) {
+        logger.info("Simple query");
         Session session = createSession();
         int pageSize = CmisQuery.pageSize;
 
@@ -125,7 +127,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
 
                 String objectId = item.getPropertyValueById(PropertyIds.OBJECT_ID);
                 try {
-                    Document doc = (Document) session.getObject(session.createObjectId(objectId));
+                    AlfrescoDocument doc = (AlfrescoDocument) session.getObject(session.createObjectId(objectId));
                     Map<String, Object> properties = CMISHelper.propertyDataToMap(doc.getProperties());
                     List<Folder> parents = doc.getParents();
                     if(parents!=null && !(parents.isEmpty())) {
@@ -165,7 +167,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
     }
 
     private void executeImplOpenCmis(Object inputMessage) {
-        logger.info("openCmis");
+        logger.info("Recursive query");
 
         String objectId;
         Pattern p = Pattern.compile("(.*) WHERE IN_TREE\\(d,'(.*)'\\)(.*)");
@@ -173,7 +175,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         if(m.matches()) {
             objectId=m.group(2);
         } else {
-            String errorMessage = "Query " + cmisQuery + " is not suited for the recursive CMIS, it should contain an IN_TREE operator";
+            String errorMessage = "Query " + cmisQuery + " is not suited for the recursive CMIS, it should contain an IN_TREE operator AND a specifier d. Example: SELECT * FROM cmn:lepWinstc AS d JOIN cmn:hasProducerNumber AS e ON d.cmis:objectId=e.cmis:objectId JOIN cmn:hasYear AS f ON d.cmis:objectId=f.cmis:objectId JOIN cmn:hasNameInsuranceTaker AS g ON d.cmis:objectId=g.cmis:objectId JOIN cmn:hasAssNumber AS h ON d.cmis:objectId=h.cmis:objectId JOIN cmn:hasPolicyNumber AS i ON d.cmis:objectId=i.cmis:objectId WHERE IN_TREE(d,'workspace://SpacesStore/b44dc3a4-6b09-4db9-a687-2b3095b984a8')";
             logger.error(errorMessage);
             throw new Move2AlfException("Recursive CMIS exception " + errorMessage);
         }
@@ -198,6 +200,8 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         // connection settings
         parameter.put(SessionParameter.ATOMPUB_URL, cmisUrl);
         parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 
         List<Repository> repositories = factory.getRepositories(parameter);
         Session session = repositories.get(0).createSession();

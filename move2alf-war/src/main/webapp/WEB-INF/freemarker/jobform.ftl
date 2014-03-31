@@ -125,11 +125,11 @@
         </div>
 
         <div id="importOptions-CMIS" class="importOptions">
-        <@textArea label="CMIS query" name="cmisQuery" binding="job.cmisQuery" attributes="maxlength='${job.cmisQueryMaxLength}'" />
+        <@textArea label="CMIS query" name="cmisQuery" binding="job.cmisQuery" attributes="maxlength='${job.cmisQueryMaxLength}'"/>
         </div>
 
         <div id="importOptions-CMIS" class="importOptions">
-        <@checkboxWithTextBefore binding="job.cmisRecursive" label="Recursive with query" helpText="The query needs to take care of joining with the relevant aspects. Filters are allowed." />
+        <@checkboxWithTextBefore binding="job.cmisRecursive" label="Recursive with query" helpText="For this option, the query needs to take care of joining with the relevant aspects if necessary, to contain a specifier AND to contain an IN_TREE operator.<br>Example: SELECT * FROM cmn:lepWinstc AS d JOIN cmn:hasProducerNumber AS e ON d.cmis:objectId=e.cmis:objectId WHERE IN_TREE(d,'workspace://SpacesStore/b44dc3a4-6b09-4db9-a687-2b3095b984a8') <br>Performance is better than for the simple query." />
         </div>
 
 		<@labeledSelectList label="Destination server" name="dest" options=destinations; destination>
