@@ -776,6 +776,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			}
 
 			Reference uncheckedReference = new Reference(store, null, escapedPath);
+
 			// can throw:
 			// java.rmi.RemoteException: when connection problem?
 			// org.alfresco.webservice.repository.RepositoryFault: this will
@@ -788,8 +789,10 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 			Node[] nodes;
 			try {
-				nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
+			    nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
+				
 				reference = nodes[0].getReference();
+				
 
 				logger.debug("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
 				if (useCache) {
@@ -1339,7 +1342,9 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			}
 		}
 
-		return sbResult.toString();
+		String path = sbResult.toString();
+		path = path.replaceAll("//","/");
+		return path;
 	}
 
 	private String getNamedValue(NamedValue[] namedValues, String name) {

@@ -175,7 +175,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
         if(m.matches()) {
             objectId=m.group(2);
         } else {
-            String errorMessage = "Query " + cmisQuery + " is not suited for the recursive CMIS, it should contain an IN_TREE operator AND a specifier d. Example: SELECT * FROM cmn:lepWinstc AS d JOIN cmn:hasProducerNumber AS e ON d.cmis:objectId=e.cmis:objectId JOIN cmn:hasYear AS f ON d.cmis:objectId=f.cmis:objectId JOIN cmn:hasNameInsuranceTaker AS g ON d.cmis:objectId=g.cmis:objectId JOIN cmn:hasAssNumber AS h ON d.cmis:objectId=h.cmis:objectId JOIN cmn:hasPolicyNumber AS i ON d.cmis:objectId=i.cmis:objectId WHERE IN_TREE(d,'workspace://SpacesStore/b44dc3a4-6b09-4db9-a687-2b3095b984a8')";
+            String errorMessage = "Query " + cmisQuery + " is not suited for the recursive CMIS, it should contain an IN_TREE operator AND a specifier. Example: SELECT * FROM cmn:lepWinstc AS d JOIN cmn:hasProducerNumber AS e ON d.cmis:objectId=e.cmis:objectId JOIN cmn:hasYear AS f ON d.cmis:objectId=f.cmis:objectId JOIN cmn:hasNameInsuranceTaker AS g ON d.cmis:objectId=g.cmis:objectId JOIN cmn:hasAssNumber AS h ON d.cmis:objectId=h.cmis:objectId JOIN cmn:hasPolicyNumber AS i ON d.cmis:objectId=i.cmis:objectId WHERE IN_TREE(d,'workspace://SpacesStore/b44dc3a4-6b09-4db9-a687-2b3095b984a8')";
             logger.error(errorMessage);
             throw new Move2AlfException("Recursive CMIS exception " + errorMessage);
         }
