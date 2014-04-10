@@ -6,6 +6,7 @@ import eu.xenit.move2alf.core.action.StartCycleAction;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
 import org.hibernate.SessionFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
  * Date: 2/24/14
  * Time: 11:32 AM
  */
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration( { "file:move2alf-war/src/main/webapp/WEB-INF/applicationContext.xml",
         "file:move2alf-war/src/main/webapp/WEB-INF/applicationContext-security.xml" })
