@@ -29,8 +29,8 @@ import static org.junit.Assert.assertNotNull;
  */
 @Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration( { "file:move2alf-war/src/main/webapp/WEB-INF/applicationContext.xml",
-        "file:move2alf-war/src/main/webapp/WEB-INF/applicationContext-security.xml" })
+@ContextConfiguration( { "file:src/main/webapp/WEB-INF/applicationContext.xml",
+        "file:src/main/webapp/WEB-INF/applicationContext-security.xml" })
 public class PipelineAssemblerImplTest {
     @Autowired
     private ApplicationContext applicationContext;
