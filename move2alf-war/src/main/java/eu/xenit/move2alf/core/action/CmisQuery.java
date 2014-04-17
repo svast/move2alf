@@ -43,6 +43,7 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
     public static final int pageSize = 1000;
 
     public final static File tempFolder = Files.createTempDir();
+    private static final int MAX_RETRY = 5;
 
 
     @Override
@@ -59,9 +60,10 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
 
         logger.info("query=" + query + " and path=" + path + " and type=" + type);
         ItemIterable<QueryResult> itemIterable = executeQuery(query,session);
+        int retry = 0;
         while (!finished) {
             int countStart=count;
-            logger.debug("Processing page " + pageNumber);
+            logger.debug("Processing page " + pageNumber + " for path=" + path);
             try {
                 ItemIterable<QueryResult> currentPage = itemIterable.skipTo(count).getPage();
                 for(QueryResult item : currentPage) {
@@ -70,6 +72,7 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
                         String objectId = item.getPropertyValueById(PropertyIds.OBJECT_ID);
                         String nameFolder = item.getPropertyValueById(PropertyIds.NAME);
                         String pathFolder = path + "/" + nameFolder;
+                        pathFolder = pathFolder.replaceAll("//","/");
 
                         // send message to RecursiveCmis with objectId, pathFolder
                         RecursiveCmisMessage outMessage = new RecursiveCmisMessage(objectId,type,pathFolder,query);
@@ -95,24 +98,26 @@ public class CmisQuery extends Move2AlfReceivingAction<RecursiveCmisMessage> imp
                         }
                     }
                     count++;
-                 }
-                if(!finished)
-                    if(currentPage.getTotalNumItems()*(pageNumber+1)==count) {
-                        pageNumber++;
-                        logger.debug("Increased page number, now path=" + path + " and count=" + count + " and pageNumber=" + pageNumber + " and hasMoreItems=" + currentPage.getHasMoreItems() + " and total number of items=" + currentPage.getTotalNumItems());
-                    } else {
-                        logger.error("Page " + pageNumber + " has not been processed correctly, count=" + count + " and total number of items=" + currentPage.getTotalNumItems());
-                        logger.error("Most probably cause for this are values too low for parameters system.acl.maxPermissionChecks and system.acl.maxPermissionCheckTimeMillis, increase those on your source Alfresco");
-                        count=countStart;
-                        finished = true;
-                    }
+                }
+
                 if(!(currentPage.getHasMoreItems())) {
                     finished=true;
                 }
-
-                if (!currentPage.getHasMoreItems()) {
-                    finished = true;
-                }
+                if(!finished)
+                    if(currentPage.getTotalNumItems()*(pageNumber+1)==count) {
+                        pageNumber++;
+                        retry=0;
+                        logger.debug("Increased page number, now path=" + path + " and count=" + count + " and pageNumber=" + pageNumber + " and hasMoreItems=" + currentPage.getHasMoreItems() + " and total number of items=" + currentPage.getTotalNumItems());
+                    } else {
+                        logger.error("Page " + pageNumber + " has not been processed correctly, count=" + count + " and total number of items=" + currentPage.getTotalNumItems());
+                        logger.error("Possible cause for this are values too low for parameters system.acl.maxPermissionChecks and system.acl.maxPermissionCheckTimeMillis, increase those on your source Alfresco. Will retry " + MAX_RETRY + " times, current retry=" + retry);
+                        count=countStart;
+                        retry ++;
+                        if(retry>=MAX_RETRY) {
+                            logger.error("Will finish, retry=" + retry);
+                            finished = true;
+                        }
+                    }
             }  catch (Exception e) {
                 e.printStackTrace();
                 continue;

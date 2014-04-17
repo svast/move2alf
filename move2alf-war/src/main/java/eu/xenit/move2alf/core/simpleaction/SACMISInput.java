@@ -120,7 +120,7 @@ public class SACMISInput extends Move2AlfReceivingAction<Object> {
             ItemIterable<QueryResult> currentPage = itemIterable.skipTo(count).getPage();
             logger.debug("Processing page {}", pageNumber, " with total number of items=" + currentPage.getTotalNumItems());
             if(pageSize!=currentPage.getTotalNumItems() && currentPage.getHasMoreItems()) {
-                logger.error("Page " + pageNumber + " did not get the corrent number of results:" + currentPage.getTotalNumItems() + " will repeat");
+                logger.error("Page " + pageNumber + " did not get the correct number of results:" + currentPage.getTotalNumItems() + " will repeat");
                 continue;
             }
             for (QueryResult item : currentPage) {
