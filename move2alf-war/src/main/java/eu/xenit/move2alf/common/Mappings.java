@@ -1,7 +1,17 @@
 package eu.xenit.move2alf.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /* Useful for CMIS import */
 public class Mappings {
@@ -10,6 +20,7 @@ public class Mappings {
     public static final Map<String,String> mappingPermissions = new HashMap();
     public static final Map<String,String> mappingUsers=new HashMap();
     public static final Map<String,String> mappingTypes=new HashMap();
+    private static final Logger logger = LoggerFactory.getLogger(Mappings.class);
 
     static {
         mappingAuditables.put("cmis:createdBy", "creator");
@@ -27,7 +38,6 @@ public class Mappings {
         mappingUsers.put("Home Visitors","GROUP_EVERYONE");
         mappingUsers.put("Home Owners","");
 
-        // can these be acquired automatically?
         mappingNamespaces.put("cm","{http://www.alfresco.org/model/content/1.0}");
         mappingNamespaces.put("dl","{http://www.alfresco.org/model/datalist/1.0}");
         mappingNamespaces.put("act","{http://www.alfresco.org/model/action/1.0}");
@@ -79,20 +89,19 @@ public class Mappings {
         mappingNamespaces.put("wcmwf","{http://www.alfresco.org/model/wcmworkflow/1.0}");
         mappingNamespaces.put("wf","{http://www.alfresco.org/model/workflow/1.0}");
         mappingNamespaces.put("youtube","{http://www.alfresco.org/model/publishing/youtube/1.0}");
-        mappingNamespaces.put("fred","{http://www.xenit.eu/fred/example/model/0.1}");
-        mappingNamespaces.put("demo","{http://www.xenit.eu/model/demo/1.0}");
-        mappingNamespaces.put("sharepoint","{http://www.xenit.eu/sharepoint/example/model/0.1}");
-        mappingNamespaces.put("hr","{hr.model}");
-        mappingNamespaces.put("eb","{eb.model}");
-        mappingNamespaces.put("pv","{pv.model}");
-        mappingNamespaces.put("li","{li.model}");
-        mappingNamespaces.put("nl","{nl.model}");
-        mappingNamespaces.put("cmn","{cmn.model}");
-        mappingNamespaces.put("portal","{portal.model}");
-        mappingNamespaces.put("claims","{claims.model}");
-        mappingNamespaces.put("wfl","{wfl.model}");
-        mappingNamespaces.put("br","{http://www.brutex.com/model/0.2}");
-        mappingNamespaces.put("abbyy","{http://www.xenit.eu/abbyy/example/model/0.1}");
+
+        Properties mappingNamespacesProperties = new Properties();
+        try {
+            mappingNamespacesProperties.load(new InputStreamReader(Mappings.class.getClassLoader().getResourceAsStream("nsmappings.properties")));
+        } catch (IOException e) {
+            logger.error("Cannot load ns mapping properties: " + e.getMessage());
+        }
+        for (final Map.Entry<Object, Object> entry : mappingNamespacesProperties.entrySet()) {
+            String key = ((String)entry.getKey()).substring(18);
+            String value = (String) entry.getValue();
+            mappingNamespaces.put(key, value);
+        }
+
 
         mappingTypes.put("0x01010B006DBEC9104B358340916826B490EC2063","sharepoint:dublin_core_columns");
     }

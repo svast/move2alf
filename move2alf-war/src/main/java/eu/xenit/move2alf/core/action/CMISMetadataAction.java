@@ -39,23 +39,22 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
             alfrescoType = type;
         // custom Alfresco types: D:namespace:content
         if(!(alfrescoType.equals("cmis:document"))) {
+            String namespace, newContentType;
             if(alfrescoType.matches("D:([^:]+):(.+)")) {
                 int idx1 = alfrescoType.indexOf(":");
                 int idx2 = alfrescoType.lastIndexOf(":");
-                String namespace = alfrescoType.substring(idx1+1,idx2);
-                logger.debug("namespace=" + namespace + " with mapping=" + Mappings.mappingNamespaces.get(namespace));
-                if(Mappings.mappingNamespaces.get(namespace)!=null)
-                    fileInfo.put(Parameters.PARAM_NAMESPACE, Mappings.mappingNamespaces.get(namespace));
-                String newContentType = alfrescoType.substring(idx2+1);
-                fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
+                namespace = alfrescoType.substring(idx1+1,idx2);
+                newContentType = alfrescoType.substring(idx2+1);
             } else { // Sharepoint types: 0x01010B006DBEC9104B358340916826B490EC2063, mapped to sharepoint:dublin_core_columns
                 int idx1 = alfrescoType.indexOf(":");
-                String namespace = alfrescoType.substring(0,idx1);
-                if(Mappings.mappingNamespaces.get(namespace)!=null)
-                    fileInfo.put(Parameters.PARAM_NAMESPACE, Mappings.mappingNamespaces.get(namespace));
-                String newContentType = alfrescoType.substring(idx1+1);
-                fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
+                namespace = alfrescoType.substring(0,idx1);
+                newContentType = alfrescoType.substring(idx1+1);
             }
+            if(Mappings.mappingNamespaces.get(namespace)!=null) {
+                logger.debug("namespace=" + namespace + " with mapping=" + Mappings.mappingNamespaces.get(namespace));
+                fileInfo.put(Parameters.PARAM_NAMESPACE, Mappings.mappingNamespaces.get(namespace));
+            }
+            fileInfo.put(Parameters.PARAM_CONTENTTYPE,newContentType);
         }
 
 
@@ -97,9 +96,12 @@ public class CMISMetadataAction extends Move2AlfReceivingAction<FileInfo> {
                     String ns = property.substring(0,property.indexOf(":"));
                     String localProperty = property.substring(property.indexOf(":")+1);
                     String fullns = Mappings.mappingNamespaces.get(ns);
-                    logger.debug("fullns for " + ns + " is " + fullns + " for property " + localProperty);
                     if(fullns !=null)
                         props.put(fullns+localProperty,val);
+                    else {
+                        logger.error("There is no mapping for namespace " + ns + " add one in file nsmappings.properties");
+                        throw new RuntimeException("There is no mapping for namespace " + ns + " add one in file nsmappings.properties");
+                    }
                 } else {
                     props.put(property,val);
                 }
