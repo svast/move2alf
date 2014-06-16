@@ -1,14 +1,12 @@
 package eu.xenit.move2alf.core.dto;
 
+import eu.xenit.move2alf.common.IdObject;
+
 import java.util.Date;
 import java.util.Set;
 
-import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.core.Report;
-
 public class Job extends IdObject {
-	private int id;
-	
+
 	private String name;
 
 	private String description;
@@ -24,21 +22,51 @@ public class Job extends IdObject {
 	private Set<Schedule> schedules;
 	
 	private Set<Cycle> cycles;
-	
-	private Set<Report> reports;
+
+    private boolean sendReport;
+
+    public boolean isSendReport() {
+        return sendReport;
+    }
+
+    public void setSendReport(boolean sendReport) {
+        this.sendReport = sendReport;
+    }
+
+    public String getSendReportTo() {
+        return sendReportTo;
+    }
+
+    public void setSendReportTo(String sendReportTo) {
+        this.sendReportTo = sendReportTo;
+    }
+
+    public boolean isSendErrorReport() {
+        return sendErrorReport;
+    }
+
+    public void setSendErrorReport(boolean sendErrorReport) {
+        this.sendErrorReport = sendErrorReport;
+    }
+
+    public String getSendErrorReportTo() {
+        return sendErrorReportTo;
+    }
+
+    public void setSendErrorReportTo(String sendErrorReportTo) {
+        this.sendErrorReportTo = sendErrorReportTo;
+    }
+
+    private String sendReportTo;
+
+    private boolean sendErrorReport;
+
+    private String sendErrorReportTo;
 
 	public Job() {
 
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public int getId() {
-		return id;
-	}
-	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -101,14 +129,6 @@ public class Job extends IdObject {
 	
 	public Set<Cycle> getCycles() {
 		return cycles;
-	}
-
-	public void setReports(Set<Report> reports) {
-		this.reports = reports;
-	}
-
-	public Set<Report> getReports() {
-		return reports;
 	}
 	
 }

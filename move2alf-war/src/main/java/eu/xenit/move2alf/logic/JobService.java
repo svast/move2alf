@@ -1,32 +1,20 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import eu.xenit.move2alf.core.dto.*;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import akka.actor.ActorRef;
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.action.Action;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.Cycle;
-import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobInfo;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Transactional
 public interface JobService {
@@ -35,34 +23,26 @@ public interface JobService {
 	 * 
 	 * @return
 	 */
-	// @PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('CONSUMER')")
 	public List<Job> getAllJobs();
 
 	/**
 	 * Create a new job.
 	 * 
-	 * @param name
-	 *            The name of the job
-	 * @param description
-	 *            The description of the job
+	 * @param jobModel
+	 *            The job configuration
 	 * @return The new job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job createJob(String name, String description);
+	public Job createJob(JobModel jobModel);
 
 	/**
-	 * Edit a job
-	 * 
-	 * @param id
-	 *            The id of the job to edit
-	 * @param name
-	 *            The name of the job
-	 * @param description
-	 *            The description of the job
+	 * @param jobModel
+	 *            The job configuration
 	 * @return The edited job
 	 */
 	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public Job editJob(int id, String name, String description);
+    public Job editJob(JobModel jobModel);
 
 	/**
 	 * Delete a job
@@ -111,9 +91,10 @@ public interface JobService {
 	/**
 	 * Return the last cycle for each job.
 	 * 
-	 * @return List<Cycle> A list of cycles
+	 * @return Cycle
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Cycle getLastCycleForJob(Job job);
 
 	/**
@@ -178,75 +159,6 @@ public interface JobService {
 	 */
 	@PreAuthorize("hasRole('CONSUMER')")
 	public int getScheduleId(int jobId, String cronJob);
-
-	/**
-	 * Creates a destination
-	 * 
-	 * @param destinationType
-	 *            The type of destination
-	 * @param destinationParams
-	 *            A map of parameters that define the destination
-	 * @return the configured source sink
-	 */
-	@PreAuthorize("hasRole('JOB_ADMIN')")
-	public ConfiguredSourceSink createDestination(String destinationType,
-			HashMap<EDestinationParameter, Object> destinationParams);
-
-	/**
-	 * Edits a destination
-	 * 
-	 * @param dinkId
-	 * @param destinationType
-	 *            The type of destination
-	 * @param destinationParams
-	 *            A map of parameters that define the destination
-	 * @return the configured source sink
-	 */
-	public ConfiguredSourceSink editDestination(int sinkId, String destinationType,
-			HashMap<EDestinationParameter, Object> destinationParams);
-	
-	/**
-	 * Get ConfiguredSourceSink by id.
-	 * 
-	 * @param sinkId
-	 * @return
-	 */
-	public ConfiguredSourceSink getDestination(int sinkId);
-
-	/**
-	 * gets all configured source sinks
-	 * 
-	 * @return a list of configured source sinks
-	 */
-	@PreAuthorize("hasRole('CONSUMER')")
-	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks();
-
-	/**
-	 * gets a configured source sink based on id.
-	 * 
-	 * @param sourceSinkId
-	 * @return a list of configured source sinks
-	 */
-	public ConfiguredObject getConfiguredSourceSink(int sourceSinkId);
-
-	/**
-	 * deletes a configured source sink based on id.
-	 * 
-	 * @param id
-	 */
-	public void deleteDestination(int id);
-	
-	/**
-	 * @deprecated Use JobExecutionService
-	 */
-	public void executeAction(int cycleId, ConfiguredAction action, Map<String, Object> parameterMap);
-	
-	/**
-	 * 
-	 * @param className
-	 * @param parameters
-	 */
-	public void createAction(String className, Map<String, String> parameters);
 	
 	/**
 	 * 
@@ -254,13 +166,6 @@ public interface JobService {
 	 * @param parameters
 	 */
 	public void createSourceSink(String className, Map<String, String> parameters);
-	
-	/**
-	 * 
-	 * @param action
-	 * @param sourceSink
-	 */
-	public void addSourceSinkToAction(ConfiguredAction action, ConfiguredSourceSink sourceSink);
 
 	/**
 	 * 
@@ -291,26 +196,6 @@ public interface JobService {
 	 */
 	public long countProcessedDocumentsWithStatus(int cycleId, EProcessedDocumentStatus status);
 
-	/** gets all configured source sink but filters out the fileSystem source sink
-	 * 
-	 * @return List of configured source sinks
-	 */
-	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks();
-
-	/**
-	 * Delete a configured action with the given id.
-	 * 
-	 * @param id
-	 */
-	public void deleteAction(int id);
-
-	/**
-	 * Get the configured action related to the configured source sink
-	 * 
-	 * @param sourceSinkId
-	 * @return
-	 */
-	public ConfiguredAction getActionRelatedToConfiguredSourceSink(int sourceSinkId);
 
 	/**
 	 * 
@@ -319,22 +204,6 @@ public interface JobService {
 	 */
 	public boolean checkJobExists(String jobName);
 
-	/**
-	 * 
-	 * @param destinationName
-	 * @return
-	 */
-	public boolean checkDestinationExists(String destinationName);
-	
-	/**
-	 * @param category
-	 */
-	public List<Action> getActionsByCategory(String category);
-	
-	/**
-	 * @param category
-	 */
-	public List<SourceSink> getSourceSinksByCategory(String category);
 	
 	/**
 	 * @param jobId
@@ -350,14 +219,23 @@ public interface JobService {
 
 	public void sendMail(SimpleMailMessage message);
 
-	public Map<String, String> getActionParameters(int cycleId, Class<? extends Action> clazz);
-	
-	public ActorRef getReportActor();
-
 	public List<HistoryInfo> getHistory(int jobId);
 	
 	public List<JobInfo> getAllJobInfo();
 
 	public void scheduleNow(int jobId);
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    void closeCycle(Cycle cycle);
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    int openCycleForJob(Integer jobId);
+
+    void startJob(Integer jobId);
+
+    JobModel getJobConfigForJob(int id);
+
+    void stopJob(int jobId);
+
+    Job getJobByName(String name);
 }

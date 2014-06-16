@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.dto.Job;
 import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
 
 @Service("scheduler")
 public class SchedulerImpl extends AbstractHibernateService implements
@@ -29,10 +29,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 			.getLogger(SchedulerImpl.class);
 
 	private JobService jobService;
-	
-	private JobExecutionService jobExecutionService;
-	
-	private UsageService usageService;
 
 	private org.quartz.Scheduler scheduler;
 
@@ -54,23 +50,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		return jobService;
 	}
 
-	@Autowired
-	public void setJobExecutionService(JobExecutionService jobExecutionService) {
-		this.jobExecutionService = jobExecutionService;
-	}
-
-	public JobExecutionService getJobExecutionService() {
-		return jobExecutionService;
-	}
-
-	@Autowired
-	public void setUsageService(UsageService usageService) {
-		this.usageService = usageService;
-	}
-	
-	public UsageService getUsageService() {
-		return this.usageService;
-	}
 	
 	@PostConstruct
 	public void init() {
@@ -78,6 +57,11 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		Util.authenticateAsSystem();
 		reloadSchedules();
 	}
+
+    @PreDestroy
+    public void preDestroy() throws SchedulerException {
+        scheduler.shutdown();
+    }
 
 	public void reloadSchedules() {
 		getJobService().resetCycles();
@@ -128,8 +112,6 @@ public class SchedulerImpl extends AbstractHibernateService implements
 		JobDataMap jobData = new JobDataMap();
 		jobData.put(JOB_ID, jobId);
 		jobData.put(JOB_SERVICE, getJobService());
-		jobData.put(JOB_EXECUTION_SERVICE, getJobExecutionService());
-		jobData.put(USAGE_SERVICE, getUsageService());
 		return jobData;
 	}
 

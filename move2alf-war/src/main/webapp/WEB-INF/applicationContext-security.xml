@@ -24,7 +24,7 @@
 			<password-encoder hash="md5" />
 	 		<jdbc-user-service data-source-ref="dataSource"
 				users-by-username-query="select userName, password, true from userPswd where userName=?"
-				authorities-by-username-query="select userPswd.userName, userRole.role from userPswd join userRole where userPswd.userName=?"/>
+				authorities-by-username-query="select userName, role from userRole where userName=?"/>
 		</authentication-provider>
 	</authentication-manager>
 	

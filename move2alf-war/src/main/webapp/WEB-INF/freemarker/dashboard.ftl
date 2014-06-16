@@ -7,10 +7,27 @@
 
 <script src="<@spring.url relativeUrl="/js/jquery.tablesorter.js" />"></script>
 <script>
+    $.tablesorter.addParser({
+        // set a unique id
+        id: 'date',
+        is: function(s) {
+            // return false so this parser is not auto detected
+            return false;
+        },
+        format: function(s, table, cell, cellIndex) {
+            var $cell = $(cell);
+            return $cell.attr('date');
+        },
+        // set type, either numeric or text
+        type: 'text'
+    });
+
+
 $(function() {
 	$("table#dashboard").tablesorter({
 		headers:{
 			0:{sorter: false},
+            2:{sorter: 'date'},
 			4:{sorter: false},
 			5:{sorter: false},
 			6:{sorter: false}
@@ -18,9 +35,9 @@ $(function() {
 	});
 });
 
-function deleteJob(id){
-	if(confirm("Are you sure you want to delete this job?")){
-		window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/delete";
+function stopJob(id){
+	if(confirm("Are you sure you want to stop this job?")){
+		window.location.href = "<@spring.url relativeUrl="/job/" />"+id+"/stop";
 	}
 }
 </script>
@@ -46,20 +63,19 @@ function deleteJob(id){
 			<th class="header">Status</th>
 			<th></th>
 			<th></th>
-			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<#list jobInfoList as jobInfo>
 		<tr>
 			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
 			</td>
 			<td><span data-content="${jobInfo.description!?html}" rel="popover"
 			    data-original-title="Description">${jobInfo.jobName?html}</span></td>
-			<td>
+			<td date="<#if jobInfo.cycleStartDateTime?? >${jobInfo.cycleStartDateTime?string("yyyyMMddHHmmss")}<#else >0</#if>">
 				<#if jobInfo.cycleStartDateTime??>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/report" />">
 					<#if jobInfo.cycleStartDateTime?string("yyyyMMdd") == .now?string("yyyyMMdd") >
@@ -75,15 +91,13 @@ function deleteJob(id){
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
 			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
 					<a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a>
-				</#if>		
-			</td>
-			<td>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
-					<img class="clickable" onclick="deleteJob('${jobInfo.jobId}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" />
-				</#if>		
-			</td>
+				</#if>
+                <#if jobInfo.scheduleState=="Running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
+                    <a class="btn btn-danger" onclick="stopJob('${jobInfo.jobId}')">STOP</a>
+                </#if>
+            </td>
 		</tr>
 		</#list>
 	</tbody>
@@ -94,26 +108,6 @@ $("span[rel=popover]").popover({
 	html: true
 });
 </script>
-
-<#if ! licenseValidationFailureCause?has_content || licenseValidationFailureCause!="nolicense" >
-        <div class="info">
-        <hr>
-        	This Move2Alf is licensed to ${licensee.companyName}.
-        
-            <#if expirationDate?has_content>
-	            <#if licenseValidationFailureCause?has_content && licenseValidationFailureCause=="validation" >
-	            	The license is expired since ${expirationDate?date}.
-	            <#else>
-	            	The license expires on ${expirationDate?date}.
-	            </#if>
-            </#if>
-            
-            <#if documentCounter?has_content>
-            Number of documents is ${documentCounter}/${totalNumberOfDocuments}.
-            </#if>
-            
-        </div>
-</#if>
 
 </@bodyMenu>
 </@html>

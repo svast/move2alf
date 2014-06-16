@@ -66,13 +66,13 @@
 					<#assign lastIndex = 0>
 					<#if paramList?has_content>
 					<#list paramList as paramS>
-						<#assign param=(paramS?split('|')) />
+						<#assign param=(paramS?split("@@@")) />  <#-- should be the same separator as defined in PipelineAssemblerImpl -->
 						<#assign rowIndex=baseId+"_"+paramS_index />
 						<tr id="${rowIndex}">
 							<td>${paramS_index+1}</td>
 							<td>${param[0]}</td>
 							<td>${param[1]}
-								<input name="${baseId}" type="hidden" value="${param[0]}|${param[1]}" />
+								<input name="${baseId}" type="hidden" value="${param[0]}@@@${param[1]}" />
 							</td>
 							<td><img class="clickable" onclick="$('#${rowIndex}').remove()" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
 						</tr>
@@ -144,7 +144,6 @@ $("#${name}").change(function(){
 	checkboxChanged("${name}");
 });
 </script>
-
 </#macro>
 
 <#macro checkboxWithText binding label checked=false >
@@ -154,4 +153,17 @@ $("#${name}").change(function(){
 		<@formCheckbox binding />${label}
 	</label>
 </div>
+</#macro>
+
+<#macro checkboxWithTextBefore binding label helpText checked=false>
+    <#assign name=binding?split('.')?last />
+    <@labeledInput label=label forId=name helpText=helpText>
+        <@formCheckbox binding/>
+    </@labeledInput>
+<script>
+    $(function(){checkboxChanged("${name}");});
+    $("#${name}").change(function(){
+        checkboxChanged("${name}");
+    });
+</script>
 </#macro>

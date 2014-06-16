@@ -30,8 +30,8 @@
 			<list>
 				<value>eu/xenit/move2alf/core/dto/ConfiguredAction.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/ConfiguredReport.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/ConfiguredSourceSink.hbm.xml
-				</value>
+				<value>eu/xenit/move2alf/core/dto/ConfiguredSharedResource.hbm.xml
+                </value>
 				<value>eu/xenit/move2alf/core/dto/Cycle.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Job.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/ProcessedDocument.hbm.xml</value>

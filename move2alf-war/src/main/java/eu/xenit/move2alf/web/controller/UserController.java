@@ -1,13 +1,13 @@
 package eu.xenit.move2alf.web.controller;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.core.dto.UserPswd;
+import eu.xenit.move2alf.core.dto.UserRole;
+import eu.xenit.move2alf.core.enums.ERole;
+import eu.xenit.move2alf.web.dto.EditPassword;
+import eu.xenit.move2alf.web.dto.EditRole;
+import eu.xenit.move2alf.web.dto.User;
+import eu.xenit.move2alf.web.dto.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -19,14 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.core.dto.UserPswd;
-import eu.xenit.move2alf.core.dto.UserRole;
-import eu.xenit.move2alf.core.enums.ERole;
-import eu.xenit.move2alf.web.dto.EditPassword;
-import eu.xenit.move2alf.web.dto.EditRole;
-import eu.xenit.move2alf.web.dto.User;
-import eu.xenit.move2alf.web.dto.UserInfo;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Controller
 public class UserController extends AbstractController{
@@ -230,7 +228,11 @@ public class UserController extends AbstractController{
 
 		getUserService().changePassword(userName,
 					editPassword.getNewPassword());
-		mav.setViewName("redirect:/users");
+        if(getRole() == "SYSTEM_ADMIN"){
+            mav.setViewName("redirect:/users");
+        } else {
+            mav.setViewName("redirect:/user/profile");
+        }
 
 		return mav;
 	}

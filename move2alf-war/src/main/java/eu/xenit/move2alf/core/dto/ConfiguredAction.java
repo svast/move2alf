@@ -1,41 +1,65 @@
 package eu.xenit.move2alf.core.dto;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import eu.xenit.move2alf.core.ConfiguredObject;
 
 public class ConfiguredAction extends ConfiguredObject {
 
-	private ConfiguredAction appliedConfiguredActionOnSuccess;
+    private Map<String, ConfiguredAction> receivers;
+    private int nmbOfWorkers;
+    private String actionId;
+    private String dispatcher;
 
-	private ConfiguredAction appliedConfiguredActionOnFailure;
+    public ConfiguredAction() {
+    }
 
-	private Set<ConfiguredSourceSink> configuredSourceSinkSet;
+    public ConfiguredAction(String actionId, String dispatcher, int nmbOfWorkers, String classId, Map parameters) {
+        this.actionId = actionId;
+        this.dispatcher = dispatcher;
+        this.nmbOfWorkers = nmbOfWorkers;
+        setClassId(classId);
+        setParameters(parameters);
+    }
 
-	public void setAppliedConfiguredActionOnSuccess(
-			ConfiguredAction appliedConfiguredActionOnSuccess) {
-		this.appliedConfiguredActionOnSuccess = appliedConfiguredActionOnSuccess;
-	}
+    public String getDispatcher() {
+        return dispatcher;
+    }
 
-	public ConfiguredAction getAppliedConfiguredActionOnSuccess() {
-		return appliedConfiguredActionOnSuccess;
-	}
+    public void setDispatcher(String dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 
-	public void setAppliedConfiguredActionOnFailure(
-			ConfiguredAction appliedConfiguredActionOnFailure) {
-		this.appliedConfiguredActionOnFailure = appliedConfiguredActionOnFailure;
-	}
+    public String getActionId() {
+        return actionId;
+    }
 
-	public ConfiguredAction getAppliedConfiguredActionOnFailure() {
-		return appliedConfiguredActionOnFailure;
-	}
+    public void setActionId(String actionId) {
+        this.actionId = actionId;
+    }
 
-	public Set<ConfiguredSourceSink> getConfiguredSourceSinkSet() {
-		return configuredSourceSinkSet;
-	}
+    public Map<String, ConfiguredAction> getReceivers() {
+        return receivers;
+    }
 
-	public void setConfiguredSourceSinkSet(
-			Set<ConfiguredSourceSink> configuredSourceSinkSet) {
-		this.configuredSourceSinkSet = configuredSourceSinkSet;
-	}
+    public void setReceivers(Map<String, ConfiguredAction> receivers) {
+        this.receivers = receivers;
+    }
+
+    public void addReceiver(String key, ConfiguredAction receiver){
+        if(receivers == null){
+            receivers = new HashMap<String, ConfiguredAction>();
+        }
+        receivers.put(key, receiver);
+    }
+
+    public int getNmbOfWorkers(){
+        return nmbOfWorkers;
+    }
+
+    public void setNmbOfWorkers(int nmbOfWorkers){
+        this.nmbOfWorkers = nmbOfWorkers;
+    }
 }

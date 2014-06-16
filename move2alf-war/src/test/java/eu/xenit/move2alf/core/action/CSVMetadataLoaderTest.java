@@ -1,32 +1,23 @@
 package eu.xenit.move2alf.core.action;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.aspectj.lang.annotation.Before;
+import au.com.bytecode.opencsv.CSVReader;
+import eu.xenit.move2alf.common.Parameters;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import scala.actors.threadpool.Arrays;
+import java.io.File;
+import java.util.HashMap;
 
-import au.com.bytecode.opencsv.CSVReader;
+import static org.junit.Assert.assertEquals;
 
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.action.CSVMetadataLoader;
-
+@Ignore
 public class CSVMetadataLoaderTest {
 
 	private static final String DIR = "src/test/resources/testdocs";
 
 	private CSVMetadataLoader metadataLoader;
-	private File csvFile;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -38,7 +29,7 @@ public class CSVMetadataLoaderTest {
 
 	public void setUp() throws Exception {
 		metadataLoader = new CSVMetadataLoader();
-		csvFile = new File(DIR, "testfile_csv.csv");
+        metadataLoader.setInputFile(new File(DIR, "testfile_csv.csv"));
 	}
 
 	public void tearDown() throws Exception {
@@ -47,7 +38,7 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testReadMetadataFields() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
 
 		assertEquals(4, metadataFields.length);
@@ -61,13 +52,12 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testProcessLineWrongNumberOfFields() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
-		HashMap dummyParameterMap = new HashMap();
 
 		String[] line = {"a"};
 		try {
-			metadataLoader.processLine(line, metadataFields, dummyParameterMap);
+			metadataLoader.processLine(line, metadataFields);
 		} catch (Throwable e) {
 			assert(true);
 			return;
@@ -79,12 +69,12 @@ public class CSVMetadataLoaderTest {
 	@Test
 	public final void testProcessLine() throws Exception {
 		setUp();
-		CSVReader reader = metadataLoader.createReader(csvFile);
+		CSVReader reader = metadataLoader.createReader();
 		String[] metadataFields = metadataLoader.readMetadataFields(reader);
 		HashMap parameterMap = new HashMap();
 
 		String[] line = {"/home/rox/m2a-dev-tutorial/input-csv/file1.txt","metadata11","metadata21","metadata31"};
-		metadataLoader.processLine(line, metadataFields, parameterMap);
+		metadataLoader.processLine(line, metadataFields);
 
 		assertEquals("/home/rox/m2a-dev-tutorial/input-csv/file1.txt",((File)(parameterMap.get(Parameters.PARAM_FILE))).getAbsolutePath());
 		HashMap<String,String> metadata = (HashMap)parameterMap.get(Parameters.PARAM_METADATA);

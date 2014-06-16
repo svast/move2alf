@@ -69,7 +69,7 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 
 	}
 
-	public void storeDocAndCreateParentSpaces(File document, String mimeType,
+	public void storeDocAndCreateParentSpaces(File document, String name, String mimeType,
 			String spacePath, String description, String contentModelNamespace,
 			String contentModelType, Map<String, String> meta,
 			Map<String, String> multiValueMeta)
@@ -131,5 +131,10 @@ public class CmisRepositoryAccessSession implements RepositoryAccessSession {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public String putContent(File file, String mimeType) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
 }

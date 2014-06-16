@@ -1,23 +1,23 @@
 package eu.xenit.move2alf.web.controller;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.core.ConfigurableObject;
+import eu.xenit.move2alf.core.action.ActionClassInfoService;
+import eu.xenit.move2alf.core.dto.Cycle;
+import eu.xenit.move2alf.core.dto.Job;
+import eu.xenit.move2alf.core.dto.ProcessedDocument;
+import eu.xenit.move2alf.core.dto.Resource;
+import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.logic.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
+import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
+import eu.xenit.move2alf.logic.DestinationService;
+import eu.xenit.move2alf.logic.JobService;
+import eu.xenit.move2alf.web.controller.destination.AlfrescoDestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.CastorDestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.model.ContentStoreModel;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobModel;
+import eu.xenit.move2alf.web.dto.ScheduleConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,25 +33,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.Cycle;
-import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
-import eu.xenit.move2alf.logic.JobService;
-import eu.xenit.move2alf.logic.PipelineAssembler;
-import eu.xenit.move2alf.logic.SchedulerImpl;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
-import eu.xenit.move2alf.web.dto.DestinationConfig;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobConfig;
-import eu.xenit.move2alf.web.dto.ScheduleConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.*;
 
 @Controller
 public class JobController extends AbstractController{
@@ -59,21 +47,18 @@ public class JobController extends AbstractController{
 			.getLogger(JobController.class);
 
 	private JobService jobService;
-	private JobExecutionService jobExecutionService;
-	private PipelineAssembler pipelineAssembler;
-	private SourceSinkFactory sourceSinkFactory;
-	private UsageService usageService;
+    private ActionClassInfoService actionClassService;
 
-	public JobExecutionService getJobExecutionService() {
-		return jobExecutionService;
-	}
+    public ActionClassInfoService getActionClassService() {
+        return actionClassService;
+    }
 
-	@Autowired
-	public void setJobExecutionService(final JobExecutionService jobExecutionService) {
-		this.jobExecutionService = jobExecutionService;
-	}
+    @Autowired
+    public void setActionClassService(ActionClassInfoService actionClassService) {
+        this.actionClassService = actionClassService;
+    }
 
-	@Autowired
+    @Autowired
 	public void setJobService(JobService jobService) {
 		this.jobService = jobService;
 	}
@@ -82,47 +67,12 @@ public class JobController extends AbstractController{
 		return jobService;
 	}
 
-	@Autowired
-	public void setPipelineAssembler(PipelineAssembler pipelineAssembler) {
-		this.pipelineAssembler = pipelineAssembler;
-	}
-
-	public PipelineAssembler getPipelineAssembler() {
-		return pipelineAssembler;
-	}
-
-	@Autowired
-	public void setSourceSinkFactory(SourceSinkFactory sourceSinkFactory) {
-		this.sourceSinkFactory = sourceSinkFactory;
-	}
-
-	public SourceSinkFactory getSourceSinkFactory() {
-		return sourceSinkFactory;
-	}
-	
-	@Autowired
-	public void setUsageService(UsageService usageService) {
-		this.usageService = usageService;
-	}
-	
-	public UsageService getUsageService() {
-		return this.usageService;
-	}
 
 	@RequestMapping("/job/dashboard")
 	public ModelAndView dashboard() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("jobInfoList", getJobService().getAllJobInfo());
 		mav.addObject("role", getRole());
-			
-		// license info
-		mav.addObject("licenseIsValid", getUsageService().isValid());
-		mav.addObject("licenseValidationFailureCause", getUsageService().getValidationFailureCause());
-		mav.addObject("licensee", getUsageService().getLicensee());
-		mav.addObject("expirationDate", getUsageService().getExpirationDate());
-		mav.addObject("documentCounter", getUsageService().getDocumentCounter());
-		mav.addObject("totalNumberOfDocuments", getUsageService().getTotalNumberOfDocuments());
-		
 		mav.setViewName("dashboard");
 		return mav;
 	}
@@ -130,7 +80,7 @@ public class JobController extends AbstractController{
 	@RequestMapping(value = "/job/create", method = RequestMethod.GET)
 	public ModelAndView createJobForm() {
 		ModelAndView mav = new ModelAndView("create-job");
-		mav.addObject("job", new JobConfig());
+		mav.addObject("job", new JobModel());
 		
 		jobModel(mav);
 
@@ -138,7 +88,7 @@ public class JobController extends AbstractController{
 	}
 
 	@RequestMapping(value = "/job/create", method = RequestMethod.POST)
-	public ModelAndView createJob(@ModelAttribute("job") @Valid JobConfig job,
+	public ModelAndView createJob(@ModelAttribute("job") @Valid JobModel job,
 			BindingResult errors) {
 		
 		if(getJobService().checkJobExists(job.getName())){
@@ -161,37 +111,33 @@ public class JobController extends AbstractController{
 
 		ModelAndView mav = new ModelAndView();
 		List<String> cronJobs = job.getCron();
-		int jobId = getJobService().createJob(job.getName(),
-				job.getDescription()).getId();
+		int jobId = getJobService().createJob(job).getId();
 
 		for (int i = 0; i < cronJobs.size(); i++) {
 			getJobService().createSchedule(jobId, cronJobs.get(i));
 		}
 
-		int destId = job.getDest();
-
-		job.setId(jobId);
-		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
-
 		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
 
+    @Autowired
+    private DestinationService destinationService;
+
 	private void jobModel(ModelAndView mav) {
-		mav.addObject("destinations", getJobService()
-				.getAllDestinationConfiguredSourceSinks());
-		mav.addObject("metadataOptions", getJobService()
-				.getActionsByCategory(ConfigurableObject.CAT_METADATA));
-		mav.addObject("transformOptions", getJobService()
-				.getActionsByCategory(ConfigurableObject.CAT_TRANSFORM));
-		mav.addObject("destinationOptions", getJobService()
-				.getSourceSinksByCategory(
-						ConfigurableObject.CAT_DESTINATION));
+        List<ContentStoreModel> contentStores = new ArrayList<ContentStoreModel>();
+        contentStores.add(new ContentStoreModel("Default Alfresco content store", -1));
+        for (Resource resource: destinationService.getDestinationsForClassId(CastorDestinationTypeController.CLASS_ID)){
+            contentStores.add(new ContentStoreModel(resource.getName(), resource.getId()));
+        }
+        mav.addObject("contentStores", contentStores);
+		mav.addObject("destinations", destinationService.getDestinationsForClassId(AlfrescoDestinationTypeController.CLASS_ID));
+		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
+		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
 		mav.addObject("role", getRole());
 	}
 
-	private void jobValidation(JobConfig job, BindingResult errors) {
+	private void jobValidation(JobModel job, BindingResult errors) {
 		List<String> metadata = job.getParamMetadata();
 		Set<String> uniqueMetadataNames = new HashSet<String>();
 		if (metadata != null) {
@@ -206,6 +152,12 @@ public class JobController extends AbstractController{
 				}
 			}
 		}
+
+        if(job.getInputSource() == InputSource.FILESYSTEM){
+           if(job.getInputFolder() == null || job.getInputFolder().isEmpty()){
+               errors.addError(new FieldError("job", "inputPath", "You should at least enter 1 inputfolder, or use another input source type."));
+           }
+        }
 		
 
 		List<String> transform = job.getParamTransform();
@@ -237,24 +189,40 @@ public class JobController extends AbstractController{
 	}
 
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.GET)
-	public ModelAndView editJobForm(@PathVariable int id) {
+	public ModelAndView editJobForm(@PathVariable("id") int id) {
+        if(getJobService().getJobState(id) == ECycleState.RUNNING){
+            Map<String, Object> model = new HashMap<String, Object>();
+            return new ModelAndView("redirect:/job/dashboard", model);
+        }
 		ModelAndView mav = new ModelAndView("edit-job");
-		JobConfig jobConfig = getPipelineAssembler().getJobConfigForJob(id);
+		JobModel jobModel = getJobService().getJobConfigForJob(id);
 		
-		mav.addObject("job", jobConfig);
+		mav.addObject("job", jobModel);
 		
 		jobModel(mav);
 		
 		return mav;
 	}
 
+    @RequestMapping(value = "/job/{id}/stop", method = RequestMethod.GET)
+    public ModelAndView stopJob(@PathVariable("id") int id){
+        getJobService().stopJob(id);
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("redirect:/job/dashboard");
+        return mav;
+    }
+
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
 	public ModelAndView editJob(@PathVariable int id,
-			@ModelAttribute("job") @Valid JobConfig job, BindingResult errors) {
+			@ModelAttribute("job") @Valid JobModel job, BindingResult errors) {
 
 		if (!getJobService().getJob(id).getName().equals(job.getName()) && getJobService().checkJobExists(job.getName())) {
 			errors.addError(new FieldError("job", "name", "The name you entered is the name of another job!"));
 		}
+
+        if (getJobService().getJobState(id) == ECycleState.RUNNING){
+            errors.addError(new ObjectError("job", "The job you want to save is currently running. Please wait until the job has finished."));
+        }
 		
 		jobValidation(job, errors);
 
@@ -269,32 +237,10 @@ public class JobController extends AbstractController{
 			return mav;
 		}
 		
-		ModelAndView mav = new ModelAndView();
-		Job editedJob = getJobService().editJob(id, job.getName(),
-				job.getDescription());
-		int jobId = editedJob.getId();
+		ModelAndView mav = new ModelAndView("redirect:/job/dashboard");
+		Job editedJob = getJobService().editJob(job);
 
 		handleSchedule(id, job.getCron());
-
-		int destId = job.getDest();
-
-		/*
-		 * Create new action pipeline and remove old one by deleting first
-		 * action. The delete will be cascaded by Hibernate.
-		 * 
-		 * TODO: delete FileSourceSink
-		 */
-
-		job.setId(jobId);
-		job.setDest(destId);
-		getPipelineAssembler().assemblePipeline(job);
-
-		ConfiguredAction firstAction = editedJob.getFirstConfiguredAction();
-		if (firstAction != null) {
-			getJobService().deleteAction(firstAction.getId());
-		}
-
-		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
 
@@ -350,10 +296,10 @@ public class JobController extends AbstractController{
 	@RequestMapping(value = "/job/{id}/edit/schedule", method = RequestMethod.GET)
 	public ModelAndView editScheduleForm(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
-		JobConfig jobConfig = new JobConfig();
-		jobConfig.setId(id);
-		jobConfig.setName(getJobService().getJob(id).getName());
-		mav.addObject("jobConfig", jobConfig);
+		JobModel jobModel = new JobModel();
+		jobModel.setId(id);
+		jobModel.setName(getJobService().getJob(id).getName());
+		mav.addObject("jobConfig", jobModel);
 		mav.addObject("job", new ScheduleConfig());
 		mav.addObject("schedules", getJobService().getSchedulesForJob(id));
 		mav.addObject("role", getRole());
@@ -393,146 +339,7 @@ public class JobController extends AbstractController{
 		return mav;
 	}
 
-	@RequestMapping("/destinations")
-	public ModelAndView destinations() {
-		ModelAndView mav = new ModelAndView();
-		List<ConfiguredSourceSink> destinations = getJobService()
-				.getAllDestinationConfiguredSourceSinks();
 
-		Map<String, String> sourceSinkNames = new HashMap<String, String>();
-
-		for (ConfiguredSourceSink destination : destinations) {
-			SourceSink sourceSink = getSourceSinkFactory().getObject(
-					destination.getClassName());
-			sourceSinkNames.put(destination.getClassName(), sourceSink
-					.getName());
-		}
-
-		mav.addObject("destinations", destinations);
-		mav.addObject("typeNames", sourceSinkNames);
-		mav.addObject("role", getRole());
-		mav.setViewName("manage-destinations");
-		return mav;
-	}
-
-	@RequestMapping(value = "/destination/create", method = RequestMethod.GET)
-	public ModelAndView createDestinationsForm() {
-		ModelAndView mav = new ModelAndView();
-		mav.addObject("destination", new DestinationConfig());
-		mav.addObject("destinationOptions", getJobService()
-				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-		mav.addObject("role", getRole());
-		mav.addObject("showDestinations", "false");
-		mav.setViewName("create-destination");
-		return mav;
-	}
-
-	@RequestMapping(value = "/destination/create", method = RequestMethod.POST)
-	public ModelAndView createDestination(
-			@ModelAttribute("destination") @Valid DestinationConfig destination,
-			BindingResult errors) {
-
-		if(errors.hasErrors()){
-			ModelAndView mav = new ModelAndView("create-destination");
-			mav.addObject("destination", destination);
-			mav.addObject("destinationOptions", getJobService()
-					.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-			mav.addObject("role", getRole());
-			mav.addObject("errors", errors.getFieldErrors());
-			return mav;	
-		}
-		ModelAndView mav = new ModelAndView();
-		
-		HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
-		destinationParams.put(EDestinationParameter.NAME, destination.getDestinationName());
-		destinationParams.put(EDestinationParameter.URL, destination.getDestinationURL());
-		destinationParams.put(EDestinationParameter.USER, destination.getAlfUser());
-		destinationParams.put(EDestinationParameter.PASSWORD, destination.getAlfPswd());
-		destinationParams.put(EDestinationParameter.THREADS, Integer.toString(destination.getNbrThreads()));
-		getJobService().createDestination(destination.getDestinationType(), destinationParams);
-
-		mav.setViewName("redirect:/destinations");
-		return mav;
-	}
-
-	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.GET)
-	public ModelAndView editDestinationForm(@PathVariable int id) {
-		ModelAndView mav = makeEditDestinationModelAndView(id);
-		return mav;
-	}
-
-	private ModelAndView makeEditDestinationModelAndView(int id) {
-		ModelAndView mav = new ModelAndView();
-		ConfiguredObject destination = getJobService().getConfiguredSourceSink(id);
-		DestinationConfig destinationConfig = new DestinationConfig();
-		
-		destinationConfig.setDestinationName(destination.getParameter("name"));
-		destinationConfig.setDestinationType(destination.getClassName());
-		destinationConfig.setDestinationURL(destination.getParameter("url"));
-		destinationConfig.setAlfUser(destination.getParameter("user"));
-		destinationConfig.setAlfPswd(destination.getParameter("password"));
-		destinationConfig.setNbrThreads(Integer.parseInt(destination.getParameter("threads")));
-		
-		mav.addObject("destination", destinationConfig);
-		mav.addObject("destinationId", id);
-		mav.addObject("destinationOptions", getJobService()
-				.getSourceSinksByCategory(ConfigurableObject.CAT_DESTINATION));
-		mav.addObject("role", getRole());
-		mav.setViewName("edit-destination");
-		return mav;
-	}
-
-	@RequestMapping(value = "/destination/{id}/edit", method = RequestMethod.POST)
-	public ModelAndView editDestination(
-			@PathVariable int id,
-			@ModelAttribute("destination") @Valid DestinationConfig destination,
-			BindingResult errors) {
-
-		boolean destinationExists = false;
-		if (!getJobService().getConfiguredSourceSink(id).getParameter("name")
-				.equals(destination.getDestinationName())) {
-			destinationExists = getJobService().checkDestinationExists(
-					destination.getDestinationName());
-		}
-
-		if (errors.hasErrors() || destinationExists == true) {
-			System.out.println("THE ERRORS: " + errors.toString());
-
-			ModelAndView mav = makeEditDestinationModelAndView(id);
-			
-			mav.addObject("destinationExists", destinationExists);
-			mav.addObject("errors", errors.getFieldErrors());
-			return mav;
-		}
-
-		ModelAndView mav = new ModelAndView();
-
-		HashMap<EDestinationParameter, Object> destinationParams = new HashMap<EDestinationParameter, Object>();
-
-		destinationParams.put(EDestinationParameter.NAME, destination
-				.getDestinationName());
-		destinationParams.put(EDestinationParameter.URL, destination
-				.getDestinationURL());
-		destinationParams.put(EDestinationParameter.USER, destination
-				.getAlfUser());
-		destinationParams.put(EDestinationParameter.PASSWORD, destination
-				.getAlfPswd());
-		destinationParams.put(EDestinationParameter.THREADS, destination
-				.getNbrThreads());
-		getJobService().editDestination(id, destination.getDestinationType(),
-				destinationParams);
-
-		mav.setViewName("redirect:/destinations");
-		return mav;
-	}
-
-	@RequestMapping(value = "/destination/{id}/delete", method = RequestMethod.GET)
-	public ModelAndView deleteDestination(@PathVariable int id) {
-		ModelAndView mav = new ModelAndView();
-		getJobService().deleteDestination(id);
-		mav.setViewName("redirect:/destinations");
-		return mav;
-	}
 
 	@RequestMapping("/job/{jobId}/report")
 	public ModelAndView recentReport(@PathVariable int jobId,
@@ -601,7 +408,7 @@ public class JobController extends AbstractController{
 			}
 		}
 
-		final List<PipelineStepProgress> progress = getJobExecutionService().getProgress(cycleId);
+		//final List<PipelineStepProgress> progress = getJobExecutionService().getProgress(cycleId);
 
 		// easiest way to keep the pagination links, not the cleanest
 		PagedListHolder<ProcessedDocument> pagedListHolder = new PagedListHolder<ProcessedDocument>() {
@@ -659,7 +466,7 @@ public class JobController extends AbstractController{
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.addObject("nrOfFailedDocuments", nrOfFailedDocuments);
-		mav.addObject("progress", progress);
+		//mav.addObject("progress", progress);
 		mav.setViewName(viewName);
 		return mav;
 	}
@@ -669,8 +476,7 @@ public class JobController extends AbstractController{
 			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
 
-		List<HistoryInfo> historyInfoList = new ArrayList<HistoryInfo>();
-		historyInfoList = getJobService().getHistory(jobId);
+		List<HistoryInfo> historyInfoList = getJobService().getHistory(jobId);
 
 		PagedListHolder pagedListHolder = new PagedListHolder(historyInfoList);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
@@ -687,7 +493,7 @@ public class JobController extends AbstractController{
 	}
 
 	@RequestMapping("/job/{jobId}/cycle/run")
-	public ModelAndView runPoller(@PathVariable int jobId) {
+	public ModelAndView runPoller(@PathVariable("jobId") int jobId) {
 		ModelAndView mav = new ModelAndView();
 
 		getJobService().scheduleNow(jobId);

@@ -30,32 +30,33 @@ function deleteDestination(id){
 	<col />
 	<col />
 	<col />
-	<col class="delete-column" />
 	<thead>
 		<tr>
-			<th><a href="<@spring.url relativeUrl="/destination/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" alt="Create new destination" /></a></th>
+			<th></th>
 			<th>Name</th>
 			<th>Type</th>
 			<th>URL</th>
 			<th>Username</th>
 			<th>Threads</th>
-			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<#list destinations as destination>
 		<tr>
-			<td><a href="<@spring.url relativeUrl="/destination/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
-			<td>${destination.parameters.name}</td>
-			<td>${typeNames[destination.className]}</td>
-			<td>${destination.parameters.url}</td>
-			<td>${destination.parameters.user}</td>
-			<td>${destination.parameters.threads}</td>
-			<td><img class="clickable" onclick="deleteDestination('${destination.id}')" src="<@spring.url relativeUrl="/images/delete-icon.png"/>" alt="delete" /></td>
+			<td><a href="<@spring.url relativeUrl="/destinations/${destination.type}/${destination.id}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" alt="edit" /></a></td>
+			<td>${destination.name}</td>
+			<td>${destination.type}</td>
+			<td>${destination.url}</td>
+			<td>${destination.userName}</td>
+			<td>${destination.threads}</td>
 		</tr>
 		</#list>
 	</tbody>
 </table>
+<b>Create new:<b>
+    <#list destinationOptions?keys as type>
+        <a class="btn btn-success" href="<@spring.url relativeUrl="/destinations/${type}/create" />">${destinationOptions[type].name}</a>
+    </#list>
 
 </@bodyMenu>
 </@html>

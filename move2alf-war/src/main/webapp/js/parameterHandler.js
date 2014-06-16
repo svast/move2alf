@@ -80,7 +80,7 @@ function adjustRowsParamsMeta(tbl,row){
 }
 
 function setParamMetadataInForm(name, value){
-	var tableValue=name+"|"+value;
+	var tableValue=name+"@@@"+value;
 	var tblParam = document.getElementById('tblParamMetadata');
 	
 	  var lastRow = tblParam.rows.length;
@@ -200,7 +200,7 @@ function adjustRowsParamsTrans(tbl,row){
 }
 
 function setParamTransformInForm(name, value){
-	var tableValue=name+"|"+value;
+	var tableValue=name+"@@@"+value;
 	var tblParam = document.getElementById('tblParamTransform');
 	
 	  var lastRow = tblParam.rows.length;

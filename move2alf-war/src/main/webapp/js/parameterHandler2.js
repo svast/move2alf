@@ -24,7 +24,7 @@ function addParameter(idbase, raw){
 				"	<td><img src='"+basePath+"/images/new.png' alt='new' /></td>" +
 				"	<td class=\"parameterName\">"+name+"</td>" +
 				"	<td class=\"parameterValue\">"+value+"" +
-						"<input name=\""+idbase+"\" type=\"hidden\" value=\""+name+"|"+value+"\" />" +
+						"<input name=\""+idbase+"\" type=\"hidden\" value=\""+name+"@@@"+value+"\" />" +  /*separator should be the same as in forms.ftl*/
 				"	</td>" +
 				"	<td>" +
 				"		<img class=\"clickable\" onclick=\"$('#"+parameterId+"').remove()\" src='"+basePath+"/images/delete-icon.png' alt='delete' />" +

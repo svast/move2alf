@@ -136,3 +136,21 @@ col.delete-column{
 .hidden {
 	display: none;
 }
+
+.scrollspy-example {
+height: 400px;
+overflow: auto;
+position: relative;
+}
+
+.bs-jobedit {
+    position: relative;
+    margin: 5px 0;
+    padding: 3px 19px 14px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+

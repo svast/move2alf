@@ -41,10 +41,11 @@ public class CMLDocument {
 		this.session = session;
 		this.doc = doc;
 		this.id = id;
+        this.contentDetails = doc.contentUrl;
 	}
 
 	public CMLUpdate toCMLUpdate(Reference ref) {
-		logger.debug("Converting doc to CMLUpdate: {}", doc.file.getName());
+		logger.debug("Converting doc to CMLUpdate: {}", doc.name);
 		Predicate pred = new Predicate(new Reference[] {ref},
 				WebServiceRepositoryAccessSession.store, null);
 
@@ -52,12 +53,12 @@ public class CMLDocument {
 	}
 
 	public CMLCreate toCMLCreate() throws RepositoryAccessException, RepositoryException {
-		logger.debug("Converting doc to CMLCreate: {}", doc.file.getName());
+		logger.debug("Converting doc to CMLCreate: {}", doc.name);
 		Reference parentSpace = session.createSpaceIfNotExists(doc.spacePath);
 		ParentReference parentRef = new ParentReference(WebServiceRepositoryAccessSession.store,
 				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
-				+ doc.file.getName());
+				+ doc.name);
 
 		return new CMLCreate(this.getId(), parentRef, parentSpace.getUuid(),
 				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
@@ -74,9 +75,8 @@ public class CMLDocument {
 		List<NamedValue> contentProps = new ArrayList<NamedValue>();
 
 		// these properties are always present
-		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, doc.file.getName()));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,
-				getContentDetailsAndCreateIfNotExists()));
+		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, doc.name));
+		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,getContentDetails()));
 
 		if (doc.meta != null) {
 			// Enumeration<String> E = meta.;
@@ -87,22 +87,30 @@ public class CMLDocument {
 			session.processMultiValuedMetadata(doc.contentModelNamespace, doc.multiValueMeta, contentProps);
 		}
 
-		contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
-/*		for(NamedValue value: contentProps){
-			System.out.println(value.getName()+": "+value.getValue());
-		}*/
-		return contentProps.toArray(new NamedValue[0]);
+        boolean hasTitle = false;
+        boolean hasDescription = false;
+        for(NamedValue value:contentProps) {
+            if(value.getName().equals(Constants.PROP_TITLE))
+                hasTitle = true;
+            if(value.getName().equals(Constants.PROP_DESCRIPTION))
+                hasDescription = true;
+        }
+        if(!hasTitle)
+            contentProps.add(Utils.createNamedValue(Constants.PROP_TITLE, doc.description));
+        if(!hasDescription)
+            contentProps.add(Utils.createNamedValue(Constants.PROP_DESCRIPTION, doc.description));
+	
+	return contentProps.toArray(new NamedValue[0]);
 	}
 
 	public String getXpath() {
-		return WebServiceRepositoryAccessSession.companyHomePath + session.getXPathEscape(doc.spacePath + "/cm:" + doc.file.getName());
+		return WebServiceRepositoryAccessSession.companyHomePath + session.getXPathEscape(doc.spacePath + "/cm:" + doc.name);
 	}
 
 	public String getPath() {
 		return WebServiceRepositoryAccessSession.companyHomePath +
 				doc.spacePath +
-				"/cm:" + doc.file.getName();
+				"/cm:" + doc.name;
 	}
 
 	public String getContentDetails() {
@@ -111,12 +119,5 @@ public class CMLDocument {
 
 	public String getSpacePath() {
 		return doc.spacePath;
-	}
-
-	private String getContentDetailsAndCreateIfNotExists() {
-		if (getContentDetails() == null) {
-			contentDetails = session.putContent(doc.file, doc.mimeType);
-		}
-		return getContentDetails();
 	}
 }

@@ -1,5 +1,8 @@
 package eu.xenit.move2alf.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * List of parameters passed between actions in the parameterMap.
  */
@@ -28,12 +31,23 @@ public class Parameters {
 	 */
 	public static final String PARAM_METADATA = "metadata";
 
+    /**
+     * ContentUrl of a document. Abstraction is made to be able to put a file
+     * in Castor and the document in Alfresco.
+     */
+    public static final String PARAM_CONTENTURL = "contentUrl";
+
 	/**
 	 * Map with metadata of file. The key is the property name without
 	 * namespace, PARAM_NAMESPACE is used as namespace for all properties.
 	 * Values are comma separated. Type: Map<String, String>
 	 */
 	public static final String PARAM_MULTI_VALUE_METADATA = "multiValueMetadata";
+
+    /**
+     * Name of document to be uploaded. Can be different of filename, to allow CMIS import of files with same name. Type: String
+     */
+    public static final String PARAM_NAME = "name";
 
 	/**
 	 * Description of the file. Type: String
@@ -50,6 +64,8 @@ public class Parameters {
 	 */
 	public static final String PARAM_NAMESPACE = "namespace";
 
+
+    public static final String PARAM_CMIS_PROPERTIES = "cmisProperties";
 	/**
 	 * Mimtype of the file. Type: String
 	 */
@@ -80,6 +96,23 @@ public class Parameters {
 	public static final String PARAM_ERROR_MESSAGE = "errormessage";
 	public static final String PARAM_REFERENCE = "reference";
 
+    /**
+     * Separator used in the CSV metadata loader
+     */
+    public static final String PARAM_CSV_DELIMITER = "csvDelimiter";
+
+    /**
+     *  Mapping of the path in the csv file, useful in drive is mounted from another machine.
+     *  Example: \\localhost\CHB_FLS\ => /mnt/windows-scanning/
+     */
+    public static final String PARAM_PATH_MAPPING_REMOTE = "pathMappingRemote";
+    public static final String PARAM_PATH_MAPPING_LOCAL = "pathMappingLocal";
+
+    /**
+     *  E.g. metadata file
+     */
+    public static final String PARAM_INPUT_FILE = "inputFile";
+
 	/************************************************************************************
 	 * TO CHECK
 	 ************************************************************************************/
@@ -89,8 +122,6 @@ public class Parameters {
     public static final String VALUE_AFTER = "after";
     public static final String VALUE_BEFORE = "before";
 	public static final String PARAM_TRANSFORM_FILE_LIST = "transformFileList";
-
-	public static final String PARAM_INPUT_FILE = "inputFile";
 
 	public static final String PARAM_COMMAND = "command";
 

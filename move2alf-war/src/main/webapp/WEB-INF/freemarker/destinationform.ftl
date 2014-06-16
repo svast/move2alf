@@ -1,14 +1,13 @@
-<@labeledSingleLineTextInput label="Name" name="name" binding="destination.destinationName" />
-<@labeledInput label="Type" forId="destinationType" >
+<@labeledSingleLineTextInput label="Name" name="name" binding="destination.name" />
+<@labeledInput label="Type" forId="type" >
 
-		<#list destinationOptions as destinationOption>
-			<@radio name="destinationType" value=destinationOption.class.name checked=((destinationOption_index==0 && (destinationOptions?size==1 || !destination.destinationType??)) || destinationOption.class.name==destination.destinationType!"false") description=destinationOption.name />
+		<#list destinationOptions?keys as destinationOption>
+			<@radio name="type" value=destinationOption checked=((destinationOption_index==0 && (destinationOptions?size==1 || !destination.type??)) || destinationOption==destination.classId!"false") description=destinationOption />
 		</#list>
 </@labeledInput>
-<@labeledSingleLineTextInput label="URL" name="destinationURL" binding="destination.destinationURL" />
-<@labeledSingleLineTextInput label="Username" name="alfUser" binding="destination.alfUser" />
-<@labeledSingleLineTextInput label="Password" name="alfPswd" binding="destination.alfPswd" />
-<@labeledSingleLineTextInput label="Number of threads" name="nbrThreads" binding="destination.nbrThreads" />
+<#list destinationOptions?values as type>
+    <#include type.viewName />
+</#list>
 
 <input class="btn btn-success" type="submit" value="Save" />
 <a class="btn btn-inverse" href="<@spring.url relativeUrl="/destinations" />">Cancel</a>

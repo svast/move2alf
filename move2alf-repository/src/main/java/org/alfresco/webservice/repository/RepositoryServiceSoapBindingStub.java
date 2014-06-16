@@ -7,7 +7,14 @@
 
 package org.alfresco.webservice.repository;
 
+import org.alfresco.webservice.types.CMLCreate;
+import org.alfresco.webservice.types.CMLUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RepositoryServiceSoapBindingStub extends org.apache.axis.client.Stub implements org.alfresco.webservice.repository.RepositoryServiceSoapPort {
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryServiceSoapBindingStub.class);
+    
 	private java.util.Vector cachedSerClasses = new java.util.Vector();
 	private java.util.Vector cachedSerQNames = new java.util.Vector();
 	private java.util.Vector cachedSerFactories = new java.util.Vector();
@@ -968,7 +975,34 @@ public class RepositoryServiceSoapBindingStub extends org.apache.axis.client.Stu
 	 * store.
 	 */
 	public org.alfresco.webservice.repository.UpdateResult[] update(org.alfresco.webservice.types.CML statements) throws java.rmi.RemoteException, org.alfresco.webservice.repository.RepositoryFault {
-		if (super.cachedEndpoint == null) {
+        logger.debug("Statements=");
+
+        if(statements.getCreate()!=null && statements.getCreate().length>0) {
+            for(CMLCreate create : statements.getCreate()) {
+                logger.debug("create: assoc type=" + create.getAssociationType());
+                logger.debug("child name=" + create.getChildName());
+                logger.debug("id=" + create.getId());
+                logger.debug("parent=" + create.getParent());
+                logger.debug("parent id=" + create.getParent_id());
+                logger.debug("type=" + create.getType());
+                logger.debug("properties=");
+                for(int i=0; i<create.getProperty().length; i++) {
+                    logger.debug(create.getProperty(i).getName() + ": " + create.getProperty(i).getValue());
+                }
+            }
+        }
+        if(statements.getUpdate()!=null && statements.getUpdate().length>0) {
+            for(CMLUpdate update : statements.getUpdate()) {
+            logger.debug("update: where=" + update.getWhere());
+            logger.debug("where id=" + update.getWhere_id());
+            logger.debug("propertes=");
+            for(int i=0; i<update.getProperty().length; i++) {
+                logger.debug(update.getProperty(i).getName() + ": " + update.getProperty(i).getValue());
+            }
+        }
+        }
+
+        if (super.cachedEndpoint == null) {
 			throw new org.apache.axis.NoEndPointException();
 		}
 		org.apache.axis.client.Call _call = createCall();
@@ -982,31 +1016,32 @@ public class RepositoryServiceSoapBindingStub extends org.apache.axis.client.Stu
 		_call.setOperationName(new javax.xml.namespace.QName("http://www.alfresco.org/ws/service/repository/1.0", "update"));
 
 		setRequestHeaders(_call);
-		setAttachments(_call);
-		try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {statements});
+        setAttachments(_call);
+        try {
+            java.lang.Object _resp = _call.invoke(new java.lang.Object[] {statements});
 
-		if (_resp instanceof java.rmi.RemoteException) {
-			throw (java.rmi.RemoteException)_resp;
-		}
-		else {
-			extractAttachments(_call);
-			try {
-				return (org.alfresco.webservice.repository.UpdateResult[]) _resp;
-			} catch (java.lang.Exception _exception) {
-				return (org.alfresco.webservice.repository.UpdateResult[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.alfresco.webservice.repository.UpdateResult[].class);
-			}
-		}
-		} catch (org.apache.axis.AxisFault axisFaultException) {
-			if (axisFaultException.detail != null) {
-				if (axisFaultException.detail instanceof java.rmi.RemoteException) {
-					throw (java.rmi.RemoteException) axisFaultException.detail;
-				}
-				if (axisFaultException.detail instanceof org.alfresco.webservice.repository.RepositoryFault) {
-					throw (org.alfresco.webservice.repository.RepositoryFault) axisFaultException.detail;
-				}
-			}
-			throw axisFaultException;
-		}
+            if (_resp instanceof java.rmi.RemoteException) {
+                throw (java.rmi.RemoteException)_resp;
+            }
+            else {
+                extractAttachments(_call);
+                try {
+                    return (org.alfresco.webservice.repository.UpdateResult[]) _resp;
+                } catch (java.lang.Exception _exception) {
+                    return (org.alfresco.webservice.repository.UpdateResult[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.alfresco.webservice.repository.UpdateResult[].class);
+                }
+            }
+        } catch (org.apache.axis.AxisFault axisFaultException) {
+            if (axisFaultException.detail != null) {
+                if (axisFaultException.detail instanceof java.rmi.RemoteException) {
+                    throw (java.rmi.RemoteException) axisFaultException.detail;
+                }
+                if (axisFaultException.detail instanceof org.alfresco.webservice.repository.RepositoryFault) {
+                    throw (org.alfresco.webservice.repository.RepositoryFault) axisFaultException.detail;
+                }
+            }
+            throw axisFaultException;
+        }
 	}
 
 

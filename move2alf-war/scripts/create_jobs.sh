@@ -1,0 +1,1 @@
+cat m2ajobs-folder-noderef | while read line; do folder=`echo $line | cut -d ' ' -f 1`; noderef=`echo $line | cut -d ' ' -f 2`; ./create_jobs.sh $folder $noderef; done

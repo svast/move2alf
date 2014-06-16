@@ -12,8 +12,7 @@ public class IdObjectComparator implements Comparator<IdObject> {
   }
   
   public int compare(IdObject o1, IdObject o2) {
-    int result = 0;
-        result = o1.toLabel().compareTo(o2.toLabel());
+    int result = o1.toLabel().compareTo(o2.toLabel());
     return (ascending)?result:-result;
   }
 

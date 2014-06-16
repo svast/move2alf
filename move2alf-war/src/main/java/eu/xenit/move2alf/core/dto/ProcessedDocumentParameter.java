@@ -1,7 +1,15 @@
 package eu.xenit.move2alf.core.dto;
 
 public class ProcessedDocumentParameter {
-	private ConfiguredAction configuredAction;
+    public ProcessedDocument getProcessedDocument() {
+        return processedDocument;
+    }
+
+    public void setProcessedDocument(ProcessedDocument processedDocument) {
+        this.processedDocument = processedDocument;
+    }
+
+    private ProcessedDocument processedDocument;
 
 	private String name;
 
@@ -9,14 +17,6 @@ public class ProcessedDocumentParameter {
 
 	public ProcessedDocumentParameter() {
 
-	}
-
-	public ConfiguredAction getConfiguredAction() {
-		return configuredAction;
-	}
-
-	public void setConfiguredAction(ConfiguredAction configuredAction) {
-		this.configuredAction = configuredAction;
 	}
 
 	public String getName() {

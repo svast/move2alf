@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.xenit</groupId>
 	<artifactId>move2alf-war</artifactId>
@@ -12,9 +12,9 @@
 		<artifactId>move2alf</artifactId>
 		<version>1.2.5</version>
 	</parent>
-    <properties>
-        <spring.version>3.1.3.RELEASE</spring.version>
-    </properties>
+	<properties>
+		<spring.version>3.1.3.RELEASE</spring.version>
+	</properties>
 	<repositories>
 		<repository>
 			<id>jboss-public-repository-group</id>
@@ -46,17 +46,18 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
-		<repository>
-			<id>Akka</id>
-			<name>Akka Maven2 Repository</name>
-			<url>http://repo.akka.io/releases/</url>
-		</repository>
+
+        <repository>
+            <id>typesafe-releases</id>
+            <name>Typesafe Releases</name>
+            <url>http://repo.typesafe.com/typesafe/releases</url>
+        </repository>
 	</repositories>
-    <dependencies>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.7.1</version>
+	<dependencies>
+	<dependency>
+            <groupId>org.alfresco.cmis.client</groupId>
+            <artifactId>alfresco-opencmis-extension</artifactId>
+            <version>0.3</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -69,15 +70,15 @@
 			<version>2.1</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.h2database</groupId>
-		    <artifactId>h2</artifactId>
-		    <version>1.3.168</version>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.175</version>
 		</dependency>
-        <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>0.9.2-pre6</version>
-        </dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.2-pre6</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
@@ -111,7 +112,14 @@
 		<dependency>
 			<groupId>eu.xenit</groupId>
 			<artifactId>move2alf-repository</artifactId>
-            <version>${project.parent.version}</version>
+			<version>${project.parent.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.xenit</groupId>
+			<artifactId>move2alf-pipeline</artifactId>
+			<version>${project.parent.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -180,27 +188,27 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-expression</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -324,11 +332,7 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.4</version>
 		</dependency>
-		<dependency>
-			<groupId>se.scalablesolutions.akka</groupId>
-			<artifactId>akka-actor</artifactId>
-			<version>1.1.2</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.sun.media</groupId>
 			<artifactId>jai_imageio</artifactId>
@@ -372,10 +376,71 @@
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-api</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-impl</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-bindings</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-api</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-impl</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.atmos</groupId>
+            <artifactId>trace-akka-2.1.4</artifactId>
+            <version>1.3.0-RC1</version>
+        </dependency>
+        <dependency>	    
+            <groupId>com.caringo.client</groupId>
+            <artifactId>CAStorSDK</artifactId>
+            <version>1.3.1-CS40</version>
+        </dependency>
+
 	</dependencies>
 	<build>
 		<finalName>move2alf</finalName>
 		<plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.14.1</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
@@ -390,6 +455,14 @@
 					<!-- <archiveClasses>true</archiveClasses> -->
 				</configuration>
 			</plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

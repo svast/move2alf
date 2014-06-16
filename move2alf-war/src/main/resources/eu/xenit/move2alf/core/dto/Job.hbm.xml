@@ -8,12 +8,12 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<property name="name" />
+		<property name="name" unique="true"/>
 		<property name="description" />
 		<many-to-one name="creator" column="creatorId" />
 		<property name="creationDateTime" />
 		<property name="lastModifyDateTime" />
-		<many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true" cascade="all-delete-orphan" lazy="false" />
+		<many-to-one name="firstConfiguredAction" column="firstConfiguredActionId" unique="true" cascade="all" lazy="false" />
 		<set name="schedules" inverse="true" cascade="all,delete-orphan" lazy="false">
 			<key column="jobId" />
 			<one-to-many class="eu.xenit.move2alf.core.dto.Schedule" />
@@ -22,9 +22,9 @@
 			<key column="jobId" />
 			<one-to-many class="eu.xenit.move2alf.core.dto.Cycle" />
 		</set>
-		<set name="reports" inverse="true">
-			<key column="jobId" />
-			<one-to-many class="eu.xenit.move2alf.core.dto.ConfiguredReport" />
-		</set>
+        <property name="sendErrorReport" />
+        <property name="sendErrorReportTo" />
+        <property name="sendReport" />
+        <property name="sendReportTo" />
 	</class>
 </hibernate-mapping>

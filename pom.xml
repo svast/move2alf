@@ -27,6 +27,8 @@
 	<modules>
 		<module>move2alf-war</module>
 		<module>move2alf-repository</module>
+        <module>move2alf-pipeline</module>
+        <!--module>move2alf-parser</module-->
 	</modules>
 	<build>
 		<plugins>

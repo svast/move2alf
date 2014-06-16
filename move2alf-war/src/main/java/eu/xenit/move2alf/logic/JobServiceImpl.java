@@ -1,70 +1,84 @@
 package eu.xenit.move2alf.logic;
 
-import static akka.actor.Actors.actorOf;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import akka.actor.ActorSystem;
+import eu.xenit.move2alf.common.Util;
+import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.dto.*;
+import eu.xenit.move2alf.core.enums.ECycleState;
+import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
+import eu.xenit.move2alf.pipeline.JobHandle;
+import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.pipeline.actions.JobConfig;
+import eu.xenit.move2alf.web.dto.HistoryInfo;
+import eu.xenit.move2alf.web.dto.JobInfo;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.context.ThreadLocalSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
+import org.springframework.orm.hibernate3.SpringSessionContext;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import akka.actor.ActorRef;
-import eu.xenit.move2alf.common.IdObject;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ConfiguredObject;
-import eu.xenit.move2alf.core.ReportActor;
-import eu.xenit.move2alf.core.action.Action;
-import eu.xenit.move2alf.core.action.ActionFactory;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
-import eu.xenit.move2alf.core.dto.ConfiguredSourceSink;
-import eu.xenit.move2alf.core.dto.Cycle;
-import eu.xenit.move2alf.core.dto.Job;
-import eu.xenit.move2alf.core.dto.ProcessedDocument;
-import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
-import eu.xenit.move2alf.core.dto.Schedule;
-import eu.xenit.move2alf.core.enums.ECycleState;
-import eu.xenit.move2alf.core.enums.EDestinationParameter;
-import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.core.sourcesink.SourceSink;
-import eu.xenit.move2alf.core.sourcesink.SourceSinkFactory;
-import eu.xenit.move2alf.logic.usageservice.UsageService;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
-import eu.xenit.move2alf.web.dto.JobInfo;
+import javax.annotation.PreDestroy;
+import javax.transaction.TransactionManager;
+import java.util.*;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
 		JobService {
 	private static final Logger logger = LoggerFactory
 			.getLogger(JobServiceImpl.class);
-	
-	@Autowired
-	private UsageService usageService;
+
+    @Override
+    public void stopJob(int jobId) {
+        jobMap.get(jobId).destroy();
+        jobMap.remove(jobId);
+        closeCycle(getLastCycleForJob(getJob(jobId)));
+    }
+
+    @Override
+    public Job getJobByName(String name) {
+        final List<Job> jobs = getSessionFactory().getCurrentSession()
+                .createQuery("from Job as j where j.name=?")
+                .setString(0, name).list();
+        return jobs.get(0);
+    }
+
+    private int getJobIdByName(String name) {
+       return getJobByName(name).getId();
+    }
+
+    @Autowired
+    private PipelineAssembler pipelineAssembler;
 
 	private UserService userService;
 
+    @Autowired
+    private DestinationService destinationService;
+
 	private Scheduler scheduler;
-
-	private ActionFactory actionFactory;
-
-	private SourceSinkFactory sourceSinkFactory;
 
 	private MailSender mailSender;
 
-	private final ActorRef reportActor;
+    @Autowired
+    private ActorSystem actorSystem;
+
+    private Map<Integer, JobHandle> jobMap = new HashMap<Integer, JobHandle>();
 
 	@Autowired
 	public void setUserService(final UserService userService) {
@@ -85,39 +99,12 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Autowired
-	public void setActionFactory(final ActionFactory actionFactory) {
-		this.actionFactory = actionFactory;
-	}
-
-	public ActionFactory getActionFactory() {
-		return actionFactory;
-	}
-
-	@Autowired
-	public void setSourceSinkFactory(final SourceSinkFactory sourceSinkFactory) {
-		this.sourceSinkFactory = sourceSinkFactory;
-	}
-
-	public SourceSinkFactory getSourceSinkFactory() {
-		return sourceSinkFactory;
-	}
-
-	@Autowired
 	public void setMailSender(final MailSender mailSender) {
 		this.mailSender = mailSender;
 	}
 
 	public MailSender getMailSender() {
 		return mailSender;
-	}
-
-	@Override
-	public ActorRef getReportActor() {
-		return reportActor;
-	}
-
-	public JobServiceImpl() {
-		reportActor = actorOf(ReportActor.class).start();
 	}
 
 	@Override
@@ -129,35 +116,56 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
 	@Override
 	// @Transactional(propagation=Propagation.REQUIRES_NEW)
-	public Job createJob(final String name, final String description) {
-		final Date now = new Date();
+	public Job createJob(JobModel jobModel) {
+
 		final Job job = new Job();
-		job.setName(name);
-		job.setDescription(description);
-		job.setCreationDateTime(now);
-		job.setLastModifyDateTime(now);
-		job.setCreator(getUserService().getCurrentUser());
-		getSessionFactory().getCurrentSession().save(job);
+        populateJobFields(jobModel, job);
+
+        ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobModel);
+        job.setFirstConfiguredAction(configuredAction);
+
+        getSessionFactory().getCurrentSession().save(job);
+
 		return job;
 	}
 
-	@Override
-	public Job editJob(final int id, final String name, final String description) {
-		final Date now = new Date();
-		final Job job = getJob(id);
-		job.setId(id);
-		job.setName(name);
-		job.setDescription(description);
-		job.setCreationDateTime(now);
-		job.setLastModifyDateTime(now);
-		job.setCreator(getUserService().getCurrentUser());
-		getSessionFactory().getCurrentSession().save(job);
+    private void populateJobFields(JobModel jobModel, Job job) {
+        final Date now = new Date();
+        job.setName(jobModel.getName());
+        job.setDescription(jobModel.getDescription());
+        job.setCreationDateTime(now);
+        job.setLastModifyDateTime(now);
+        job.setCreator(getUserService().getCurrentUser());
+        job.setSendErrorReport(jobModel.getSendNotification());
+        job.setSendErrorReportTo(jobModel.getSendNotificationText());
+        job.setSendReport(jobModel.getSendReport());
+        job.setSendReportTo(jobModel.getSendReportText());
+    }
+
+    @Override
+	public Job editJob(JobModel jobModel) {
+		final Job job = getJob(jobModel.getId());
+
+        populateJobFields(jobModel, job);
+
+        ConfiguredAction oldConfiguredAction = job.getFirstConfiguredAction();
+        job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobModel));
+        getSessionFactory().getCurrentSession().save(job);
+        getSessionFactory().getCurrentSession().delete(oldConfiguredAction);
+        if(jobMap.containsKey(jobModel.getId())){
+            jobMap.get(jobModel.getId()).destroy();
+            jobMap.remove(jobModel.getId());
+        }
 		return job;
 	}
 
 	@Override
 	public void deleteJob(final int id) {
 		final Job job = getJob(id);
+        if(jobMap.get(id) != null){
+            jobMap.get(id).destroy();
+            jobMap.remove(id);
+        }
 		sessionFactory.getCurrentSession().delete(job);
 		logger.debug("Reloading scheduler");
 		getSessionFactory().getCurrentSession().flush();
@@ -216,7 +224,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public Cycle getLastCycleForJob(final Job job) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Cycle getLastCycleForJob(final Job job) {
 
 		@SuppressWarnings("unchecked")
 		final List<Cycle> list = getSessionFactory()
@@ -312,198 +321,25 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		getScheduler().reloadSchedules();
 	}
 
-	@Override
-	public ConfiguredSourceSink createDestination(final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSourceSink sourceSink = new ConfiguredSourceSink();
-		createSourceSink(destinationType, destinationParams, sourceSink);
-		getSessionFactory().getCurrentSession().save(sourceSink);
-		return sourceSink;
-	}
-
-	@Override
-	public ConfiguredSourceSink editDestination(final int sinkId,
-			final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams) {
-		final ConfiguredSourceSink sourceSink = getConfiguredSourceSink(sinkId);
-		sourceSink.setClassName(destinationType);
-		createSourceSink(destinationType, destinationParams, sourceSink);
-		getSessionFactory().getCurrentSession().save(sourceSink);
-		return sourceSink;
-	}
-
-	@Override
-	public ConfiguredSourceSink getDestination(final int id) {
-		return (ConfiguredSourceSink) getSessionFactory().getCurrentSession()
-				.get(ConfiguredSourceSink.class, id);
-	}
-
-	@Override
-	public boolean checkDestinationExists(final String destinationName) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredObject> destinations = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSourceSink")
-				.list();
-
-		for (int i = 0; i < destinations.size(); i++) {
-			final String destinationParameter = destinations.get(i)
-					.getParameter("name");
-
-			if (destinationName.equals(destinationParameter)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void createSourceSink(final String destinationType,
-			final HashMap<EDestinationParameter, Object> destinationParams,
-			final ConfiguredSourceSink sourceSink) {
-		sourceSink.setClassName(destinationType);
-
-		final Map<String, String> sourceSinkParameters = new HashMap<String, String>();
-		sourceSinkParameters.put("name",
-				(String) destinationParams.get(EDestinationParameter.NAME));
-		sourceSinkParameters.put("url",
-				(String) destinationParams.get(EDestinationParameter.URL));
-		sourceSinkParameters.put("user",
-				(String) destinationParams.get(EDestinationParameter.USER));
-		sourceSinkParameters.put("password",
-				(String) destinationParams.get(EDestinationParameter.PASSWORD));
-		sourceSinkParameters
-				.put("threads",
-						destinationParams.get(EDestinationParameter.THREADS)
-								.toString());
-		sourceSink.setParameters(sourceSinkParameters);
-	}
-
-	@Override
-	public List<ConfiguredSourceSink> getAllConfiguredSourceSinks() {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredSourceSink")
-				.list();
-
-		return configuredSourceSink;
-	}
-
-	@Override
-	public List<ConfiguredSourceSink> getAllDestinationConfiguredSourceSinks() {
-
-		final String fileSourceSink = "eu.xenit.move2alf.core.sourcesink.FileSourceSink";
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
-				.getCurrentSession()
-				.createQuery(
-						"from ConfiguredSourceSink as c where c.className!=?")
-				.setString(0, fileSourceSink).list();
-
-		return configuredSourceSink;
-	}
-
-	@Override
-	public ConfiguredSourceSink getConfiguredSourceSink(final int sourceSinkId) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredSourceSink> configuredSourceSink = sessionFactory
-				.getCurrentSession()
-				.createQuery("from ConfiguredSourceSink as c where c.id=?")
-				.setLong(0, sourceSinkId).list();
-		if (configuredSourceSink.size() == 1) {
-			return configuredSourceSink.get(0);
-		} else {
-			throw new Move2AlfException("ConfiguredSourceSink with id "
-					+ sourceSinkId + " not found");
-		}
-	}
-
-	@Override
-	public ConfiguredAction getActionRelatedToConfiguredSourceSink(
-			final int sourceSinkId) {
-		@SuppressWarnings("unchecked")
-		final List<ConfiguredAction> configuredActions = sessionFactory
-				.getCurrentSession().createQuery("from ConfiguredAction")
-				.list();
-
-		for (int i = 0; i < configuredActions.size(); i++) {
-			final Set<ConfiguredSourceSink> configuredSourceSinkForAction = configuredActions
-					.get(i).getConfiguredSourceSinkSet();
-
-			for (int j = 0; j < configuredSourceSinkForAction.size(); j++) {
-				final Iterator<ConfiguredSourceSink> configuredSourceSinkIterator = configuredSourceSinkForAction
-						.iterator();
-
-				while (configuredSourceSinkIterator.hasNext()) {
-					if (((IdObject) configuredSourceSinkIterator.next())
-							.getId() == sourceSinkId) {
-						return configuredActions.get(i);
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public void deleteDestination(final int id) {
-		final ConfiguredSourceSink destination = getConfiguredSourceSink(id);
-		final Map<String, String> emptyMap = new HashMap<String, String>();
-		destination.setParameters(emptyMap);
-		sessionFactory.getCurrentSession().delete(destination);
-	}
-
-	@Override
-	public void executeAction(final int cycleId, final ConfiguredAction action,
-			final Map<String, Object> parameterMap) {
-		throw new UnsupportedOperationException(
-				"Use JobExecutionService instead");
-	}
-
-	@Override
-	public Map<String, String> getActionParameters(final int cycleId,
-			final Class<? extends Action> clazz) {
-		final Cycle cycle = getCycle(cycleId);
-		ConfiguredAction action = cycle.getJob().getFirstConfiguredAction();
-		while (action != null) {
-			if (clazz.getName().equals(action.getClassName())) {
-				return action.getParameters();
-			}
-			action = action.getAppliedConfiguredActionOnSuccess();
-		}
-		return null;
-	}
-
-	@Override
-	public void addSourceSinkToAction(final ConfiguredAction action,
-			final ConfiguredSourceSink sourceSink) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void createAction(final String className,
-			final Map<String, String> parameters) {
-		final ConfiguredAction action = new ConfiguredAction();
-		action.setClassName(className);
-		action.setParameters(parameters);
-		getSessionFactory().getCurrentSession().save(action);
-	}
 
 	@Override
 	public void createSourceSink(final String className,
 			final Map<String, String> parameters) {
-		final ConfiguredSourceSink ss = new ConfiguredSourceSink();
-		ss.setClassName(className);
+		final ConfiguredSharedResource ss = new ConfiguredSharedResource();
+		ss.setClassId(className);
 		ss.setParameters(parameters);
 		getSessionFactory().getCurrentSession().save(ss);
 	}
 
 	@Override
-	public List<ProcessedDocument> getProcessedDocuments(final int cycleId) {
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public List<ProcessedDocument> getProcessedDocuments(final int cycleId) {
 		return getProcessedDocuments(cycleId, 0, 0);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
+    @Transactional(propagation = Propagation.SUPPORTS)
 	public List<ProcessedDocument> getProcessedDocuments(final int cycleId,
 			final int first, final int count) {
 		final Query query = sessionFactory.getCurrentSession()
@@ -537,34 +373,13 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		return (Long) query.uniqueResult();
 	}
 
-	@Override
-	public void deleteAction(final int id) {
-		final Session s = getSessionFactory().getCurrentSession();
-		s.delete(s.get(ConfiguredAction.class, id));
-	}
-
-	@Override
-	public List<Action> getActionsByCategory(final String category) {
-		return getActionFactory().getObjectsByCategory(category);
-	}
-
-	@Override
-	public List<SourceSink> getSourceSinksByCategory(final String category) {
-		return getSourceSinkFactory().getObjectsByCategory(category);
-	}
 
 	@Override
 	public ECycleState getJobState(final int jobId) {
-		logger.debug("Getting state of job: " + jobId);
-		final String hql = "SELECT cycle.id FROM Cycle as cycle WHERE cycle.job.id= :jobId AND cycle.endDateTime is null";
-		final Session s = sessionFactory.getCurrentSession();
-		final Query q = s.createQuery(hql);
-		q.setParameter("jobId", jobId);
-		if (q.list().size() == 0) {
-			return ECycleState.NOT_RUNNING;
-		} else {
-			return ECycleState.RUNNING;
-		}
+		if(jobMap.get(jobId)!=null && jobMap.get(jobId).isRunning()){
+            return ECycleState.RUNNING;
+        }
+        return ECycleState.NOT_RUNNING;
 	}
 
 	@Override
@@ -593,12 +408,11 @@ public class JobServiceImpl extends AbstractHibernateService implements
 					param.setValue(param.getValue().substring(0, 255));
 				}
 			}
+            logger.debug("Number of params: "+params.size());
 			doc.setProcessedDocumentParameterSet(params);
 			doc.setReference(reference);
 			getSessionFactory().getCurrentSession().save(doc);
-			if ( EProcessedDocumentStatus.OK.equals(doc.getStatus()) ) {
-				usageService.decrementDocumentCounter();
-			}
+
 		} catch (final Exception e) {
 			logger.error("Failed to write " + name + " to report.", e);
 		}
@@ -667,18 +481,181 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			final Cycle cycle = getLastCycleForJob(job);
 			if (cycle != null) {
 				info.setCycleStartDateTime(cycle.getStartDateTime());
-				info.setScheduleState(cycle.getState().getDisplayName());
 				info.setNrOfDocuments(countProcessedDocuments(cycle.getId()));
 				info.setNrOfFailedDocuments(countProcessedDocumentsWithStatus(cycle.getId(),
 						EProcessedDocumentStatus.FAILED));
-			} else {
-				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
 			}
+
+			info.setScheduleState(getJobState(job.getId()).getDisplayName());
+
 			info.setDescription(job.getDescription());
 			jobInfoList.add(info);
 		}
 
 		return jobInfoList;
 	}
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void closeCycle(final Cycle cycle) {
+        final Session session = getSessionFactory().getCurrentSession();
+
+        cycle.setEndDateTime(new Date());
+        session.update(cycle);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int openCycleForJob(final Integer jobId) {
+        final Session session = getSessionFactory().getCurrentSession();
+
+        final Job job = getJob(jobId);
+        logger.debug("Executing job \"" + job.getName() + "\"");
+
+        final Cycle cycle = new Cycle();
+        cycle.setJob(job);
+        cycle.setStartDateTime(new Date());
+        session.save(cycle);
+
+        return cycle.getId();
+    }
+
+    private Map<Integer, RunnableWithCycle> onStopJobActions = new HashMap<Integer, RunnableWithCycle>();
+
+    abstract class RunnableWithCycle implements Runnable {
+
+        public Cycle cycle;
+
+        @Override
+        public abstract void run();
+    }
+
+    @Value(value="#{'${mail.from}'}")
+    private String mailFrom;
+
+    @Value(value="#{'${url}'}")
+    private String url;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+
+
+    @Override
+    public void startJob(Integer jobId) {
+        if(!jobMap.containsKey(jobId)){
+            final Job job = getJob(jobId);
+            String name = job.getName();
+            ConfiguredAction configuredAction = job.getFirstConfiguredAction();
+            ActionConfig actionConfig = pipelineAssembler.getActionConfig(configuredAction);
+            JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(actionConfig));
+
+            RunnableWithCycle action = new RunnableWithCycle() {
+
+                @Autowired
+                JobService jobService;
+
+                @Override
+                @Transactional
+                public void run() {
+
+                    try {
+
+                        jobService.closeCycle(cycle);
+
+                        if(job.isSendReport() || job.isSendErrorReport()){
+                            int cycleId = cycle.getId();
+
+                            // only send report on errors
+                            boolean errorsOccured = false;
+                            int counter = 0;
+                            int amountFailed = 0;
+                            Date firstDocDateTime = null;
+                            List<ProcessedDocument> processedDocuments = jobService.getProcessedDocuments(cycle.getId());
+                            if (processedDocuments != null) {
+                                for (ProcessedDocument doc : processedDocuments) {
+                                    if (counter == 0) {
+                                        firstDocDateTime = doc.getProcessedDateTime();
+                                    }
+
+                                    if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
+                                        errorsOccured = true;
+                                        amountFailed += 1;
+                                    }
+                                    counter += 1;
+                                }
+                            }
+
+                            // Get cycle information
+                            long startDateTime = cycle.getStartDateTime().getTime();
+                            long endDateTime = cycle.getEndDateTime().getTime();
+                            long durationInSeconds = (endDateTime - startDateTime) / 1000;
+                            String duration = Util.formatDuration(durationInSeconds);
+
+
+                            List<String> addresses = new ArrayList<String>();
+                            if(job.isSendReport() && job.getSendReportTo()!=null){
+                                addresses.addAll(Arrays.asList(job.getSendReportTo()));
+                            }
+                            if(job.isSendErrorReport() && errorsOccured && job.getSendErrorReportTo() != null){
+                                addresses.addAll(Arrays.asList(job.getSendErrorReportTo()));
+                            }
+                            SimpleMailMessage mail = new SimpleMailMessage();
+                            mail.setFrom(mailFrom);
+                            mail.setTo(addresses.toArray(new String[addresses.size()]));
+                            mail.setSubject("Move2Alf error report");
+
+                            Job job = cycle.getJob();
+
+                            mail.setText("Cycle " + cycleId + " of job " + job.getName()
+                                    + " completed.\n" + "The full report can be found on "
+                                    + url + "/job/" + job.getId() + "/" + cycleId
+                                    + "/report" + "\n\nStatistics:" + "\nNr of files: "
+                                    + processedDocuments.size() + "\nNr of failed: "
+                                    + amountFailed + "\n\nTime to process: " + duration
+                                    + "\nStart date/time: " + startDateTime
+                                    + "\nTime first document loaded: " + firstDocDateTime
+                                    + "\n\nSent by Move2Alf");
+
+                            sendMail(mail);
+                        }
+
+
+                    } catch (Exception e) {
+                        logger.error("Error", e);
+                    }
+                }
+            };
+
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(action);
+            jobHandle.registerOnStopAction(action);
+            onStopJobActions.put(jobId, action);
+            jobMap.put(job.getId(), jobHandle);
+        }
+
+        JobHandle handle = jobMap.get(jobId);
+        if(!handle.isRunning()){
+            int cycleId = openCycleForJob(jobId);
+            onStopJobActions.get(jobId).cycle = getCycle(cycleId);
+            jobMap.get(jobId).startJob();
+        } else {
+            logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
+        }
+    }
+
+    @Override
+    public JobModel getJobConfigForJob(int id) {
+        return pipelineAssembler.getJobConfigForJob(id);
+    }
+
+    @PreDestroy
+    public void preDestroy(){
+        logger.debug("Stopping the actorSystem");
+        for(JobHandle handle: jobMap.values()){
+            handle.destroy();
+        }
+        actorSystem.shutdown();
+        actorSystem.awaitTermination();
+    }
 
 }

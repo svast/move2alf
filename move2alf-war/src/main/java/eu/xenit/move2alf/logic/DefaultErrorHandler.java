@@ -3,63 +3,67 @@
  */
 package eu.xenit.move2alf.logic;
 
-import java.io.File;
-import java.util.*;
-
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.core.ReportMessage;
-import eu.xenit.move2alf.core.dto.Cycle;
 import eu.xenit.move2alf.core.dto.ProcessedDocumentParameter;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
-import eu.xenit.move2alf.web.dto.JobConfig;
+import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
+
+import java.io.File;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DefaultErrorHandler implements ErrorHandler {
 
-	private final JobService jobService;
-	
-	/**
-	 * @param jobService
-	 */
-	DefaultErrorHandler(JobService jobService) {
-		this.jobService = jobService;
-	}
-	
-	protected JobService getJobService() {
-		return this.jobService;
-	}
+    private final boolean moveNotLoad;
+
+    public DefaultErrorHandler(boolean moveNotLoad){
+        this.moveNotLoad = moveNotLoad;
+    }
 
 	/* (non-Javadoc)
-	 * @see eu.xenit.move2alf.logic.ErrorHandlerInterface#handleError(eu.xenit.move2alf.core.simpleaction.data.FileInfo, eu.xenit.move2alf.web.dto.JobConfig, eu.xenit.move2alf.core.dto.Cycle, java.lang.Exception)
+	 * @see eu.xenit.move2alf.logic.ErrorHandlerInterface#handleError(eu.xenit.move2alf.core.simpleaction.data.FileInfo, eu.xenit.move2alf.web.dto.JobModel, eu.xenit.move2alf.core.dto.Cycle, java.lang.Exception)
 	 */
 	@Override
-	public void handleError(FileInfo parameterMap, JobConfig jobConfig,
-			Cycle cycle, Exception e) {
-		// TODO: handle cleaner?
-		File file = (File) parameterMap.get(Parameters.PARAM_FILE);
+	public void handleError(String actionId, Object message, Exception e, SendingContext sendingContext) {
+        final String errorMessage = Util.getFullErrorMessage(e);
+        handleError(actionId, message, errorMessage, sendingContext);
+    }
 
-		// reporting
-		Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
-		ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+    @Override
+    public void handleError(String actionId, Object message, String error, SendingContext sendingContext) {
+        // reporting
+        Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
+        ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+        msg.setName(Parameters.PARAM_ERROR_MESSAGE);
+        msg.setValue(error);
+        params.add(msg);
+        if(message instanceof FileInfo){
+            FileInfo fileInfo = ((FileInfo)message);
 
-		final String errorMessage = Util.getFullErrorMessage(e);
-		msg.setName(Parameters.PARAM_ERROR_MESSAGE);
-		msg.setValue(errorMessage);
-		// Report everything using the first (deprecated) ConfiguredAction of the job.
-		msg.setConfiguredAction(cycle.getJob()
-				.getFirstConfiguredAction());
-		params.add(msg);
-		
-		getJobService().getReportActor().sendOneWay(
-				new ReportMessage(cycle.getId(), file.getName(),
-						new Date(), Parameters.VALUE_FAILED, params, (String)parameterMap.get(Parameters.PARAM_REFERENCE)));
+            // TODO: handle cleaner?
+            File file = (File) fileInfo.get(Parameters.PARAM_FILE);
+            String name = (String) fileInfo.get(Parameters.PARAM_NAME);
 
-		// move
-		if (jobConfig.getMoveNotLoad()) {
-			String inputFolder = (String) parameterMap
-					.get(Parameters.PARAM_INPUT_PATH);
-			Util.moveFile(inputFolder, jobConfig.getMoveNotLoadText(), file);
-		}
-	}
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage(name,
+                                new Date(), Parameters.VALUE_FAILED, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
+            }
+
+            if(moveNotLoad){
+                sendingContext.sendMessage(message, "MoveNotLoad");
+            }
+        } else {
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage("Not a file", new Date(), Parameters.VALUE_FAILED, params, null),
+                        PipelineAssemblerImpl.REPORTER
+                );
+            }
+        }
+    }
 
 }

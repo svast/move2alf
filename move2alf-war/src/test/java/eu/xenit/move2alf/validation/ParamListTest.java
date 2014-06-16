@@ -63,7 +63,7 @@ public class ParamListTest {
 	@Test
 	public final void testParamList_OneValidParam () {
 		ArrayList<String> stringList = new ArrayList<String>();
-		stringList.add("12345|1234567890");
+		stringList.add("12345@@@1234567890");
 		paramListTestClass.setStringList(stringList);
 		
 		Set<ConstraintViolation<ParamListTestClass>> constraintViolations = validator.validate(paramListTestClass);
@@ -74,8 +74,8 @@ public class ParamListTest {
 	@Test
 	public final void testParamList_TwoValidParams () {
 		ArrayList<String> stringList = new ArrayList<String>();
-		stringList.add("12345|1234567890");
-		stringList.add("12345|1234567890");
+		stringList.add("12345@@@1234567890");
+		stringList.add("12345@@@1234567890");
 		paramListTestClass.setStringList(stringList);
 		
 		Set<ConstraintViolation<ParamListTestClass>> constraintViolations = validator.validate(paramListTestClass);

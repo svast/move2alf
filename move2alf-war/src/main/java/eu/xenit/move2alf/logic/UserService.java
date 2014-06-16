@@ -1,15 +1,13 @@
 package eu.xenit.move2alf.logic;
 
-import java.util.List;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
-
 import eu.xenit.move2alf.common.exceptions.DuplicateUserException;
 import eu.xenit.move2alf.common.exceptions.NonexistentUserException;
 import eu.xenit.move2alf.core.dto.UserPswd;
-import eu.xenit.move2alf.core.dto.UserRole;
 import eu.xenit.move2alf.core.enums.ERole;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional
 public interface UserService {
@@ -39,7 +37,7 @@ public interface UserService {
 	 * 
 	 * @return A list containing all users.
 	 */
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
 	public List<UserPswd> getAllUsers();
 
 	/**
@@ -79,7 +77,7 @@ public interface UserService {
 	 * @param newPassword The new password for the given user.
 	 * @throws NonexistentUserException
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	@PreAuthorize("hasRole('SYSTEM_ADMIN') or #userName == authentication.name")
 	public void changePassword(String userName, String newPassword);
 
 	/**

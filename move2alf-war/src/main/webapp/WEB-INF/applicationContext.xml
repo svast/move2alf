@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:akka="http://akka.io/schema/akka" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -8,31 +8,18 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-	<import resource="applicationContext-h2db.xml"/>
-	
     <aop:config expose-proxy="true"/>
 
-	<tx:annotation-driven transaction-manager="txManager" />
-	
+	<tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+
+
 	<bean id="dataSourceInitializer" class="eu.xenit.move2alf.core.ConditionalDataSourceInitializer">
-		<property name="dataSource" ref="dataSource" />
+		<property name="txManager" ref="txManager" />
 		<property name="enabled" value="${db.initialize}" />
-		<property name="databasePopulator">
-			<bean class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator">
-				<property name="continueOnError" value="false" />
-				<property name="ignoreFailedDrops" value="false" />
-				<property name="sqlScriptEncoding" value="UTF-8" />
-				<property name="scripts">
-					<array>
-						<value type="org.springframework.core.io.Resource">
-							classpath:eu/xenit/move2alf/sql/move2alf.sql
-						</value>
-					</array>
-				</property>
-			</bean>
-		</property>
 	</bean>
-		
+
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
 	<context:annotation-config />
 	<context:component-scan base-package="eu.xenit.move2alf">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
@@ -55,7 +42,7 @@
 
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
 		<property name="driverClass">
-			<value>com.mysql.jdbc.Driver</value>
+			<value>${db.driver}</value>
 		</property>
 		<property name="jdbcUrl">
 			<value>${db.url}</value>
@@ -82,30 +69,30 @@
 			<value>0</value>
 		</property>
 	</bean>
-	
+
 
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <qualifier value="main" />
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingResources">
 			<list>
 				<value>eu/xenit/move2alf/core/dto/ConfiguredAction.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/ConfiguredReport.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/ConfiguredSourceSink.hbm.xml
-				</value>
+				<value>eu/xenit/move2alf/core/dto/ConfiguredSharedResource.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Cycle.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Job.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/ProcessedDocument.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/RunningAction.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/Schedule.hbm.xml</value>
-				<value>eu/xenit/move2alf/core/dto/ThreadPool.hbm.xml</value>
 				<value>eu/xenit/move2alf/core/dto/UserPswd.hbm.xml</value>
+                <value>eu/xenit/move2alf/core/dto/Resource.hbm.xml</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
 				<prop key="hibernate.query.substitutions"> true 1, false 0 </prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.jdbc.batch_size">50</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
 			</props>
 		</property>
 	</bean>
@@ -118,6 +105,8 @@
 
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.smtp}" />
+		<property name="username" value="${mail.username}" />
+		<property name="password" value="${mail.password}" />
 	</bean>
 
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
@@ -134,7 +123,9 @@
 	<bean id="move2alfJmxBean" class="eu.xenit.move2alf.jmx.Move2AlfJmxBean">
 		<property name="jobService" ref="jobService" />
 	</bean>
-	
-	<bean id="applicationCtxProvider" class="eu.xenit.move2alf.core.ApplicationContextProvider" lazy-init="false">
-	</bean>
+
+    <bean id="actorSystem" class="akka.actor.ActorSystem" factory-method="create" scope="singleton">
+        <constructor-arg value="Move2Alf"/>
+    </bean>
+
 </beans>

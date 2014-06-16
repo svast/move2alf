@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="eu.xenit.move2alf.core.dto.ConfiguredSharedResource" table="configuredSharedResource">
+		<id name="id">
+			<generator class="identity" />
+		</id>
+		<property name="classId" column="classId"/>
+        <property name="name" column="name" unique="true"/>
+    	<map name="parameters" table="sharedResourceParameter" lazy="false" cascade="all">
+			<key column="sharedResourceId" />
+			<map-key column="name" type="string" />
+			<element column="value" type="string" />
+		</map>
+	</class>
+</hibernate-mapping>

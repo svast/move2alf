@@ -1,21 +1,10 @@
 package eu.xenit.move2alf.common;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import org.apache.commons.io.FileUtils;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
+import eu.xenit.move2alf.core.enums.ERole;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +14,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import eu.xenit.move2alf.core.enums.ERole;
+import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class Util {
 	private static final Logger logger = LoggerFactory.getLogger(Util.class);
@@ -71,7 +63,7 @@ public class Util {
 		if (filePath.contains("/")) {
 			relativePath = filePath.substring(0, filePath.lastIndexOf("/"));
 		}
-		relativePath = relativePath.substring(inputPath.length());
+		relativePath = relativePath.substring(normalizePath(inputPath).length());
 		return relativePath;
 	}
 
@@ -83,14 +75,10 @@ public class Util {
 		return out.replace("\\", "/");
 	}
 
-	// moveFile method in MoveDocumentsAction
-	public static File moveFile(final String src, final String dest, final File file) {		
-		String nSrc = normalizePath(src);
-		String nDest = normalizePath(dest);
-		String fullPath = normalizePath(file.getAbsolutePath());
-		String relativePath = fullPath.substring(nSrc.length(), fullPath.lastIndexOf("/"));
-		String fullDestinationPath = nDest + relativePath;
-		File moveFolder = new File(fullDestinationPath);
+	public static File moveFile(final String dest, final File file) {
+        logger.debug("Moving file " + file + " from " + file.getParent() + " to " + dest);
+		String fullDestinationPath = normalizePath(dest);
+        File moveFolder = new File(fullDestinationPath);
 	
 		// check if full path exists, otherwise create path
 		boolean destinationPathExists = true;
@@ -100,13 +88,11 @@ public class Util {
 	
 		// If path exists move document
 		if (destinationPathExists) {
-			String newFileName = fullDestinationPath + "/" + file.getName();
-			File newFile = new File(newFileName);
-			deleteIfExists(newFile);
+			String newFileName = fullDestinationPath + File.separator + file.getName();
 			File movedFile = new File(newFileName);
+            deleteIfExists(movedFile);
 			try {			
-				FileUtils.moveFile(file, new File(newFileName));
-				logger.info("Moved file to " + movedFile.getAbsolutePath());
+				FileUtils.moveFile(file, movedFile);
 			} catch (IOException e) {
 				logger.error("Could not move document "
 						+ file.getAbsolutePath(), e);
@@ -115,7 +101,7 @@ public class Util {
 			return movedFile;
 		}
 		else {
-			logger.warn("Destination path could not be made for document "
+			logger.warn("Resource path could not be made for document "
 					+ file.getAbsolutePath());
 			return null;
 		}
@@ -221,4 +207,11 @@ public class Util {
 		}
 		return Joiner.on(" < ").join(errorMessages);
 	}
+
+    public static int countLines(File file) throws IOException {
+        LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
+        lineNumberReader.skip(Long.MAX_VALUE);
+        return lineNumberReader.getLineNumber();
+
+    }
 }

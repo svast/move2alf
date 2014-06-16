@@ -108,8 +108,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 		host = alfrescoUrl.getHost();
 		port = alfrescoUrl.getPort();
-		webapp = alfrescoUrl.getPath().substring(1,
-				alfrescoUrl.getPath().length() - 5);
+		webapp = alfrescoUrl.getPath().split("/")[1];
 		logger.debug("Host: " + host);
 		logger.debug("Port: " + port);
 		logger.debug("Path: " + webapp);
@@ -131,23 +130,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			// don't throw an exception.
 			logger.warn("Problem closing session", e);
 		}
-	}
-
-	/**
-	 * @throws IllegalDocumentException
-	 * @deprecated as of Move2Alf 1.2, replaced by {@see
-	 *             void storeDocAndCreateParentSpaces(Document)}
-	 */
-	@Override
-	public void storeDocAndCreateParentSpaces(File file, String mimeType,
-											  String spacePath, String description, String contentModelNamespace,
-											  String contentModelType, Map<String, String> meta,
-											  Map<String, String> multiValueMeta)
-			throws RepositoryAccessException, RepositoryException, IllegalDocumentException {
-		Document document = new Document(file, mimeType, spacePath,
-				description, contentModelNamespace, contentModelType, meta,
-				multiValueMeta);
-		storeDocAndCreateParentSpaces(document);
 	}
 
 	@Override
@@ -361,14 +343,13 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 					if (auditablePropertyMap.size() > 0) {
 						String actionResult = ActionUtils.executeAction(content,
 								"edit-auditable-aspect", auditablePropertyMap);
-						logger.info("actionResult {}", actionResult);
 					}
 				}
 			}
 		} catch (WebServiceException e) {
 			if ("Unable to execute action".equals(e.getMessage())) {
 				logger.warn("Trying to set auditable properties but edit-auditable-aspect action not found. "
-						+ "Please install move2alf-amp on the Alfresco server.");
+						+ "Please install move2alf-amp on the Alfresco server and make sure that the dates are in the correct format.");
 			} else {
 				throw e;
 			}
@@ -685,8 +666,8 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 						UpdateResult result = results[0];
 						logger.debug(result.getStatement());
 						// put in cache
-						logger.info("Put {} in cache (learned from creation)",
-								path);
+						logger.info("Put {} in cache (learned from creation): {}",
+								path, result.getDestination());
 						referenceCache.put(getXPathEscape(path).toLowerCase(), result.getDestination());
 						return result.getDestination();
 					} else {
@@ -798,6 +779,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			}
 
 			Reference uncheckedReference = new Reference(store, null, escapedPath);
+
 			// can throw:
 			// java.rmi.RemoteException: when connection problem?
 			// org.alfresco.webservice.repository.RepositoryFault: this will
@@ -810,10 +792,12 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 			Node[] nodes;
 			try {
-				nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
+			    nodes = repositoryService.get(new Predicate(new Reference[] {uncheckedReference}, store, null));
+				
 				reference = nodes[0].getReference();
+				
 
-				logger.info("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
+				logger.debug("Put {} in cache (learned from reference query) for path {}", reference.getUuid(), escapedPath);
 				if (useCache) {
 					referenceCache.put(escapedPath.toLowerCase(), reference);
 				}
@@ -850,7 +834,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				throw new RepositoryAccessException(e.getMessage(), e);
 			}
 		} else {
-			logger.info("Obtained reference from cache {}", escapedPath);
+			logger.debug("Obtained reference from cache {}", escapedPath);
 		}
 		return reference;
 	}
@@ -883,103 +867,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		return name;
 	}
 
-	private void addDocumentToCML(File file, String mimeType,
-								  Reference parentSpace, String description,
-								  String contentModelNamespace, String contentModelType,
-								  Map<String, String> meta, Map<String, String> multiValueMeta, CML cml, String cmlId)
-			throws RepositoryAccessException, RepositoryException {
-		if (parentSpace == null) {
-			logger.warn("ParentSpace is null, can not store {}", file.getName());
-			throw new RepositoryException("ParentSpace is null");
-		}
-		ParentReference parentRef = new ParentReference(store,
-				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
-
-		logger.debug("Path {}", file.getAbsolutePath());
-
-		logger.debug("ContentModelNamespace {}", contentModelNamespace);
-		logger.debug("ContentModelType {}", contentModelType);
-
-		String fileName = file.getName();
-
-		logger.debug("Filename {}", fileName);
-
-		String contentDetails = putContent(file, mimeType);
-
-		// audtiable properties need a special handling, they can not be set
-		// like other
-		// properties,
-		int nbrOfAuditableProperties = 0;
-		if (meta != null) {
-			for (String auditablePropertyName : auditablePropertyNameSet) {
-				if (meta.keySet().contains(auditablePropertyName))
-					nbrOfAuditableProperties++;
-			}
-		}
-		int nbrOfNonAuditableProperties = ((meta != null) ? meta.size() : 0)
-				+ ((multiValueMeta != null) ? multiValueMeta.size() : 0) + 2 // fixed
-				// properties
-				- nbrOfAuditableProperties;
-
-		List<NamedValue> contentProps = new ArrayList<NamedValue>();
-
-		// these properties are always present
-		contentProps.add(Utils.createNamedValue(Constants.PROP_NAME, fileName));
-		contentProps.add(Utils.createNamedValue(Constants.PROP_CONTENT,
-				contentDetails));
-
-		if (meta != null) {
-			// Enumeration<String> E = meta.;
-			// while (E.hasMoreElements()) {
-			processMetadata(contentModelNamespace, meta, contentProps);
-		}
-
-		// multiValue properties
-		if (multiValueMeta != null) {
-			processMultiValuedMetadata(contentModelNamespace, multiValueMeta,
-					contentProps);
-		}
-
-		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
-				+ fileName);
-		logger.debug("Childname set");
-
-		// a title aspect will always be added
-		NamedValue[] titledProps = new NamedValue[2];
-		titledProps[0] = Utils.createNamedValue(Constants.PROP_TITLE,
-				description);
-		titledProps[1] = Utils.createNamedValue(Constants.PROP_DESCRIPTION,
-				description);
-		CMLAddAspect titleAspect = new CMLAddAspect(Constants.ASPECT_TITLED,
-				titledProps, null, cmlId);
-
-		CMLCreate[] createsArray = cml.getCreate();
-		List<CMLCreate> creates;
-		if (createsArray == null) {
-			creates = new ArrayList<CMLCreate>();
-		} else {
-			creates = new ArrayList<CMLCreate>(Arrays.asList(createsArray));
-		}
-
-		CMLAddAspect[] addAspectsArray = cml.getAddAspect();
-		List<CMLAddAspect> addAspects;
-		if (addAspectsArray == null) {
-			addAspects = new ArrayList<CMLAddAspect>();
-		} else {
-			addAspects = new ArrayList<CMLAddAspect>(Arrays.asList(addAspectsArray));
-		}
-
-		CMLCreate create = new CMLCreate(cmlId, parentRef, parentSpace.getUuid(),
-				Constants.ASSOC_CONTAINS, null, /* Constants.TYPE_CONTENT */
-				contentModelNamespace + contentModelType, contentProps.toArray(new NamedValue[0]));
-
-		creates.add(create);
-		addAspects.add(titleAspect);
-
-		cml.setCreate(creates.toArray(new CMLCreate[creates.size()]));
-		cml.setAddAspect(addAspects.toArray(new CMLAddAspect[addAspects.size()]));
-	}
-
 	protected void processMultiValuedMetadata(String contentModelNamespace,
 											  Map<String, String> multiValueMeta, List<NamedValue> contentProps) {
 		for (String key : multiValueMeta.keySet()) {
@@ -999,7 +886,8 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		}
 	}
 
-	protected String putContent(File file, String mimeType) {
+    @Override
+	public String putContent(File file, String mimeType) {
 		String contentDetails = ContentUtils.putContent(file, host, port, webapp,
 				mimeType, "UTF-8");
 		logger.debug("File put in repository, details: {}", contentDetails);
@@ -1248,7 +1136,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 		try {
 			repositoryService.update(cml);
-			logger.debug("Finished update");
 		} catch (RepositoryFault e) {
 			logger.warn("Could not update metadata", e);
 			throw new RepositoryException(e.getMessage(), e);
@@ -1267,7 +1154,7 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			ACE[] aces = new ACE[accessControl.size()];
 
 			int count = 0;
-			logger.info("Size Access Control list {}", accessControl.size());
+			logger.info("Size Access Control list=" + accessControl.size() + " for "+ref.getPath());
 			for (String key : accessControl.keySet()) {
 				String authority = key;
 				logger.info("Authority {}", authority);
@@ -1281,14 +1168,16 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 				count++;
 			}
 
-			// remove existing ...
-			logger.info("Removing ACEs");
-			accessControlService.removeACEs(predicate, null);
-			logger.info("Adding ACEs");
-			accessControlService.addACEs(predicate, aces);
-			logger.info("Setting Inherit Permission to {}", inheritPermissions);
-			accessControlService.setInheritPermission(predicate,
-					inheritPermissions);
+            if(aces.length>0) {
+                // remove existing ...
+                logger.info("Removing ACEs");
+                accessControlService.removeACEs(predicate, null);
+                logger.info("Adding ACEs");
+                accessControlService.addACEs(predicate, aces);
+                logger.info("Setting Inherit Permission to {}", inheritPermissions);
+                accessControlService.setInheritPermission(predicate,
+                        inheritPermissions);
+            }
 			// } catch (AccessControlFault e) {
 			// logger.warn(e.getMessage() + " space: " + ref.getPath(), e);
 			// throw new RepositoryException(e.getMessage());
@@ -1456,7 +1345,9 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 			}
 		}
 
-		return sbResult.toString();
+		String path = sbResult.toString();
+		path = path.replaceAll("//","/");
+		return path;
 	}
 
 	private String getNamedValue(NamedValue[] namedValues, String name) {

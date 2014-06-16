@@ -1,151 +1,71 @@
 package eu.xenit.move2alf.core.action;
 
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
+import eu.xenit.move2alf.pipeline.actions.AbstractSendingAction;
+import eu.xenit.move2alf.pipeline.actions.StartAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> {
 
-import eu.xenit.move2alf.common.Parameters;
-import eu.xenit.move2alf.core.dto.ConfiguredAction;
+    private static final Logger logger = LoggerFactory
+            .getLogger(ExecuteCommandAction.class);
 
-public class ExecuteCommandAction extends Action {
 
-	public static final String PARAM_MOVE_BEFORE_PROCESSING_PATH = "moveBeforeProcessingPath";
-	public static final String PARAM_MOVE_BEFORE_PROCESSING = "moveBeforeProcessing";
-	public static final String COMMAND = "command";
+    public static final String PARAM_COMMAND = "command";
+    private String command;
+    public void setCommand(String command){
+        this.command = command;
+    }
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ExecuteCommandAction.class);
+    @Override
+    public void executeImpl(Object message) {
+        logger.debug("Command: " + command);
+        if (command != null && !"".equals(command)) {
+            logger.debug("Executing command " + command);
 
-	@Override
-	public void execute(final ConfiguredAction configuredAction,
-			final Map<String, Object> parameterMap) {
-		// TODO Auto-generated method stub
+            final ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
 
-		final String stage = configuredAction
-				.getParameter(Parameters.PARAM_STAGE);
+            Process process;
+            try {
+                process = pb.start();
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return;
+            }
 
-		final CountDownLatch countDown = (CountDownLatch) parameterMap
-				.get(Parameters.PARAM_COUNTER);
+            try {
+                final InputStream is = process.getInputStream();
+                final InputStreamReader isr = new InputStreamReader(is);
+                final BufferedReader br = new BufferedReader(isr);
+                String line;
 
-		if ("after".equals(stage) && countDown.getCount() == 1) {
+                while ((line = br.readLine()) != null) {
+                    logger.debug(line);
 
-			final String command = configuredAction
-					.getParameter(Parameters.PARAM_COMMAND);
-			logger.debug("Command: " + command);
-			if (command != null && !"".equals(command)) {
-				logger.debug("Executing command " + command);
+                }
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-				final ProcessBuilder pb = new ProcessBuilder(command);
-				pb.redirectErrorStream(true);
+            try {
+                process.waitFor();
+            } catch (final InterruptedException ie) {
+                logger.error("Problem running command");
+            }
 
-				final Map environmentMap = pb.environment();
-
-				environmentMap.put("MOVETOALF_INPUT_PATH",
-						configuredAction.getParameter(SourceAction.PARAM_PATH));
-
-				final String moveBeforeProcessing = configuredAction
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING_PATH);
-				final String moveAfterLoad = configuredAction
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD_PATH);
-				final String moveNotLoaded = configuredAction
-						.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED_PATH);
-
-				if ("true"
-						.equals(configuredAction
-								.getParameter(MoveDocumentsAction.PARAM_MOVE_BEFORE_PROCESSING))
-						&& moveBeforeProcessing != null) {
-					environmentMap.put("MOVETOALF_BEFORE_LOAD",
-							moveBeforeProcessing);
-				}
-
-				if ("after".equals(stage)) {
-					if ("true"
-							.equals(configuredAction
-									.getParameter(MoveDocumentsAction.PARAM_MOVE_AFTER_LOAD))
-							&& moveAfterLoad != null) {
-						environmentMap.put("MOVETOALF_AFTER_LOAD",
-								moveAfterLoad);
-					}
-					if ("true"
-							.equals(configuredAction
-									.getParameter(MoveDocumentsAction.PARAM_MOVE_NOT_LOADED))
-							&& moveNotLoaded != null) {
-						environmentMap.put("MOVETOALF_NOT_LOAD", moveNotLoaded);
-					}
-				}
-
-				Process process = null;
-				try {
-					process = pb.start();
-				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return;
-				}
-
-				try {
-					final InputStream is = process.getInputStream();
-					final InputStreamReader isr = new InputStreamReader(is);
-					final BufferedReader br = new BufferedReader(isr);
-					String line;
-
-					while ((line = br.readLine()) != null) {
-						logger.debug(line);
-
-					}
-				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				try {
-					process.waitFor();
-				} catch (final InterruptedException ie) {
-					logger.error("Problem running command");
-				}
-
-				logger.info("Command finished");
-			}
-		}
-
-		// Go to next action
-		final ConfiguredAction nextAction = configuredAction
-				.getAppliedConfiguredActionOnSuccess();
-		if (nextAction != null) {
-			getJobService().executeAction((Integer) parameterMap.get("cycle"),
-					nextAction, parameterMap);
-		}
-	}
-
-	@Override
-	public String getCategory() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected void executeImpl(final ConfiguredAction configuredAction,
-			final Map<String, Object> parameterMap) {
-		// TODO Auto-generated method stub
-
-	}
-
+            logger.info("Command finished");
+            if (sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)) {
+                sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, "Command executed");
+            }
+        }
+    }
 }
