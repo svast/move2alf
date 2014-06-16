@@ -73,8 +73,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 	private String webapp;
 	private boolean enableLuceneFallback;
 
-    public final URL alfrescoURL;
-
 	public static final String protocol = "http://";
 	public static final String pathDocumentDetails = "/n/showDocDetails/workspace/SpacesStore/";
 
@@ -87,7 +85,6 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 
 	public WebServiceRepositoryAccessSession(URL alfrescoUrl, boolean enableLuceneFallback) {
 		super();
-        this.alfrescoURL = alfrescoUrl;
 		this.enableLuceneFallback = enableLuceneFallback;
 		logger.debug("TICKET {}", AuthenticationUtils.getTicket());
 		repositoryService = WebServiceFactory.getRepositoryService(alfrescoUrl
