@@ -32,6 +32,10 @@ public class Parameters {
 	public static final String PARAM_METADATA = "metadata";
 
     /**
+     *  Parameter specifying whether metadata file can be closed
+     */
+    public static final String PARAM_CLOSE_METADATA = "false";
+    /**
      * ContentUrl of a document. Abstraction is made to be able to put a file
      * in Castor and the document in Alfresco.
      */

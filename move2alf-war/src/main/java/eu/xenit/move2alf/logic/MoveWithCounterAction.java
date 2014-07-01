@@ -42,29 +42,32 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
-	        logger.debug("Entering MoveWithCounterAction for csv=" + fileInfo.get(Parameters.PARAM_INPUT_FILE) + " and for file=" + fileInfo.get(Parameters.PARAM_FILE));
+            File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
+
+            if(fileInfo.containsKey(Parameters.PARAM_CLOSE_METADATA)) {
+                logger.debug("File " + file + " can be closed ");
+                canBeClosed.put(file.getAbsolutePath(),Boolean.valueOf(true));
+            }
 
             output.putAll(fileInfo);
-            File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
+
             Integer counter = counters.get(file);
 
             if(counter==null) {  // first time the function is called
                 try {
                     logger.debug("Counting lines of file " + file);
-                    counter = Util.countLines(file)-1;
+                    counter = Util.countLines(file)-1; // assumes csv file has a header
                     counter--;
                     counters.put(file,counter);
                 } catch (IOException e) {
                     throw new Move2AlfException("Could not count lines in file " + file.getAbsolutePath());
                 }
-            } else {
-                counter--;
-                counters.put(file,counter);
+                logger.debug("There are still " + counter + " files to be processed for " + file);
             }
 
-            logger.debug("After decreasing the counter, there are still " + counter + " files to be processed for " + file);
-            if(counter.intValue()==0) {
-                if(canBeClosed.get(file.getAbsolutePath())!=null && canBeClosed.get(file.getAbsolutePath())) {
+
+            if(counter.intValue()==0 || counter.intValue()==-1) {  // sometimes the end of file is not marked, so last line is not counted
+                if(canBeClosed.containsKey(file.getAbsolutePath())) {
                     File newFile = Util.moveFile(path, file);
                     if (newFile != null) {
                         output.put(Parameters.PARAM_INPUT_FILE, newFile);
@@ -72,14 +75,14 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
                         throw new Move2AlfException("Could not move file " + file.getAbsolutePath() + " to " + output);
                     }
                 } else {
-                    logger.debug("File " + file + "(" + file.getClass() + " cannot yet be closed");
+                    logger.debug("File " + file + " cannot yet be closed");
                 }
+            } else {
+                counter--;
+                counters.put(file,counter);
+                logger.debug("There are still " + counter + " files to be processed for " + file);
             }
-        } else if(message instanceof String) {
-            String file = (String)message;
-            logger.debug("File " + file + " can be closed ");
-            canBeClosed.put(file,Boolean.valueOf(true));
-       }
+        }
 
         if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)){
             sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, output);

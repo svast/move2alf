@@ -432,7 +432,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
             moveWithCounter.addReceiver(REPORTER, reporter);
             metadataAction.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
-            //moveAfterLoad.addReceiver(DEFAULT_RECEIVER,moveWithCounter);
         }
 
 
@@ -560,9 +559,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
 
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-                moveAfterLoad.addReceiver(DEFAULT_RECEIVER,moveWithCounter);
+                moveAfterLoad.addReceiver(MOVE_WITH_COUNTER,moveWithCounter);
             }
-
         }
 
         if(jobModel.getMoveNotLoad()){

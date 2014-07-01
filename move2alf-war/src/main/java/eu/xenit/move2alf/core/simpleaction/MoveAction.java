@@ -29,6 +29,7 @@ public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
         FileInfo output = new FileInfo();
         output.putAll(fileInfo);
         File file = (File) fileInfo.get(Parameters.PARAM_FILE);
+        logger.debug("Will move file " + file.getPath() + " to " + path);
         File newFile = Util.moveFile(path, file);
         if (newFile != null) {
             output.put(Parameters.PARAM_FILE, newFile);
@@ -36,8 +37,13 @@ public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
             throw new Move2AlfException("Could not move file "
                     + file.getAbsolutePath() + " to " + output);
         }
-        if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)){
+
+        if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)) {
             sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, output);
+        }
+        if(sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_WITH_COUNTER)) {
+            fileInfo.put(Parameters.PARAM_CLOSE_METADATA,true);
+            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, fileInfo);
         }
     }
 }
