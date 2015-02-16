@@ -520,7 +520,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = deleteAction;
 		}
 		if (Mode.LIST == jobModel.getMode()){
-
             ConfiguredAction listAction;
 			
 			if(jobModel.getListIgnorePath()){
@@ -550,16 +549,16 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         end = uploadedFileHandler;
 
         if(jobModel.getMoveAfterLoad()){
-            final ConfiguredAction moveAfterLoad = new ConfiguredAction();
-            moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
-            moveAfterLoad.setActionId(MOVE_AFTER_ID);
-            moveAfterLoad.setNmbOfWorkers(1);
-            moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
-            moveAfterLoad.addReceiver(REPORTER, reporter);
-            end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
-
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-                moveAfterLoad.addReceiver(MOVE_WITH_COUNTER,moveWithCounter);
+                end.addReceiver(MOVE_WITH_COUNTER,moveWithCounter);
+            } else {
+                final ConfiguredAction moveAfterLoad = new ConfiguredAction();
+                moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
+                moveAfterLoad.setActionId(MOVE_AFTER_ID);
+                moveAfterLoad.setNmbOfWorkers(1);
+                moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
+                moveAfterLoad.addReceiver(REPORTER, reporter);
+                end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
             }
         }
 
@@ -581,8 +580,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             commandAfter.setNmbOfWorkers(1);
             commandAfter.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobModel.getCommandAfter());
             commandAfter.addReceiver(REPORTER, reporter);
-            end.addReceiver(DEFAULT_RECEIVER, commandAfter);
-            end = commandAfter;
+            end.addReceiver(COMMAND_AFTER_ID, commandAfter);
         }
 
         end.addReceiver(DEFAULT_RECEIVER, reporter);
