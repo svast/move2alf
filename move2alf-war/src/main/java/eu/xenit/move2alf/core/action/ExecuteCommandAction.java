@@ -2,6 +2,7 @@ package eu.xenit.move2alf.core.action;
 
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import eu.xenit.move2alf.pipeline.actions.AbstractSendingAction;
+import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import eu.xenit.move2alf.pipeline.actions.StartAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> {
+public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> implements EOCAware {
 
     private static final Logger logger = LoggerFactory
             .getLogger(ExecuteCommandAction.class);
@@ -19,14 +20,15 @@ public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> {
 
     public static final String PARAM_COMMAND = "command";
     private String command;
+    private boolean alreadyExecuted = false;
+
     public void setCommand(String command){
         this.command = command;
     }
 
     @Override
     public void executeImpl(Object message) {
-        logger.debug("Command: " + command);
-        if (command != null && !"".equals(command)) {
+         if (command != null && !"".equals(command) && !(alreadyExecuted)) {
             logger.debug("Executing command " + command);
 
             final ProcessBuilder pb = new ProcessBuilder(command);
@@ -63,9 +65,16 @@ public class ExecuteCommandAction extends Move2AlfReceivingAction<Object> {
             }
 
             logger.info("Command finished");
+            alreadyExecuted = true;
+
             if (sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)) {
                 sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, "Command executed");
             }
         }
+    }
+
+    @Override
+    public void beforeSendEOC() {
+        alreadyExecuted = false;
     }
 }
