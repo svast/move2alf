@@ -41,9 +41,5 @@ public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
         if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)) {
             sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, output);
         }
-        if(sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_WITH_COUNTER)) {
-            fileInfo.put(Parameters.PARAM_CLOSE_METADATA,true);
-            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, fileInfo);
-        }
     }
 }
