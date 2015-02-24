@@ -33,6 +33,10 @@
 		<td>${documentListSize}</td>
 		<th<#if (nrOfFailedDocuments > 0)> class="failedWarning"</#if>>Failed documents:</th>
 		<td<#if (nrOfFailedDocuments > 0)> class="failedWarning"</#if>>${nrOfFailedDocuments}</td>
+		<th<#if (nrOfInfoDocuments > 0)> class="failedWarning"</#if>>Info documents:</th>
+		<td<#if (nrOfInfoDocuments > 0)> class="failedWarning"</#if>>${nrOfInfoDocuments}</td>
+		<th<#if (nrOfWarnDocuments > 0)> class="failedWarning"</#if>>Warn documents:</th>
+		<td<#if (nrOfWarnDocuments > 0)> class="failedWarning"</#if>>${nrOfWarnDocuments}</td>
 	</tr>
 	<tr>
 		<th>State:</th>

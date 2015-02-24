@@ -12,6 +12,8 @@ public class JobInfo {
 	private String description;
 	private Long nrOfDocuments = Long.valueOf(0);
 	private Long nrOfFailedDocuments = Long.valueOf(0);
+	private Long nrOfWarnDocuments;
+	private Long nrOfInfoDocuments;
 
 	public JobInfo() {
 	}
@@ -70,6 +72,22 @@ public class JobInfo {
 
 	public void setNrOfFailedDocuments(final Long nrOfFailedDocuments) {
 		this.nrOfFailedDocuments = nrOfFailedDocuments;
+	}
+
+        public Long getNrOfwarnDocuments() {
+                return nrOfWarnDocuments;
+        }
+
+        public Long getNrOfInfoDocuments() {
+                return nrOfInfoDocuments;
+        }
+
+	public void setNrOfWarnDocuments(final Long nrOfWarnDocuments) {
+		this.nrOfWarnDocuments = nrOfWarnDocuments;
+	}
+
+	public void setNrOfInfoDocuments(final Long nrOfInfoDocuments) {
+		this.nrOfInfoDocuments = nrOfInfoDocuments;
 	}
 
 	public Long getNrOfDocuments() {

@@ -66,4 +66,81 @@ public class DefaultErrorHandler implements ErrorHandler {
         }
     }
 
+    // lolo
+
+    @Override
+    public void handleInfo(String actionId, Object message, String info, SendingContext sendingContext) {
+        // reporting
+        Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
+        ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+        msg.setName(Parameters.PARAM_INFO_MESSAGE);
+        msg.setValue(info);
+        params.add(msg);
+        if(message instanceof FileInfo){
+            FileInfo fileInfo = ((FileInfo)message);
+
+            // TODO: handle cleaner?
+            File file = (File) fileInfo.get(Parameters.PARAM_FILE);
+            String name = (String) fileInfo.get(Parameters.PARAM_NAME);
+
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage(name,
+                                new Date(), Parameters.VALUE_INFO, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
+            }
+
+            if(moveNotLoad){
+                sendingContext.sendMessage(message, "MoveNotLoad");
+            }
+        } else {
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage("Not a file", new Date(), Parameters.VALUE_INFO, params, null),
+                        PipelineAssemblerImpl.REPORTER
+                );
+            }
+        }
+    }
+
+
+    @Override
+    public void handleWarn(String actionId, Object message, String warning, SendingContext sendingContext) {
+        // reporting
+        Set<ProcessedDocumentParameter> params = new HashSet<ProcessedDocumentParameter>();
+        ProcessedDocumentParameter msg = new ProcessedDocumentParameter();
+        msg.setName(Parameters.PARAM_WARN_MESSAGE);
+        msg.setValue(warning);
+        params.add(msg);
+        if(message instanceof FileInfo){
+            FileInfo fileInfo = ((FileInfo)message);
+
+            // TODO: handle cleaner?
+            File file = (File) fileInfo.get(Parameters.PARAM_FILE);
+            String name = (String) fileInfo.get(Parameters.PARAM_NAME);
+
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage(name,
+                                new Date(), Parameters.VALUE_WARN, params, (String) fileInfo.get(Parameters.PARAM_REFERENCE)), PipelineAssemblerImpl.REPORTER);
+            }
+
+            if(moveNotLoad){
+                sendingContext.sendMessage(message, "MoveNotLoad");
+            }
+        } else {
+            if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
+                sendingContext.sendMessage(
+                        new ReportMessage("Not a file", new Date(), Parameters.VALUE_WARN, params, null),
+                        PipelineAssemblerImpl.REPORTER
+                );
+            }
+        }
+    }
+
+
+
+
+
+
+
 }

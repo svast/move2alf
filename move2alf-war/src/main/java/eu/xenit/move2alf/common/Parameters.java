@@ -96,8 +96,18 @@ public class Parameters {
 	 */
 	public static final String PARAM_STATUS = "status";
 	public static final String VALUE_FAILED = "failed";
+
+
 	public static final String VALUE_OK = "ok";
+	public static final String VALUE_INFO = "info";
+	public static final String VALUE_WARN = "warn";
+
+
 	public static final String PARAM_ERROR_MESSAGE = "errormessage";
+	public static final String PARAM_INFO_MESSAGE = "infomessage";
+	public static final String PARAM_WARN_MESSAGE = "warnmessage";
+
+
 	public static final String PARAM_REFERENCE = "reference";
 
     /**

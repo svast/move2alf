@@ -393,6 +393,10 @@ public class JobController extends AbstractController{
 		final Long documentListSize = getJobService().countProcessedDocuments(cycleId);
 		final Long nrOfFailedDocuments = getJobService().countProcessedDocumentsWithStatus(cycleId,
 				EProcessedDocumentStatus.FAILED);
+		final Long nrOfWarnDocuments = getJobService().countProcessedDocumentsWithStatus(cycleId,
+				EProcessedDocumentStatus.WARN);
+		final Long nrOfInfoDocuments = getJobService().countProcessedDocumentsWithStatus(cycleId,
+				EProcessedDocumentStatus.INFO);
 		List<ProcessedDocument> processedDocuments = getJobService()
 				.getProcessedDocuments(cycleId, start, count);
 
@@ -466,6 +470,8 @@ public class JobController extends AbstractController{
 		mav.addObject("documentListSize", documentListSize);
 		mav.addObject("docsPerSecond", docsPerSecond);
 		mav.addObject("nrOfFailedDocuments", nrOfFailedDocuments);
+		mav.addObject("nrOfInfoDocuments", nrOfInfoDocuments);
+		mav.addObject("nrOfWarnDocuments", nrOfWarnDocuments);
 		//mav.addObject("progress", progress);
 		mav.setViewName(viewName);
 		return mav;

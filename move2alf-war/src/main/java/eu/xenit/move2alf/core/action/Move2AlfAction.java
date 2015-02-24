@@ -34,6 +34,16 @@ public abstract class Move2AlfAction extends AbstractSendingAction implements Pa
         errorHandler.handleError(getId(), message, error, sendingContext);
     }
 
+    protected void handleInfo(Object message, String info){
+        errorHandler.handleInfo(getId(), message, info, sendingContext);
+    }
+
+    protected void handleWarn(Object message, String warning){
+        errorHandler.handleWarn(getId(), message, warning, sendingContext);
+    }
+
+
+
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }

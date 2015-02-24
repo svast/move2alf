@@ -17,4 +17,12 @@ class ResourceErrorHandler(action: ResourceAction[_]) extends ErrorHandler{
   def handleError(actionId: String, message: Any, error: String, sendingContext: SendingContext) {
     action.getTaskContext().reply(new Move2AlfException(error))
   }
+
+  def handleInfo(actionId: String, message: Any, info: String, sendingContext: SendingContext) {
+    action.getTaskContext().reply(new Move2AlfException(info))
+  }
+
+  def handleWarn(actionId: String, message: Any, warning: String, sendingContext: SendingContext) {
+    action.getTaskContext().reply(new Move2AlfException(warning))
+  }
 }
