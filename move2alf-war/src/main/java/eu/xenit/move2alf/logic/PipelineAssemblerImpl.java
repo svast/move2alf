@@ -181,9 +181,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 extension = action.getParameter(SAFilter.PARAM_EXTENSION);
             } else if (COMMAND_BEFORE_ID
                     .equals(action.getActionId())) {
-                commandBefore = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+                commandBefore = action.getParameter(ExecuteCommandStartAction.PARAM_COMMAND);
             } else if (COMMAND_AFTER_ID.equals(action.getActionId())) {
-                commandAfter = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+                commandAfter = action.getParameter(ExecuteCommandEOCAction.PARAM_COMMAND);
             } else if (METADATA_ACTION_ID.equals(action.getActionId())) {
                 metadata = action.getClassId();
                 metadataParameterMap = action.getParameters();
@@ -331,9 +331,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(!jobModel.getCommand().isEmpty()){
             ConfiguredAction executeCommandBefore = new ConfiguredAction();
             executeCommandBefore.setActionId(COMMAND_BEFORE_ID);
-            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandStartAction.class));
             executeCommandBefore.setNmbOfWorkers(1);
-            executeCommandBefore.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobModel.getCommand());
+            executeCommandBefore.setParameter(ExecuteCommandStartAction.PARAM_COMMAND, jobModel.getCommand());
             executeCommandBefore.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, executeCommandBefore);
             end = executeCommandBefore;
@@ -574,9 +574,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(!jobModel.getCommandAfter().isEmpty()){
             ConfiguredAction commandAfter = new ConfiguredAction();
             commandAfter.setActionId(COMMAND_AFTER_ID);
-            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandEOCAction.class));
             commandAfter.setNmbOfWorkers(1);
-            commandAfter.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobModel.getCommandAfter());
+            commandAfter.setParameter(ExecuteCommandEOCAction.PARAM_COMMAND, jobModel.getCommandAfter());
             commandAfter.addReceiver(REPORTER, reporter);
             end.addReceiver(COMMAND_AFTER_ID, commandAfter);
         }

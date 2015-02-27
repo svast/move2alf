@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.enums.ERole;
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,107 +21,107 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class Util {
-	private static final Logger logger = LoggerFactory.getLogger(Util.class);
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
-	public static String convertToMd5(final String str) {
-		try {
-			byte[] bytes = str.getBytes("UTF-8");
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] md5 = md.digest(bytes);
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < md5.length; i++) {
-				sb.append(Integer.toString((md5[i] & 0xff) + 0x100, 16)
-						.substring(1));
-			}
-			return sb.toString();
-		} catch (UnsupportedEncodingException e) {
-			logger.error("UTF-8 encoding not supported");
-			return null;
-		} catch (NoSuchAlgorithmException e) {
-			logger.error("MD5 algorithm not supported");
-			return null;
-		}
-	}
+    public static String convertToMd5(final String str) {
+        try {
+            byte[] bytes = str.getBytes("UTF-8");
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] md5 = md.digest(bytes);
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < md5.length; i++) {
+                sb.append(Integer.toString((md5[i] & 0xff) + 0x100, 16)
+                        .substring(1));
+            }
+            return sb.toString();
+        } catch (UnsupportedEncodingException e) {
+            logger.error("UTF-8 encoding not supported");
+            return null;
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("MD5 algorithm not supported");
+            return null;
+        }
+    }
 
-	public static void authenticateAsSystem() {
-		List<GrantedAuthority> gas = new ArrayList<GrantedAuthority>();
-		gas.add(new GrantedAuthorityImpl(ERole.CONSUMER.toString()));
-		gas.add(new GrantedAuthorityImpl(ERole.SCHEDULE_ADMIN.toString()));
-		gas.add(new GrantedAuthorityImpl(ERole.JOB_ADMIN.toString()));
-		gas.add(new GrantedAuthorityImpl(ERole.SYSTEM_ADMIN.toString()));
-		UserDetails ud = new User("System", "", true, true, true, true, gas);
+    public static void authenticateAsSystem() {
+        List<GrantedAuthority> gas = new ArrayList<GrantedAuthority>();
+        gas.add(new GrantedAuthorityImpl(ERole.CONSUMER.toString()));
+        gas.add(new GrantedAuthorityImpl(ERole.SCHEDULE_ADMIN.toString()));
+        gas.add(new GrantedAuthorityImpl(ERole.JOB_ADMIN.toString()));
+        gas.add(new GrantedAuthorityImpl(ERole.SYSTEM_ADMIN.toString()));
+        UserDetails ud = new User("System", "", true, true, true, true, gas);
 
-		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-				ud, "", ud.getAuthorities());
-		auth.setDetails(ud);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                ud, "", ud.getAuthorities());
+        auth.setDetails(ud);
 
-		SecurityContextHolder.getContext().setAuthentication(auth);
-	}
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 
-	public static String relativePath(final String inputPath, final File file) {
-		String filePath = normalizePath(file.getAbsolutePath());
-		String relativePath = filePath;
-		if (filePath.contains("/")) {
-			relativePath = filePath.substring(0, filePath.lastIndexOf("/"));
-		}
-		relativePath = relativePath.substring(normalizePath(inputPath).length());
-		return relativePath;
-	}
+    public static String relativePath(final String inputPath, final File file) {
+        String filePath = normalizePath(file.getAbsolutePath());
+        String relativePath = filePath;
+        if (filePath.contains("/")) {
+            relativePath = filePath.substring(0, filePath.lastIndexOf("/"));
+        }
+        relativePath = relativePath.substring(normalizePath(inputPath).length());
+        return relativePath;
+    }
 
-	public static String normalizePath(final String in) {
-		String out = in;
-		if (in.endsWith("/")) {
-			out = in.substring(0, in.length() - 1);
-		}
-		return out.replace("\\", "/");
-	}
+    public static String normalizePath(final String in) {
+        String out = in;
+        if (in.endsWith("/")) {
+            out = in.substring(0, in.length() - 1);
+        }
+        return out.replace("\\", "/");
+    }
 
-	public static File moveFile(final String dest, final File file) {
+    public static File moveFile(final String dest, final File file) {
         logger.debug("Moving file " + file + " from " + file.getParent() + " to " + dest);
-		String fullDestinationPath = normalizePath(dest);
+        String fullDestinationPath = normalizePath(dest);
         File moveFolder = new File(fullDestinationPath);
-	
-		// check if full path exists, otherwise create path
-		boolean destinationPathExists = true;
-		if(!moveFolder.exists()) {
-			destinationPathExists = moveFolder.mkdirs();
-		}
-	
-		// If path exists move document
-		if (destinationPathExists) {
-			String newFileName = fullDestinationPath + File.separator + file.getName();
-			File movedFile = new File(newFileName);
-            deleteIfExists(movedFile);
-			try {			
-				FileUtils.moveFile(file, movedFile);
-			} catch (IOException e) {
-				logger.error("Could not move document "
-						+ file.getAbsolutePath(), e);
-				return null;
-			}
-			return movedFile;
-		}
-		else {
-			logger.warn("Resource path could not be made for document "
-					+ file.getAbsolutePath());
-			return null;
-		}
-	}
 
-	public static void deleteIfExists(File file) {
-		if (file.exists()) {
-			try {
-				file.delete();
-			} catch (Exception e) {
-			}
-		}
-	}
-	
+        // check if full path exists, otherwise create path
+        boolean destinationPathExists = true;
+        if(!moveFolder.exists()) {
+            destinationPathExists = moveFolder.mkdirs();
+        }
+
+        // If path exists move document
+        if (destinationPathExists) {
+            String newFileName = fullDestinationPath + File.separator + file.getName();
+            File movedFile = new File(newFileName);
+            deleteIfExists(movedFile);
+            try {
+                FileUtils.moveFile(file, movedFile);
+            } catch (IOException e) {
+                logger.error("Could not move document "
+                        + file.getAbsolutePath(), e);
+                return null;
+            }
+            return movedFile;
+        }
+        else {
+            logger.warn("Resource path could not be made for document "
+                    + file.getAbsolutePath());
+            return null;
+        }
+    }
+
+    public static void deleteIfExists(File file) {
+        if (file.exists()) {
+            try {
+                file.delete();
+            } catch (Exception e) {
+            }
+        }
+    }
+
     public static String ISO8601format(Date isoDate)
     {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(isoDate);
-        
+
         StringBuilder formatted = new StringBuilder(28);
         padInt(formatted, calendar.get(Calendar.YEAR), 4);
         formatted.append('-');
@@ -135,7 +136,7 @@ public class Util {
         padInt(formatted, calendar.get(Calendar.SECOND), 2);
         formatted.append('.');
         padInt(formatted, calendar.get(Calendar.MILLISECOND), 3);
-        
+
         TimeZone tz = calendar.getTimeZone();
         int offset = tz.getOffset(calendar.getTimeInMillis());
         if (offset != 0)
@@ -146,15 +147,15 @@ public class Util {
             padInt(formatted, hours, 2);
             formatted.append(':');
             padInt(formatted, minutes, 2);
-        } 
+        }
         else
         {
             formatted.append('Z');
         }
-        
+
         return formatted.toString();
     }
-    
+
     /*
      * Based on "Java Concurrency in Practice"
      * 
@@ -164,13 +165,13 @@ public class Util {
      * which is not practical to use.
      */
     public static RuntimeException launderThrowable(Throwable t) {
-    	if (t instanceof RuntimeException) {
-    		return (RuntimeException) t;
-    	} else if (t instanceof Error) {
-    		throw (Error) t;
-    	} else {
-    		throw new IllegalStateException("Not unchecked", t);
-    	}
+        if (t instanceof RuntimeException) {
+            return (RuntimeException) t;
+        } else if (t instanceof Error) {
+            throw (Error) t;
+        } else {
+            throw new IllegalStateException("Not unchecked", t);
+        }
     }
 
 
@@ -184,34 +185,75 @@ public class Util {
         buffer.append(strValue);
     }
 
-	public static String formatDuration(final long seconds) {
-		return String.format("%d:%02d:%02d",
-				seconds / 3600, (seconds % 3600) / 60,
-				(seconds % 60));
-	}
+    public static String formatDuration(final long seconds) {
+        return String.format("%d:%02d:%02d",
+                seconds / 3600, (seconds % 3600) / 60,
+                (seconds % 60));
+    }
 
-	public static String getFullErrorMessage(final Exception e) {
-		List<Throwable> causalChain = Throwables.getCausalChain(e);
-		List<String> errorMessages = new ArrayList<String>();
-		for(Throwable t : causalChain) {
-			if (t instanceof Move2AlfException) {
-				final String message = t.getMessage();
-				if (message != null) {
-					errorMessages.add(message);
-				} else {
-					errorMessages.add("null");
-				}
-			}  else {
-				errorMessages.add(t.getClass().getSimpleName() + ": " + t.getMessage());
-			}
-		}
-		return Joiner.on(" < ").join(errorMessages);
-	}
+    public static String getFullErrorMessage(final Exception e) {
+        List<Throwable> causalChain = Throwables.getCausalChain(e);
+        List<String> errorMessages = new ArrayList<String>();
+        for(Throwable t : causalChain) {
+            if (t instanceof Move2AlfException) {
+                final String message = t.getMessage();
+                if (message != null) {
+                    errorMessages.add(message);
+                } else {
+                    errorMessages.add("null");
+                }
+            }  else {
+                errorMessages.add(t.getClass().getSimpleName() + ": " + t.getMessage());
+            }
+        }
+        return Joiner.on(" < ").join(errorMessages);
+    }
 
     public static int countLines(File file) throws IOException {
         LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
         lineNumberReader.skip(Long.MAX_VALUE);
         return lineNumberReader.getLineNumber();
 
+    }
+
+    public static void executeCommand(String command) {
+        if (command != null && !"".equals(command)) {
+            logger.debug("Executing command " + command);
+
+            final ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+
+            Process process;
+            try {
+                process = pb.start();
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return;
+            }
+
+            try {
+                final InputStream is = process.getInputStream();
+                final InputStreamReader isr = new InputStreamReader(is);
+                final BufferedReader br = new BufferedReader(isr);
+                String line;
+
+                while ((line = br.readLine()) != null) {
+                    logger.debug(line);
+
+                }
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            try {
+                process.waitFor();
+            } catch (final InterruptedException ie) {
+                logger.error("Problem running command");
+            }
+
+            logger.info("Command finished");
+        }
     }
 }

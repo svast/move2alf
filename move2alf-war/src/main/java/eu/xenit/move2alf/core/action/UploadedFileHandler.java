@@ -50,11 +50,6 @@ public class UploadedFileHandler extends Move2AlfReceivingAction<FileInfo> {
         if(sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_AFTER_ID) && status == Parameters.VALUE_OK){
             sendMessage(PipelineAssemblerImpl.MOVE_AFTER_ID, fileInfo);
         }
-
-        if(sendingContext.hasReceiver(PipelineAssemblerImpl.COMMAND_AFTER_ID) && status == Parameters.VALUE_OK){
-            sendMessage(PipelineAssemblerImpl.COMMAND_AFTER_ID, fileInfo);
-        }
-
     }
 
     Set<ProcessedDocumentParameter> createProcessedDocumentParameterSet(
