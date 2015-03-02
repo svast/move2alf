@@ -170,7 +170,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveBeforeProcessing = true;
                 moveBeforeProcessingPath = action
                         .getParameter(MoveAction.PARAM_PATH);
-            } else if (MOVE_AFTER_ID.equals(action.getActionId())) {
+            } else if (MOVE_AFTER_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveAfterLoad = true;
                 moveAfterLoadPath = action.getParameter(MoveAction.PARAM_PATH);
             } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId())) {
@@ -422,7 +422,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
         ConfiguredAction moveWithCounter = new ConfiguredAction();
         moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
-        moveWithCounter.setActionId(MOVE_AFTER_ID);
+        moveWithCounter.setActionId(MOVE_AFTER_ID);    // same id as normal MoveAction
         moveWithCounter.setNmbOfWorkers(1);
         moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
         moveWithCounter.addReceiver(REPORTER, reporter);
