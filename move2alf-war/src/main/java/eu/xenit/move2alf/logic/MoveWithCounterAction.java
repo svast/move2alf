@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,59 +35,77 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
         this.path = path;
     }
 
-    private Map<File,Integer> counters = new HashMap();
-    private Map<String,Boolean> canBeClosed = new HashMap();
-
+    private Map<String,Integer> counters = new HashMap();
 
     @Override
     public void executeImpl(Object message) {
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
-            File file = (File) fileInfo.get(Parameters.PARAM_INPUT_FILE);
-
-            if(fileInfo.containsKey(Parameters.PARAM_CLOSE_METADATA)) {
-                logger.debug("File " + file + " can be closed ");
-                canBeClosed.put(file.getAbsolutePath(),Boolean.valueOf(true));
-            }
+            logger.debug("Decreasing the counters for " + fileInfo.get(Parameters.PARAM_NAME));
+            HashMap<String,Integer> iCounters = (HashMap)fileInfo.get(Parameters.PARAM_COUNTERS);
 
             output.putAll(fileInfo);
 
-            Integer counter = counters.get(file);
+            for(String key : iCounters.keySet()) {
+                Integer counter = counters.get(key);
+                Integer iCounter = iCounters.get(key);
 
-            if(counter==null) {  // first time the function is called
-                try {
-                    logger.debug("Counting lines of file " + file);
-                    counter = Util.countLines(file)-1; // assumes csv file has a header
-                    counter--;
-                    counters.put(file,counter);
-                } catch (IOException e) {
-                    throw new Move2AlfException("Could not count lines in file " + file.getAbsolutePath());
+                if(counter==null) { // only happens if there are multiple jobs running in the same time
+                   logger.info("Got key which was not present in the batch file: " + key);
+                   counter = 0;
                 }
-                logger.debug("There are still " + counter + " files to be processed for " + file);
-            }
 
+                counter -= iCounter;
+                counters.put(key,Integer.valueOf(counter));
+                logger.debug("Counter for " + key + " was decreased with " + iCounter + " and is now " + counter);
 
-            if(counter.intValue()==0 || counter.intValue()==-1) {  // sometimes the end of file is not marked, so last line is not counted
-                if(canBeClosed.containsKey(file.getAbsolutePath())) {
-                    File newFile = Util.moveFile(path, file);
-                    if (newFile != null) {
+                if(counter.intValue()==0) {
+                    tryToMove(key,message);
+                    /*File inputFile = (File)fileInfo.get(Parameters.PARAM_INPUT_FILE);
+                    if(inputFile!=null && key.equals(inputFile.getPath())) {
                         output.put(Parameters.PARAM_INPUT_FILE, newFile);
-                    } else {
-                        throw new Move2AlfException("Could not move file " + file.getAbsolutePath() + " to " + output);
                     }
-                } else {
-                    logger.debug("File " + file + " cannot yet be closed");
+                    File file = (File)fileInfo.get(Parameters.PARAM_FILE);
+                    if(file!=null && key.equals(file.getPath())) {
+                        output.put(Parameters.PARAM_FILE, newFile);
+                    }*/
                 }
-            } else {
-                counter--;
-                counters.put(file,counter);
-                logger.debug("There are still " + counter + " files to be processed for " + file);
             }
+        } else if(message instanceof HashMap) {
+            logger.debug("Setting the counters for message=" + message);
+            HashMap<String,Integer> inputCounters = (HashMap<String,Integer>)message;
+            for(String key : (Set<String>)inputCounters.keySet()) {
+                Integer counterExisting = counters.get(key);
+                Integer counterNew = inputCounters.get(key);
+                if(counterExisting==null)
+                    counterExisting=0;
+                counterNew+=counterExisting;
+                counters.put(key,counterNew);
+                logger.debug("Setting counter for " + key + " to " + counterNew + ", before it was " + counterExisting);
+                if(counterNew==0)
+                    tryToMove(key,message);
+
+            }
+            // do not send further messages in this case
+            return;
         }
 
         if(sendingContext.hasReceiver(PipelineAssemblerImpl.DEFAULT_RECEIVER)){
             sendMessage(PipelineAssemblerImpl.DEFAULT_RECEIVER, output);
+        }
+    }
+
+    private void tryToMove(String key, Object message) {
+        File oldFile = new File(key);
+        File newFile = Util.moveFile(path, oldFile);
+        if (newFile == null) {
+            String errorMessage = "Cannot move " + oldFile + " to " + newFile;
+            handleError(message,errorMessage);
+        } else {
+            logger.info("Moved " + oldFile + " to " + newFile);
+            counters.remove(key);
+
         }
     }
 

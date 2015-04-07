@@ -170,22 +170,20 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveBeforeProcessing = true;
                 moveBeforeProcessingPath = action
                         .getParameter(MoveAction.PARAM_PATH);
-            } else if (MOVE_AFTER_ID.equals(action.getActionId())) {
+            } else if (MOVE_AFTER_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveAfterLoad = true;
-                moveAfterLoadPath = action
-                        .getParameter(MoveAction.PARAM_PATH);
+                moveAfterLoadPath = action.getParameter(MoveAction.PARAM_PATH);
             } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId())) {
                 moveNotLoaded = true;
-                moveNotLoadedPath = action
-                        .getParameter(MoveAction.PARAM_PATH);
+                moveNotLoadedPath = action.getParameter(MoveAction.PARAM_PATH);
             } else if (FILTER_ID
                     .equals(action.getActionId())) {
                 extension = action.getParameter(SAFilter.PARAM_EXTENSION);
             } else if (COMMAND_BEFORE_ID
                     .equals(action.getActionId())) {
-                commandBefore = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+                commandBefore = action.getParameter(ExecuteCommandStartAction.PARAM_COMMAND);
             } else if (COMMAND_AFTER_ID.equals(action.getActionId())) {
-                commandAfter = action.getParameter(ExecuteCommandAction.PARAM_COMMAND);
+                commandAfter = action.getParameter(ExecuteCommandEOCAction.PARAM_COMMAND);
             } else if (METADATA_ACTION_ID.equals(action.getActionId())) {
                 metadata = action.getClassId();
                 metadataParameterMap = action.getParameters();
@@ -333,9 +331,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(!jobModel.getCommand().isEmpty()){
             ConfiguredAction executeCommandBefore = new ConfiguredAction();
             executeCommandBefore.setActionId(COMMAND_BEFORE_ID);
-            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            executeCommandBefore.setClassId(actionClassService.getClassId(ExecuteCommandStartAction.class));
             executeCommandBefore.setNmbOfWorkers(1);
-            executeCommandBefore.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobModel.getCommand());
+            executeCommandBefore.setParameter(ExecuteCommandStartAction.PARAM_COMMAND, jobModel.getCommand());
             executeCommandBefore.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, executeCommandBefore);
             end = executeCommandBefore;
@@ -422,15 +420,15 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
 
-        ConfiguredAction moveWithCounter = null;
+        ConfiguredAction moveWithCounter = new ConfiguredAction();
+        moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
+        moveWithCounter.setActionId(MOVE_AFTER_ID);    // same id as normal MoveAction
+        moveWithCounter.setNmbOfWorkers(1);
+        moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
+        moveWithCounter.addReceiver(REPORTER, reporter);
+
         Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
         if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-            moveWithCounter = new ConfiguredAction();
-            moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
-            moveWithCounter.setActionId(MOVE_WITH_COUNTER);
-            moveWithCounter.setNmbOfWorkers(1);
-            moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
-            moveWithCounter.addReceiver(REPORTER, reporter);
             metadataAction.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
         }
 
@@ -550,7 +548,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
         if(jobModel.getMoveAfterLoad()){
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-                end.addReceiver(MOVE_WITH_COUNTER,moveWithCounter);
+                end.addReceiver(MOVE_AFTER_ID,moveWithCounter);
             } else {
                 final ConfiguredAction moveAfterLoad = new ConfiguredAction();
                 moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
@@ -576,9 +574,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(!jobModel.getCommandAfter().isEmpty()){
             ConfiguredAction commandAfter = new ConfiguredAction();
             commandAfter.setActionId(COMMAND_AFTER_ID);
-            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandAction.class));
+            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandEOCAction.class));
             commandAfter.setNmbOfWorkers(1);
-            commandAfter.setParameter(ExecuteCommandAction.PARAM_COMMAND, jobModel.getCommandAfter());
+            commandAfter.setParameter(ExecuteCommandEOCAction.PARAM_COMMAND, jobModel.getCommandAfter());
             commandAfter.addReceiver(REPORTER, reporter);
             end.addReceiver(COMMAND_AFTER_ID, commandAfter);
         }
@@ -599,7 +597,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         if(parameters == null)
             return;
         for(String param: parameters){
-            logger.info("param=" + param);
+            logger.debug("param=" + param);
             String[] keyValue = param.split(SEPARATOR);
             metadataAction.setParameter(keyValue[0], keyValue[1]);
         }

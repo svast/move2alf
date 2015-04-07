@@ -5,6 +5,7 @@ import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.core.ConfigurableObject;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
+import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +21,13 @@ import java.util.Map;
 @ClassInfo(classId = "CSVMetadataLoader",
         category = ConfigurableObject.CAT_METADATA,
         description = "Loads metadata and filenames from pipe separated CSV file")
-public class CSVMetadataLoader extends FileWithMetadataAction {
+public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CSVMetadataLoader.class);
 	private char CSV_DELIMITER = '\t';
 	private static final char STRING_QUOTE = '"';
     private static final char STRING_ESCAPE = '\0';  // no escaping
+    private HashMap<String,Integer> counters = new HashMap<String,Integer>();
 
     public void setInputFile(File inputFile) {
         this.inputFile = inputFile;
@@ -52,11 +54,16 @@ public class CSVMetadataLoader extends FileWithMetadataAction {
 
 		HashMap docMetadata = new HashMap();
 		for(int i=0;i<nextLine.length;i++) {
+            HashMap localCounters = new HashMap();
+            localCounters.put(inputFile.getAbsolutePath(),Integer.valueOf(1));
 			if(Parameters.PARAM_FILE.equals(metadataFields[i])) {
                 String newPath = processPath(nextLine[i]);
                 File file = new File(newPath);
                 fileInfo.put(Parameters.PARAM_INPUT_PATH,file.getParentFile().getAbsolutePath());
 				fileInfo.put(Parameters.PARAM_FILE,file);
+                localCounters.put(file.getAbsolutePath(),Integer.valueOf(1));
+                fileInfo.put(Parameters.PARAM_COUNTERS,localCounters);
+                counters.put(file.getAbsolutePath(), Integer.valueOf(1));
 			}
 			else
 				docMetadata.put(metadataFields[i], nextLine[i]);
@@ -166,9 +173,11 @@ public class CSVMetadataLoader extends FileWithMetadataAction {
 
 
         String[] nextLine;
+        int filesToProcess=0;
         try {
             while ((nextLine = reader.readNext()) != null) {
                 sendMessage(processLine(nextLine, metadataFields));
+                filesToProcess++;
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -176,10 +185,16 @@ public class CSVMetadataLoader extends FileWithMetadataAction {
         }
         try {
             reader.close();
-            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER,inputFile.getAbsolutePath());
+            counters.put(inputFile.getAbsolutePath(), Integer.valueOf(filesToProcess));
+            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, counters.clone());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void beforeSendEOC() {
+        counters.clone();
     }
 }
