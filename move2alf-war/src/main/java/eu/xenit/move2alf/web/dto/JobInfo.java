@@ -10,8 +10,8 @@ public class JobInfo {
 	private Date cycleStartDateTime;
 	private String scheduleState;
 	private String description;
-	private Long nrOfDocuments;
-	private Long nrOfFailedDocuments;
+	private Long nrOfDocuments = Long.valueOf(0);
+	private Long nrOfFailedDocuments = Long.valueOf(0);
 
 	public JobInfo() {
 	}

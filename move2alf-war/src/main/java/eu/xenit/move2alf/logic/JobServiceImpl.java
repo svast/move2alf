@@ -460,28 +460,39 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	public List<JobInfo> getAllJobInfo() {
 		final List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
 		final Session s = getSessionFactory().getCurrentSession();
-		final String hql = "FROM Job AS job ORDER BY job.id ASC";
+		final String hql = "SELECT job.id, job.name, job.description FROM Job AS job ORDER BY job.id ASC";
 
 		@SuppressWarnings("unchecked")
-		final List<Job> jobs = s.createQuery(hql).list();
+		final List<Object[]> jobs;
+		jobs = s.createQuery(hql).list();
 
-		for (final Job job : jobs) {
+		final String cyclesQuery = "select c.job.id, c.startDateTime, c.id, count(pd) as processed, pd.status from Cycle as c left outer join c.processedDocuments as pd WHERE  c.id in (select max(c2.id) from Cycle as c2 group by c2.job.id) group by pd.status, c.job.id";
+        final List<Object[]> cycles = s.createQuery(cyclesQuery).list();
+
+
+        Map<Integer, JobInfo> jobInfoMap = new HashMap<Integer, JobInfo>();
+
+		for (final Object[] job : jobs) {
 			final JobInfo info = new JobInfo();
-			info.setJobId(job.getId());
-			info.setJobName(job.getName());
-			final Cycle cycle = getLastCycleForJob(job);
-			if (cycle != null) {
-				info.setCycleStartDateTime(cycle.getStartDateTime());
-				info.setNrOfDocuments(countProcessedDocuments(cycle.getId()));
-				info.setNrOfFailedDocuments(countProcessedDocumentsWithStatus(cycle.getId(),
-						EProcessedDocumentStatus.FAILED));
-			}
+			info.setJobId((Integer) job[0]);
+			info.setJobName((String) job[1]);
+			info.setScheduleState(getJobState((Integer) job[0]).getDisplayName());
 
-			info.setScheduleState(getJobState(job.getId()).getDisplayName());
-
-			info.setDescription(job.getDescription());
+			info.setDescription((String) job[2]);
 			jobInfoList.add(info);
+            jobInfoMap.put((Integer) job[0], info);
 		}
+
+        for (final Object[] cycle: cycles){
+            final JobInfo info = jobInfoMap.get(cycle[0]);
+            info.setCycleStartDateTime((Date) cycle[1]);
+            Long nmbOfProcessedDocuments = info.getNrOfDocuments().longValue();
+            info.setNrOfDocuments(((Long) cycle[3]).longValue() + nmbOfProcessedDocuments );
+            if (cycle[4] != null && ((EProcessedDocumentStatus)cycle[4]) == EProcessedDocumentStatus.FAILED){
+                info.setNrOfFailedDocuments((Long) cycle[3]);
+            }
+
+        }
 
 		return jobInfoList;
 	}
