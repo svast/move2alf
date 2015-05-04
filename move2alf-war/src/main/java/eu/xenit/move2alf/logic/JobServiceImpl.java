@@ -14,28 +14,19 @@ import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.context.ThreadLocalSessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
-import org.springframework.orm.hibernate3.SpringSessionContext;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
-import javax.transaction.TransactionManager;
 import java.util.*;
 
 @Service("jobService")
@@ -595,29 +586,34 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
                             List<String> addresses = new ArrayList<String>();
                             if(job.isSendReport() && job.getSendReportTo()!=null){
-                                addresses.addAll(Arrays.asList(job.getSendReportTo()));
+                                addresses.addAll(Arrays.asList(job.getSendReportTo().split(" *, *")));
                             }
                             if(job.isSendErrorReport() && errorsOccured && job.getSendErrorReportTo() != null){
-                                addresses.addAll(Arrays.asList(job.getSendErrorReportTo()));
+                                addresses.addAll(Arrays.asList(job.getSendErrorReportTo().split(" *, *")));
                             }
-                            SimpleMailMessage mail = new SimpleMailMessage();
-                            mail.setFrom(mailFrom);
-                            mail.setTo(addresses.toArray(new String[addresses.size()]));
-                            mail.setSubject("Move2Alf error report");
+							if(!addresses.isEmpty()){
+								SimpleMailMessage mail = new SimpleMailMessage();
+								mail.setFrom(mailFrom);
+								mail.setTo(addresses.toArray(new String[addresses.size()]));
+								mail.setSubject("Move2Alf error report");
 
-                            Job job = cycle.getJob();
+								Job job = cycle.getJob();
 
-                            mail.setText("Cycle " + cycleId + " of job " + job.getName()
-                                    + " completed.\n" + "The full report can be found on "
-                                    + url + "/job/" + job.getId() + "/" + cycleId
-                                    + "/report" + "\n\nStatistics:" + "\nNr of files: "
-                                    + processedDocuments.size() + "\nNr of failed: "
-                                    + amountFailed + "\n\nTime to process: " + duration
-                                    + "\nStart date/time: " + startDateTime
-                                    + "\nTime first document loaded: " + firstDocDateTime
-                                    + "\n\nSent by Move2Alf");
+								mail.setText("Cycle " + cycleId + " of job " + job.getName()
+										+ " completed.\n" + "The full report can be found on "
+										+ url + "/job/" + job.getId() + "/" + cycleId
+										+ "/report" + "\n\nStatistics:" + "\nNr of files: "
+										+ processedDocuments.size() + "\nNr of failed: "
+										+ amountFailed + "\n\nTime to process: " + duration
+										+ "\nStart date/time: " + startDateTime
+										+ "\nTime first document loaded: " + firstDocDateTime
+										+ "\n\nSent by Move2Alf");
 
-                            sendMail(mail);
+								sendMail(mail);
+							} else {
+								logger.debug("Not sending email, because no email addresses to send to");
+							}
+
                         }
 
 
