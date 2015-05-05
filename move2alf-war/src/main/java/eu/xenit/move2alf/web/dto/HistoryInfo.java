@@ -6,7 +6,8 @@ public class HistoryInfo {
 	private int cycleId = -1;
 	private Date cycleStartDateTime;
 	private String scheduleState;
-	private int nbrOfDocuments;
+	private int nbrOfDocuments = 0;
+	private int nbrOfFailures = 0;
 
 	public HistoryInfo(int cycleId, Date cycleStartDateTime, String scheduleState, int nbrOfDocuments) {
 		this.cycleId=cycleId;
@@ -49,5 +50,13 @@ public class HistoryInfo {
 
 	public int getNbrOfDocuments() {
 		return nbrOfDocuments;
+	}
+
+	public int getNbrOfFailures() {
+		return nbrOfFailures;
+	}
+
+	public void setNbrOfFailures(int nbrOfFailures) {
+		this.nbrOfFailures = nbrOfFailures;
 	}
 }

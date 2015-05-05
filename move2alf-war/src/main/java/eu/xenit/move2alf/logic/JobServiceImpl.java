@@ -423,9 +423,10 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	@Override
 	public List<HistoryInfo> getHistory(final int jobId) {
 		final List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
+		final Map<Integer, HistoryInfo> integerHistoryInfoMap = new HashMap<Integer, HistoryInfo>();
 		final Session s = getSessionFactory().getCurrentSession();
 
-		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY cycle.id ORDER BY cycle.startDateTime DESC";
+		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
 		final Query query = s.createQuery(hql);
 		query.setParameter("jobId", jobId);
 
@@ -433,16 +434,28 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final List<Object[]> history = query.list();
 
 		for (final Object[] cycle : history) {
-			final HistoryInfo info = new HistoryInfo();
-			info.setCycleId((Integer) cycle[0]);
-			info.setNbrOfDocuments(((Long) cycle[1]).intValue());
-			info.setCycleStartDateTime((Date) cycle[2]);
-			if (cycle[3] == null) {
-				info.setScheduleState(ECycleState.RUNNING.getDisplayName());
+			Integer cycleId = (Integer) cycle[0];
+			HistoryInfo info = null;
+			if(integerHistoryInfoMap.containsKey(cycleId)){
+				info = integerHistoryInfoMap.get(cycleId);
+				int count = info.getNbrOfDocuments();
+				info.setNbrOfDocuments(((Long) cycle[1]).intValue() + count);
 			} else {
-				info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+				info = new HistoryInfo();
+				info.setNbrOfDocuments(((Long) cycle[1]).intValue());
+				info.setCycleId((Integer) cycle[0]);
+				info.setCycleStartDateTime((Date) cycle[2]);
+				if (cycle[3] == null) {
+					info.setScheduleState(ECycleState.RUNNING.getDisplayName());
+				} else {
+					info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+				}
+				historyList.add(info);
+				integerHistoryInfoMap.put(cycleId, info);
 			}
-			historyList.add(info);
+			if(cycle[4] == EProcessedDocumentStatus.FAILED){
+				info.setNbrOfFailures(((Long) cycle[1]).intValue());
+			}
 		}
 
 		return historyList;
@@ -638,16 +651,20 @@ public class JobServiceImpl extends AbstractHibernateService implements
             jobHandle.registerOnStopAction(action);
             onStopJobActions.put(jobId, action);
             jobMap.put(job.getId(), jobHandle);
-        }
-
-        JobHandle handle = jobMap.get(jobId);
-        if(!handle.isRunning()){
-            int cycleId = openCycleForJob(jobId);
-            onStopJobActions.get(jobId).cycle = getCycle(cycleId);
-            jobMap.get(jobId).startJob();
+			int cycleId = openCycleForJob(jobId);
+			onStopJobActions.get(jobId).cycle = getCycle(cycleId);
+			jobMap.get(jobId).startJob();
         } else {
-            logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
-        }
+			JobHandle handle = jobMap.get(jobId);
+			if (!handle.isRunning()) {
+				handle.destroy();
+				jobMap.remove(jobId);
+				startJob(jobId);
+			}
+			else {
+				logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
+			}
+		}
     }
 
     @Override

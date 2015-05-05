@@ -12,6 +12,7 @@
 				<th>Start time</th>
 				<th>Status</th>
 				<th>Nr. of documents</th>
+				<th>Failures</th>
 				<th></th>
 			</tr>
 		</thead>
@@ -21,6 +22,7 @@
 					<td>${item.cycleStartDateTime}</td>
 					<td>${item.scheduleState}</td>
 					<td>${item.nbrOfDocuments}</td>
+					<td>${item.nbrOfFailures}</td>
 					<td><a href="<@spring.url relativeUrl="/job/${job.id}/${item.cycleId}/report" />">view details</a></td>
 				</tr>
 			</#list>
