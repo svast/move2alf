@@ -157,7 +157,7 @@
 
 		<@labeledSingleLineTextInput label="Command before" name="commandbefore" binding="job.command" helpText="Execute command before processing." attributes="maxlength='${job.commandMaxLength}'" />
 
-		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions; processor>
+		<@labeledSelectList label="Metadata processor" name="metadata" options=metadataOptions?sort_by("classId"); processor>
 			<option value="${processor.classId}" <#if job.metadata?? && processor.classId=job.metadata >selected="selected"</#if> >${processor.classId} - ${processor.description}</option>
 		</@labeledSelectList>
 
@@ -168,7 +168,7 @@
 
 		<@labeledInput label="Transformation" forId="transformation">
 				<@radio name="transform" value="notransformation" checked=(jobTransform?? || !jobTransform?has_content || "No transformation"==jobTransform) description="No transformation" />
-			<#list transformOptions as transformOption>
+			<#list transformOptions?sort_by("classId") as transformOption>
 				<@radio name="transform" value=transformOption.classId checked=(job.transform?? && transformOption.classId==job.transform) description=transformOption.classId+" - "+transformOption.description />
 			</#list>
 		</@labeledInput>
