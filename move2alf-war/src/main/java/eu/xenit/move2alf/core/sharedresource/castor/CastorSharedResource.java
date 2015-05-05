@@ -70,9 +70,6 @@ public class CastorSharedResource extends SharedResource{
     }
 
     public String uploadFile(File file, String mimeType) throws IOException {
-        byte[] byteArray = FileUtils.readFileToByteArray(file);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
-        int size = byteArray.length;
         int accessAttempt = 0;
         while (accessAttempt < maxNbrOfRetries) {
 
@@ -85,8 +82,12 @@ public class CastorSharedResource extends SharedResource{
                     && (nbrOfRetries < maxNbrOfRetries)) {
                 logger.debug("Post: StatusCode, nbrOfRetries: "+ statusCode+" "+nbrOfRetries);
                 statusCode = HttpStatus.SC_NOT_FOUND;
+                InputStream inputStream = null;
                 try
                 {
+                    byte[] byteArray = FileUtils.readFileToByteArray(file);
+                    inputStream = new ByteArrayInputStream(byteArray);
+                    int size = byteArray.length;
                     ScspResponse writeResponse = getCastorClient().write("", inputStream, size,
                             new ScspQueryArgs(), headers);
                     statusCode = writeResponse.getHttpStatusCode();
@@ -101,8 +102,11 @@ public class CastorSharedResource extends SharedResource{
                     {
                         logger.debug("Post: StatusCode SC_CREATED");
                         String castorUUID = writeResponse.getResponseHeaders().getHeaderValues("Content-UUID").get(0);
-
-                        String encoding = (new InputStreamReader(new FileInputStream(file))).getEncoding();
+                        InputStream encodingStream = new FileInputStream(file);
+                        InputStreamReader inputStreamReader = new InputStreamReader(encodingStream);
+                        String encoding = inputStreamReader.getEncoding();
+                        inputStreamReader.close();
+                        encodingStream.close();
                         return "contentUrl=castor://" + clusterName + "/" + castorUUID+"|mimetype="+mimeType+"|size="+size+"|encoding="+encoding;
                     }
                     else
@@ -113,6 +117,9 @@ public class CastorSharedResource extends SharedResource{
                 catch (Exception e)
                 {
                     logger.error("Post: "+e.getMessage());
+                }
+                finally {
+                    inputStream.close();
                 }
             }
             accessAttempt++;
