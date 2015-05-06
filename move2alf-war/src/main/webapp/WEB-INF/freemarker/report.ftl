@@ -8,25 +8,20 @@
 <table class="small">
 	<tr>
 		<th>Description:</th>
-		<td colspan="2">${job.description}</td>
+		<td colspan="7">${job.description}</td>
 	</tr>
 	<tr>
 		<th>Start time:</th>
-		<td colspan="2">${cycle.startDateTime}</td>
-		<td></td>
-		<td></td>
+		<td colspan="7">${cycle.startDateTime}</td>
 	</tr>
 	<tr>
 		<th>End time:</th>
-		<td>${cycle.endDateTime!}</td>
-		<td></td>
-		<td></td>
+		<td colspan="7">${cycle.endDateTime!}</td>
+
 	</tr>
 	<tr>
 		<th>Duration:</th>
-		<td>${duration}</td>
-		<td></td>
-		<td></td>
+		<td colspan="7">${duration}</td>
 	</tr>
 	<tr>
 		<th>Nr. of documents:</th>
@@ -42,7 +37,7 @@
 		<th>State:</th>
     	<td>${cycle.state.displayName}</td>
 		<th>Docs/s:</th>
-		<td>${docsPerSecond}</td>
+		<td colspan="5">${docsPerSecond}</td>
 	</tr>
 
 </table>

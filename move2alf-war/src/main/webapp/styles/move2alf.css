@@ -154,3 +154,9 @@ position: relative;
     border-radius: 4px;
 }
 
+
+table.small tr th,td {
+	padding: 5px;
+}
+
+
