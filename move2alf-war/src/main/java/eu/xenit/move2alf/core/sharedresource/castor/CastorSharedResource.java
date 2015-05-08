@@ -102,7 +102,7 @@ public class CastorSharedResource extends SharedResource{
                             InputStream encodingStream = new FileInputStream(file);
                             InputStreamReader inputStreamReader = new InputStreamReader(encodingStream);
                             String encoding = inputStreamReader.getEncoding();
-
+                            encodingStream.close();
                             return "contentUrl=castor://" + clusterName + "/" + castorUUID + "|mimetype=" + mimeType + "|size=" + size + "|encoding=" + encoding;
                         } else {
                             logger.info("Post: Statuscode: " + statusCode);
