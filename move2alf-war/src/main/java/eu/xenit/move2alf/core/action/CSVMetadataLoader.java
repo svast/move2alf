@@ -27,7 +27,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
 	private char CSV_DELIMITER = '\t';
 	private static final char STRING_QUOTE = '"';
     private static final char STRING_ESCAPE = '\0';  // no escaping
-    private HashMap<String,Integer> counters = new HashMap<String,Integer>();
+    Map localCounters = new HashMap();
 
     public void setInputFile(File inputFile) {
         this.inputFile = inputFile;
@@ -41,6 +41,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
 	}
 
 	public FileInfo processLine(String[] nextLine, String[] metadataFields) {
+        localCounters.clear();
 		if(nextLine.length != metadataFields.length)
 			throw new RuntimeException("Line " + Arrays.asList(nextLine) + " does not have the same number of fields as the header line");
 
@@ -54,16 +55,15 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
 
 		HashMap docMetadata = new HashMap();
 		for(int i=0;i<nextLine.length;i++) {
-            HashMap localCounters = new HashMap();
             localCounters.put(inputFile.getAbsolutePath(),Integer.valueOf(1));
 			if(Parameters.PARAM_FILE.equals(metadataFields[i])) {
                 String newPath = processPath(nextLine[i]);
                 File file = new File(newPath);
                 fileInfo.put(Parameters.PARAM_INPUT_PATH,file.getParentFile().getAbsolutePath());
-				fileInfo.put(Parameters.PARAM_FILE,file);
+                fileInfo.put(Parameters.PARAM_FILE,file);
+                fileInfo.put(Parameters.PARAM_NAME, newPath.substring(newPath.lastIndexOf("/")+1));
                 localCounters.put(file.getAbsolutePath(),Integer.valueOf(1));
-                fileInfo.put(Parameters.PARAM_COUNTERS,localCounters);
-                counters.put(file.getAbsolutePath(), Integer.valueOf(1));
+                setCounter(file.getAbsolutePath(), Integer.valueOf(1));
 			}
 			else
 				docMetadata.put(metadataFields[i], nextLine[i]);
@@ -176,7 +176,9 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
         int filesToProcess=0;
         try {
             while ((nextLine = reader.readNext()) != null) {
-                sendMessage(processLine(nextLine, metadataFields));
+                FileInfo fileInfo = processLine(nextLine, metadataFields);
+                HashMap c = new HashMap(localCounters);
+                sendFileInfoWithCounters(fileInfo, c);
                 filesToProcess++;
             }
         } catch (IOException e) {
@@ -185,8 +187,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
         }
         try {
             reader.close();
-            counters.put(inputFile.getAbsolutePath(), Integer.valueOf(filesToProcess));
-            sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, counters.clone());
+            setCounter(inputFile.getAbsolutePath(), Integer.valueOf(filesToProcess));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -195,6 +196,5 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
 
     @Override
     public void beforeSendEOC() {
-        counters.clone();
     }
 }

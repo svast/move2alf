@@ -2,17 +2,15 @@ package eu.xenit.move2alf.logic;
 
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
-import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.action.ClassInfo;
 import eu.xenit.move2alf.core.action.Move2AlfReceivingAction;
+import eu.xenit.move2alf.core.action.messages.SetCounterMessage;
 import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +23,7 @@ import java.util.Set;
  */
 @ClassInfo(classId = "MoveWithCounterAction",
         description = "Moves files on the filesystem when a counter gets to 0")
-public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> implements EOCAware {
+public class MoveWithCounterAction extends Move2AlfReceivingAction implements EOCAware {
     private static final Logger logger = LoggerFactory.getLogger(MoveWithCounterAction.class);
 
     public static final String PARAM_PATH = "path";
@@ -38,11 +36,11 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
     private Map<String,Integer> counters = new HashMap();
 
     @Override
-    public void executeImpl(Object message) {
+    protected void executeImpl(Object message) {
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
-            logger.debug("Decreasing the counters for " + fileInfo.get(Parameters.PARAM_NAME));
+            logger.debug("Decreasing the counters for input file " + fileInfo.get(Parameters.PARAM_NAME));
             HashMap<String,Integer> iCounters = (HashMap)fileInfo.get(Parameters.PARAM_COUNTERS);
 
             output.putAll(fileInfo);
@@ -62,19 +60,24 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
 
                 if(counter.intValue()==0) {
                     tryToMove(key,message);
-                    /*File inputFile = (File)fileInfo.get(Parameters.PARAM_INPUT_FILE);
-                    if(inputFile!=null && key.equals(inputFile.getPath())) {
-                        output.put(Parameters.PARAM_INPUT_FILE, newFile);
-                    }
-                    File file = (File)fileInfo.get(Parameters.PARAM_FILE);
-                    if(file!=null && key.equals(file.getPath())) {
-                        output.put(Parameters.PARAM_FILE, newFile);
-                    }*/
                 }
             }
-        } else if(message instanceof HashMap) {
+        } else if(message instanceof SetCounterMessage) {
+            SetCounterMessage counterMessage = (SetCounterMessage)message;
+            String key = counterMessage.getId();
+            Integer value = counterMessage.getCounter();
+            Integer counterExisting = counters.get(key);
+            if(counterExisting==null)
+                counterExisting=0;
+            value+=counterExisting;
+            counters.put(key,value);
+            logger.debug("Setting counter for " + key + " to " + value + ", before it was " + counterExisting);
+            if(value==0)
+                tryToMove(key,message);
+            return;
+        } else if(message instanceof Map) {
             logger.debug("Setting the counters for message=" + message);
-            HashMap<String,Integer> inputCounters = (HashMap<String,Integer>)message;
+            Map<String,Integer> inputCounters = (Map<String,Integer>)message;
             for(String key : (Set<String>)inputCounters.keySet()) {
                 Integer counterExisting = counters.get(key);
                 Integer counterNew = inputCounters.get(key);
@@ -105,16 +108,11 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction<Object> imple
         } else {
             logger.info("Moved " + oldFile + " to " + newFile);
             counters.remove(key);
-
         }
     }
 
     @Override
     public void beforeSendEOC() {
-        resetCounters();
-    }
-
-    private void resetCounters() {
         counters.clear();
     }
 }

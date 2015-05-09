@@ -28,7 +28,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String SOURCE_CMIS_ID = "SourceCMIS";
     public static final String MOVE_BEFORE_ID = "MoveBefore";
     public static final String MOVE_AFTER_ID = "MoveAfter";
-    public static final String MOVE_WITH_COUNTER = "MoveWithCounter";
     public static final String MOVE_NOT_LOADED_ID = "MoveNotLoaded";
     public static final String FILTER_ID = "Filter";
     public static final String METADATA_ACTION_ID = "MetadataAction";
@@ -64,10 +63,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     @Autowired
     private ActionClassInfoService actionClassService;
 
-	private static final Logger logger = LoggerFactory.getLogger(PipelineAssemblerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(PipelineAssemblerImpl.class);
 
-	@Value(value = "#{'${default.batch.size}'}")
-	private int defaultBatchSize;
+    @Value(value = "#{'${default.batch.size}'}")
+    private int defaultBatchSize;
 
     @Value(value="#{'${mail.from}'}")
     private String mailFrom;
@@ -85,49 +84,49 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         return configuredActionMap;
     }
 
-	@Override
-	public JobModel getJobConfigForJob(final int id) {
+    @Override
+    public JobModel getJobConfigForJob(final int id) {
 
-		final Job job = getJobService().getJob(id);
-		final JobModel jobModel = new JobModel();
-		jobModel.setId(id);
-		jobModel.setName(job.getName());
-		jobModel.setDescription(job.getDescription());
-		ConfiguredAction startAction = job.getFirstConfiguredAction();
+        final Job job = getJobService().getJob(id);
+        final JobModel jobModel = new JobModel();
+        jobModel.setId(id);
+        jobModel.setName(job.getName());
+        jobModel.setDescription(job.getDescription());
+        ConfiguredAction startAction = job.getFirstConfiguredAction();
 
         Map<String, ConfiguredAction> configuredActionMap = getAllConfiguredActions(startAction, new HashMap<String, ConfiguredAction>());
 
         InputSource inputSource = InputSource.FILESYSTEM;
-		List<String> inputFolder = new ArrayList();
+        List<String> inputFolder = new ArrayList();
         String cmisURL = "";
         String cmisUsername = "";
         String cmisPassword = "";
         String cmisQuery = "";
         boolean cmisRecursive = false;
-		String destinationFolder = "";
-		int dest = 0;
+        String destinationFolder = "";
+        int dest = 0;
         int contentStoreId = -1;
-		String writeOption = null;
-		String deleteOption = null;
-		Mode mode = null;
-		boolean ignorePath = false;
+        String writeOption = null;
+        String deleteOption = null;
+        Mode mode = null;
+        boolean ignorePath = false;
 
         boolean skipContentUpload = false;
-		String metadata = "";
-		String transform = "";
-		boolean moveBeforeProcessing = false;
-		String moveBeforeProcessingPath = "";
-		boolean moveAfterLoad = false;
-		String moveAfterLoadPath = "";
-		boolean moveNotLoaded = false;
-		String moveNotLoadedPath = "";
-		String extension = "*";
-		String commandBefore = "";
-		String commandAfter = "";
-		Map<String, String> metadataParameterMap = new HashMap<String, String>();
-		Map<String, String> transformParameterMap = new HashMap<String, String>();
+        String metadata = "";
+        String transform = "";
+        boolean moveBeforeProcessing = false;
+        String moveBeforeProcessingPath = "";
+        boolean moveAfterLoad = false;
+        String moveAfterLoadPath = "";
+        boolean moveNotLoaded = false;
+        String moveNotLoadedPath = "";
+        String extension = "*";
+        String commandBefore = "";
+        String commandAfter = "";
+        Map<String, String> metadataParameterMap = new HashMap<String, String>();
+        Map<String, String> transformParameterMap = new HashMap<String, String>();
 
-		for(ConfiguredAction action: configuredActionMap.values())
+        for(ConfiguredAction action: configuredActionMap.values())
             if (SOURCE_ID.equals(action
                     .getActionId())) {
                 String path = action.getParameter(SASource.PARAM_INPUTPATHS);
@@ -173,7 +172,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             } else if (MOVE_AFTER_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveAfterLoad = true;
                 moveAfterLoadPath = action.getParameter(MoveAction.PARAM_PATH);
-            } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId())) {
+            } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveNotLoaded = true;
                 moveNotLoadedPath = action.getParameter(MoveAction.PARAM_PATH);
             } else if (FILTER_ID
@@ -196,71 +195,71 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
 
         jobModel.setSkipContentUpload(skipContentUpload);
         jobModel.setInputSource(inputSource);
-		jobModel.setInputFolder(inputFolder);
+        jobModel.setInputFolder(inputFolder);
         jobModel.setCmisURL(cmisURL);
         jobModel.setCmisUsername(cmisUsername);
         jobModel.setCmisPassword(cmisPassword);
         jobModel.setCmisQuery(cmisQuery);
         jobModel.setCmisRecursive(cmisRecursive);
-		jobModel.setDestinationFolder(destinationFolder);
-		jobModel.setDest(dest);
+        jobModel.setDestinationFolder(destinationFolder);
+        jobModel.setDest(dest);
         jobModel.setContentStoreId(contentStoreId);
-		jobModel.setMode(mode);
-		if(writeOption != null){
-			jobModel.setWriteOption(WriteOption.valueOf(writeOption));
-		}
-		if(deleteOption != null){
-			jobModel.setDeleteOption(DeleteOption.valueOf(deleteOption));
-		}
-		jobModel.setListIgnorePath(ignorePath);
-		jobModel.setMetadata(metadata);
-		jobModel.setTransform(transform);
-		jobModel.setMoveBeforeProc(moveBeforeProcessing);
-		jobModel.setMoveBeforeProcText(moveBeforeProcessingPath);
-		jobModel.setMoveAfterLoad(moveAfterLoad);
-		jobModel.setMoveAfterLoadText(moveAfterLoadPath);
-		jobModel.setMoveNotLoad(moveNotLoaded);
-		jobModel.setMoveNotLoadText(moveNotLoadedPath);
-		jobModel.setSendNotification(job.isSendErrorReport());
-		jobModel.setSendNotificationText(job.getSendErrorReportTo());
-		jobModel.setSendReport(job.isSendReport());
+        jobModel.setMode(mode);
+        if(writeOption != null){
+            jobModel.setWriteOption(WriteOption.valueOf(writeOption));
+        }
+        if(deleteOption != null){
+            jobModel.setDeleteOption(DeleteOption.valueOf(deleteOption));
+        }
+        jobModel.setListIgnorePath(ignorePath);
+        jobModel.setMetadata(metadata);
+        jobModel.setTransform(transform);
+        jobModel.setMoveBeforeProc(moveBeforeProcessing);
+        jobModel.setMoveBeforeProcText(moveBeforeProcessingPath);
+        jobModel.setMoveAfterLoad(moveAfterLoad);
+        jobModel.setMoveAfterLoadText(moveAfterLoadPath);
+        jobModel.setMoveNotLoad(moveNotLoaded);
+        jobModel.setMoveNotLoadText(moveNotLoadedPath);
+        jobModel.setSendNotification(job.isSendErrorReport());
+        jobModel.setSendNotificationText(job.getSendErrorReportTo());
+        jobModel.setSendReport(job.isSendReport());
         jobModel.setSendReportText(job.getSendReportTo());
-		jobModel.setExtension(extension);
-		jobModel.setCommand(commandBefore);
-		jobModel.setCommandAfter(commandAfter);
-		jobModel.setCron(getJobService().getCronjobsForJob(id));
+        jobModel.setExtension(extension);
+        jobModel.setCommand(commandBefore);
+        jobModel.setCommandAfter(commandAfter);
+        jobModel.setCron(getJobService().getCronjobsForJob(id));
 
-		final Iterator metadataMapIterator = metadataParameterMap.entrySet()
-				.iterator();
-		final List<String> paramMetadata = new ArrayList<String>();
-		while (metadataMapIterator.hasNext()) {
-			final Map.Entry nameValuePair = (Map.Entry) metadataMapIterator
-					.next();
+        final Iterator metadataMapIterator = metadataParameterMap.entrySet()
+                .iterator();
+        final List<String> paramMetadata = new ArrayList<String>();
+        while (metadataMapIterator.hasNext()) {
+            final Map.Entry nameValuePair = (Map.Entry) metadataMapIterator
+                    .next();
 
-			final String listValue = nameValuePair.getKey() + SEPARATOR
-					+ nameValuePair.getValue();
-			logger.debug("metadata list value = " + listValue);
-			paramMetadata.add(listValue);
-		}
+            final String listValue = nameValuePair.getKey() + SEPARATOR
+                    + nameValuePair.getValue();
+            logger.debug("metadata list value = " + listValue);
+            paramMetadata.add(listValue);
+        }
 
-		jobModel.setParamMetadata(paramMetadata);
+        jobModel.setParamMetadata(paramMetadata);
 
-		final Iterator transformMapIterator = transformParameterMap.entrySet()
-				.iterator();
-		final List<String> paramTransform = new ArrayList<String>();
-		while (transformMapIterator.hasNext()) {
-			final Map.Entry nameValuePair = (Map.Entry) transformMapIterator
-					.next();
-			final String listValue = nameValuePair.getKey() + SEPARATOR
-					+ nameValuePair.getValue();
-			logger.debug("transform list value = " + listValue);
-			paramTransform.add(listValue);
-		}
+        final Iterator transformMapIterator = transformParameterMap.entrySet()
+                .iterator();
+        final List<String> paramTransform = new ArrayList<String>();
+        while (transformMapIterator.hasNext()) {
+            final Map.Entry nameValuePair = (Map.Entry) transformMapIterator
+                    .next();
+            final String listValue = nameValuePair.getKey() + SEPARATOR
+                    + nameValuePair.getValue();
+            logger.debug("transform list value = " + listValue);
+            paramTransform.add(listValue);
+        }
 
-		jobModel.setParamTransform(paramTransform);
+        jobModel.setParamTransform(paramTransform);
 
-		return jobModel;
-	}
+        return jobModel;
+    }
 
     @Override
     public ActionConfig getActionConfig(ConfiguredAction configuredAction){
@@ -297,7 +296,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     private DestinationService destinationService;
 
     @Override
-	public ConfiguredAction getConfiguredAction(final JobModel jobModel) {
+    public ConfiguredAction getConfiguredAction(final JobModel jobModel) {
 
         ConfiguredAction reportSaver = new ConfiguredAction();
         reportSaver.setActionId(REPORT_SAVER);
@@ -427,16 +426,25 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         moveWithCounter.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
         moveWithCounter.addReceiver(REPORTER, reporter);
 
+
+        ConfiguredAction moveWithCounterNotLoaded = new ConfiguredAction();
+        moveWithCounterNotLoaded.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
+        moveWithCounterNotLoaded.setActionId(MOVE_NOT_LOADED_ID);  // same id as normal MoveAction for files not loaded
+        moveWithCounterNotLoaded.setNmbOfWorkers(1);
+        moveWithCounterNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
+        moveWithCounterNotLoaded.addReceiver(REPORTER, reporter);
+
         Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
         if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-            metadataAction.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
+            end.addReceiver(MOVE_AFTER_ID, moveWithCounter);
+            end.addReceiver(MOVE_NOT_LOADED_ID, moveWithCounterNotLoaded);
         }
 
 
 
         if (!("notransformation".equals(jobModel.getTransform()) || ""
-				.equals(jobModel.getTransform()))) {
-			logger.debug("getTransform() == \"{}\"", jobModel.getTransform());
+                .equals(jobModel.getTransform()))) {
+            logger.debug("getTransform() == \"{}\"", jobModel.getTransform());
 
             ConfiguredAction transformAction = new ConfiguredAction();
             transformAction.setActionId(TRANSFORM_ACTION_ID);
@@ -446,7 +454,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             transformAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, transformAction);
             end = transformAction;
-		}
+        }
 
         if(!jobModel.getSkipContentUpload() && filesystemSource) {
             ConfiguredAction mimeTypeAction = new ConfiguredAction();
@@ -459,7 +467,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         }
 
 
-		if (Mode.WRITE == jobModel.getMode()) {
+        if (Mode.WRITE == jobModel.getMode()) {
             if(!jobModel.getSkipContentUpload()) {
                 final ConfiguredAction putContentAction = new ConfiguredAction();
                 putContentAction.setActionId(PUT_CONTENT);
@@ -492,7 +500,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
             uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION(), jobModel.getWriteOption().toString());
             uploadAction.addReceiver(REPORTER, reporter);
-			end.addReceiver(DEFAULT_RECEIVER, uploadAction);
+            end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
 
             final ConfiguredAction aclAction = new ConfiguredAction();
@@ -505,7 +513,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = aclAction;
         }
 
-		if (Mode.DELETE  == jobModel.getMode()) {
+        if (Mode.DELETE  == jobModel.getMode()) {
             final ConfiguredAction deleteAction = new ConfiguredAction();
             deleteAction.setActionId(DELETE_ID);
             deleteAction.setClassId(actionClassService.getClassId(DeleteAction.class));
@@ -516,27 +524,27 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             deleteAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, deleteAction);
             end = deleteAction;
-		}
-		if (Mode.LIST == jobModel.getMode()){
+        }
+        if (Mode.LIST == jobModel.getMode()){
             ConfiguredAction listAction;
-			
-			if(jobModel.getListIgnorePath()){
-				listAction = new ConfiguredAction();
+
+            if(jobModel.getListIgnorePath()){
+                listAction = new ConfiguredAction();
                 listAction.setActionId(EXISTENCE_CHECK_ID);
                 listAction.setClassId(actionClassService.getClassId(ExistenceCheck.class));
-			}
-			else{
-				listAction = new ConfiguredAction();
+            }
+            else{
+                listAction = new ConfiguredAction();
                 listAction.setActionId(LIST_ID);
                 listAction.setClassId(actionClassService.getClassId(ListAction.class));
-			}
+            }
             listAction.setNmbOfWorkers(1);
             listAction.setParameter(ListAction$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
             listAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
             listAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, listAction);
             end = listAction;
-		}
+        }
 
         final ConfiguredAction uploadedFileHandler = new ConfiguredAction();
         uploadedFileHandler.setClassId(actionClassService.getClassId(UploadedFileHandler.class));
@@ -561,14 +569,19 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         }
 
         if(jobModel.getMoveNotLoad()){
-            final ConfiguredAction moveNotLoaded = new ConfiguredAction();
-            moveNotLoaded.setClassId(actionClassService.getClassId(MoveAction.class));
-            moveNotLoaded.setActionId(MOVE_NOT_LOADED_ID);
-            moveNotLoaded.setNmbOfWorkers(1);
-            moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
-            moveNotLoaded.addReceiver(REPORTER, reporter);
-            end.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+            if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
+                end.addReceiver(MOVE_NOT_LOADED_ID, moveWithCounterNotLoaded);
+            } else {
+                final ConfiguredAction moveNotLoaded = new ConfiguredAction();
+                moveNotLoaded.setClassId(actionClassService.getClassId(MoveAction.class));
+                moveNotLoaded.setActionId(MOVE_NOT_LOADED_ID);
+                moveNotLoaded.setNmbOfWorkers(1);
+                moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
+                moveNotLoaded.addReceiver(REPORTER, reporter);
+                end.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+            }
         }
+
 
 
         if(!jobModel.getCommandAfter().isEmpty()){
@@ -590,8 +603,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         endAction.setNmbOfWorkers(1);
         end.addReceiver(DEFAULT_RECEIVER, endAction);
 
-		return start;
-	}
+        return start;
+    }
 
     private void setParameters(List<String> parameters, ConfiguredAction metadataAction) {
         if(parameters == null)
