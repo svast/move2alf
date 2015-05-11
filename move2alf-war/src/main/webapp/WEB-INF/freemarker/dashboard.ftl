@@ -49,8 +49,7 @@ function stopJob(id){
 	<col />
 	<col />
 	<col class="run-column" />
-	<col class="delete-column" />
-	
+
 	<thead>
 		<tr>
 			<th>
