@@ -8,7 +8,7 @@
     <id name="id">
       <generator class="identity"/>
     </id>
-    <property name="userName"/>
+    <property name="userName" unique="true"/>
     <property name="password"/>
     <set name="userRoleSet" table="userRole" lazy="false">
       <key column="userName" property-ref="userName"/>
