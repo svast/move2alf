@@ -28,6 +28,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String SOURCE_CMIS_ID = "SourceCMIS";
     public static final String MOVE_BEFORE_ID = "MoveBefore";
     public static final String MOVE_AFTER_ID = "MoveAfter";
+
+    /**
+     * @deprecated Use {@link eu.xenit.move2alf.core.action.FileWithMetadataAction#setCounter(String, int)} method
+     */
+    @Deprecated
+    public static final String MOVE_WITH_COUNTER = "MoveWithCounter";
+
     public static final String MOVE_NOT_LOADED_ID = "MoveNotLoaded";
     public static final String FILTER_ID = "Filter";
     public static final String METADATA_ACTION_ID = "MetadataAction";
@@ -437,6 +444,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
         if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
             end.addReceiver(MOVE_AFTER_ID, moveWithCounter);
+            end.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
             end.addReceiver(MOVE_NOT_LOADED_ID, moveWithCounterNotLoaded);
         }
 
