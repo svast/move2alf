@@ -100,7 +100,7 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   var messageSent = false
 
   final def sendMessage(message: AnyRef, receiver: String = "default"){
-    if (receivers.contains(receiver)){
+    if  (receivers.contains(receiver)){
       taskKey match {
         case None => getActorRef(receiver).tell(M2AMessage(message), context.self)
         case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
@@ -113,6 +113,21 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
       logger.error("Actor: "+context.self+" has no receiver called "+receiver);
     }
   }
+
+  final def broadcastPublic(message: AnyRef){
+    receivers foreach { receiver => {
+      taskKey match {
+        case None => getActorRef(receiver).tell(M2AMessage(message), context.self)
+        case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
+      }
+      if(messageSent == false){
+        logger.debug(context.self+" setting messageSent from false to true in broadcasting public")
+        messageSent = true
+      }
+    }
+    }
+  }
+
 
   final def hasReceiver(receiver: String): Boolean = {
     receivers.contains(receiver)

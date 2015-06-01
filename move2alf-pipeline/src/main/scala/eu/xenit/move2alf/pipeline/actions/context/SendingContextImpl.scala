@@ -20,4 +20,8 @@ class SendingContextImpl(private val ct: AbstractActionContext) extends SendingC
   def hasReceiver(receiver: String): Boolean = {
     ct.hasReceiver(receiver)
   }
+
+  def broadcastPublic(message: AnyRef) {
+    ct.broadcastPublic(message);
+  }
 }

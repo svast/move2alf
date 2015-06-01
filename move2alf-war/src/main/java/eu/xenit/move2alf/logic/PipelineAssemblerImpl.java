@@ -47,6 +47,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     public static final String COMMAND_BEFORE_ID = "CommandBefore";
     public static final String COMMAND_AFTER_ID = "CommandAfter";
     public static final String DEFAULT_RECEIVER = "default";
+    public static final String UPLOAD_RECEIVER = "upload";
     public static final String REPORTER = "reporter";
     public static final String END_ACTION = "EndAction";
     public static final String START = "Start";
@@ -426,6 +427,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         end.addReceiver(DEFAULT_RECEIVER, metadataAction);
         end = metadataAction;
 
+
         ConfiguredAction moveWithCounter = new ConfiguredAction();
         moveWithCounter.setClassId(actionClassService.getClassId(MoveWithCounterAction.class));
         moveWithCounter.setActionId(MOVE_AFTER_ID);    // same id as normal MoveAction
@@ -441,11 +443,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         moveWithCounterNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
         moveWithCounterNotLoaded.addReceiver(REPORTER, reporter);
 
+        ConfiguredAction moveWithCounterDispatcher = new ConfiguredAction();
+        moveWithCounterDispatcher.setClassId(actionClassService.getClassId(DispatcherAction.class));
+        moveWithCounterDispatcher.setActionId(MOVE_WITH_COUNTER);
+        moveWithCounterDispatcher.setNmbOfWorkers(1);
+        moveWithCounterDispatcher.addReceiver(MOVE_NOT_LOADED_ID,moveWithCounterNotLoaded);
+        moveWithCounterDispatcher.addReceiver(MOVE_AFTER_ID,moveWithCounter);
+
+
         Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
         if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
             end.addReceiver(MOVE_AFTER_ID, moveWithCounter);
-            end.addReceiver(MOVE_WITH_COUNTER, moveWithCounter);
-            end.addReceiver(MOVE_NOT_LOADED_ID, moveWithCounterNotLoaded);
+            end.addReceiver(MOVE_WITH_COUNTER, moveWithCounterDispatcher);
         }
 
 
@@ -474,7 +483,14 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end = mimeTypeAction;
         }
 
-
+        final ConfiguredAction uploadAction = new ConfiguredAction();
+        uploadAction.setActionId(UPLOAD_ID);
+        uploadAction.setClassId(actionClassService.getClassId(AlfrescoUpload.class));
+        uploadAction.setNmbOfWorkers(1);
+        uploadAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
+        uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
+        uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION(), jobModel.getWriteOption().toString());
+        uploadAction.addReceiver(REPORTER, reporter);
         if (Mode.WRITE == jobModel.getMode()) {
             if(!jobModel.getSkipContentUpload()) {
                 final ConfiguredAction putContentAction = new ConfiguredAction();
@@ -500,14 +516,6 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             end.addReceiver(DEFAULT_RECEIVER, batchAction);
             end = batchAction;
 
-            final ConfiguredAction uploadAction = new ConfiguredAction();
-            uploadAction.setActionId(UPLOAD_ID);
-            uploadAction.setClassId(actionClassService.getClassId(AlfrescoUpload.class));
-            uploadAction.setNmbOfWorkers(1);
-            uploadAction.setParameter(ActionWithDestination$.MODULE$.PARAM_DESTINATION(), String.valueOf(jobModel.getDest()));
-            uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_PATH(), jobModel.getDestinationFolder());
-            uploadAction.setParameter(AlfrescoUpload$.MODULE$.PARAM_WRITEOPTION(), jobModel.getWriteOption().toString());
-            uploadAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, uploadAction);
             end = uploadAction;
 
@@ -561,6 +569,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         uploadedFileHandler.addReceiver(REPORTER, reporter);
         end.addReceiver(DEFAULT_RECEIVER, uploadedFileHandler);
         end = uploadedFileHandler;
+        uploadAction.addReceiver(UPLOAD_RECEIVER, uploadedFileHandler);
 
         if(jobModel.getMoveAfterLoad()){
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {

@@ -13,20 +13,11 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 @ClassInfo(classId = "DispatcherAction",
-        description = "Sends messages to multiple actors")
+        description = "Sends messages to all receivers")
 public class DispatcherAction extends Move2AlfReceivingAction {
-    private static ArrayList<String> receivers = new ArrayList();
-    static {
-        receivers.add(PipelineAssemblerImpl.MOVE_AFTER_ID);
-        receivers.add(PipelineAssemblerImpl.MOVE_NOT_LOADED_ID);
-    }
 
     @Override
     protected void executeImpl(Object message) {
-        for(String key : receivers) {
-            if(sendingContext.hasReceiver(key)) {
-                sendMessage(key,message);
-            }
-        }
+        sendingContext.broadcastPublic(message);
     }
 }

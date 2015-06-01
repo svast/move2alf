@@ -11,6 +11,8 @@ import eu.xenit.move2alf.repository.alfresco.ws.Document
 import org.slf4j.{Logger, LoggerFactory}
 import java.util.{Map => JMap}
 import eu.xenit.move2alf.core.sharedresource.alfresco.{WriteOption, ACL}
+import eu.xenit.move2alf.logic.PipelineAssemblerImpl
+import org.alfresco.webservice.repository.RepositoryFault
 
 /**
  * User: Thijs Lemmens (tlemmens@xenit.eu)
@@ -168,8 +170,13 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
       case m: SendBatchMessage => {
           original.foreach {
             fileInfo => {
-              handleError(fileInfo, reply)
+              fileInfo.put(Parameters.PARAM_STATUS,Parameters.VALUE_FAILED)
+              fileInfo.put(Parameters.PARAM_ERROR_MESSAGE,reply.getCause.getCause.asInstanceOf[RepositoryFault].getMessage1)
+              fileInfo.put(Parameters.PARAM_REFERENCE,"not uploaded")
+              sendingContext.sendMessage(fileInfo,PipelineAssemblerImpl.UPLOAD_RECEIVER)
+              //  handleError(fileInfo, reply)
             }
+
         }
       }
       case _ => super.handleErrorReply(original, message, reply)

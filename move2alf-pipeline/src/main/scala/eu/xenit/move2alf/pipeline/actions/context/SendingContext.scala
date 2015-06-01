@@ -21,4 +21,5 @@ trait SendingContext{
 
   def hasReceiver(receiver: String): Boolean
 
+  def broadcastPublic(message: AnyRef)
 }

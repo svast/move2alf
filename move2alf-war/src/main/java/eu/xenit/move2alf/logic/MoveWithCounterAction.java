@@ -40,7 +40,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
-            logger.debug("Decreasing the counters for input file " + fileInfo.get(Parameters.PARAM_NAME));
+            logger.debug("Decreasing the counters i object " + this + " for input file " + fileInfo.get(Parameters.PARAM_NAME));
             HashMap<String,Integer> iCounters = (HashMap)fileInfo.get(Parameters.PARAM_COUNTERS);
 
             output.putAll(fileInfo);
@@ -71,12 +71,12 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
                 counterExisting=0;
             value+=counterExisting;
             counters.put(key,value);
-            logger.debug("Setting counter for " + key + " to " + value + ", before it was " + counterExisting);
+            logger.debug("Setting counter in object " + this + " for " + key + " to " + value + ", before it was " + counterExisting);
             if(value==0)
                 tryToMove(key,message);
             return;
         } else if(message instanceof Map) {
-            logger.debug("Setting the counters for message=" + message);
+            logger.debug("Setting the counters in object " + this + " for message=" + message);
             Map<String,Integer> inputCounters = (Map<String,Integer>)message;
             for(String key : (Set<String>)inputCounters.keySet()) {
                 Integer counterExisting = counters.get(key);
