@@ -115,16 +115,10 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   }
 
   final def broadcastPublic(message: AnyRef){
-    receivers foreach { receiver => {
-      taskKey match {
-        case None => getActorRef(receiver).tell(M2AMessage(message), context.self)
-        case Some(key) => getActorRef(receiver).tell(TaskMessage(key, message, replyTo.get), context.self)
+    receivers foreach {
+      receiver => {
+        sendMessage(message, receiver)
       }
-      if(messageSent == false){
-        logger.debug(context.self+" setting messageSent from false to true in broadcasting public")
-        messageSent = true
-      }
-    }
     }
   }
 

@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils
  * @author Laurent Van der Linden
  */
 trait ClasspathScanner {
-  val SERVER_DEVELOPMENT: String = "development"
   val SERVER_PRODUCTION: String = "production"
 
   def findMatchingClasses(basePackage: String, resourceType: Class[_],
