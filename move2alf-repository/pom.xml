@@ -17,8 +17,9 @@
     </properties>
     <repositories>
         <repository>
-            <id>alfresco-enterprise</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-releases</url>
+            <id>artifactory.xenit.eu</id>
+            <name>artifactory.dev.xenit.libs-release</name>
+            <url>https://artifactory.xenit.eu/artifactory/libs-release</url>
         </repository>
     </repositories>
 	<dependencies>
