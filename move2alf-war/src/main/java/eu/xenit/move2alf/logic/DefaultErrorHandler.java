@@ -63,7 +63,8 @@ public class DefaultErrorHandler implements ErrorHandler {
 
             // TODO: handle cleaner?
             File file = (File) fileInfo.get(Parameters.PARAM_FILE);
-            String name = (String) fileInfo.get(Parameters.PARAM_NAME);
+            String name = file.getAbsolutePath();
+            //String name = (String) fileInfo.get(Parameters.PARAM_NAME);
 
             if(sendingContext.hasReceiver(PipelineAssemblerImpl.REPORTER)) {
                 sendingContext.sendMessage(

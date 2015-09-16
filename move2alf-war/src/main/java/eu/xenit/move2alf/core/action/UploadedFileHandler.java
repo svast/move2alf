@@ -35,7 +35,8 @@ public class UploadedFileHandler extends Move2AlfReceivingAction<FileInfo> {
 
 //        logger.debug("Number of params: "+params.size());
 
-        String name = (String)fileInfo.get(Parameters.PARAM_NAME);
+        String name = ((File)fileInfo.get(Parameters.PARAM_FILE)).getAbsolutePath();
+
         ReportMessage reportMessage = new ReportMessage(name,
                 new Date(),
                 status,
