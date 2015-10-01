@@ -218,9 +218,13 @@ public class Util {
 
     public static void executeCommand(String command) {
         if (command != null && !"".equals(command)) {
-            logger.debug("Executing command " + command);
-
-            final ProcessBuilder pb = new ProcessBuilder(command);
+            logger.debug("Executing command [including arguments " + command);
+            List<String> cmdList = new ArrayList<String>();
+            for (String c:command.split(" "))
+            {
+                cmdList.add(c);
+            }
+            final ProcessBuilder pb = new ProcessBuilder(cmdList);
             pb.redirectErrorStream(true);
 
             Process process;
