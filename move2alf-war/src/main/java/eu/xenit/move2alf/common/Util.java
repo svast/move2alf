@@ -260,4 +260,18 @@ public class Util {
             logger.info("Command finished");
         }
     }
+
+    public static String createRelativePath(String path, String file, String directory) {
+        String newPath = path;
+        if(!(newPath.endsWith(File.separator)))
+            newPath = newPath.concat(File.separator);
+        if(directory.endsWith(File.separator))
+            directory = directory.substring(0,directory.length()-1);
+        String[] fileParts = file.split(File.separator);
+        String[] directoryParts = directory.split(File.separator);
+        for(int i=(directoryParts.length); i< (fileParts.length - 1) ; i++) {
+            newPath = newPath.concat(fileParts[i]).concat(File.separator);
+        }
+        return newPath;
+    }
 }

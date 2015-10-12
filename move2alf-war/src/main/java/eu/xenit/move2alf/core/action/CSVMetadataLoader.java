@@ -29,6 +29,13 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
     private static final char STRING_ESCAPE = '\0';  // no escaping
     Map localCounters = new HashMap();
 
+    private String inputPath = "";
+
+    @Override
+    public String getInputPath() {
+        return inputPath;
+    }
+
     public void setInputFile(File inputFile) {
         this.inputFile = inputFile;
     }
@@ -59,7 +66,8 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
 			if(Parameters.PARAM_FILE.equals(metadataFields[i])) {
                 String newPath = processPath(nextLine[i]);
                 File file = new File(newPath);
-                fileInfo.put(Parameters.PARAM_INPUT_PATH,file.getParentFile().getAbsolutePath());
+//                inputPath = file.getParentFile().getAbsolutePath();
+                fileInfo.put(Parameters.PARAM_INPUT_PATH,inputPath);
                 fileInfo.put(Parameters.PARAM_FILE,file);
                 fileInfo.put(Parameters.PARAM_NAME, newPath.substring(newPath.lastIndexOf("/")+1));
                 localCounters.put(file.getAbsolutePath(),Integer.valueOf(1));
@@ -154,6 +162,7 @@ public class CSVMetadataLoader extends FileWithMetadataAction implements EOCAwar
         }
 
         inputFile = (File) message.get(Parameters.PARAM_FILE);
+        inputPath = (String) message.get(Parameters.PARAM_INPUT_PATH);
 
         CSVReader reader = null;
         String[] metadataFields = null;

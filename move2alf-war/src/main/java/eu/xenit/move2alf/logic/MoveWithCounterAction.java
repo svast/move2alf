@@ -9,6 +9,7 @@ import eu.xenit.move2alf.core.simpleaction.data.FileInfo;
 import eu.xenit.move2alf.pipeline.actions.EOCAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.util.HashMap;
@@ -29,6 +30,9 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
     public static final String PARAM_PATH = "path";
     private String path;
 
+    @Value(value = "#{'${move.keepstructure}'}")
+    private boolean moveKeepStructure;
+
     public void setPath(String path){
         this.path = path;
     }
@@ -40,7 +44,9 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
         FileInfo output = new FileInfo();
         if(message instanceof FileInfo) {
             FileInfo fileInfo = (FileInfo) message;
-            logger.debug("Decreasing the counters i object " + this + " for input file " + fileInfo.get(Parameters.PARAM_NAME));
+            logger.info("In MoveWithCounterAction, fileInfo=" + fileInfo);
+            logger.debug("Decreasing the counters in object " + this + " for input file " + fileInfo.get(Parameters.PARAM_NAME));
+            String inputPath = (String)fileInfo.get(Parameters.PARAM_INPUT_PATH);
             HashMap<String,Integer> iCounters = (HashMap)fileInfo.get(Parameters.PARAM_COUNTERS);
 
             output.putAll(fileInfo);
@@ -59,13 +65,14 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
                 logger.debug("Counter for " + key + " was decreased with " + iCounter + " and is now " + counter);
 
                 if(counter.intValue()==0) {
-                    tryToMove(key,message);
+                    tryToMove(key,inputPath,message);
                 }
             }
         } else if(message instanceof SetCounterMessage) {
             SetCounterMessage counterMessage = (SetCounterMessage)message;
             String key = counterMessage.getId();
             Integer value = counterMessage.getCounter();
+            String inputPath = counterMessage.getInputPath();
             Integer counterExisting = counters.get(key);
             if(counterExisting==null)
                 counterExisting=0;
@@ -73,7 +80,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
             counters.put(key,value);
             logger.debug("Setting counter in object " + this + " for " + key + " to " + value + ", before it was " + counterExisting);
             if(value==0)
-                tryToMove(key,message);
+                tryToMove(key,inputPath,message);
             return;
         } else if(message instanceof Map) {
             logger.debug("Setting the counters in object " + this + " for message=" + message);
@@ -87,7 +94,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
                 counters.put(key,counterNew);
                 logger.debug("Setting counter for " + key + " to " + counterNew + ", before it was " + counterExisting);
                 if(counterNew==0)
-                    tryToMove(key,message);
+                    tryToMove(key,"",message);
 
             }
             // do not send further messages in this case
@@ -99,9 +106,13 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
         }
     }
 
-    private void tryToMove(String key, Object message) {
+    private void tryToMove(String key, String inputPath, Object message) {
         File oldFile = new File(key);
-        File newFile = Util.moveFile(path, oldFile);
+        String newPath = path;
+        if(!(inputPath.isEmpty()) && moveKeepStructure)
+            newPath = Util.createRelativePath(path, oldFile.getPath(), inputPath);
+        logger.info("Will move file " + oldFile.getPath() + " to " + newPath);
+        File newFile = Util.moveFile(newPath, oldFile);
         if (newFile == null) {
             String errorMessage = "Cannot move " + oldFile + " to " + newFile;
             handleError(message,errorMessage);

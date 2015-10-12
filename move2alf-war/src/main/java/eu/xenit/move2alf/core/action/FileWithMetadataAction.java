@@ -28,10 +28,22 @@ public abstract class FileWithMetadataAction extends Move2AlfReceivingAction<Fil
     @Override
     public void setCounter(String counterId, int counter) {
         if (sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_AFTER_ID)) {
-            sendMessage(PipelineAssemblerImpl.MOVE_AFTER_ID, new SetCounterMessage(counterId, Integer.valueOf(counter)));
+            if(getInputPath().isEmpty())
+                sendMessage(PipelineAssemblerImpl.MOVE_AFTER_ID, new SetCounterMessage(counterId, Integer.valueOf(counter)));
+            else
+                sendMessage(PipelineAssemblerImpl.MOVE_AFTER_ID, new SetCounterMessage(counterId, Integer.valueOf(counter), getInputPath()));
         }
         if (sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_NOT_LOADED_ID)) {
-            sendMessage(PipelineAssemblerImpl.MOVE_NOT_LOADED_ID, new SetCounterMessage(counterId, Integer.valueOf(counter)));
+            if(getInputPath().isEmpty())
+                sendMessage(PipelineAssemblerImpl.MOVE_NOT_LOADED_ID, new SetCounterMessage(counterId, Integer.valueOf(counter)));
+            else
+                sendMessage(PipelineAssemblerImpl.MOVE_NOT_LOADED_ID, new SetCounterMessage(counterId, Integer.valueOf(counter), getInputPath()));
+        }
+        if (sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_WITH_COUNTER)) {
+            if(getInputPath().isEmpty())
+                sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, new SetCounterMessage(counterId, Integer.valueOf(counter)));
+            else
+                sendMessage(PipelineAssemblerImpl.MOVE_WITH_COUNTER, new SetCounterMessage(counterId, Integer.valueOf(counter), getInputPath()));
         }
     }
 
@@ -48,5 +60,9 @@ public abstract class FileWithMetadataAction extends Move2AlfReceivingAction<Fil
     public void sendFileInfoWithCounters(FileInfo fileInfo, Map<String, Integer> counters) {
         fileInfo.put(Parameters.PARAM_COUNTERS, counters);
         sendMessage(fileInfo);
+    }
+
+    public String getInputPath() {
+        return "";
     }
 }

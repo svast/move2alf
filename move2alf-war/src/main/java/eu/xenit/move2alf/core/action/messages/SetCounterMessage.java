@@ -9,11 +9,18 @@ package eu.xenit.move2alf.core.action.messages;
  */
 public class SetCounterMessage {
     String id;
+    String inputPath = "";
     Integer counter;
 
     public SetCounterMessage(String id, Integer counter) {
         this.id = id;
         this.counter = counter;
+    }
+
+    public SetCounterMessage(String id, Integer counter, String inputPath) {
+        this.id = id;
+        this.counter = counter;
+        this.inputPath = inputPath;
     }
 
     public String getId() {
@@ -22,6 +29,14 @@ public class SetCounterMessage {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getInputPath() {
+        return inputPath;
+    }
+
+    public void setInputPath(String inputPath) {
+        this.inputPath = inputPath;
     }
 
     public Integer getCounter() {
