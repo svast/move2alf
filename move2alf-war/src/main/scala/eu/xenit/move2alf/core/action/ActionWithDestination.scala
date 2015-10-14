@@ -51,12 +51,20 @@ abstract class ActionWithDestination[T, U] extends Move2AlfReceivingAction[T] wi
   }
 
   def acceptReply(key: String, message: AnyRef) {
-    message match {
-      case message: Exception => handleErrorReply(originals.get(key).get, messages.get(key).get, message)
-      case message: U@unchecked => replyHandlers.get(key).getOrElse({message: AnyRef => {
-        logger.error("No reply method for message "+message.toString+ " Message key: "+key)
-        handleError(message, "Something went wrong while putting message.")
-      }}).apply(message)
+    try {
+      message match {
+        case message: Exception => handleErrorReply(originals.get(key).get, messages.get(key).get, message)
+        case message: U@unchecked => replyHandlers.get(key).getOrElse({ message: AnyRef => {
+          logger.error("No reply method for message " + message.toString + " Message key: " + key)
+          handleError(message, "Something went wrong while putting message.")
+        }
+        }).apply(message)
+      }
+    } catch {
+      case e: Exception => {
+        logger.error("Error in acceptReply " + e + " for message " + message, e)
+        handleError(originals.get(key).get, e)
+      }
     }
     replyHandlers.remove(key)
     messages.remove(key)

@@ -1,10 +1,5 @@
 package eu.xenit.move2alf.core.action;
 
-import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
-import eu.xenit.move2alf.pipeline.actions.EOCAware;
-
-import java.util.ArrayList;
-
 /**
  * Created with IntelliJ IDEA.
  * User: rox

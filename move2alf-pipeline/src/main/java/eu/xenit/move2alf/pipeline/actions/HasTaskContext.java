@@ -9,5 +9,5 @@ import eu.xenit.move2alf.pipeline.actions.context.TaskContext;
  */
 public interface HasTaskContext extends Action {
 
-    public void setTaskContext(TaskContext taskContext);
+    void setTaskContext(TaskContext taskContext);
 }

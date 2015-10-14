@@ -9,6 +9,6 @@ package eu.xenit.move2alf.pipeline.actions;
  */
 public interface ReceivingAction<T> extends Action{
 
-    public void execute(T message);
+    void execute(T message);
 
 }

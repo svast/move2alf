@@ -10,5 +10,5 @@ import eu.xenit.move2alf.pipeline.actions.context.StateContext;
  * To change this template use File | Settings | File Templates.
  */
 public interface HasStateContext extends Action{
-    public void setStateContext(StateContext stateContext);
+    void setStateContext(StateContext stateContext);
 }

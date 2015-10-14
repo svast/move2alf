@@ -7,5 +7,5 @@ package eu.xenit.move2alf.pipeline.actions;
  */
 public interface AcceptsReply extends Action{
 
-    public void acceptReply(String key, Object reply);
+    void acceptReply(String key, Object reply);
 }

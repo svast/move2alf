@@ -11,5 +11,5 @@ import eu.xenit.move2alf.pipeline.actions.context.EOCBlockingContext;
  */
 public interface EOCBlockingAction extends Action{
 
-    public void setEOCBlockingContext(EOCBlockingContext eocBlockingContext);
+    void setEOCBlockingContext(EOCBlockingContext eocBlockingContext);
 }

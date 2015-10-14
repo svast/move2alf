@@ -172,10 +172,15 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
             fileInfo => {
               fileInfo.put(Parameters.PARAM_STATUS,Parameters.VALUE_FAILED)
               var errorMessage: String = "Error in AlfrescoUpload"
-              if(reply.getCause!= null && reply.getCause.getCause!=null && reply.getCause.getCause.asInstanceOf[RepositoryFault].getMessage1!=null)
-                errorMessage = reply.getCause.getCause.asInstanceOf[RepositoryFault].getMessage1
+              if(reply.getCause!= null && reply.getCause.getCause!=null){
+                if (reply.getCause.getCause.isInstanceOf[RepositoryFault] && reply.getCause.getCause.asInstanceOf[RepositoryFault].getMessage1!=null){
+                  errorMessage = reply.getCause.getCause.asInstanceOf[RepositoryFault].getMessage1
+                } else {
+                  errorMessage = reply.getCause.getCause.getMessage
+                }
+              }
+
               fileInfo.put(Parameters.PARAM_ERROR_MESSAGE,errorMessage)
-              fileInfo.put(Parameters.PARAM_REFERENCE,"not uploaded")
               sendingContext.sendMessage(fileInfo,PipelineAssemblerImpl.UPLOAD_RECEIVER)
               //  handleError(fileInfo, reply)
             }

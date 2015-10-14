@@ -10,5 +10,5 @@ import eu.xenit.move2alf.pipeline.actions.context.SendingContext;
  * To change this template use File | Settings | File Templates.
  */
 public interface HasSendingContext extends Action{
-    public void setSendingContext(SendingContext sendingContext);
+    void setSendingContext(SendingContext sendingContext);
 }

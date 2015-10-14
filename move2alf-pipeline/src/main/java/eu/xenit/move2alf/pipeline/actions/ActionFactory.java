@@ -7,5 +7,5 @@ package eu.xenit.move2alf.pipeline.actions;
  */
 public interface ActionFactory {
 
-    public Action createAction();
+    Action createAction();
 }

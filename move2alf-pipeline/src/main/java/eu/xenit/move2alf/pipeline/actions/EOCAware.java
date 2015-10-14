@@ -9,5 +9,5 @@ package eu.xenit.move2alf.pipeline.actions;
  */
 public interface EOCAware extends Action{
 
-    public void beforeSendEOC();
+    void beforeSendEOC();
 }
