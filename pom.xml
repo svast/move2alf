@@ -65,7 +65,7 @@
 										<version>${project.version}</version>
 										<type>war</type>
 									</dependency>
-									<contextPath>/</contextPath>
+									<contextPath>/move2alf</contextPath>
 								</warRunDependency>
 							</warRunDependencies>
 							<!-- naming is disable by default so use true to enable it -->
