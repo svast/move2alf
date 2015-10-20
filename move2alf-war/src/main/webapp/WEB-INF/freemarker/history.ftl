@@ -5,7 +5,7 @@
 </@head>
 <@bodyMenu title="History" >
 <h2>${job.name?html}</h2>
-<#if historyInfoList??>
+<#if history??>
 	<table class="table-striped wide">
 		<thead>
 			<tr>
@@ -17,7 +17,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list pagedListHolder.pageList as item>
+			<#list history as item>
 				<tr>
 					<td>${item.cycleStartDateTime}</td>
 					<td>${item.scheduleState}</td>

@@ -11,11 +11,11 @@ import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
 import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
 import eu.xenit.move2alf.logic.DestinationService;
+import eu.xenit.move2alf.logic.HistoryPage;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.controller.destination.AlfrescoDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.CastorDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.model.ContentStoreModel;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import eu.xenit.move2alf.web.dto.ScheduleConfig;
 import org.slf4j.Logger;
@@ -481,18 +481,18 @@ public class JobController extends AbstractController{
 	public ModelAndView history(@PathVariable int jobId,
 			HttpServletRequest request, HttpServletResponse response) {
 		ModelAndView mav = new ModelAndView();
-
-		List<HistoryInfo> historyInfoList = getJobService().getHistory(jobId);
-
-		PagedListHolder pagedListHolder = new PagedListHolder(historyInfoList);
 		int page = ServletRequestUtils.getIntParameter(request, "p", 0);
-		pagedListHolder.setPage(page);
-		int pageSize = 10;
-		pagedListHolder.setPageSize(pageSize);
+		int pageSize = 20;
+
+		HistoryPage historyPage = getJobService().getHistory(jobId, page, pageSize);
+		PagedListHolder pagedListHolder = new PageHolder(historyPage.getTotalNumberOfResults(), page, pageSize, 10);
+
 
 		mav.addObject("job", getJobService().getJob(jobId));
+		mav.addObject("history", historyPage.getHistoryInfos());
 		mav.addObject("pagedListHolder", pagedListHolder);
-		mav.addObject("historyInfoList", historyInfoList);
+		mav.addObject("page", page);
+		mav.addObject("numberOfPages", historyPage.getNumberOfPages());
 		mav.addObject("role", getRole());
 		mav.setViewName("history");
 		return mav;

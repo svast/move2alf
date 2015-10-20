@@ -421,7 +421,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
 	}
 
 	@Override
-	public List<HistoryInfo> getHistory(final int jobId) {
+	public HistoryPage getHistory(final int jobId, int page, int pageSize) {
 		final List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
 		final Map<Integer, HistoryInfo> integerHistoryInfoMap = new HashMap<Integer, HistoryInfo>();
 		final Session s = getSessionFactory().getCurrentSession();
@@ -429,6 +429,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
 		final Query query = s.createQuery(hql);
 		query.setParameter("jobId", jobId);
+		query.setFirstResult(page*pageSize);
+		query.setMaxResults(pageSize);
 
 		@SuppressWarnings("unchecked")
 		final List<Object[]> history = query.list();
@@ -458,7 +460,14 @@ public class JobServiceImpl extends AbstractHibernateService implements
 			}
 		}
 
-		return historyList;
+		final String countHql = "select COUNT(*) FROM Cycle AS cycle WHERE cycle.job.id=:jobId";
+		final Query countQuery = s.createQuery(countHql);
+		countQuery.setParameter("jobId", jobId);
+		int count = ((Long) countQuery.uniqueResult()).intValue();
+		int numberOfPages = (int) Math.ceil(count/((double)pageSize));
+
+
+		return new HistoryPage(count, numberOfPages, historyList);
 	}
 
 	/**

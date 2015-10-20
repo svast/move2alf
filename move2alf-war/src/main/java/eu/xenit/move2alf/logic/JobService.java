@@ -3,7 +3,6 @@ package eu.xenit.move2alf.logic;
 import eu.xenit.move2alf.core.dto.*;
 import eu.xenit.move2alf.core.enums.ECycleState;
 import eu.xenit.move2alf.core.enums.EProcessedDocumentStatus;
-import eu.xenit.move2alf.web.dto.HistoryInfo;
 import eu.xenit.move2alf.web.dto.JobInfo;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.springframework.mail.SimpleMailMessage;
@@ -219,7 +218,7 @@ public interface JobService {
 
 	public void sendMail(SimpleMailMessage message);
 
-	public List<HistoryInfo> getHistory(int jobId);
+	public HistoryPage getHistory(int jobId, int page, int pageSize);
 	
 	public List<JobInfo> getAllJobInfo();
 
