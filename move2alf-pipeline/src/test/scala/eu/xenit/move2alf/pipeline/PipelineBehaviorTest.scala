@@ -118,7 +118,7 @@ class PipelineBehaviorTest extends {
 
   def checkForEOC(testProbe: TestProbe, amount: Int) {
     var count: Int = 1
-    testProbe.fishForMessage(Duration(9999, duration.SECONDS))({
+    testProbe.fishForMessage(Duration(5, duration.SECONDS))({
       case Broadcast(EOC) => {
         if (count == amount) {
           true
