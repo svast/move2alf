@@ -18,7 +18,7 @@
 			<key column="jobId" />
 			<one-to-many class="eu.xenit.move2alf.core.dto.Schedule" />
 		</set>
-		<set name="cycles" inverse="true" cascade="all,delete-orphan" lazy="false">
+		<set name="cycles" inverse="true" cascade="all,delete-orphan" lazy="true">
 			<key column="jobId" />
 			<one-to-many class="eu.xenit.move2alf.core.dto.Cycle" />
 		</set>
