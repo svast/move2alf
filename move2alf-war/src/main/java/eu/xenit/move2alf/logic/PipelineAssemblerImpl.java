@@ -571,9 +571,25 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         end = uploadedFileHandler;
         uploadAction.addReceiver(UPLOAD_RECEIVER, uploadedFileHandler);
 
+
+        ConfiguredAction commandAfter = null;
+
+        if(!jobModel.getCommandAfter().isEmpty()){
+            commandAfter = new ConfiguredAction();
+            commandAfter.setActionId(COMMAND_AFTER_ID);
+            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandEOCAction.class));
+            commandAfter.setNmbOfWorkers(1);
+            commandAfter.setParameter(ExecuteCommandEOCAction.PARAM_COMMAND, jobModel.getCommandAfter());
+            commandAfter.addReceiver(REPORTER, reporter);
+            end.addReceiver(COMMAND_AFTER_ID, commandAfter);
+        }
+
         if(jobModel.getMoveAfterLoad()){
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
                 end.addReceiver(MOVE_AFTER_ID,moveWithCounter);
+                if(commandAfter!=null){
+                    moveWithCounter.addReceiver(COMMAND_AFTER_ID, commandAfter);
+                }
             } else {
                 final ConfiguredAction moveAfterLoad = new ConfiguredAction();
                 moveAfterLoad.setClassId(actionClassService.getClassId(MoveAction.class));
@@ -582,12 +598,18 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveAfterLoad.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveAfterLoadText());
                 moveAfterLoad.addReceiver(REPORTER, reporter);
                 end.addReceiver(MOVE_AFTER_ID, moveAfterLoad);
+                if(commandAfter!=null){
+                    moveAfterLoad.addReceiver(COMMAND_AFTER_ID,commandAfter);
+                }
             }
         }
 
         if(jobModel.getMoveNotLoad()){
             if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
                 end.addReceiver(MOVE_NOT_LOADED_ID, moveWithCounterNotLoaded);
+                if(commandAfter!=null){
+                    moveWithCounterNotLoaded.addReceiver(COMMAND_AFTER_ID,commandAfter);
+                }
             } else {
                 final ConfiguredAction moveNotLoaded = new ConfiguredAction();
                 moveNotLoaded.setClassId(actionClassService.getClassId(MoveAction.class));
@@ -596,20 +618,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveNotLoaded.setParameter(MoveAction.PARAM_PATH, jobModel.getMoveNotLoadText());
                 moveNotLoaded.addReceiver(REPORTER, reporter);
                 end.addReceiver(MOVE_NOT_LOADED_ID, moveNotLoaded);
+                if(commandAfter!=null){
+                    moveNotLoaded.addReceiver(COMMAND_AFTER_ID,commandAfter);
+                }
             }
         }
 
-
-
-        if(!jobModel.getCommandAfter().isEmpty()){
-            ConfiguredAction commandAfter = new ConfiguredAction();
-            commandAfter.setActionId(COMMAND_AFTER_ID);
-            commandAfter.setClassId(actionClassService.getClassId(ExecuteCommandEOCAction.class));
-            commandAfter.setNmbOfWorkers(1);
-            commandAfter.setParameter(ExecuteCommandEOCAction.PARAM_COMMAND, jobModel.getCommandAfter());
-            commandAfter.addReceiver(REPORTER, reporter);
-            end.addReceiver(COMMAND_AFTER_ID, commandAfter);
-        }
 
         end.addReceiver(DEFAULT_RECEIVER, reporter);
         end = reportSaver;
