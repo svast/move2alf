@@ -109,7 +109,7 @@ public class MoveWithCounterAction extends Move2AlfReceivingAction implements EO
     private void tryToMove(String key, String inputPath, Object message) {
         File oldFile = new File(key);
         String newPath = path;
-        if(!(inputPath.isEmpty()) && moveKeepStructure)
+        if(moveKeepStructure && (inputPath!=null) && !(inputPath.isEmpty()))
             newPath = Util.createRelativePath(path, oldFile.getPath(), inputPath);
         logger.info("Will move file " + oldFile.getPath() + " to " + newPath);
         File newFile = Util.moveFile(newPath, oldFile);
