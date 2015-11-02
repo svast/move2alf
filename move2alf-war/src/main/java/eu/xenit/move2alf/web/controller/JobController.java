@@ -27,10 +27,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -212,6 +209,39 @@ public class JobController extends AbstractController{
         return mav;
     }
 
+    @RequestMapping(value = "/job/{id}/start", method = RequestMethod.POST, produces="text/plain")
+    @ResponseBody
+    public String startJob(@PathVariable("id") int id){
+        //getJobService().startJob(id);
+        try {
+            getJobService().scheduleNow(id);
+            return "OK";
+        }
+        catch (Exception e){
+            return "FAIL: " + e.getMessage();
+        }
+    }
+
+    @RequestMapping(value = "/job/name/{name}/start", method = RequestMethod.POST, produces="text/plain")
+    @ResponseBody
+    public String startJobByName(@PathVariable("name") String name){
+        try {
+            if (!getJobService().checkJobExists(name)){
+                return "FAIL: Job " + name + " does not exist.";
+            }
+
+            Job job = getJobService().getJobByName(name);
+            getJobService().scheduleNow(job.getId());
+
+            return "OK";
+        }
+        catch (Exception e){
+            return "FAIL: " + e.getMessage();
+        }
+    }
+
+
+
 	@RequestMapping(value = "/job/{id}/edit", method = RequestMethod.POST)
 	public ModelAndView editJob(@PathVariable int id,
 			@ModelAttribute("job") @Valid JobModel job, BindingResult errors) {
@@ -335,7 +365,7 @@ public class JobController extends AbstractController{
 	public ModelAndView deleteJob(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteJob(id);
-		mav.setViewName("redirect:/job/dashboard");
+		mav.setViewName("redirect:.");
 		return mav;
 	}
 

@@ -567,113 +567,115 @@ public class JobServiceImpl extends AbstractHibernateService implements
 
     @Override
     public void startJob(Integer jobId) {
-        if(!jobMap.containsKey(jobId)){
-            final Job job = getJob(jobId);
-            String name = job.getName();
-            ConfiguredAction configuredAction = job.getFirstConfiguredAction();
-            ActionConfig actionConfig = pipelineAssembler.getActionConfig(configuredAction);
-            JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(actionConfig));
+        if (jobMap.containsKey(jobId)) {
+            JobHandle handle = jobMap.get(jobId);
+            if (!handle.isRunning()) {
+                handle.destroy();
+                jobMap.remove(jobId);
+                startJob(jobId);
+            } else {
+                logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
+            }
 
-            RunnableWithCycle action = new RunnableWithCycle() {
+            return;
+        }
 
-                @Autowired
-                JobService jobService;
+        final Job job = getJob(jobId);
+        String name = job.getName();
+        ConfiguredAction configuredAction = job.getFirstConfiguredAction();
+        ActionConfig actionConfig = pipelineAssembler.getActionConfig(configuredAction);
+        JobHandle jobHandle = new JobHandle(actorSystem, name, new JobConfig(actionConfig));
 
-                @Override
-                @Transactional
-                public void run() {
+        RunnableWithCycle action = new RunnableWithCycle() {
 
-                    try {
+            @Autowired
+            JobService jobService;
 
-                        jobService.closeCycle(cycle);
+            @Override
+            @Transactional
+            public void run() {
 
-                        if(job.isSendReport() || job.isSendErrorReport()){
-                            int cycleId = cycle.getId();
+                try {
 
-                            // only send report on errors
-                            boolean errorsOccured = false;
-                            int counter = 0;
-                            int amountFailed = 0;
-                            Date firstDocDateTime = null;
-                            List<ProcessedDocument> processedDocuments = jobService.getProcessedDocuments(cycle.getId());
-                            if (processedDocuments != null) {
-                                for (ProcessedDocument doc : processedDocuments) {
-                                    if (counter == 0) {
-                                        firstDocDateTime = doc.getProcessedDateTime();
-                                    }
+                    jobService.closeCycle(cycle);
 
-                                    if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
-                                        errorsOccured = true;
-                                        amountFailed += 1;
-                                    }
-                                    counter += 1;
+                    if (job.isSendReport() || job.isSendErrorReport()) {
+                        int cycleId = cycle.getId();
+
+                        // only send report on errors
+                        boolean errorsOccured = false;
+                        int counter = 0;
+                        int amountFailed = 0;
+                        Date firstDocDateTime = null;
+                        List<ProcessedDocument> processedDocuments = jobService.getProcessedDocuments(cycle.getId());
+                        if (processedDocuments != null) {
+                            for (ProcessedDocument doc : processedDocuments) {
+                                if (counter == 0) {
+                                    firstDocDateTime = doc.getProcessedDateTime();
                                 }
+
+                                if (EProcessedDocumentStatus.FAILED.equals(doc.getStatus())) {
+                                    errorsOccured = true;
+                                    amountFailed += 1;
+                                }
+                                counter += 1;
                             }
-
-                            // Get cycle information
-                            long startDateTime = cycle.getStartDateTime().getTime();
-                            long endDateTime = cycle.getEndDateTime().getTime();
-                            long durationInSeconds = (endDateTime - startDateTime) / 1000;
-                            String duration = Util.formatDuration(durationInSeconds);
-
-
-                            List<String> addresses = new ArrayList<String>();
-                            if(job.isSendReport() && job.getSendReportTo()!=null){
-                                addresses.addAll(Arrays.asList(job.getSendReportTo().split(" *, *")));
-                            }
-                            if(job.isSendErrorReport() && errorsOccured && job.getSendErrorReportTo() != null){
-                                addresses.addAll(Arrays.asList(job.getSendErrorReportTo().split(" *, *")));
-                            }
-							if(!addresses.isEmpty()){
-								SimpleMailMessage mail = new SimpleMailMessage();
-								mail.setFrom(mailFrom);
-								mail.setTo(addresses.toArray(new String[addresses.size()]));
-								mail.setSubject("Move2Alf error report");
-
-								Job job = cycle.getJob();
-
-								mail.setText("Cycle " + cycleId + " of job " + job.getName()
-										+ " completed.\n" + "The full report can be found on "
-										+ url + "/job/" + job.getId() + "/" + cycleId
-										+ "/report" + "\n\nStatistics:" + "\nNr of files: "
-										+ processedDocuments.size() + "\nNr of failed: "
-										+ amountFailed + "\n\nTime to process: " + duration
-										+ "\nStart date/time: " + startDateTime
-										+ "\nTime first document loaded: " + firstDocDateTime
-										+ "\n\nSent by Move2Alf");
-
-								sendMail(mail);
-							} else {
-								logger.debug("Not sending email, because no email addresses to send to");
-							}
-
                         }
 
+                        // Get cycle information
+                        long startDateTime = cycle.getStartDateTime().getTime();
+                        long endDateTime = cycle.getEndDateTime().getTime();
+                        long durationInSeconds = (endDateTime - startDateTime) / 1000;
+                        String duration = Util.formatDuration(durationInSeconds);
 
-                    } catch (Exception e) {
-                        logger.error("Error", e);
+
+                        List<String> addresses = new ArrayList<String>();
+                        if (job.isSendReport() && job.getSendReportTo() != null) {
+                            addresses.addAll(Arrays.asList(job.getSendReportTo().split(" *, *")));
+                        }
+                        if (job.isSendErrorReport() && errorsOccured && job.getSendErrorReportTo() != null) {
+                            addresses.addAll(Arrays.asList(job.getSendErrorReportTo().split(" *, *")));
+                        }
+                        if (!addresses.isEmpty()) {
+                            SimpleMailMessage mail = new SimpleMailMessage();
+                            mail.setFrom(mailFrom);
+                            mail.setTo(addresses.toArray(new String[addresses.size()]));
+                            mail.setSubject("Move2Alf error report");
+
+                            Job job = cycle.getJob();
+
+                            mail.setText("Cycle " + cycleId + " of job " + job.getName()
+                                    + " completed.\n" + "The full report can be found on "
+                                    + url + "/job/" + job.getId() + "/" + cycleId
+                                    + "/report" + "\n\nStatistics:" + "\nNr of files: "
+                                    + processedDocuments.size() + "\nNr of failed: "
+                                    + amountFailed + "\n\nTime to process: " + duration
+                                    + "\nStart date/time: " + startDateTime
+                                    + "\nTime first document loaded: " + firstDocDateTime
+                                    + "\n\nSent by Move2Alf");
+
+                            sendMail(mail);
+                        } else {
+                            logger.debug("Not sending email, because no email addresses to send to");
+                        }
+
                     }
-                }
-            };
 
-            applicationContext.getAutowireCapableBeanFactory().autowireBean(action);
-            jobHandle.registerOnStopAction(action);
-            onStopJobActions.put(jobId, action);
-            jobMap.put(job.getId(), jobHandle);
-			int cycleId = openCycleForJob(jobId);
-			onStopJobActions.get(jobId).cycle = getCycle(cycleId);
-			jobMap.get(jobId).startJob();
-        } else {
-			JobHandle handle = jobMap.get(jobId);
-			if (!handle.isRunning()) {
-				handle.destroy();
-				jobMap.remove(jobId);
-				startJob(jobId);
-			}
-			else {
-				logger.warn("Job " + handle.id() + " is already running. It cannot be started again");
-			}
-		}
+
+                } catch (Exception e) {
+                    logger.error("Error", e);
+                }
+            }
+        };
+
+        applicationContext.getAutowireCapableBeanFactory().autowireBean(action);
+        jobHandle.registerOnStopAction(action);
+        onStopJobActions.put(jobId, action);
+        jobMap.put(job.getId(), jobHandle);
+        int cycleId = openCycleForJob(jobId);
+        onStopJobActions.get(jobId).cycle = getCycle(cycleId);
+        jobMap.get(jobId).startJob();
+
     }
 
     @Override
