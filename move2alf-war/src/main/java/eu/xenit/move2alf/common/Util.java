@@ -267,8 +267,11 @@ public class Util {
             newPath = newPath.concat(File.separator);
         if(directory.endsWith(File.separator))
             directory = directory.substring(0,directory.length()-1);
-        String[] fileParts = file.split(File.separator);
-        String[] directoryParts = directory.split(File.separator);
+
+        String separatorRegex = String.format("\\%s", File.separator);
+
+        String[] fileParts = file.split(separatorRegex);
+        String[] directoryParts = directory.split(separatorRegex);
         for(int i=(directoryParts.length); i< (fileParts.length - 1) ; i++) {
             newPath = newPath.concat(fileParts[i]).concat(File.separator);
         }
