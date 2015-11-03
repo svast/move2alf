@@ -134,7 +134,9 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         Map<String, String> metadataParameterMap = new HashMap<String, String>();
         Map<String, String> transformParameterMap = new HashMap<String, String>();
 
-        for(ConfiguredAction action: configuredActionMap.values())
+        Integer batchSize = null;
+
+        for(ConfiguredAction action: configuredActionMap.values()) {
             if (SOURCE_ID.equals(action
                     .getActionId())) {
                 String path = action.getParameter(SASource.PARAM_INPUTPATHS);
@@ -177,10 +179,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 moveBeforeProcessing = true;
                 moveBeforeProcessingPath = action
                         .getParameter(MoveAction.PARAM_PATH);
-            } else if (MOVE_AFTER_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
+            } else if (MOVE_AFTER_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH) != null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveAfterLoad = true;
                 moveAfterLoadPath = action.getParameter(MoveAction.PARAM_PATH);
-            } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH)!=null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
+            } else if (MOVE_NOT_LOADED_ID.equals(action.getActionId()) && action.getParameter(MoveAction.PARAM_PATH) != null && !(action.getParameter(MoveAction.PARAM_PATH).isEmpty())) {
                 moveNotLoaded = true;
                 moveNotLoadedPath = action.getParameter(MoveAction.PARAM_PATH);
             } else if (FILTER_ID
@@ -199,7 +201,10 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
                 transformParameterMap = action.getParameters();
             } else if (PUT_CONTENT.equals(action.getActionId())) {
                 contentStoreId = Integer.parseInt(action.getParameter(PutContentAction.PARAM_DESTINATION()));
+            } else if (BATCH_ACTION.equals(action.getActionId())) {
+                batchSize = Integer.parseInt(action.getParameter(BatchAction.PARAM_BATCHSIZE));
             }
+        }
 
         jobModel.setSkipContentUpload(skipContentUpload);
         jobModel.setInputSource(inputSource);
@@ -236,6 +241,8 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         jobModel.setCommand(commandBefore);
         jobModel.setCommandAfter(commandAfter);
         jobModel.setCron(getJobService().getCronjobsForJob(id));
+
+        jobModel.setBatchSize(batchSize);
 
         final Iterator metadataMapIterator = metadataParameterMap.entrySet()
                 .iterator();
@@ -511,7 +518,12 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
             batchAction.setActionId(BATCH_ACTION);
             batchAction.setClassId(actionClassService.getClassId(BatchAction.class));
             batchAction.setNmbOfWorkers(1);
-            batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(defaultBatchSize));
+            if (jobModel.getBatchSize() == null) {
+                batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(defaultBatchSize));
+            }
+            else {
+                batchAction.setParameter(BatchAction.PARAM_BATCHSIZE, String.valueOf(jobModel.getBatchSize()));
+            }
             batchAction.addReceiver(REPORTER, reporter);
             end.addReceiver(DEFAULT_RECEIVER, batchAction);
             end = batchAction;

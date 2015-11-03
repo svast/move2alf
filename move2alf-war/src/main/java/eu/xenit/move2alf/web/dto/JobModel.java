@@ -8,6 +8,7 @@ import eu.xenit.move2alf.validation.CSVsize;
 import eu.xenit.move2alf.validation.ParamList;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -127,6 +128,10 @@ public class JobModel {
 	private String alfPswd;
 
 	private int nbrThreads = 5;
+
+    // Integer can be null :-)
+    @Digits(integer = 10000, fraction = 0, message = "batchSize parameter is incorrectly.")
+    private Integer batchSize;
 
 	@Size(min=0, max=extensionMaxLength, message="Max length of extension is " + extensionMaxLength)
 	private String extension = "*";
@@ -448,7 +453,15 @@ public class JobModel {
 		return nbrThreads;
 	}
 
-	public void setDest(int dest) {
+    public Integer getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    public void setDest(int dest) {
 		this.dest = dest;
 	}
 

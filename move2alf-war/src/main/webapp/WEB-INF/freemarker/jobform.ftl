@@ -140,7 +140,10 @@
             <option value="${contentStore.id}" <#if job.contentStoreId?? && contentStore.id=job.contentStoreId >selected="selected"</#if> >${contentStore.name}</option>
         </@labeledSelectList>
 
-		<@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />
+        <@labeledSingleLineTextInput label="Job batch size" name="jobbatchsize" binding="job.batchSize" helpText="The batchSize for the job."/>
+
+
+        <@labeledSingleLineTextInput label="Destination path" name="path" binding="job.destinationFolder" attributes="maxlength='${job.pathMaxLength}'" />
 
         <@checkboxWithTextBefore binding="job.skipContentUpload" label="Skip content upload" helpText="Makes sense only when the parser sets the content url, e.g. for a CMIS import" />
 

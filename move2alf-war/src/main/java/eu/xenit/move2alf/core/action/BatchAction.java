@@ -36,6 +36,11 @@ public class BatchAction extends Move2AlfReceivingAction<FileInfo> implements EO
     @Override
     protected void executeImpl(FileInfo message) {
         batch.add(message);
+
+        if (logger.isTraceEnabled()){
+            logger.trace("batch containing " + batch.size() + "/" + batchSize + " fileInfo's");
+        }
+
         if(batch.size() == batchSize){
             sendMessage(batch);
             batch = new Batch();
