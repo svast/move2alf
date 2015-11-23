@@ -36,7 +36,7 @@ public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
         String inputPath = (String)fileInfo.get(Parameters.PARAM_INPUT_PATH);
         // if input file is in a subdirectory, add the subdirectory path to destination
         String newPath = path;
-        if(moveKeepStructure)
+        if(moveKeepStructure && inputPath!=null)
             newPath = Util.createRelativePath(path,file.getPath(),inputPath);
         logger.debug("Will move file " + file.getPath() + " to " + newPath);
         File newFile = Util.moveFile(newPath, file);
