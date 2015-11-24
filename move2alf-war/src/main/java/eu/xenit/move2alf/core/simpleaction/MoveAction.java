@@ -2,6 +2,8 @@ package eu.xenit.move2alf.core.simpleaction;
 
 import java.io.File;
 
+import eu.xenit.move2alf.common.FileService;
+import eu.xenit.move2alf.common.FileServiceImpl;
 import eu.xenit.move2alf.common.Parameters;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
@@ -17,6 +19,17 @@ import org.springframework.beans.factory.annotation.Value;
             description = "Moves files on the filesystem")
 public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
     private static final Logger logger = LoggerFactory.getLogger(MoveAction.class);
+
+    private FileService fileService;
+
+    public MoveAction() {
+        fileService = new FileServiceImpl();
+    }
+    public MoveAction(FileService fileService, boolean moveKeepStructure) {
+        this.fileService = fileService;
+        this.moveKeepStructure = moveKeepStructure;
+    }
+
 
     public static final String PARAM_PATH = "path";
     private String path;
@@ -37,9 +50,9 @@ public class MoveAction extends Move2AlfReceivingAction<FileInfo> {
         // if input file is in a subdirectory, add the subdirectory path to destination
         String newPath = path;
         if(moveKeepStructure && inputPath!=null)
-            newPath = Util.createRelativePath(path,file.getPath(),inputPath);
+            newPath = fileService.createRelativePath(path,file.getPath(),inputPath);
         logger.debug("Will move file " + file.getPath() + " to " + newPath);
-        File newFile = Util.moveFile(newPath, file);
+        File newFile = fileService.moveFile(newPath, file);
         if (newFile != null) {
             output.put(Parameters.PARAM_FILE, newFile);
         } else {
