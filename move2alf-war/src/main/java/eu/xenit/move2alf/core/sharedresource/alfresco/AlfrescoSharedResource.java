@@ -6,6 +6,7 @@ import eu.xenit.move2alf.core.sharedresource.SharedResource;
 import eu.xenit.move2alf.repository.*;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
+import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessFactory;
 import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +40,37 @@ public class AlfrescoSharedResource extends SharedResource {
         AlfrescoSharedResource.luceneFallbackEnabled = luceneFallbackEnabled;
     }
 
+	private RepositoryAccessFactory repositoryAccessFactory;
+
+	public AlfrescoSharedResource(){
+		super();
+		this.repositoryAccessFactory = null;
+	}
+
+	public AlfrescoSharedResource(RepositoryAccessFactory repositoryAccessFactory){
+		super();
+		this.repositoryAccessFactory = repositoryAccessFactory;
+	}
+
     private ThreadLocal<RepositoryAccessSession> ras = new ThreadLocal<RepositoryAccessSession>();
 
 	private static final Logger logger = LoggerFactory.getLogger(AlfrescoSharedResource.class);
 
+	public static final String PUT_CONTENT_401_MESSAGE = "Content could not be uploaded because invalid credentials have been supplied.";
+
     public String putContent(File file, String mimeType){
-        return createRepositoryAccessSession().putContent(file, mimeType);
+		try {
+			return createRepositoryAccessSession().putContent(file, mimeType);
+		} catch (RuntimeException e){
+			if (e.getMessage().equals(PUT_CONTENT_401_MESSAGE)){
+				logger.debug("401 message on put content, ticket could be expired, retrying");
+				destroyRepositoryAccessSession();
+				return createRepositoryAccessSession().putContent(file, mimeType);
+			} else {
+				throw e;
+			}
+		}
+
     }
 
 	public List<UploadResult> sendBatch(
@@ -228,15 +254,22 @@ public class AlfrescoSharedResource extends SharedResource {
         }
     }
 
+	private RepositoryAccessFactory getRepositoryAccessFactory() throws MalformedURLException {
+		if(repositoryAccessFactory == null){
+			repositoryAccessFactory = new WebServiceRepositoryAccessFactory(url, user, password, AlfrescoSharedResource.luceneFallbackEnabled);
+		}
+		return repositoryAccessFactory;
+	}
+
+
     private RepositoryAccessSession createRepositoryAccessSession() {
 		// RepositoryAccessSession ras;
 		if (ras.get() == null) {
 			logger.debug("Creating new RepositoryAccessSession for thread "
 					+ Thread.currentThread());
-			WebServiceRepositoryAccess ra = null;
+			RepositoryAccess ra = null;
 			try {
-				ra = new WebServiceRepositoryAccess(new URL(url), user,
-						password, AlfrescoSharedResource.luceneFallbackEnabled);
+				ra = getRepositoryAccessFactory().createRepositoryAccess();
 			} catch (final MalformedURLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
