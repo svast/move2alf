@@ -2,15 +2,14 @@ package eu.xenit.move2alf.web.controller.destination;
 
 import eu.xenit.move2alf.core.action.ActionClassInfoService;
 import eu.xenit.move2alf.core.action.ClassInfo;
-import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction;
-import eu.xenit.move2alf.core.action.resource.AlfrescoResourceAction$;
+import eu.xenit.move2alf.core.action.resource.AlfrescoHttpResourceAction$;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
 import eu.xenit.move2alf.core.dto.Resource;
 import eu.xenit.move2alf.core.sharedresource.SharedResourceClassInfoService;
 import eu.xenit.move2alf.core.sharedresource.SharedResourceService;
 import eu.xenit.move2alf.core.sharedresource.alfresco.AbstractAlfrescoSharedResource;
-import eu.xenit.move2alf.core.sharedresource.alfresco.AlfrescoSharedResource;
+import eu.xenit.move2alf.core.sharedresource.alfresco.AlfrescoHttpSharedResource;
 import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import eu.xenit.move2alf.web.controller.AbstractController;
@@ -29,17 +28,15 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.validation.Valid;
 
 /**
- * User: Thijs Lemmens (tlemmens@xenit.eu)
- * Date: 7/2/13
- * Time: 2:38 PM
+ * Created by Stan on 12-Jan-16.
  */
 @Controller
 @ClassInfo(classId = AlfrescoDestinationTypeController.CLASS_ID,
-            category = ResourceTypeClassInfoService.CATEGORY_DESTINATION,
-            description = "Alfresco destination type")
-public class AlfrescoDestinationTypeController extends AbstractController implements DestinationTypeController {
+        category = ResourceTypeClassInfoService.CATEGORY_DESTINATION,
+        description = "AlfrescoHttp destination type")
+public class AlfrescoHttpDestinationTypeController extends AbstractController implements DestinationTypeController {
 
-    public static final String CLASS_ID = "Alfresco";
+    public static final String CLASS_ID = "AlfrescoHttp";
 
     @Autowired
     protected DestinationService destinationService;
@@ -53,12 +50,13 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
     @Autowired
     protected SharedResourceService sharedResourceService;
 
-    public AlfrescoDestinationTypeController() {
+    public AlfrescoHttpDestinationTypeController() {
         //ioc
     }
 
-    public String getName(){
-        return "Alfresco";
+    @Override
+    public String getName() {
+        return "AlfrescoHttp";
     }
 
     @Override
@@ -66,7 +64,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         DestinationInfo info = new DestinationInfo();
         info.setName(resource.getName());
         ConfiguredAction first = resource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
+        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         if(configuredSharedResource==null)
             return null;
@@ -84,7 +82,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         destinationConfig.setName(resource.getName());
 
         ConfiguredAction first = resource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
+        int sourceSink = Integer.parseInt(first.getParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE()));
         ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         if(configuredSharedResource==null)
             return null;
@@ -96,11 +94,11 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return destinationConfig;
     }
 
-    @RequestMapping(value = "/destinations/Alfresco/create", method = RequestMethod.POST)
+    @RequestMapping(value = "/destinations/AlfrescoHttp/create", method = RequestMethod.POST)
     public ModelAndView createDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel destination, BindingResult errors){
 
         if(errors.hasErrors()){
-            ModelAndView mav = new ModelAndView("destinationtypes/alfresco/create");
+            ModelAndView mav = new ModelAndView("destinationtypes/alfrescoHttp/create");
             mav.addObject("destination", destination);
 
             mav.addObject("role", getRole());
@@ -114,7 +112,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return new ModelAndView("redirect:/destinations");
     }
 
-    @RequestMapping(value = "/destinations/Alfresco/create", method = RequestMethod.GET)
+    @RequestMapping(value = "/destinations/AlfrescoHttp/create", method = RequestMethod.GET)
     public ModelAndView createDestination(){
         ModelAndView mav = getModelAndView();
 
@@ -129,7 +127,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         ConfiguredSharedResource alfrescoResource;
         if(update){
             action =  resource.getFirstConfiguredAction();
-            int alfrescoResourceId = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
+            int alfrescoResourceId = Integer.parseInt(action.getParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE()));
             alfrescoResource = sharedResourceService.getConfiguredSharedResource(alfrescoResourceId);
             if(alfrescoResource==null)
                 return null;
@@ -138,13 +136,13 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
             alfrescoResource = new ConfiguredSharedResource();
         }
         action.setActionId(destination.getName()+"_action");
-        action.setClassId(actionClassInfoService.getClassId(AlfrescoResourceAction.class));
+        action.setClassId(actionClassInfoService.getClassId(AlfrescoHttpSharedResource.class));
         action.setNmbOfWorkers(destination.getNbrThreads());
         action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);
 
 
 
-        alfrescoResource.setClassId(sharedResourceClassInfoService.getClassId(AlfrescoSharedResource.class));
+        alfrescoResource.setClassId(sharedResourceClassInfoService.getClassId(AlfrescoHttpSharedResource.class));
         alfrescoResource.setName(destination.getName());
         alfrescoResource.setParameter(AbstractAlfrescoSharedResource.PARAM_URL, destination.getDestinationURL());
         alfrescoResource.setParameter(AbstractAlfrescoSharedResource.PARAM_USER, destination.getAlfUser());
@@ -156,7 +154,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
             sharedResourceService.saveConfiguredSharedResource(alfrescoResource);
         }
 
-        action.setParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE(), Integer.toString(alfrescoResource.getId()));
+        action.setParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE(), Integer.toString(alfrescoResource.getId()));
 
         resource.setName(destination.getName());
         resource.setClassId(CLASS_ID);
@@ -164,7 +162,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return resource;
     }
 
-    @RequestMapping(value = "/destinations/Alfresco/{id}/edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/destinations/AlfrescoHttp/{id}/edit", method = RequestMethod.POST)
     public ModelAndView editDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel alfrescoDestinationModel, BindingResult errors, @PathVariable int id){
         Resource resource = populateResource(alfrescoDestinationModel, destinationService.getDestination(id), true);
         destinationService.updateDestination(resource);
@@ -181,7 +179,7 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return mav;
     }
 
-    @RequestMapping(value = "/destinations/Alfresco/{id}/edit", method = RequestMethod.GET)
+    @RequestMapping(value = "/destinations/AlfrescoHttp/{id}/edit", method = RequestMethod.GET)
     public ModelAndView editDestination(@PathVariable int id){
         ModelAndView mav = getModelAndView();
         Resource resource = destinationService.getDestination(id);
@@ -193,17 +191,19 @@ public class AlfrescoDestinationTypeController extends AbstractController implem
         return mav;
     }
 
-    @RequestMapping(value = "/destination/Alfresco/{id}/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "/destination/AlfrescoHttp/{id}/delete", method = RequestMethod.GET)
     public ModelAndView deleteDestination(@PathVariable int id){
         ModelAndView mav = new ModelAndView();
         final Resource destinationResource = destinationService.getDestination(id);
         destinationService.deleteDestination(destinationResource);
 
         ConfiguredAction action = destinationResource.getFirstConfiguredAction();
-        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoResourceAction$.MODULE$.PARAM_ALFRESCOSHAREDRESOURCE()));
+        int sourceSink = Integer.parseInt(action.getParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE()));
         final ConfiguredSharedResource configuredSharedResource = sharedResourceService.getConfiguredSharedResource(sourceSink);
         sharedResourceService.deleteConfiguredSharedResource(configuredSharedResource);
         mav.setViewName("redirect:/destinations");
         return mav;
     }
+
+
 }

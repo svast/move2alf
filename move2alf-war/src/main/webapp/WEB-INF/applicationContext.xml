@@ -128,4 +128,8 @@
         <constructor-arg value="Move2Alf"/>
     </bean>
 
+	<context:component-scan base-package="eu.xenit.service" />
+	<context:component-scan base-package="eu.xenit.json" />
+	<context:component-scan base-package="eu.xenit.move2alf.services" />
+
 </beans>

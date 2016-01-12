@@ -372,11 +372,11 @@
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>commons-httpclient</groupId>-->
+			<!--<artifactId>commons-httpclient</artifactId>-->
+			<!--<version>3.1</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>com.typesafe.atmos</groupId>
 			<artifactId>trace-akka-2.1.4</artifactId>
@@ -386,6 +386,27 @@
 			<groupId>com.caringo.client</groupId>
 			<artifactId>CAStorSDK</artifactId>
 			<version>6.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+				<!--<exclusion>-->
+					<!--<groupId>org.apache.httpcomponents</groupId>-->
+					<!--<artifactId>httpclient-cache</artifactId>-->
+				<!--</exclusion>-->
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpcore</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.xenit</groupId>
+			<artifactId>move2alf-client-lib</artifactId>
+			<version>1.0</version>
+			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>

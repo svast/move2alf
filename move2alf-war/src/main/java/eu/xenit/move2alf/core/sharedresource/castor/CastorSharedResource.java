@@ -3,7 +3,7 @@ package eu.xenit.move2alf.core.sharedresource.castor;
 import com.caringo.client.*;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.sharedresource.SharedResource;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

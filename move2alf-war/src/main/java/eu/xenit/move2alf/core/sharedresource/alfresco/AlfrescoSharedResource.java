@@ -1,11 +1,8 @@
 package eu.xenit.move2alf.core.sharedresource.alfresco;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.core.ConfigurableObject;
-import eu.xenit.move2alf.core.sharedresource.SharedResource;
 import eu.xenit.move2alf.repository.*;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
-import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccess;
 import eu.xenit.move2alf.repository.alfresco.ws.WebServiceRepositoryAccessFactory;
 import org.alfresco.webservice.util.WebServiceException;
 import org.slf4j.Logger;
@@ -13,21 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
-import java.util.Map;
 
-public class AlfrescoSharedResource extends SharedResource {
-	
-	public static final String PARAM_URL = "url";
-	public static final String PARAM_PASSWORD = "password";
-	public static final String PARAM_USER = "user";
+public class AlfrescoSharedResource extends AbstractAlfrescoSharedResource {
 
-    @Value(value = "#{'${repo.overwrite.optimistic}'}")
+	@Value(value = "#{'${repo.overwrite.optimistic}'}")
     private boolean overwriteOptimistic;
 
     @Value(value = "#{'${repo.create.optimistic}'}")
@@ -58,7 +46,8 @@ public class AlfrescoSharedResource extends SharedResource {
 
 	public static final String PUT_CONTENT_401_MESSAGE = "Content could not be uploaded because invalid credentials have been supplied.";
 
-    public String putContent(File file, String mimeType){
+    @Override
+	public String putContent(File file, String mimeType){
 		try {
 			return createRepositoryAccessSession().putContent(file, mimeType);
 		} catch (RuntimeException e){
@@ -73,6 +62,7 @@ public class AlfrescoSharedResource extends SharedResource {
 
     }
 
+	@Override
 	public List<UploadResult> sendBatch(
 			final WriteOption docExistsMode, final List<Document> documents) {
 		List<UploadResult> results;
@@ -151,6 +141,7 @@ public class AlfrescoSharedResource extends SharedResource {
 		return uploadBatch(docExistsMode, ras, documents);
 	}
 
+	@Override
 	public void setACL(final ACL acl) {
 		if (acl != null && acl.acls != null) {
 			final RepositoryAccessSession ras = createRepositoryAccessSession();
@@ -184,6 +175,7 @@ public class AlfrescoSharedResource extends SharedResource {
 		}
 	}
 
+	@Override
 	public boolean exists(final String remotePath, final String name) {
 		
 		return new RepositoryOperation<Boolean>() {
@@ -196,6 +188,7 @@ public class AlfrescoSharedResource extends SharedResource {
 
 	}
 
+	@Override
 	public void delete(final String remotePath, final String name, final DeleteOption option) {
 		new RepositoryOperation<Object>() { 
 
@@ -213,6 +206,7 @@ public class AlfrescoSharedResource extends SharedResource {
 		}.execute();
 	}
 	
+	@Override
 	public boolean fileNameExists(final String name) {
 		return new RepositoryOperation<Boolean>(){
 
@@ -233,26 +227,6 @@ public class AlfrescoSharedResource extends SharedResource {
 			logger.warn("Tried to clear caches of inexistent RepositoryAccessSession");
 		}
 	}
-
-    private String user;
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    private String password;
-    private String url;
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setUrl(String url) {
-        if (url.endsWith("/")) {
-            this.url = url;
-        } else {
-            this.url = url + "/";
-        }
-    }
 
 	private RepositoryAccessFactory getRepositoryAccessFactory() throws MalformedURLException {
 		if(repositoryAccessFactory == null){
@@ -287,19 +261,18 @@ public class AlfrescoSharedResource extends SharedResource {
         ras.remove();
 	}
 
-	public String getCategory() {
-		return ConfigurableObject.CAT_DESTINATION;
-	}
-
+	@Override
 	public String getDescription() {
 		return "Alfresco using SOAP web services";
 	}
 
+	@Override
 	public String getName() {
 		return "Alfresco";
 	}
 
-    public boolean validate() {
+    @Override
+	public boolean validate() {
         RepositoryAccessSession ras = createRepositoryAccessSession();
         return (ras!= null);
     }
