@@ -14,6 +14,7 @@ import eu.xenit.move2alf.logic.DestinationService;
 import eu.xenit.move2alf.logic.HistoryPage;
 import eu.xenit.move2alf.logic.JobService;
 import eu.xenit.move2alf.web.controller.destination.AlfrescoDestinationTypeController;
+import eu.xenit.move2alf.web.controller.destination.AlfrescoHttpDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.CastorDestinationTypeController;
 import eu.xenit.move2alf.web.controller.destination.model.ContentStoreModel;
 import eu.xenit.move2alf.web.dto.JobModel;
@@ -128,7 +129,11 @@ public class JobController extends AbstractController{
             contentStores.add(new ContentStoreModel(resource.getName(), resource.getId()));
         }
         mav.addObject("contentStores", contentStores);
-		mav.addObject("destinations", destinationService.getDestinationsForClassId(AlfrescoDestinationTypeController.CLASS_ID));
+
+		List<Resource> destinations = destinationService.getDestinationsForClassId(AlfrescoDestinationTypeController.CLASS_ID);
+		destinations.addAll(destinationService.getDestinationsForClassId(AlfrescoHttpDestinationTypeController.CLASS_ID));
+		mav.addObject("destinations", destinations);
+
 		mav.addObject("metadataOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_METADATA));
 		mav.addObject("transformOptions", getActionClassService().getClassesForCategory(ConfigurableObject.CAT_TRANSFORM));
 		mav.addObject("role", getRole());

@@ -279,7 +279,13 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     @Override
     public ActionConfig getActionConfig(ConfiguredAction configuredAction){
         HashMap<String, ActionConfig> map = new HashMap<String, ActionConfig>();
-        M2AActionFactory factory = new M2AActionFactory(actionClassService.getClassInfoModel(configuredAction.getClassId()).getClazz(), configuredAction.getParameters(), beanFactory);
+
+        String classId = configuredAction.getClassId();
+        ClassInfoModel classInfoModel = actionClassService.getClassInfoModel(classId);
+        Class clazz = classInfoModel.getClazz();
+        Map<String, String> parameters = configuredAction.getParameters();
+
+        M2AActionFactory factory = new M2AActionFactory(clazz, parameters, beanFactory);
         ActionConfig actionConfig = new ActionConfig(configuredAction.getActionId(), factory, configuredAction.getNmbOfWorkers());
         map.put(configuredAction.getActionId(), actionConfig);
         configuredActionToActionConfig(configuredAction, map);

@@ -28,12 +28,12 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
   }
 
   private def normalizeBasePath(path: String): String = {
-    var basePath: String = if ((path == null)) "/" else path
-    if (!basePath.endsWith("/")) {
-      basePath = basePath + "/"
+    var basePath: String = if ((path == null)) "" else path
+    if (basePath.endsWith("/")) {
+      basePath = basePath.substring(0, basePath.length - 1)
     }
-    if (!basePath.startsWith("/")) {
-      basePath = "/" + basePath
+    if (basePath.startsWith("/")) {
+      basePath = basePath.substring(1, basePath.length)
     }
     return basePath
   }
@@ -93,27 +93,32 @@ class AlfrescoUpload extends ActionWithDestination[Batch, BatchReply]{
   }
 
   private def normalizeRemotePath(basePath: String, relativePathInput: String): String = {
+    if (relativePathInput.isEmpty){
+      return basePath;
+    }
+
     var relativePath: String = relativePathInput.replace("\\", "/")
     if (relativePath.startsWith("/")) {
       relativePath = relativePath.substring(1)
     }
-    var remotePath: String = basePath + relativePath
-    val components = remotePath.split("/")
-    remotePath = ""
-    for(component <- components){
-        if ("" == component) {
-          remotePath += "/"
-        }
-        else if (component.contains(":")) {
-          remotePath += component + "/"
-        }
-        else {
-          remotePath += "cm:" + component + "/"
-        }
-      }
-    if (remotePath.length > 0) {
-      remotePath = remotePath.substring(0, remotePath.length - 1)
-    }
+
+    val remotePath: String = basePath + "/" + relativePath
+//    val components = remotePath.split("/")
+//    remotePath = ""
+//    for(component <- components){
+//        if ("" == component) {
+//          remotePath += "/"
+//        }
+//        else if (component.contains(":")) {
+//          remotePath += component + "/"
+//        }
+//        else {
+//          remotePath += "cm:" + component + "/"
+//        }
+//      }
+//    if (remotePath.length > 0) {
+//      remotePath = remotePath.substring(0, remotePath.length - 1)
+//    }
     return remotePath
   }
 

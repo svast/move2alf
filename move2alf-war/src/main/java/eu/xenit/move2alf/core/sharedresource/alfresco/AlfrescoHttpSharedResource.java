@@ -1,10 +1,7 @@
 package eu.xenit.move2alf.core.sharedresource.alfresco;
 
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
-import eu.xenit.move2alf.model.Move2AlfRequest;
-import eu.xenit.move2alf.model.Move2AlfResponse;
-import eu.xenit.move2alf.model.Property;
-import eu.xenit.move2alf.model.Status;
+import eu.xenit.move2alf.model.*;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.services.AlfrescoService;
@@ -28,6 +25,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
     @Autowired
     @Qualifier("xenit.service.alfrescoservice")
     private AlfrescoService alfrescoService;
+    private boolean initiated = false;
 
     @Override
     public String getName() {
@@ -41,8 +39,17 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
 
     public AlfrescoHttpSharedResource() {
         super();
-        init();
+        //init();
 
+    }
+
+    private AlfrescoService getAlfrescoService(){
+        if (!this.initiated){
+            this.init();
+            this.initiated = true;
+        }
+
+        return this.alfrescoService;
     }
 
     private void init() {
@@ -70,7 +77,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
     public String putContent(File file, String mimeType) {
         try {
 
-            Future<String> future = this.alfrescoService.putContent(super.url + AlfrescoService.ALFRESCO_URL_PUT_CONTENT, file, mimeType, "UTF-8");
+            Future<String> future = this.getAlfrescoService().putContent(super.url + AlfrescoService.ALFRESCO_URL_PUT_CONTENT, file, mimeType, "UTF-8");
 
             return future.get();
         }
@@ -84,14 +91,18 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
         try {
             List<Move2AlfRequest> uploadData = new ArrayList<>();
             for (Document document : documents) {
-                uploadData.add(this.documentToRequest(document));
+                Move2AlfRequest request = this.documentToRequest(document);
+                request.setCreatePath(true);
+                request.setMode(Mode.WRITE);
+
+                uploadData.add(request);
             }
 
-            Future<List<Move2AlfResponse>> response = this.alfrescoService.postMetadata(super.url + AlfrescoService.ALFRESCO_URL_POST_METADATA, uploadData);
+            Future<List<Move2AlfResponse>> response = this.getAlfrescoService().postMetadata(super.url + AlfrescoService.ALFRESCO_URL_POST_METADATA, uploadData);
 
             List<UploadResult> result = new ArrayList<>();
             for(Move2AlfResponse move2AlfResponse : response.get()){
-                result.add(this.responseToUploadResult(move2AlfResponse));
+                result.add(this.responseToUploadResult(move2AlfResponse, documents));
             }
 
             return result;
@@ -105,6 +116,8 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
     private Move2AlfRequest documentToRequest(Document document){
         Move2AlfRequest request = new Move2AlfRequest();
 
+        request.setId(document.name);
+        request.setType(document.contentModelNamespace + document.contentModelType);
         request.setContentUrl(document.contentUrl);
         request.setPath(document.spacePath);
 
@@ -112,14 +125,18 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
         // cm:name
         properties.add(new Property("cm:name", document.name));
         // properties
-        for(Map.Entry<String, String> prop : document.meta.entrySet()){
-            Property property = new Property(prop.getKey(), prop.getValue());
-            properties.add(property);
+        if (document.meta != null) {
+            for (Map.Entry<String, String> prop : document.meta.entrySet()) {
+                Property property = new Property(prop.getKey(), prop.getValue());
+                properties.add(property);
+            }
         }
         // multivalue properties
-        for(Map.Entry<String, String> prop : document.multiValueMeta.entrySet()){
-            Property property = new Property(prop.getKey(), prop.getValue());
-            properties.add(property);
+        if (document.multiValueMeta != null) {
+            for (Map.Entry<String, String> prop : document.multiValueMeta.entrySet()) {
+                Property property = new Property(prop.getKey(), prop.getValue());
+                properties.add(property);
+            }
         }
 
         request.setProperties(properties);
@@ -127,7 +144,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
         return request;
     }
 
-    private UploadResult responseToUploadResult(Move2AlfResponse response){
+    private UploadResult responseToUploadResult(Move2AlfResponse response, List<Document> documents){
         UploadResult result = new UploadResult();
 
         result.setMessage(response.getMessage());
@@ -138,6 +155,13 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
         }
         else{
             result.setStatus(UploadResult.VALUE_FAILED);
+        }
+
+        for (Document document : documents) {
+            if (document.name.equals(response.getId())) {
+                result.setDocument(document);
+                break;
+            }
         }
 
         return result;
@@ -166,7 +190,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
 
     @Override
     public boolean validate() {
-        throw new UnsupportedOperationException("Method not yet implemented.");
+        return this.getAlfrescoService() != null;
     }
 
 

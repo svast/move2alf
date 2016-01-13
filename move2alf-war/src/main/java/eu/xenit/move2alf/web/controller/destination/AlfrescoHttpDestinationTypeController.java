@@ -2,6 +2,7 @@ package eu.xenit.move2alf.web.controller.destination;
 
 import eu.xenit.move2alf.core.action.ActionClassInfoService;
 import eu.xenit.move2alf.core.action.ClassInfo;
+import eu.xenit.move2alf.core.action.resource.AlfrescoHttpResourceAction;
 import eu.xenit.move2alf.core.action.resource.AlfrescoHttpResourceAction$;
 import eu.xenit.move2alf.core.dto.ConfiguredAction;
 import eu.xenit.move2alf.core.dto.ConfiguredSharedResource;
@@ -31,7 +32,7 @@ import javax.validation.Valid;
  * Created by Stan on 12-Jan-16.
  */
 @Controller
-@ClassInfo(classId = AlfrescoDestinationTypeController.CLASS_ID,
+@ClassInfo(classId = AlfrescoHttpDestinationTypeController.CLASS_ID,
         category = ResourceTypeClassInfoService.CATEGORY_DESTINATION,
         description = "AlfrescoHttp destination type")
 public class AlfrescoHttpDestinationTypeController extends AbstractController implements DestinationTypeController {
@@ -98,7 +99,7 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
     public ModelAndView createDestination(@ModelAttribute("alfrescoDestination") @Valid AlfrescoDestinationModel destination, BindingResult errors){
 
         if(errors.hasErrors()){
-            ModelAndView mav = new ModelAndView("destinationtypes/alfrescoHttp/create");
+            ModelAndView mav = new ModelAndView("destinationtypes/AlfrescoHttp/create");
             mav.addObject("destination", destination);
 
             mav.addObject("role", getRole());
@@ -118,7 +119,7 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
 
         //Default is Alfresco. If we add something else, we should change this.
         mav.addObject("destination", new AlfrescoDestinationModel());
-        mav.setViewName("destinationtypes/alfresco/create");
+        mav.setViewName("destinationtypes/AlfrescoHttp/create");
         return mav;
     }
 
@@ -136,7 +137,7 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
             alfrescoResource = new ConfiguredSharedResource();
         }
         action.setActionId(destination.getName()+"_action");
-        action.setClassId(actionClassInfoService.getClassId(AlfrescoHttpSharedResource.class));
+        action.setClassId(actionClassInfoService.getClassId(AlfrescoHttpResourceAction.class));
         action.setNmbOfWorkers(destination.getNbrThreads());
         action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);
 
@@ -187,7 +188,7 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
 
         mav.addObject("destination", destinationConfig);
         mav.addObject("destinationId", id);
-        mav.setViewName("destinationtypes/alfresco/edit");
+        mav.setViewName("destinationtypes/AlfrescoHttp/edit");
         return mav;
     }
 

@@ -15,7 +15,7 @@ class AlfrescoHttpResourceAction extends ResourceAction[AnyRef]{
   private var sharedResourceService: SharedResourceService = _
 
 
-  def setAlfrescoSharedResource(id: String){
+  def setAlfrescoHttpSharedResource(id: String){
     alfrescoSourceSink = sharedResourceService.getSharedResource(Integer.parseInt(id)).asInstanceOf[AlfrescoHttpSharedResource]
   }
 

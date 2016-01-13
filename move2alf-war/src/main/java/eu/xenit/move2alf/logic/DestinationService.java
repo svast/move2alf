@@ -72,7 +72,7 @@ public class DestinationService extends AbstractHibernateService{
 
     }
 
-    public List<Resource> getDestinations(){
+    public List<Resource>   getDestinations(){
         return sessionFactory.getCurrentSession().createQuery("from Resource").list();
     }
 
