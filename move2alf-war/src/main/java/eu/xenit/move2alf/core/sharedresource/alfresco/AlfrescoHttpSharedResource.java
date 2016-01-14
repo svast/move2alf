@@ -101,8 +101,11 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
             Future<List<Move2AlfResponse>> response = this.getAlfrescoService().postMetadata(super.url + AlfrescoService.ALFRESCO_URL_POST_METADATA, uploadData);
 
             List<UploadResult> result = new ArrayList<>();
-            for(Move2AlfResponse move2AlfResponse : response.get()){
-                result.add(this.responseToUploadResult(move2AlfResponse, documents));
+            List<Move2AlfResponse> get = response.get();
+            for (int i = 0; i < get.size(); i++) {
+                Move2AlfResponse move2AlfResponse = get.get(i);
+                Document document = documents.get(i);
+                result.add(this.responseToUploadResult(move2AlfResponse, document));
             }
 
             return result;
@@ -144,7 +147,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
         return request;
     }
 
-    private UploadResult responseToUploadResult(Move2AlfResponse response, List<Document> documents){
+    private UploadResult responseToUploadResult(Move2AlfResponse response, Document document){
         UploadResult result = new UploadResult();
 
         result.setMessage(response.getMessage());
@@ -157,12 +160,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
             result.setStatus(UploadResult.VALUE_FAILED);
         }
 
-        for (Document document : documents) {
-            if (document.name.equals(response.getId())) {
-                result.setDocument(document);
-                break;
-            }
-        }
+        result.setDocument(document);
 
         return result;
     }
