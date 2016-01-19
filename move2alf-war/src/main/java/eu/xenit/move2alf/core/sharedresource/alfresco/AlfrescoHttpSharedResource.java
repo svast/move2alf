@@ -5,27 +5,35 @@ import eu.xenit.move2alf.model.*;
 import eu.xenit.move2alf.repository.UploadResult;
 import eu.xenit.move2alf.repository.alfresco.ws.Document;
 import eu.xenit.move2alf.services.AlfrescoService;
+import eu.xenit.move2alf.services.AlfrescoServiceImpl;
 import eu.xenit.move2alf.services.http.CredentialData;
+import eu.xenit.service.JsonService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.net.URISyntaxException;
+import java.util.*;
 import java.util.concurrent.Future;
 
 /**
  * Created by Stan on 08-Jan-16.
  */
 public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
+    private final Logger logger = LoggerFactory.getLogger(AlfrescoHttpSharedResource.class);
 
     @Autowired
-    @Qualifier("xenit.service.alfrescoservice")
+    @Qualifier("xenit.service.jsonservice")
+    private JsonService jsonService;
+
+//    @Autowired
+//    @Qualifier("xenit.service.alfrescoservice")
     private AlfrescoService alfrescoService;
-    private boolean initiated = false;
+
 
     @Override
     public String getName() {
@@ -39,38 +47,29 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
 
     public AlfrescoHttpSharedResource() {
         super();
-        //init();
 
     }
 
     private AlfrescoService getAlfrescoService(){
-        if (!this.initiated){
-            this.init();
-            this.initiated = true;
+        if (this.alfrescoService == null){
+            try {
+                URI uri = new URI(url);
+                CredentialData credentialData = new CredentialData(uri.getHost(), uri.getPort(), super.user, super.password);
+
+                this.alfrescoService = new AlfrescoServiceImpl(this.jsonService, Collections.singletonList(credentialData));
+            }
+            catch (URISyntaxException e){
+                logger.error(e.getMessage(), e);
+                // error in forming uri
+            }
+            catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                //e.printStackTrace();
+                // error in creating alfresco service
+            }
         }
 
         return this.alfrescoService;
-    }
-
-    private void init() {
-        String url = super.url;
-        CredentialData credentialData;
-
-        try{
-            URI uri = new URI(url);
-            credentialData = new CredentialData(uri.getHost(), uri.getPort(), super.user, super.password);
-        }
-        catch (Exception e){
-            credentialData = null;
-        }
-
-        try {
-            this.alfrescoService.init(Arrays.asList(credentialData));
-        }
-        catch (Exception e){
-            throw new Move2AlfException(e.getMessage(), e);
-        }
-
     }
 
     @Override
@@ -94,6 +93,10 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
                 Move2AlfRequest request = this.documentToRequest(document);
                 request.setCreatePath(true);
                 request.setMode(Mode.WRITE);
+                if (docExistsMode.equals(WriteOption.OVERWRITE)) {
+
+                    request.setOverWrite(Boolean.TRUE);
+                }
 
                 uploadData.add(request);
             }
