@@ -370,7 +370,7 @@ public class JobController extends AbstractController{
 	public ModelAndView deleteJob(@PathVariable int id) {
 		ModelAndView mav = new ModelAndView();
 		getJobService().deleteJob(id);
-		mav.setViewName("redirect:.");
+		mav.setViewName("redirect:/job/dashboard");
 		return mav;
 	}
 
