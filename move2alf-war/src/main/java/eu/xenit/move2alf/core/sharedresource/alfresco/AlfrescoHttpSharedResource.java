@@ -191,7 +191,16 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
 
     @Override
     public boolean validate() {
-        return this.getAlfrescoService() != null;
+        // fetch single ticket to see if alfresco is up and running
+        try{
+            Future<String> ticket = this.getAlfrescoService().postTicket(super.url);
+            return ticket != null && !ticket.get().isEmpty();
+        }
+        catch (Exception e){
+            logger.error("Unable to validate.", e);
+            return false;
+        }
+
     }
 
 
