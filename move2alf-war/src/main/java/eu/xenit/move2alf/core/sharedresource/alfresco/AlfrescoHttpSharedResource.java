@@ -193,7 +193,7 @@ public class AlfrescoHttpSharedResource extends AbstractAlfrescoSharedResource {
     public boolean validate() {
         // fetch single ticket to see if alfresco is up and running
         try{
-            Future<String> ticket = this.getAlfrescoService().postTicket(super.url);
+            Future<String> ticket = this.getAlfrescoService().postTicket(super.url + AlfrescoService.ALFRESCO_URL_GET_TICKET);
             return ticket != null && !ticket.get().isEmpty();
         }
         catch (Exception e){
