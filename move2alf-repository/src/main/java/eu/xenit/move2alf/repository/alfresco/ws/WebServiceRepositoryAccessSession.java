@@ -1362,6 +1362,8 @@ public class WebServiceRepositoryAccessSession implements RepositoryAccessSessio
 		return value;
 	}
 
+
+
 	@Override
 	public boolean doesFileNameExists(String name) throws RepositoryAccessException, RepositoryException {
 		try {

@@ -54,7 +54,7 @@ public class CMLDocument {
 
 	public CMLCreate toCMLCreate() throws RepositoryAccessException, RepositoryException {
 		logger.debug("Converting doc to CMLCreate: {}", doc.name);
-		Reference parentSpace = session.createSpaceIfNotExists(doc.spacePath);
+		Reference parentSpace = session.createSpaceIfNotExists(getQnamePath());
 		ParentReference parentRef = new ParentReference(WebServiceRepositoryAccessSession.store,
 				parentSpace.getUuid(), null, Constants.ASSOC_CONTAINS, null);
 		parentRef.setChildName("{http://www.alfresco.org/model/content/1.0}"
@@ -104,12 +104,33 @@ public class CMLDocument {
 	}
 
 	public String getXpath() {
-		return WebServiceRepositoryAccessSession.companyHomePath + session.getXPathEscape(doc.spacePath + "/cm:" + doc.name);
+		return WebServiceRepositoryAccessSession.companyHomePath + session.getXPathEscape(getQnamePath() + "/cm:" + doc.name);
+	}
+
+	private String getQnamePath(){
+		String[] components = getSpacePath().split("/");
+		String qnamePath = "/";
+		for(String component: components){
+			if ("" == component) {
+				qnamePath += "/";
+			}
+			else if (component.contains(":")) {
+				qnamePath += component + "/";
+			}
+			else {
+				qnamePath += "cm:" + component + "/";
+			}
+		}
+		if (qnamePath.length() > 0) {
+			qnamePath = qnamePath.substring(0, qnamePath.length() - 1);
+		}
+
+		return qnamePath;
 	}
 
 	public String getPath() {
 		return WebServiceRepositoryAccessSession.companyHomePath +
-				doc.spacePath +
+				getQnamePath() +
 				"/cm:" + doc.name;
 	}
 
