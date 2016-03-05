@@ -426,16 +426,28 @@ public class JobServiceImpl extends AbstractHibernateService implements
 		final Map<Integer, HistoryInfo> integerHistoryInfoMap = new HashMap<Integer, HistoryInfo>();
 		final Session s = getSessionFactory().getCurrentSession();
 
-		final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
-		final Query query = s.createQuery(hql);
-		query.setParameter("jobId", jobId);
-		query.setFirstResult(page*pageSize);
-		query.setMaxResults(pageSize);
+        final String hql = "select id from Cycle as cycle where cycle.job.id=:jobId ORDER BY cycle.startDateTime DESC";
+        final Query query = s.createQuery(hql);
+        query.setParameter("jobId", jobId);
+        query.setFirstResult(page*pageSize);
+        query.setMaxResults(pageSize);
+        @SuppressWarnings("unchecked")
+        final List<Integer> cycles = query.list();
+        StringBuilder cycleString = new StringBuilder("(");
+        for (final Integer cycle : cycles) {
+            cycleString.append(cycle + ",");
+        }
+        cycleString.setCharAt(cycleString.length()-1,')');
 
-		@SuppressWarnings("unchecked")
-		final List<Object[]> history = query.list();
+		//final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
+        StringBuilder hql1 = new StringBuilder("select cycle.id,COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status from Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument where cycle.id in ");
+        hql1.append(cycleString);
+        hql1.append(" GROUP BY processedDocument.status, cycle.id");
+        final Query query1 = s.createQuery(hql1.toString());
 
-		for (final Object[] cycle : history) {
+        final List<Object[]> history = query1.list();
+
+        for (final Object[] cycle : history) {
 			Integer cycleId = (Integer) cycle[0];
 			HistoryInfo info = null;
 			if(integerHistoryInfoMap.containsKey(cycleId)){

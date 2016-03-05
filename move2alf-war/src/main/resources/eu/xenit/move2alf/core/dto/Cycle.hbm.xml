@@ -8,7 +8,7 @@
 		<id name="id">
 			<generator class="identity" />
 		</id>
-		<property name="startDateTime" />
+		<property name="startDateTime" index="idx_startDateTime" />
 		<property name="endDateTime" />
 		
 		<many-to-one name="job" column="jobId" lazy="false"/>
