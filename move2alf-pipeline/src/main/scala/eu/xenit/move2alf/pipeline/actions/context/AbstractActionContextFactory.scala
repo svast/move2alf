@@ -5,6 +5,7 @@ import eu.xenit.move2alf.common.LogHelper
 import akka.actor.ActorContext
 
 /**
+ * Takes care of instantiating an Action and injecting dependencies given the implemented interfaces of the Action
  * User: Thijs Lemmens
  * Date: 5/2/13
  * Time: 3:36 PM

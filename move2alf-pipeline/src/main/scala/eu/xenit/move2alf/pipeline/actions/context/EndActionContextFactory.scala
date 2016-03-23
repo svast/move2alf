@@ -5,7 +5,7 @@ import eu.xenit.move2alf.pipeline.state.JobContext
 import eu.xenit.move2alf.pipeline.actions.{Action, ActionFactory}
 
 /**
-  * Created with IntelliJ IDEA.
+  * End action refers back to the job actor
   * User: thijs
   * Date: 4/30/13
   * Time: 10:39 AM

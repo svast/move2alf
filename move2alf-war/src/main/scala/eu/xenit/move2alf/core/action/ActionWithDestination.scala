@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import scala.collection.mutable
 
 /**
+ * Proxy to send message from a normal move2alf job context to a destination job context
+ * Use both for alfresco and castor indifferently
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 6/19/13
  * Time: 3:33 PM

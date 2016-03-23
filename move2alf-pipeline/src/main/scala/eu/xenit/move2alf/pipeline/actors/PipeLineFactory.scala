@@ -8,7 +8,7 @@ import eu.xenit.move2alf.pipeline.state.JobContext
 import eu.xenit.move2alf.pipeline.actions.context.{EndActionContextFactory, BasicActionContextFactory}
 
 /**
- * Created with IntelliJ IDEA.
+ * Builds the ActionConfig graph
  * User: thijs
  * Date: 4/30/13
  * Time: 1:45 PM

@@ -13,6 +13,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.List;
 
+/**
+ * This is the main endpoint for communication to alfresco
+ * See AlfrescoResourceAction
+ */
 public class AlfrescoSharedResource extends AbstractAlfrescoSharedResource {
 
 	@Value(value = "#{'${repo.overwrite.optimistic}'}")

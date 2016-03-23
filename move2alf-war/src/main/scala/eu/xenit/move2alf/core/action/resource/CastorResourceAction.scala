@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import eu.xenit.move2alf.core.sharedresource.SharedResourceService
 
 /**
+ * Actor forwarding move2alf messages destined to Castor
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 9/10/13
  * Time: 3:16 PM

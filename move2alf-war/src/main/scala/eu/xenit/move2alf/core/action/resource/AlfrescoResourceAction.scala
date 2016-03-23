@@ -6,6 +6,8 @@ import eu.xenit.move2alf.core.sharedresource.SharedResourceService
 import eu.xenit.move2alf.core.sharedresource.alfresco.AlfrescoSharedResource
 
 /**
+ * Action forwarding move2alf messages destined to alfresco
+ * This action runs in the destination job, not in the actual move2alf job
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 7/1/13
  * Time: 1:40 PM

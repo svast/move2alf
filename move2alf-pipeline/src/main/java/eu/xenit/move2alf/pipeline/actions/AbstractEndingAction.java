@@ -1,7 +1,7 @@
 package eu.xenit.move2alf.pipeline.actions;
 
 /**
- * Created with IntelliJ IDEA.
+ * Helper base class
  * User: thijs
  * Date: 5/6/13
  * Time: 4:50 PM

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * Batches database reports before sending to database
  * User: thijs
  * Date: 5/27/13
  * Time: 5:18 PM

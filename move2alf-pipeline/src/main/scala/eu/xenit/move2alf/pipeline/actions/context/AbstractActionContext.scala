@@ -13,13 +13,15 @@ import akka.routing.Broadcast
 
 
 /**
- * User: thijs
+ * An AbstractActionContext is an instantiation of an Action of an ActionConfig.
+ * This class can be seen as the implementation of an Action
+ * Implementation of abstract class is done in the factory
  * Date: 3/5/13
  * Time: 2:54 PM
  */
 abstract class AbstractActionContext(val id: String, protected val receivers: Set[String], getActorRef: String => ActorRef)(implicit protected val jobContext: JobContext, implicit val context: ActorContext) extends LogHelper {
 
-  val action: Any
+  val action: Any //=> this is an Action?
 
   private var taskKey: Option[String] = None
   private var replyTo: Option[ActorRef] = None
@@ -99,6 +101,9 @@ abstract class AbstractActionContext(val id: String, protected val receivers: Se
   //only used to track if a message has been sent
   var messageSent = false
 
+  /**
+    * This sends move2alf message to the receivers defined in the ActionConfig for this action
+    */
   final def sendMessage(message: AnyRef, receiver: String = "default"){
     if  (receivers.contains(receiver)){
       taskKey match {

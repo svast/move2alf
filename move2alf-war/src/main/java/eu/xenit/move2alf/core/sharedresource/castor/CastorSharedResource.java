@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * See CastorResourceAction
  * User: Thijs Lemmens (tlemmens@xenit.eu)
  * Date: 9/10/13
  * Time: 2:09 PM

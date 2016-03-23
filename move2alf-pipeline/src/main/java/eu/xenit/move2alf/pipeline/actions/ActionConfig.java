@@ -3,7 +3,10 @@ package eu.xenit.move2alf.pipeline.actions;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
+ * Defines a config for creating a number of identical actions, instantiated using factory
+ * Actions can send (move2alf) message to other actions, defined using actionconfig's in receivers
+ * All message sending between actions in move2alf is done on these receiver keys.
+ * An actionconfig is a node is the move2alf message graph. Each node can only communicate to its receivers
  * User: thijs
  * Date: 4/29/13
  * Time: 3:44 PM
@@ -37,6 +40,11 @@ public class ActionConfig {
 
     private Map<String, ActionConfig> receivers = new TreeMap<String, ActionConfig>();
 
+    /**
+     *
+     * @param key defines a name used as target to send messages
+     * @param value
+     */
     public void addReceiver(String key, ActionConfig value){
         if(receivers.containsKey(key)){
             throw new IllegalArgumentException("This config already has a receiver with key: "+key);

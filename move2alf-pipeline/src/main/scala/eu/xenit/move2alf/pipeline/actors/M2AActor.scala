@@ -29,7 +29,7 @@ case class AliveData(nmbOfEOC: Int, nmbOfReadyToDie: Int, counter: Int, negotiat
 
 
 /**
- * Created with IntelliJ IDEA.
+ * A M2AActor is responsible for executing a single Action from the move2alf pipeline
  * User: thijs
  * Date: 2/28/13
  * Time: 10:05 AM

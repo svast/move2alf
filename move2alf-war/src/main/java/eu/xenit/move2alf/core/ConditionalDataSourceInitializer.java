@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Bootstrapper for the move2alf database
+ */
 public class ConditionalDataSourceInitializer implements InitializingBean {
 	
 	private boolean enabled = false;
@@ -35,7 +38,7 @@ public class ConditionalDataSourceInitializer implements InitializingBean {
         Session session = txManager.getSessionFactory().openSession();
         session.beginTransaction();
         List<UserPswd> users = session.createQuery("from UserPswd").list();
-        if(users.size() == 0){
+        if(users.size() == 0){ // Test for first load of database
             UserPswd admin = new UserPswd();
             admin.setUserName("admin");
             admin.setPassword("21232f297a57a5a743894a0e4a801fc3");
