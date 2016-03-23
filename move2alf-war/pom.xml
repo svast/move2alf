@@ -14,6 +14,9 @@
 	</parent>
 	<properties>
 		<spring.version>4.0.3.RELEASE</spring.version>
+		<hibernate.version>3.6.0.CR2</hibernate.version>
+		<!--<hibernate.version>5.0.3.Final</hibernate.version>-->
+		
 	</properties>
 	<repositories>
 		<repository>
@@ -103,7 +106,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>3.6.0.CR2</version>
+			<version>${hibernate.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 			<exclusions>
@@ -147,7 +150,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
-			<version>3.6.0.CR2</version>
+			<version>${hibernate.version}</version>
 			<type>jar</type>
 			<scope>runtime</scope>
 		</dependency>
