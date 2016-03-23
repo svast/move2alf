@@ -32,9 +32,9 @@ import java.util.*;
 
 @Service("jobService")
 public class JobServiceImpl extends AbstractHibernateService implements
-		JobService {
-	private static final Logger logger = LoggerFactory
-			.getLogger(JobServiceImpl.class);
+        JobService {
+    private static final Logger logger = LoggerFactory
+            .getLogger(JobServiceImpl.class);
 
     @Override
     public void stopJob(int jobId) {
@@ -52,74 +52,74 @@ public class JobServiceImpl extends AbstractHibernateService implements
     }
 
     private int getJobIdByName(String name) {
-       return getJobByName(name).getId();
+        return getJobByName(name).getId();
     }
 
     @Autowired
     private PipelineAssembler pipelineAssembler;
 
-	private UserService userService;
+    private UserService userService;
 
     @Autowired
     private DestinationService destinationService;
 
-	private Scheduler scheduler;
+    private Scheduler scheduler;
 
-	private MailSender mailSender;
+    private MailSender mailSender;
 
     @Autowired
     private ActorSystem actorSystem;
 
     private Map<Integer, JobHandle> jobMap = new HashMap<Integer, JobHandle>();
 
-	@Autowired
-	public void setUserService(final UserService userService) {
-		this.userService = userService;
-	}
+    @Autowired
+    public void setUserService(final UserService userService) {
+        this.userService = userService;
+    }
 
-	public UserService getUserService() {
-		return userService;
-	}
+    public UserService getUserService() {
+        return userService;
+    }
 
-	@Autowired
-	public void setScheduler(final Scheduler scheduler) {
-		this.scheduler = scheduler;
-	}
+    @Autowired
+    public void setScheduler(final Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
-	public Scheduler getScheduler() {
-		return scheduler;
-	}
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
 
-	@Autowired
-	public void setMailSender(final MailSender mailSender) {
-		this.mailSender = mailSender;
-	}
+    @Autowired
+    public void setMailSender(final MailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
-	public MailSender getMailSender() {
-		return mailSender;
-	}
+    public MailSender getMailSender() {
+        return mailSender;
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Job> getAllJobs() {
-		return getSessionFactory().getCurrentSession().createQuery("from Job")
-				.list();
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Job> getAllJobs() {
+        return getSessionFactory().getCurrentSession().createQuery("from Job")
+                .list();
+    }
 
-	@Override
-	// @Transactional(propagation=Propagation.REQUIRES_NEW)
-	public Job createJob(JobModel jobModel) {
+    @Override
+    // @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public Job createJob(JobModel jobModel) {
 
-		final Job job = new Job();
+        final Job job = new Job();
         populateJobFields(jobModel, job);
 
-        ConfiguredAction configuredAction =  pipelineAssembler.getConfiguredAction(jobModel);
+        ConfiguredAction configuredAction = pipelineAssembler.getConfiguredAction(jobModel);
         job.setFirstConfiguredAction(configuredAction);
 
         getSessionFactory().getCurrentSession().save(job);
 
-		return job;
-	}
+        return job;
+    }
 
     private void populateJobFields(JobModel jobModel, Job job) {
         final Date now = new Date();
@@ -135,8 +135,8 @@ public class JobServiceImpl extends AbstractHibernateService implements
     }
 
     @Override
-	public Job editJob(JobModel jobModel) {
-		final Job job = getJob(jobModel.getId());
+    public Job editJob(JobModel jobModel) {
+        final Job job = getJob(jobModel.getId());
 
         populateJobFields(jobModel, job);
 
@@ -144,293 +144,318 @@ public class JobServiceImpl extends AbstractHibernateService implements
         job.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(jobModel));
         getSessionFactory().getCurrentSession().save(job);
         getSessionFactory().getCurrentSession().delete(oldConfiguredAction);
-        if(jobMap.containsKey(jobModel.getId())){
+        if (jobMap.containsKey(jobModel.getId())) {
             jobMap.get(jobModel.getId()).destroy();
             jobMap.remove(jobModel.getId());
         }
-		return job;
-	}
+        return job;
+    }
 
-	@Override
-	public void deleteJob(final int id) {
-		final Job job = getJob(id);
-        if(jobMap.get(id) != null){
+    @Override
+    public void deleteJob(final int id) {
+        final Job job = getJob(id);
+        if (jobMap.get(id) != null) {
             jobMap.get(id).destroy();
             jobMap.remove(id);
         }
-		sessionFactory.getCurrentSession().delete(job);
-		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().flush();
-		getScheduler().reloadSchedules();
-	}
+        sessionFactory.getCurrentSession().delete(job);
+        logger.debug("Reloading scheduler");
+        getSessionFactory().getCurrentSession().flush();
+        getScheduler().reloadSchedules();
+    }
 
-	@Override
-	public Job getJob(final int id) {
-		@SuppressWarnings("unchecked")
-		final List<Job> jobs = sessionFactory.getCurrentSession()
-				.createQuery("from Job as j where j.id=?").setLong(0, id)
-				.list();
-		if (jobs.size() == 1) {
-			return jobs.get(0);
-		} else {
-			throw new Move2AlfException("Job with id " + id + " not found.");
-		}
-	}
+    @Override
+    public Job getJob(final int id) {
+        Job ret = getRawJob(id);
+		ret.setFirstConfiguredAction(null); // DO NOT USE THIS FROM THE DB ANYMORE!
 
-	@Override
-	public boolean checkJobExists(final String jobName) {
-		@SuppressWarnings("unchecked")
-		final List<Job> jobs = sessionFactory.getCurrentSession()
-				.createQuery("from Job as j where j.name=?")
-				.setString(0, jobName).list();
-		return (jobs.size() > 0);
-	}
+        // MH: Don't use the db contents of the Action framework directly!
+        // Instead, read them out into a jobmodel and build a new action graph for it!
+        // This ensure that move2alf always uses the move2alf code as a base to run jobs
+        //   instead old code stored in the database
+        JobModel model = pipelineAssembler.getJobConfigForJob(id);
 
-	@Override
-	public Cycle getCycle(final int cycleId) {
-		@SuppressWarnings("unchecked")
-		final List<Cycle> cycles = getSessionFactory().getCurrentSession()
-				.createQuery("from Cycle as c where c.id=?")
-				.setLong(0, cycleId).list();
-		return cycles.get(0);
-	}
+        ret.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(model));
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Cycle> getCyclesForJob(final int jobId) {
-		return getSessionFactory()
-				.getCurrentSession()
-				.createQuery(
-						"from Cycle as c where c.job.id=? order by c.endDateTime asc")
-				.setLong(0, jobId).list();
-	}
+        //populateJobFields(model,job);
+        return ret;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Cycle> getCyclesForJobDesc(final int jobId) {
-		return getSessionFactory()
-				.getCurrentSession()
-				.createQuery(
-						"from Cycle as c where c.job.id=? order by c.startDateTime desc")
-				.setLong(0, jobId).list();
-	}
 
-	@Override
+    //@Override
+
+    /**
+     * "ONLY FOR INTERNAL USE"
+     */
+    @Deprecated()
+    public Job getRawJob(final int id) {
+        @SuppressWarnings("unchecked")
+        final List<Job> jobs = sessionFactory.getCurrentSession()
+                .createQuery("from Job as j where j.id=?").setLong(0, id)
+                .list();
+        if (jobs.size() == 1) {
+            Job ret = jobs.get(0);
+
+            return ret;
+        } else {
+            throw new Move2AlfException("Job with id " + id + " not found.");
+        }
+    }
+
+    @Override
+    public boolean checkJobExists(final String jobName) {
+        @SuppressWarnings("unchecked")
+        final List<Job> jobs = sessionFactory.getCurrentSession()
+                .createQuery("from Job as j where j.name=?")
+                .setString(0, jobName).list();
+        return (jobs.size() > 0);
+    }
+
+    @Override
+    public Cycle getCycle(final int cycleId) {
+        @SuppressWarnings("unchecked")
+        final List<Cycle> cycles = getSessionFactory().getCurrentSession()
+                .createQuery("from Cycle as c where c.id=?")
+                .setLong(0, cycleId).list();
+        return cycles.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Cycle> getCyclesForJob(final int jobId) {
+        return getSessionFactory()
+                .getCurrentSession()
+                .createQuery(
+                        "from Cycle as c where c.job.id=? order by c.endDateTime asc")
+                .setLong(0, jobId).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Cycle> getCyclesForJobDesc(final int jobId) {
+        return getSessionFactory()
+                .getCurrentSession()
+                .createQuery(
+                        "from Cycle as c where c.job.id=? order by c.startDateTime desc")
+                .setLong(0, jobId).list();
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Cycle getLastCycleForJob(final Job job) {
 
-		@SuppressWarnings("unchecked")
-		final List<Cycle> list = getSessionFactory()
-				.getCurrentSession()
-				.createQuery(
-						"from Cycle as c where c.job.id=? order by c.startDateTime desc limit 1")
-				.setLong(0, job.getId()).list();
+        @SuppressWarnings("unchecked")
+        final List<Cycle> list = getSessionFactory()
+                .getCurrentSession()
+                .createQuery(
+                        "from Cycle as c where c.job.id=? order by c.startDateTime desc limit 1")
+                .setLong(0, job.getId()).list();
 
-		if (list.isEmpty()) {
-			return null;
-		}
+        if (list.isEmpty()) {
+            return null;
+        }
 
-		return list.get(0);
-	}
+        return list.get(0);
+    }
 
-	@Override
-	public List<Schedule> getSchedulesForJob(final int jobId) {
-		@SuppressWarnings("unchecked")
-		final List<Schedule> schedules = sessionFactory.getCurrentSession()
-				.createQuery("from Schedule as s where s.job.id=?")
-				.setLong(0, jobId).list();
-		return schedules;
-	}
+    @Override
+    public List<Schedule> getSchedulesForJob(final int jobId) {
+        @SuppressWarnings("unchecked")
+        final List<Schedule> schedules = sessionFactory.getCurrentSession()
+                .createQuery("from Schedule as s where s.job.id=?")
+                .setLong(0, jobId).list();
+        return schedules;
+    }
 
-	@Override
-	public Schedule getSchedule(final int scheduleId) {
-		@SuppressWarnings("unchecked")
-		final List<Schedule> schedules = sessionFactory.getCurrentSession()
-				.createQuery("from Schedule as s where s.id=?")
-				.setLong(0, scheduleId).list();
-		if (schedules.size() == 1) {
-			return schedules.get(0);
-		} else {
-			throw new Move2AlfException("Schedule with id " + scheduleId
-					+ " not found.");
-		}
-	}
+    @Override
+    public Schedule getSchedule(final int scheduleId) {
+        @SuppressWarnings("unchecked")
+        final List<Schedule> schedules = sessionFactory.getCurrentSession()
+                .createQuery("from Schedule as s where s.id=?")
+                .setLong(0, scheduleId).list();
+        if (schedules.size() == 1) {
+            return schedules.get(0);
+        } else {
+            throw new Move2AlfException("Schedule with id " + scheduleId
+                    + " not found.");
+        }
+    }
 
-	@Override
-	@Transactional(noRollbackFor = IndexOutOfBoundsException.class)
-	public int getScheduleId(final int jobId, final String cronJob) {
-		@SuppressWarnings("unchecked")
-		final List<Schedule> schedule = sessionFactory
-				.getCurrentSession()
-				.createQuery(
-						"from Schedule as s where s.job.id=? and s.quartzScheduling=?")
-				.setLong(0, jobId).setString(1, cronJob).list();
+    @Override
+    @Transactional(noRollbackFor = IndexOutOfBoundsException.class)
+    public int getScheduleId(final int jobId, final String cronJob) {
+        @SuppressWarnings("unchecked")
+        final List<Schedule> schedule = sessionFactory
+                .getCurrentSession()
+                .createQuery(
+                        "from Schedule as s where s.job.id=? and s.quartzScheduling=?")
+                .setLong(0, jobId).setString(1, cronJob).list();
 
-		return schedule.get(0).getId();
-	}
+        return schedule.get(0).getId();
+    }
 
-	@Override
-	public List<String> getCronjobsForJob(final int jobId) {
-		final List<Schedule> schedules = getSchedulesForJob(jobId);
-		final List<String> cronjobs = new ArrayList<String>();
+    @Override
+    public List<String> getCronjobsForJob(final int jobId) {
+        final List<Schedule> schedules = getSchedulesForJob(jobId);
+        final List<String> cronjobs = new ArrayList<String>();
 
-		for (int i = 0; i < schedules.size(); i++) {
-			cronjobs.add(schedules.get(i).getQuartzScheduling());
-		}
-		return cronjobs;
-	}
+        for (int i = 0; i < schedules.size(); i++) {
+            cronjobs.add(schedules.get(i).getQuartzScheduling());
+        }
+        return cronjobs;
+    }
 
-	@Override
-	public Schedule createSchedule(final int jobId, final String cronJob) {
-		final Date now = new Date();
-		final Schedule schedule = new Schedule();
-		final Job job = getJob(jobId);
-		schedule.setJob(job);
-		schedule.setCreator(getUserService().getCurrentUser());
-		schedule.setCreationDateTime(now);
-		schedule.setLastModifyDateTime(now);
-		schedule.setQuartzScheduling(cronJob);
-		getSessionFactory().getCurrentSession().save(schedule);
+    @Override
+    public Schedule createSchedule(final int jobId, final String cronJob) {
+        final Date now = new Date();
+        final Schedule schedule = new Schedule();
+        final Job job = getJob(jobId);
+        schedule.setJob(job);
+        schedule.setCreator(getUserService().getCurrentUser());
+        schedule.setCreationDateTime(now);
+        schedule.setLastModifyDateTime(now);
+        schedule.setQuartzScheduling(cronJob);
+        getSessionFactory().getCurrentSession().save(schedule);
 
-		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job);
-		// job object is still in cache with old schedules
-		getScheduler().reloadSchedules();
+        logger.debug("Reloading scheduler");
+        getSessionFactory().getCurrentSession().evict(job);
+        // job object is still in cache with old schedules
+        getScheduler().reloadSchedules();
 
-		return schedule;
-	}
+        return schedule;
+    }
 
-	@Override
-	public void deleteSchedule(final int scheduleId) {
-		final Schedule schedule = getSchedule(scheduleId);
-		final Job job = schedule.getJob();
-		sessionFactory.getCurrentSession().delete(schedule);
+    @Override
+    public void deleteSchedule(final int scheduleId) {
+        final Schedule schedule = getSchedule(scheduleId);
+        final Job job = schedule.getJob();
+        sessionFactory.getCurrentSession().delete(schedule);
 
-		logger.debug("Reloading scheduler");
-		getSessionFactory().getCurrentSession().evict(job);
-		// job object is still in cache with old schedules
-		getSessionFactory().getCurrentSession().flush();
-		getScheduler().reloadSchedules();
-	}
+        logger.debug("Reloading scheduler");
+        getSessionFactory().getCurrentSession().evict(job);
+        // job object is still in cache with old schedules
+        getSessionFactory().getCurrentSession().flush();
+        getScheduler().reloadSchedules();
+    }
 
 
-	@Override
-	public void createSourceSink(final String className,
-			final Map<String, String> parameters) {
-		final ConfiguredSharedResource ss = new ConfiguredSharedResource();
-		ss.setClassId(className);
-		ss.setParameters(parameters);
-		getSessionFactory().getCurrentSession().save(ss);
-	}
+    @Override
+    public void createSourceSink(final String className,
+                                 final Map<String, String> parameters) {
+        final ConfiguredSharedResource ss = new ConfiguredSharedResource();
+        ss.setClassId(className);
+        ss.setParameters(parameters);
+        getSessionFactory().getCurrentSession().save(ss);
+    }
 
-	@Override
+    @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public List<ProcessedDocument> getProcessedDocuments(final int cycleId) {
-		return getProcessedDocuments(cycleId, 0, 0);
-	}
+        return getProcessedDocuments(cycleId, 0, 0);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
+    @SuppressWarnings("unchecked")
+    @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-	public List<ProcessedDocument> getProcessedDocuments(final int cycleId,
-			final int first, final int count) {
-		final Query query = sessionFactory.getCurrentSession()
-				.createQuery("from ProcessedDocument as d where d.cycle.id=?")
-				.setLong(0, cycleId).setFirstResult(first);
-		if (count > 0) {
-			query.setMaxResults(count);
-		}
+    public List<ProcessedDocument> getProcessedDocuments(final int cycleId,
+                                                         final int first, final int count) {
+        final Query query = sessionFactory.getCurrentSession()
+                .createQuery("from ProcessedDocument as d where d.cycle.id=?")
+                .setLong(0, cycleId).setFirstResult(first);
+        if (count > 0) {
+            query.setMaxResults(count);
+        }
 
-		return query.list();
-	}
+        return query.list();
+    }
 
-	@Override
-	public long countProcessedDocuments(final int cycleId) {
-		final Query query = sessionFactory
-				.getCurrentSession()
-				.createQuery(
-						"select count(*) from ProcessedDocument as d where d.cycle.id=?")
-				.setLong(0, cycleId);
-		return (Long) query.uniqueResult();
-	}
+    @Override
+    public long countProcessedDocuments(final int cycleId) {
+        final Query query = sessionFactory
+                .getCurrentSession()
+                .createQuery(
+                        "select count(*) from ProcessedDocument as d where d.cycle.id=?")
+                .setLong(0, cycleId);
+        return (Long) query.uniqueResult();
+    }
 
-	@Override
-	public long countProcessedDocumentsWithStatus(final int cycleId, EProcessedDocumentStatus status) {
-		final Query query = sessionFactory
-				.getCurrentSession()
-				.createQuery(
-						"select count(*) from ProcessedDocument as d where d.cycle.id=? and d.status=?")
-				.setLong(0, cycleId)
-				.setParameter(1, status);
-		return (Long) query.uniqueResult();
-	}
+    @Override
+    public long countProcessedDocumentsWithStatus(final int cycleId, EProcessedDocumentStatus status) {
+        final Query query = sessionFactory
+                .getCurrentSession()
+                .createQuery(
+                        "select count(*) from ProcessedDocument as d where d.cycle.id=? and d.status=?")
+                .setLong(0, cycleId)
+                .setParameter(1, status);
+        return (Long) query.uniqueResult();
+    }
 
 
-	@Override
-	public ECycleState getJobState(final int jobId) {
-		if(jobMap.get(jobId)!=null && jobMap.get(jobId).isRunning()){
+    @Override
+    public ECycleState getJobState(final int jobId) {
+        if (jobMap.get(jobId) != null && jobMap.get(jobId).isRunning()) {
             return ECycleState.RUNNING;
         }
         return ECycleState.NOT_RUNNING;
-	}
+    }
 
-	@Override
-	public void resetCycles() {
-		logger.debug("Resetting cycles");
-		final String hql = "UPDATE Cycle as cycle SET cycle.endDateTime = :now WHERE cycle.endDateTime is null";
-		final Session session = getSessionFactory().getCurrentSession();
-		final Query q = session.createQuery(hql);
-		q.setTimestamp("now", new Date());
-		q.executeUpdate();
-	}
+    @Override
+    public void resetCycles() {
+        logger.debug("Resetting cycles");
+        final String hql = "UPDATE Cycle as cycle SET cycle.endDateTime = :now WHERE cycle.endDateTime is null";
+        final Session session = getSessionFactory().getCurrentSession();
+        final Query q = session.createQuery(hql);
+        q.setTimestamp("now", new Date());
+        q.executeUpdate();
+    }
 
-	@Override
-	public void createProcessedDocument(final int cycleId, final String name,
-			final Date date, final String state,
-			final Set<ProcessedDocumentParameter> params, final String reference) {
-		//logger.debug("Creating processed document:" + name);
-		try {
-			final ProcessedDocument doc = new ProcessedDocument();
-			doc.setCycle(getCycle(cycleId));
-			doc.setName(name);
-			doc.setProcessedDateTime(date);
-			doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
-			for (final ProcessedDocumentParameter param : params) {
-				if (param.getValue().length() > 255) {
-					param.setValue(param.getValue().substring(0, 255));
-				}
-			}
-            logger.debug("Number of params: "+params.size());
-			doc.setProcessedDocumentParameterSet(params);
-			doc.setReference(reference);
-			getSessionFactory().getCurrentSession().save(doc);
+    @Override
+    public void createProcessedDocument(final int cycleId, final String name,
+                                        final Date date, final String state,
+                                        final Set<ProcessedDocumentParameter> params, final String reference) {
+        //logger.debug("Creating processed document:" + name);
+        try {
+            final ProcessedDocument doc = new ProcessedDocument();
+            doc.setCycle(getCycle(cycleId));
+            doc.setName(name);
+            doc.setProcessedDateTime(date);
+            doc.setStatus(EProcessedDocumentStatus.valueOf(state.toUpperCase()));
+            for (final ProcessedDocumentParameter param : params) {
+                if (param.getValue().length() > 255) {
+                    param.setValue(param.getValue().substring(0, 255));
+                }
+            }
+            logger.debug("Number of params: " + params.size());
+            doc.setProcessedDocumentParameterSet(params);
+            doc.setReference(reference);
+            getSessionFactory().getCurrentSession().save(doc);
 
-		} catch (final Exception e) {
-			logger.error("Failed to write " + name + " to report.", e);
-		}
-	}
+        } catch (final Exception e) {
+            logger.error("Failed to write " + name + " to report.", e);
+        }
+    }
 
-	@Override
-	public void sendMail(final SimpleMailMessage message) {
-		try {
-			logger.debug("Sending email \"" + message.getSubject() + "\" to "
-					+ Arrays.asList(message.getTo()));
-			getMailSender().send(message);
-		} catch (final MailException e) {
-			logger.warn("Failed to send email (" + e.getMessage() + ")");
-		}
-	}
+    @Override
+    public void sendMail(final SimpleMailMessage message) {
+        try {
+            logger.debug("Sending email \"" + message.getSubject() + "\" to "
+                    + Arrays.asList(message.getTo()));
+            getMailSender().send(message);
+        } catch (final MailException e) {
+            logger.warn("Failed to send email (" + e.getMessage() + ")");
+        }
+    }
 
-	@Override
-	public HistoryPage getHistory(final int jobId, int page, int pageSize) {
-		final List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
-		final Map<Integer, HistoryInfo> integerHistoryInfoMap = new HashMap<Integer, HistoryInfo>();
-		final Session s = getSessionFactory().getCurrentSession();
+    @Override
+    public HistoryPage getHistory(final int jobId, int page, int pageSize) {
+        final List<HistoryInfo> historyList = new ArrayList<HistoryInfo>();
+        final Map<Integer, HistoryInfo> integerHistoryInfoMap = new HashMap<Integer, HistoryInfo>();
+        final Session s = getSessionFactory().getCurrentSession();
 
         final String hql = "select id from Cycle as cycle where cycle.job.id=:jobId ORDER BY cycle.startDateTime DESC";
         final Query query = s.createQuery(hql);
         query.setParameter("jobId", jobId);
-        query.setFirstResult(page*pageSize);
+        query.setFirstResult(page * pageSize);
         query.setMaxResults(pageSize);
         @SuppressWarnings("unchecked")
         final List<Integer> cycles = query.list();
@@ -438,9 +463,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
         for (final Integer cycle : cycles) {
             cycleString.append(cycle + ",");
         }
-        cycleString.setCharAt(cycleString.length()-1,')');
+        cycleString.setCharAt(cycleString.length() - 1, ')');
 
-		//final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
+        //final String hql = "SELECT cycle.id, COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status FROM Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument WHERE cycle.job.id=:jobId GROUP BY processedDocument.status, cycle.id ORDER BY cycle.startDateTime DESC";
         StringBuilder hql1 = new StringBuilder("select cycle.id,COUNT(processedDocument), cycle.startDateTime, cycle.endDateTime, processedDocument.status from Cycle AS cycle LEFT JOIN cycle.processedDocuments AS processedDocument where cycle.id in ");
         hql1.append(cycleString);
         hql1.append(" GROUP BY processedDocument.status, cycle.id");
@@ -449,88 +474,88 @@ public class JobServiceImpl extends AbstractHibernateService implements
         final List<Object[]> history = query1.list();
 
         for (final Object[] cycle : history) {
-			Integer cycleId = (Integer) cycle[0];
-			HistoryInfo info = null;
-			if(integerHistoryInfoMap.containsKey(cycleId)){
-				info = integerHistoryInfoMap.get(cycleId);
-				int count = info.getNbrOfDocuments();
-				info.setNbrOfDocuments(((Long) cycle[1]).intValue() + count);
-			} else {
-				info = new HistoryInfo();
-				info.setNbrOfDocuments(((Long) cycle[1]).intValue());
-				info.setCycleId((Integer) cycle[0]);
-				info.setCycleStartDateTime((Date) cycle[2]);
-				if (cycle[3] == null) {
-					info.setScheduleState(ECycleState.RUNNING.getDisplayName());
-				} else {
-					info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
-				}
-				historyList.add(info);
-				integerHistoryInfoMap.put(cycleId, info);
-			}
-			if(cycle[4] == EProcessedDocumentStatus.FAILED){
-				info.setNbrOfFailures(((Long) cycle[1]).intValue());
-			}
-		}
+            Integer cycleId = (Integer) cycle[0];
+            HistoryInfo info = null;
+            if (integerHistoryInfoMap.containsKey(cycleId)) {
+                info = integerHistoryInfoMap.get(cycleId);
+                int count = info.getNbrOfDocuments();
+                info.setNbrOfDocuments(((Long) cycle[1]).intValue() + count);
+            } else {
+                info = new HistoryInfo();
+                info.setNbrOfDocuments(((Long) cycle[1]).intValue());
+                info.setCycleId((Integer) cycle[0]);
+                info.setCycleStartDateTime((Date) cycle[2]);
+                if (cycle[3] == null) {
+                    info.setScheduleState(ECycleState.RUNNING.getDisplayName());
+                } else {
+                    info.setScheduleState(ECycleState.NOT_RUNNING.getDisplayName());
+                }
+                historyList.add(info);
+                integerHistoryInfoMap.put(cycleId, info);
+            }
+            if (cycle[4] == EProcessedDocumentStatus.FAILED) {
+                info.setNbrOfFailures(((Long) cycle[1]).intValue());
+            }
+        }
 
-		final String countHql = "select COUNT(*) FROM Cycle AS cycle WHERE cycle.job.id=:jobId";
-		final Query countQuery = s.createQuery(countHql);
-		countQuery.setParameter("jobId", jobId);
-		int count = ((Long) countQuery.uniqueResult()).intValue();
-		int numberOfPages = (int) Math.ceil(count/((double)pageSize));
+        final String countHql = "select COUNT(*) FROM Cycle AS cycle WHERE cycle.job.id=:jobId";
+        final Query countQuery = s.createQuery(countHql);
+        countQuery.setParameter("jobId", jobId);
+        int count = ((Long) countQuery.uniqueResult()).intValue();
+        int numberOfPages = (int) Math.ceil(count / ((double) pageSize));
 
 
-		return new HistoryPage(count, numberOfPages, historyList);
-	}
+        return new HistoryPage(count, numberOfPages, historyList);
+    }
 
-	/**
-	 * Execute job with jobId as soon as possible
-	 */
-	@Override
-	public void scheduleNow(final int jobId) {
-		getScheduler().immediately(getJob(jobId));
-	}
+    /**
+     * Execute job with jobId as soon as possible
+     */
+    @Override
+    public void scheduleNow(final int jobId) {
+        getScheduler().immediately(getJob(jobId));
+    }
 
-	@Override
-	public List<JobInfo> getAllJobInfo() {
-		final List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
-		final Session s = getSessionFactory().getCurrentSession();
-		final String hql = "SELECT job.id, job.name, job.description FROM Job AS job ORDER BY job.id ASC";
+    @Override
+    public List<JobInfo> getAllJobInfo() {
+        final List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
+        final Session s = getSessionFactory().getCurrentSession();
+        final String hql = "SELECT job.id, job.name, job.description FROM Job AS job ORDER BY job.id ASC";
 
-		@SuppressWarnings("unchecked")
-		final List<Object[]> jobs;
-		jobs = s.createQuery(hql).list();
+        @SuppressWarnings("unchecked")
+        final List<Object[]> jobs;
+        jobs = s.createQuery(hql).list();
 
-		final String cyclesQuery = "select c.job.id, c.startDateTime, c.id, count(pd) as processed, pd.status from Cycle as c left outer join c.processedDocuments as pd WHERE  c.id in (select max(c2.id) from Cycle as c2 group by c2.job.id) group by pd.status, c.job.id";
+        final String cyclesQuery = "select c.job.id, c.startDateTime, c.id, count(pd) as processed, pd.status from Cycle as c left outer join c.processedDocuments as pd WHERE  c.id in (select max(c2.id) from Cycle as c2 group by c2.job.id) group by pd.status, c.job.id";
         final List<Object[]> cycles = s.createQuery(cyclesQuery).list();
 
 
         Map<Integer, JobInfo> jobInfoMap = new HashMap<Integer, JobInfo>();
 
-		for (final Object[] job : jobs) {
-			final JobInfo info = new JobInfo();
-			info.setJobId((Integer) job[0]);
-			info.setJobName((String) job[1]);
-			info.setScheduleState(getJobState((Integer) job[0]).getDisplayName());
+        for (final Object[] job : jobs) {
+            final JobInfo info = new JobInfo();
+            info.setJobId((Integer) job[0]);
+            info.setJobName((String) job[1]);
+            info.setScheduleState(getJobState((Integer) job[0]).getDisplayName());
 
-			info.setDescription((String) job[2]);
-			jobInfoList.add(info);
+            info.setDescription((String) job[2]);
+            jobInfoList.add(info);
             jobInfoMap.put((Integer) job[0], info);
-		}
+        }
 
-        for (final Object[] cycle: cycles){
+        for (final Object[] cycle : cycles) {
             final JobInfo info = jobInfoMap.get(cycle[0]);
             info.setCycleStartDateTime((Date) cycle[1]);
             Long nmbOfProcessedDocuments = info.getNrOfDocuments().longValue();
-            info.setNrOfDocuments(((Long) cycle[3]).longValue() + nmbOfProcessedDocuments );
-            if (cycle[4] != null && ((EProcessedDocumentStatus)cycle[4]) == EProcessedDocumentStatus.FAILED){
+            info.setNrOfDocuments(((Long) cycle[3]).longValue() + nmbOfProcessedDocuments);
+            if (cycle[4] != null && ((EProcessedDocumentStatus) cycle[4]) == EProcessedDocumentStatus.FAILED) {
                 info.setNrOfFailedDocuments((Long) cycle[3]);
             }
 
         }
 
-		return jobInfoList;
-	}
+        return jobInfoList;
+    }
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -567,15 +592,14 @@ public class JobServiceImpl extends AbstractHibernateService implements
         public abstract void run();
     }
 
-    @Value(value="#{'${mail.from}'}")
+    @Value(value = "#{'${mail.from}'}")
     private String mailFrom;
 
-    @Value(value="#{'${url}'}")
+    @Value(value = "#{'${url}'}")
     private String url;
 
     @Autowired
     private ApplicationContext applicationContext;
-
 
 
     @Override
@@ -704,9 +728,9 @@ public class JobServiceImpl extends AbstractHibernateService implements
     }
 
     @PreDestroy
-    public void preDestroy(){
+    public void preDestroy() {
         logger.debug("Stopping the actorSystem");
-        for(JobHandle handle: jobMap.values()){
+        for (JobHandle handle : jobMap.values()) {
             handle.destroy();
         }
         actorSystem.shutdown();

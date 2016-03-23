@@ -8,7 +8,7 @@ import eu.xenit.move2alf.core.ConfiguredObject;
 
 public class ConfiguredAction extends ConfiguredObject {
 
-    private Map<String, ConfiguredAction> receivers;
+    private Map<String, ConfiguredAction> receivers =new HashMap<String, ConfiguredAction>();
     private int nmbOfWorkers;
     private String actionId;
     private String dispatcher;
@@ -49,9 +49,9 @@ public class ConfiguredAction extends ConfiguredObject {
     }
 
     public void addReceiver(String key, ConfiguredAction receiver){
-        if(receivers == null){
+        /*if(receivers == null){
             receivers = new HashMap<String, ConfiguredAction>();
-        }
+        }*/
         receivers.put(key, receiver);
     }
 

@@ -4,9 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
+import eu.xenit.move2alf.web.dto.JobModel;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,26 +48,28 @@ public class JobsTests extends IntegrationTests {
 		return this.scheduler;
 	}
 
-//	@Test
-//	public void testCreateJob() {
-//		loginAsAdmin();
-//		final Date before = new Date();
-//		final Job newJob = getJobService().createJob("test job",
-//				"description of test job");
-//		assertEquals("test job", newJob.getName());
-//		assertEquals("description of test job", newJob.getDescription());
-//		final Date after = new Date();
-//		assertTrue(before.before(newJob.getCreationDateTime())
-//				|| before.equals(newJob.getCreationDateTime()));
-//		assertTrue(after.after(newJob.getCreationDateTime())
-//				|| after.equals(newJob.getCreationDateTime()));
-//		assertTrue(before.before(newJob.getLastModifyDateTime())
-//				|| before.equals(newJob.getLastModifyDateTime()));
-//		assertTrue(after.after(newJob.getLastModifyDateTime())
-//				|| after.equals(newJob.getLastModifyDateTime()));
-//		assertEquals("admin", newJob.getCreator().getUserName());
-//		getJobService().destroy(newJob.getId());
-//	}
+	@Test
+	public void testCreateJob() {
+		loginAsAdmin();
+		final Date before = new Date();
+
+		JobModel jobModel = JobModel.CreateDefault("test job");
+
+		final Job newJob = getJobService().createJob(jobModel);
+		assertEquals("test job", newJob.getName());
+		assertEquals("Description of test job", newJob.getDescription());
+		final Date after = new Date();
+		assertTrue(before.before(newJob.getCreationDateTime())
+				|| before.equals(newJob.getCreationDateTime()));
+		assertTrue(after.after(newJob.getCreationDateTime())
+				|| after.equals(newJob.getCreationDateTime()));
+		assertTrue(before.before(newJob.getLastModifyDateTime())
+				|| before.equals(newJob.getLastModifyDateTime()));
+		assertTrue(after.after(newJob.getLastModifyDateTime())
+				|| after.equals(newJob.getLastModifyDateTime()));
+		assertEquals("admin", newJob.getCreator().getUserName());
+		getJobService().deleteJob(newJob.getId());
+	}
 //
 //	@Test
 //	public void testGetAllJobs() {

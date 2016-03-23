@@ -96,7 +96,7 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
     @Override
     public JobModel getJobConfigForJob(final int id) {
 
-        final Job job = getJobService().getJob(id);
+        final Job job = ((JobServiceImpl) getJobService()).getRawJob(id);
         final JobModel jobModel = new JobModel();
         jobModel.setId(id);
         jobModel.setName(job.getName());

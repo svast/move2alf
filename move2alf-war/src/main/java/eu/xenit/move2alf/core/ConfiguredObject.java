@@ -16,7 +16,7 @@ public abstract class ConfiguredObject extends IdObject {
 
     private String classId;
 	
-	private Map<String, String> parameters;
+	private Map<String, String> parameters = new HashMap<>();
 
 	public void setParameters(Map<String, String> parameters) {
 		this.parameters = parameters;
