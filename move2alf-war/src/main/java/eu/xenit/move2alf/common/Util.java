@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,10 +45,10 @@ public class Util {
 
     public static void authenticateAsSystem() {
         List<GrantedAuthority> gas = new ArrayList<GrantedAuthority>();
-        gas.add(new GrantedAuthorityImpl(ERole.CONSUMER.toString()));
-        gas.add(new GrantedAuthorityImpl(ERole.SCHEDULE_ADMIN.toString()));
-        gas.add(new GrantedAuthorityImpl(ERole.JOB_ADMIN.toString()));
-        gas.add(new GrantedAuthorityImpl(ERole.SYSTEM_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.CONSUMER.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.SCHEDULE_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.JOB_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.SYSTEM_ADMIN.toString()));
         UserDetails ud = new User("System", "", true, true, true, true, gas);
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
