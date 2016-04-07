@@ -167,7 +167,6 @@ public class JobServiceImpl extends AbstractHibernateService implements
     @Override
     public Job getJob(final int id) {
         Job ret = getRawJob(id);
-		ret.setFirstConfiguredAction(null); // DO NOT USE THIS FROM THE DB ANYMORE!
 
         // MH: Don't use the db contents of the Action framework directly!
         // Instead, read them out into a jobmodel and build a new action graph for it!
@@ -175,6 +174,7 @@ public class JobServiceImpl extends AbstractHibernateService implements
         //   instead old code stored in the database
         JobModel model = pipelineAssembler.getJobConfigForJob(id);
 
+        // DO NOT USE THIS FROM THE DB ANYMORE!
         ret.setFirstConfiguredAction(pipelineAssembler.getConfiguredAction(model));
 
         //populateJobFields(model,job);

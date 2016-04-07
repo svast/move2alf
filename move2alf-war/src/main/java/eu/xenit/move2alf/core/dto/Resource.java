@@ -38,4 +38,13 @@ public class Resource extends IdObject {
     }
 
     private String classId;
+
+    @Override
+    public String toString() {
+        return "Resource{" +
+                "name='" + name + '\'' +
+                ", firstConfiguredAction=" + firstConfiguredAction +
+                ", classId='" + classId + '\'' +
+                '}';
+    }
 }

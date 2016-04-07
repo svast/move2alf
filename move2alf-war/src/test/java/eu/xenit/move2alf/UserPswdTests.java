@@ -22,7 +22,7 @@ import eu.xenit.move2alf.core.enums.ERole;
 import eu.xenit.move2alf.logic.UserService;
 import eu.xenit.move2alf.logic.UserServiceImpl;
 
-public class UserPswdTests extends IntegrationTests {
+public class UserPswdTests extends TransactionalIntegrationTests {
 
 	private UserService userService;
 

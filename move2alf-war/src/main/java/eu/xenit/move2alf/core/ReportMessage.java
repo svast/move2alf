@@ -22,4 +22,15 @@ public class ReportMessage{
 		this.params = params;
 		this.reference = reference;
 	}
+
+	@Override
+	public String toString() {
+		return "ReportMessage{" +
+				"name='" + name + '\'' +
+				", date=" + date +
+				", state='" + state + '\'' +
+				", reference='" + reference + '\'' +
+				", params=" + params +
+				'}';
+	}
 }

@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.core.dto;
 
 import eu.xenit.move2alf.common.IdObject;
+import eu.xenit.move2alf.web.dto.JobModel;
 
 import java.util.Date;
 import java.util.Set;
@@ -18,6 +19,7 @@ public class Job extends IdObject {
 	private Date lastModifyDateTime;
 	
 	private ConfiguredAction firstConfiguredAction;
+	private JobModel jobModel;
 	
 	private Set<Schedule> schedules;
 	

@@ -136,13 +136,6 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
             action = new ConfiguredAction();
             alfrescoResource = new ConfiguredSharedResource();
         }
-        action.setActionId(destination.getName()+"_action");
-        action.setClassId(actionClassInfoService.getClassId(AlfrescoHttpResourceAction.class));
-        action.setNmbOfWorkers(destination.getNbrThreads());
-        action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);
-
-
-
         alfrescoResource.setClassId(sharedResourceClassInfoService.getClassId(AlfrescoHttpSharedResource.class));
         alfrescoResource.setName(destination.getName());
         alfrescoResource.setParameter(AbstractAlfrescoSharedResource.PARAM_URL, destination.getDestinationURL());
@@ -155,12 +148,31 @@ public class AlfrescoHttpDestinationTypeController extends AbstractController im
             sharedResourceService.saveConfiguredSharedResource(alfrescoResource);
         }
 
+        setupAlfrescoHttpDestinationResource(resource, action, alfrescoResource, destination.getNbrThreads(), destination.getName());
+        return resource;
+    }
+
+    /**
+     * This method builds a destination resource, which is a 'destination job' capable of handling move2alf messages
+     * to a remote destination. This method was added to be able to mock the destination service, which is called an
+     *   AlfrescoHttpSharedResource
+     *
+     * WARNING: you need to first persist the alfrescoResource before calling this method!!
+     * Do not forget that you need to persist both the alfrescoResource and the resource before you can use this
+     *   destination
+     *
+     */
+    public void setupAlfrescoHttpDestinationResource(Resource resource, ConfiguredAction action, ConfiguredSharedResource alfrescoResource, int nbrThreads, String destinationName) {
+        if (alfrescoResource.getId() == 0) throw new UnsupportedOperationException("Must be persisted to database!");
+        action.setActionId(destinationName +"_action");
+        action.setClassId(actionClassInfoService.getClassId(AlfrescoHttpResourceAction.class));
+        action.setNmbOfWorkers(nbrThreads);
+        action.setDispatcher(PipelineAssemblerImpl.PINNED_DISPATCHER);
         action.setParameter(AlfrescoHttpResourceAction$.MODULE$.PARAM_ALFRESCOHTTPSHAREDRESOURCE(), Integer.toString(alfrescoResource.getId()));
 
-        resource.setName(destination.getName());
+        resource.setName(destinationName);
         resource.setClassId(CLASS_ID);
         resource.setFirstConfiguredAction(action);
-        return resource;
     }
 
     @RequestMapping(value = "/destinations/AlfrescoHttp/{id}/edit", method = RequestMethod.POST)
