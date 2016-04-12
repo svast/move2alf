@@ -27,6 +27,9 @@ public abstract class FileWithMetadataAction extends Move2AlfReceivingAction<Fil
 
     @Override
     public void setCounter(String counterId, int counter) {
+        if (counter == 0)
+            throw new UnsupportedOperationException("Setting counter to 0 is not allowed, " +
+                    "this causes the files to be deleted permanently due to implementation error.");
         if (sendingContext.hasReceiver(PipelineAssemblerImpl.MOVE_AFTER_ID)) {
             if(getInputPath().isEmpty())
                 sendMessage(PipelineAssemblerImpl.MOVE_AFTER_ID, new SetCounterMessage(counterId, Integer.valueOf(counter)));

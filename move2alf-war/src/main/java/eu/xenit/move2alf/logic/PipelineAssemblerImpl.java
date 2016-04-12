@@ -8,6 +8,7 @@ import eu.xenit.move2alf.core.sharedresource.alfresco.InputSource;
 import eu.xenit.move2alf.core.sharedresource.alfresco.WriteOption;
 import eu.xenit.move2alf.core.simpleaction.*;
 import eu.xenit.move2alf.pipeline.actions.ActionConfig;
+import eu.xenit.move2alf.pipeline.actions.JobConfig;
 import eu.xenit.move2alf.web.dto.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -460,14 +461,20 @@ public class PipelineAssemblerImpl extends PipelineAssembler implements Applicat
         moveWithCounterDispatcher.setClassId(actionClassService.getClassId(DispatcherAction.class));
         moveWithCounterDispatcher.setActionId(MOVE_WITH_COUNTER);
         moveWithCounterDispatcher.setNmbOfWorkers(1);
-        moveWithCounterDispatcher.addReceiver(MOVE_NOT_LOADED_ID,moveWithCounterNotLoaded);
-        moveWithCounterDispatcher.addReceiver(MOVE_AFTER_ID,moveWithCounter);
+        if (jobModel.getMoveNotLoad())
+            moveWithCounterDispatcher.addReceiver(MOVE_NOT_LOADED_ID,moveWithCounterNotLoaded);
+        if (jobModel.getMoveAfterLoad())
+            moveWithCounterDispatcher.addReceiver(MOVE_AFTER_ID,moveWithCounter);
 
 
         Class metadataClass = actionClassService.getClassInfoModel(jobModel.getMetadata()).getClazz();
         if(FileWithMetadataAction.class.isAssignableFrom(metadataClass)) {
-            end.addReceiver(MOVE_AFTER_ID, moveWithCounter);
-            end.addReceiver(MOVE_WITH_COUNTER, moveWithCounterDispatcher);
+            //MH: this seems to be here because we want to be able to send move messages from inside the metadataaction
+            //  However, i added the jobmodel check since it can cause nullpointers
+            if (jobModel.getMoveAfterLoad())
+                end.addReceiver(MOVE_AFTER_ID, moveWithCounter);
+            if (jobModel.getMoveAfterLoad() || jobModel.getMoveNotLoad())
+                end.addReceiver(MOVE_WITH_COUNTER, moveWithCounterDispatcher);
         }
 
 
