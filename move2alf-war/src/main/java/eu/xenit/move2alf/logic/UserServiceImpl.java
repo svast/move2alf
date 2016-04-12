@@ -75,14 +75,14 @@ public class UserServiceImpl extends AbstractHibernateService implements
 		Set<UserRole> userRoleSet = new HashSet<UserRole>();
 		// add role and all lower roles
 		switch (role) {
-		case SYSTEM_ADMIN:
-			userRoleSet.add(new UserRole(userName, ERole.SYSTEM_ADMIN));
-		case JOB_ADMIN:
-			userRoleSet.add(new UserRole(userName, ERole.JOB_ADMIN));
-		case SCHEDULE_ADMIN:
-			userRoleSet.add(new UserRole(userName, ERole.SCHEDULE_ADMIN));
-		case CONSUMER:
-			userRoleSet.add(new UserRole(userName, ERole.CONSUMER));
+		case ROLE_SYSTEM_ADMIN:
+			userRoleSet.add(new UserRole(userName, ERole.ROLE_SYSTEM_ADMIN));
+		case ROLE_JOB_ADMIN:
+			userRoleSet.add(new UserRole(userName, ERole.ROLE_JOB_ADMIN));
+		case ROLE_SCHEDULE_ADMIN:
+			userRoleSet.add(new UserRole(userName, ERole.ROLE_SCHEDULE_ADMIN));
+		case ROLE_CONSUMER:
+			userRoleSet.add(new UserRole(userName, ERole.ROLE_CONSUMER));
 		}
 		return userRoleSet;
 	}

@@ -20,7 +20,7 @@
 	<@labeledSingleLinePasswordInput label="Retype the new password" name="newPasswordRetype" binding="editPassword.newPasswordRetype" />
 
 	<input class="btn btn-success" type="submit" value="Update password" />
-	<a class="btn btn-inverse" href="<#if role=="SYSTEM_ADMIN"><@spring.url relativeUrl="/users" /><#else><@spring.url relativeUrl="/user/profile" /></#if>">Cancel</a>
+	<a class="btn btn-inverse" href="<#if role=="ROLE_SYSTEM_ADMIN"><@spring.url relativeUrl="/users" /><#else><@spring.url relativeUrl="/user/profile" /></#if>">Cancel</a>
 </form>
 </@bodyMenu>
 </@html>

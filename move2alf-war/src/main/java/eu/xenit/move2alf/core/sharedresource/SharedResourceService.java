@@ -52,13 +52,13 @@ public class SharedResourceService extends AbstractHibernateService implements A
             return results.get(0);
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void deleteConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
         sessionFactory.getCurrentSession().delete(configuredSharedResource);
         sharedResources.remove(configuredSharedResource.getId());
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void saveConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource){
         sessionFactory.getCurrentSession().save(configuredSharedResource);
     }
@@ -70,7 +70,7 @@ public class SharedResourceService extends AbstractHibernateService implements A
         this.beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void updateConfiguredSharedResource(ConfiguredSharedResource configuredSharedResource) {
         sessionFactory.getCurrentSession().update(configuredSharedResource);
         if(sharedResources.containsKey(configuredSharedResource.getId())){

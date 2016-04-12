@@ -70,42 +70,42 @@ public class UserPswdTests extends IntegrationTests {
 	@Test
 	public void testCreateRoleSetConsumer() {
 		UserServiceImpl userService = new UserServiceImpl();
-		Set<UserRole> roles = userService.createRoleSet("test", ERole.CONSUMER);
+		Set<UserRole> roles = userService.createRoleSet("test", ERole.ROLE_CONSUMER);
 		assertEquals(roles.size(), 1);
-		assertTrue(roles.contains(new UserRole("test", ERole.CONSUMER)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_CONSUMER)));
 	}
 
 	@Test
 	public void testCreateRoleSetScheduleAdmin() {
 		UserServiceImpl userService = new UserServiceImpl();
 		Set<UserRole> roles = userService.createRoleSet("test",
-				ERole.SCHEDULE_ADMIN);
+				ERole.ROLE_SCHEDULE_ADMIN);
 		assertEquals(roles.size(), 2);
-		assertTrue(roles.contains(new UserRole("test", ERole.CONSUMER)));
-		assertTrue(roles.contains(new UserRole("test", ERole.SCHEDULE_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_CONSUMER)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_SCHEDULE_ADMIN)));
 	}
 
 	@Test
 	public void testCreateRoleSetJobAdmin() {
 		UserServiceImpl userService = new UserServiceImpl();
 		Set<UserRole> roles = userService
-				.createRoleSet("test", ERole.JOB_ADMIN);
+				.createRoleSet("test", ERole.ROLE_JOB_ADMIN);
 		assertEquals(roles.size(), 3);
-		assertTrue(roles.contains(new UserRole("test", ERole.CONSUMER)));
-		assertTrue(roles.contains(new UserRole("test", ERole.SCHEDULE_ADMIN)));
-		assertTrue(roles.contains(new UserRole("test", ERole.JOB_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_CONSUMER)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_SCHEDULE_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_JOB_ADMIN)));
 	}
 
 	@Test
 	public void testCreateRoleSetSystemAdmin() {
 		UserServiceImpl userService = new UserServiceImpl();
 		Set<UserRole> roles = userService.createRoleSet("test",
-				ERole.SYSTEM_ADMIN);
+				ERole.ROLE_SYSTEM_ADMIN);
 		assertEquals(roles.size(), 4);
-		assertTrue(roles.contains(new UserRole("test", ERole.CONSUMER)));
-		assertTrue(roles.contains(new UserRole("test", ERole.SCHEDULE_ADMIN)));
-		assertTrue(roles.contains(new UserRole("test", ERole.JOB_ADMIN)));
-		assertTrue(roles.contains(new UserRole("test", ERole.SYSTEM_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_CONSUMER)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_SCHEDULE_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_JOB_ADMIN)));
+		assertTrue(roles.contains(new UserRole("test", ERole.ROLE_SYSTEM_ADMIN)));
 	}
 
 	@Test
@@ -117,22 +117,22 @@ public class UserPswdTests extends IntegrationTests {
 	public void testCreateUser() {
 		loginAsAdmin();
 		UserPswd user = getUserService().createUser("test", "test",
-				ERole.CONSUMER);
+				ERole.ROLE_CONSUMER);
 		assertEquals("test", user.getUserName());
-		assertTrue(user.isUserInRole(ERole.CONSUMER));
+		assertTrue(user.isUserInRole(ERole.ROLE_CONSUMER));
 	}
 
 	@Test(expected = DuplicateUserException.class)
 	public void testCreateDuplicateUser() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test1", ERole.CONSUMER);
-		getUserService().createUser("test", "test2", ERole.JOB_ADMIN);
+		getUserService().createUser("test", "test1", ERole.ROLE_CONSUMER);
+		getUserService().createUser("test", "test2", ERole.ROLE_JOB_ADMIN);
 	}
 
 	@Test
 	public void testDeleteExistingUser() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test", ERole.CONSUMER);
+		getUserService().createUser("test", "test", ERole.ROLE_CONSUMER);
 		getUserService().deleteUser("test");
 	}
 
@@ -145,10 +145,10 @@ public class UserPswdTests extends IntegrationTests {
 	@Test
 	public void testGetUser() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test", ERole.CONSUMER);
+		getUserService().createUser("test", "test", ERole.ROLE_CONSUMER);
 		UserPswd user = getUserService().getUser("test");
 		assertEquals("test", user.getUserName());
-		assertTrue(user.isUserInRole(ERole.CONSUMER));
+		assertTrue(user.isUserInRole(ERole.ROLE_CONSUMER));
 	}
 
 	@Test(expected = NonexistentUserException.class)
@@ -160,7 +160,7 @@ public class UserPswdTests extends IntegrationTests {
 	@Test
 	public void testGetAllUsers() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test", ERole.CONSUMER);
+		getUserService().createUser("test", "test", ERole.ROLE_CONSUMER);
 		List<UserPswd> users = getUserService().getAllUsers();
 		// assertEquals(2, users.size());
 		// TODO
@@ -177,7 +177,7 @@ public class UserPswdTests extends IntegrationTests {
 	@Test
 	public void testChangePassword() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test", ERole.CONSUMER);
+		getUserService().createUser("test", "test", ERole.ROLE_CONSUMER);
 		getUserService().changePassword("test", "123");
 		UserPswd user = getUserService().getUser("test");
 		assertEquals(Util.convertToMd5("123"), user.getPassword());
@@ -200,23 +200,23 @@ public class UserPswdTests extends IntegrationTests {
 	@Test
 	public void testChangeRole() {
 		loginAsAdmin();
-		getUserService().createUser("test", "test", ERole.CONSUMER);
-		getUserService().changeRole("test", ERole.JOB_ADMIN);
+		getUserService().createUser("test", "test", ERole.ROLE_CONSUMER);
+		getUserService().changeRole("test", ERole.ROLE_JOB_ADMIN);
 		UserPswd user = getUserService().getUser("test");
-		assertFalse(user.isUserInRole(ERole.SYSTEM_ADMIN));
-		assertTrue(user.isUserInRole(ERole.JOB_ADMIN));
-		assertTrue(user.isUserInRole(ERole.SCHEDULE_ADMIN));
-		assertTrue(user.isUserInRole(ERole.CONSUMER));
-		getUserService().changeRole("test", ERole.SCHEDULE_ADMIN);
-		assertFalse(user.isUserInRole(ERole.SYSTEM_ADMIN));
-		assertFalse(user.isUserInRole(ERole.JOB_ADMIN));
-		assertTrue(user.isUserInRole(ERole.SCHEDULE_ADMIN));
-		assertTrue(user.isUserInRole(ERole.CONSUMER));
+		assertFalse(user.isUserInRole(ERole.ROLE_SYSTEM_ADMIN));
+		assertTrue(user.isUserInRole(ERole.ROLE_JOB_ADMIN));
+		assertTrue(user.isUserInRole(ERole.ROLE_SCHEDULE_ADMIN));
+		assertTrue(user.isUserInRole(ERole.ROLE_CONSUMER));
+		getUserService().changeRole("test", ERole.ROLE_SCHEDULE_ADMIN);
+		assertFalse(user.isUserInRole(ERole.ROLE_SYSTEM_ADMIN));
+		assertFalse(user.isUserInRole(ERole.ROLE_JOB_ADMIN));
+		assertTrue(user.isUserInRole(ERole.ROLE_SCHEDULE_ADMIN));
+		assertTrue(user.isUserInRole(ERole.ROLE_CONSUMER));
 	}
 
 	@Test(expected = NonexistentUserException.class)
 	public void testChangeRoleOfNonexistentUser() {
 		loginAsAdmin();
-		getUserService().changeRole("sdfsd", ERole.CONSUMER);
+		getUserService().changeRole("sdfsd", ERole.ROLE_CONSUMER);
 	}
 }

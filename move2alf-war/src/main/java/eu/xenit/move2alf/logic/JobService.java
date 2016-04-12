@@ -22,7 +22,7 @@ public interface JobService {
 	 * 
 	 * @return
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public List<Job> getAllJobs();
 
 	/**
@@ -32,7 +32,7 @@ public interface JobService {
 	 *            The job configuration
 	 * @return The new job
 	 */
-	@PreAuthorize("hasRole('JOB_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
 	public Job createJob(JobModel jobModel);
 
 	/**
@@ -40,7 +40,7 @@ public interface JobService {
 	 *            The job configuration
 	 * @return The edited job
 	 */
-	@PreAuthorize("hasRole('JOB_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public Job editJob(JobModel jobModel);
 
 	/**
@@ -49,7 +49,7 @@ public interface JobService {
 	 * @param id
 	 *            The id of the job to delete
 	 */
-	@PreAuthorize("hasRole('JOB_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
 	public void deleteJob(int id);
 
 	/**
@@ -59,7 +59,7 @@ public interface JobService {
 	 *            The id of the job to get
 	 * @return the job
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public Job getJob(int id);
 
 	/**
@@ -76,7 +76,7 @@ public interface JobService {
 	 * @param jobId
 	 *            The id of the job return List<Cycle> A list of cycles
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public List<Cycle> getCyclesForJob(int jobId);
 
 	/**
@@ -92,7 +92,7 @@ public interface JobService {
 	 * 
 	 * @return Cycle
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Cycle getLastCycleForJob(Job job);
 
@@ -103,7 +103,7 @@ public interface JobService {
 	 *            The id of the job
 	 * @return a list of schedules
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public List<Schedule> getSchedulesForJob(int jobId);
 
 	/**
@@ -115,7 +115,7 @@ public interface JobService {
 	 *            the cronjob as a String
 	 * @return a list of schedules
 	 */
-	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SCHEDULE_ADMIN')")
 	public Schedule createSchedule(int jobId, String cronJob);
 
 	/**
@@ -125,7 +125,7 @@ public interface JobService {
 	 *            The id of the job
 	 * @return a list of cronjobs
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public List<String> getCronjobsForJob(int jobId);
 
 	/**
@@ -135,7 +135,7 @@ public interface JobService {
 	 *            The id of the schedule
 	 * @return the schedule
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public Schedule getSchedule(int scheduleId);
 
 	/**
@@ -144,7 +144,7 @@ public interface JobService {
 	 * @param scheduleId
 	 *            The id of the schedule to be deleted
 	 */
-	@PreAuthorize("hasRole('SCHEDULE_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SCHEDULE_ADMIN')")
 	public void deleteSchedule(int scheduleId);
 
 	/**
@@ -156,7 +156,7 @@ public interface JobService {
 	 *            The cronjob of the schedule
 	 * @return the id
 	 */
-	@PreAuthorize("hasRole('CONSUMER')")
+	@PreAuthorize("hasRole('ROLE_CONSUMER')")
 	public int getScheduleId(int jobId, String cronJob);
 	
 	/**

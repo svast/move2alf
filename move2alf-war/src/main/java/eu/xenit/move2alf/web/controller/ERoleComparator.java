@@ -11,10 +11,10 @@ public class ERoleComparator implements Comparator<ERole> {
 		if(arg0 == arg1){
 			return 0;
 		}
-		if(arg0 == ERole.SYSTEM_ADMIN || arg1 == ERole.CONSUMER){
+		if(arg0 == ERole.ROLE_SYSTEM_ADMIN || arg1 == ERole.ROLE_CONSUMER){
 			return 1;
 		}
-		if(arg0 == ERole.JOB_ADMIN){
+		if(arg0 == ERole.ROLE_JOB_ADMIN){
 			return 1;
 		}
 		return -1;

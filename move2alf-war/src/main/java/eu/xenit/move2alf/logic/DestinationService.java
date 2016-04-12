@@ -83,12 +83,12 @@ public class DestinationService extends AbstractHibernateService{
         return null;
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void saveDestination(Resource resource){
         sessionFactory.getCurrentSession().save(resource);
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void updateDestination(Resource resource) {
         sessionFactory.getCurrentSession().update(resource);
         int id = resource.getId();
@@ -99,7 +99,7 @@ public class DestinationService extends AbstractHibernateService{
         startDestination(id);
     }
 
-    @PreAuthorize("hasRole('JOB_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_JOB_ADMIN')")
     public void deleteDestination(Resource resource) {
         sessionFactory.getCurrentSession().delete(resource.getFirstConfiguredAction());
         sessionFactory.getCurrentSession().delete(resource);

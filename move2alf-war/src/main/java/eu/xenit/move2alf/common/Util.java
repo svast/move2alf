@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.enums.ERole;
-import eu.xenit.move2alf.logic.PipelineAssemblerImpl;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +44,10 @@ public class Util {
 
     public static void authenticateAsSystem() {
         List<GrantedAuthority> gas = new ArrayList<GrantedAuthority>();
-        gas.add(new SimpleGrantedAuthority(ERole.CONSUMER.toString()));
-        gas.add(new SimpleGrantedAuthority(ERole.SCHEDULE_ADMIN.toString()));
-        gas.add(new SimpleGrantedAuthority(ERole.JOB_ADMIN.toString()));
-        gas.add(new SimpleGrantedAuthority(ERole.SYSTEM_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority( ERole.ROLE_CONSUMER.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.ROLE_SCHEDULE_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.ROLE_JOB_ADMIN.toString()));
+        gas.add(new SimpleGrantedAuthority(ERole.ROLE_SYSTEM_ADMIN.toString()));
         UserDetails ud = new User("System", "", true, true, true, true, gas);
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(

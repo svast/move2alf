@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 /**
  * Bootstrapper for the move2alf database
  */
@@ -37,38 +38,49 @@ public class ConditionalDataSourceInitializer implements InitializingBean {
 
         Session session = txManager.getSessionFactory().openSession();
         session.beginTransaction();
-        List<UserPswd> users = session.createQuery("from UserPswd").list();
-        if(users.size() == 0){ // Test for first load of database
-            UserPswd admin = new UserPswd();
-            admin.setUserName("admin");
-            admin.setPassword("21232f297a57a5a743894a0e4a801fc3");
-
-            Set<UserRole> roles = new HashSet<UserRole>();
-
-            UserRole consumer = new UserRole();
-            consumer.setUserName("admin");
-            consumer.setRole("CONSUMER");
-            roles.add(consumer);
-
-            UserRole scheduleAdmin = new UserRole();
-            scheduleAdmin.setUserName("admin");
-            scheduleAdmin.setRole("SCHEDULE_ADMIN");
-            roles.add(scheduleAdmin);
-
-            UserRole jobAdmin = new UserRole();
-            jobAdmin.setUserName("admin");
-            jobAdmin.setRole("JOB_ADMIN");
-            roles.add(jobAdmin);
-
-            UserRole systemAdmin = new UserRole();
-            systemAdmin.setUserName("admin");
-            systemAdmin.setRole("SYSTEM_ADMIN");
-            roles.add(systemAdmin);
-
-            admin.setUserRoleSet(roles);
-
-            session.save(admin);
-            session.getTransaction().commit();
+        if(isUninitializedDatabase(session)){ // Test for first load of database
+            loadInitialAdminUser(session);
         }
+        session.getTransaction().commit();
+    }
+
+
+    private void loadInitialAdminUser(Session session) {
+        UserPswd admin = new UserPswd();
+        admin.setUserName("admin");
+        admin.setPassword("21232f297a57a5a743894a0e4a801fc3");
+
+        Set<UserRole> roles = new HashSet<UserRole>();
+
+        UserRole consumer = new UserRole();
+        consumer.setUserName("admin");
+        consumer.setRole("ROLE_CONSUMER");
+        roles.add(consumer);
+
+        UserRole scheduleAdmin = new UserRole();
+        scheduleAdmin.setUserName("admin");
+        scheduleAdmin.setRole("ROLE_SCHEDULE_ADMIN");
+        roles.add(scheduleAdmin);
+
+        UserRole jobAdmin = new UserRole();
+        jobAdmin.setUserName("admin");
+        jobAdmin.setRole("ROLE_JOB_ADMIN");
+        roles.add(jobAdmin);
+
+        UserRole systemAdmin = new UserRole();
+        systemAdmin.setUserName("admin");
+        systemAdmin.setRole("ROLE_SYSTEM_ADMIN");
+        roles.add(systemAdmin);
+
+        admin.setUserRoleSet(roles);
+
+        session.save(admin);
+
+    }
+
+    private boolean isUninitializedDatabase(Session session) {
+        List<UserPswd> users = session.createQuery("from UserPswd").list();
+
+        return users.size() == 0;
     }
 }

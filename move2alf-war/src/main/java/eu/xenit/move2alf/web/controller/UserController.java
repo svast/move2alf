@@ -60,21 +60,21 @@ public class UserController extends AbstractController{
 			Iterator<UserRole> roleIterator = userRole.iterator();
 			while(roleIterator.hasNext()){
 				String currentRole = ((UserRole) roleIterator.next()).getRole();
-				if("SYSTEM_ADMIN".equals(currentRole)){
+				if("ROLE_SYSTEM_ADMIN".equals(currentRole)){
 					roleCheck="System admin";
 				}
 				if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
-					if("JOB_ADMIN".equals(currentRole)){
+					if("ROLE_JOB_ADMIN".equals(currentRole)){
 						roleCheck="Job admin";
 					}
 				}
 				if(roleCheck=="Consumer" || roleCheck==""){
-					if("SCHEDULE_ADMIN".equals(currentRole)){
+					if("ROLE_SCHEDULE_ADMIN".equals(currentRole)){
 						roleCheck="Schedule admin";
 					}
 				}
 				if(roleCheck==""){
-					if("CONSUMER".equals(currentRole)){
+					if("ROLE_CONSUMER".equals(currentRole)){
 						roleCheck="Consumer";
 					}
 				}
@@ -228,7 +228,7 @@ public class UserController extends AbstractController{
 
 		getUserService().changePassword(userName,
 					editPassword.getNewPassword());
-        if(getRole() == "SYSTEM_ADMIN"){
+        if(getRole() == "ROLE_SYSTEM_ADMIN"){
             mav.setViewName("redirect:/users");
         } else {
             mav.setViewName("redirect:/user/profile");
@@ -284,21 +284,21 @@ public class UserController extends AbstractController{
 			Iterator<UserRole> roleIterator = userRole.iterator();
 			while(roleIterator.hasNext()){
 				String currentRole = ((UserRole) roleIterator.next()).getRole();
-				if("SYSTEM_ADMIN".equals(currentRole)){
+				if("ROLE_SYSTEM_ADMIN".equals(currentRole)){
 					roleCheck=currentRole;
 				}
 				if(roleCheck=="Consumer" ||roleCheck=="Schedule admin" || roleCheck==""){
-					if("JOB_ADMIN".equals(currentRole)){
+					if("ROLE_JOB_ADMIN".equals(currentRole)){
 						roleCheck=currentRole;
 					}
 				}
 				if(roleCheck=="Consumer" || roleCheck==""){
-					if("SCHEDULE_ADMIN".equals(currentRole)){
+					if("ROLE_SCHEDULE_ADMIN".equals(currentRole)){
 						roleCheck=currentRole;
 					}
 				}
 				if(roleCheck==""){
-					if("CONSUMER".equals(currentRole)){
+					if("ROLE_CONSUMER".equals(currentRole)){
 						roleCheck=currentRole;
 					}
 				}

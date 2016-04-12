@@ -53,7 +53,7 @@ function stopJob(id){
 	<thead>
 		<tr>
 			<th>
-				<#if role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN">
+				<#if role=="ROLE_SYSTEM_ADMIN"  || role=="ROLE_JOB_ADMIN">
 					<a href="<@spring.url relativeUrl="/job/create" />"><img src="<@spring.url relativeUrl="/images/add-icon.png"/>" label="Create new job" alt="Create new job" /></a>
 				</#if>		
 			</th>
@@ -68,7 +68,7 @@ function stopJob(id){
 		<#list jobInfoList as jobInfo>
 		<tr>
 			<td>
-				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
+				<#if jobInfo.scheduleState=="Not running" && (role=="ROLE_SYSTEM_ADMIN"  || role=="ROLE_JOB_ADMIN")>
 					<a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/edit" />"><img src="<@spring.url relativeUrl="/images/edit-icon.png"/>" label="edit" alt="edit" /></a>
 				</#if>
 			</td>
@@ -90,10 +90,10 @@ function stopJob(id){
 			<td>${jobInfo.scheduleState!"Not running"}</td>
 			<td><a href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/history" />">History</a></td>
 			<td>
-				<#if jobInfo.scheduleState=="Not running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
+				<#if jobInfo.scheduleState=="Not running" && (role=="ROLE_SYSTEM_ADMIN"  || role=="ROLE_JOB_ADMIN")>
 					<a class="btn" href="<@spring.url relativeUrl="/job/${jobInfo.jobId}/cycle/run" />">RUN</a>
 				</#if>
-                <#if jobInfo.scheduleState=="Running" && (role=="SYSTEM_ADMIN"  || role=="JOB_ADMIN")>
+                <#if jobInfo.scheduleState=="Running" && (role=="ROLE_SYSTEM_ADMIN"  || role=="ROLE_JOB_ADMIN")>
                     <a class="btn btn-danger" onclick="stopJob('${jobInfo.jobId}')">STOP</a>
                 </#if>
             </td>

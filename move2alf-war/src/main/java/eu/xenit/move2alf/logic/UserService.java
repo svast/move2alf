@@ -37,7 +37,7 @@ public interface UserService {
 	 * 
 	 * @return A list containing all users.
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
 	public List<UserPswd> getAllUsers();
 
 	/**
@@ -50,7 +50,7 @@ public interface UserService {
 	 *            lower roles.
 	 * @throws DuplicateUserException
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
 	public UserPswd createUser(String userName, String password, ERole role);
 	
 	/** Delete user with given user name.
@@ -58,7 +58,7 @@ public interface UserService {
 	 * @param userName
 	 * @throws NonexistentUserException
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
 	public void deleteUser(String userName);
 
 	/**
@@ -77,7 +77,7 @@ public interface UserService {
 	 * @param newPassword The new password for the given user.
 	 * @throws NonexistentUserException
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN') or #userName == authentication.name")
+	@PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN') or #userName == authentication.name")
 	public void changePassword(String userName, String newPassword);
 
 	/**
@@ -90,7 +90,7 @@ public interface UserService {
 	 *            lower roles. All higher roles will be removed.
 	 * @throws NonexistentUserException
 	 */
-	@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_SYSTEM_ADMIN')")
 	public void changeRole(String userName, ERole newRole);
 
 	
