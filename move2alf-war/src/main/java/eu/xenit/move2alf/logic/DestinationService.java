@@ -59,7 +59,7 @@ public class DestinationService extends AbstractHibernateService{
         String name = destination.getName().replace(" ", "_");
         ActionConfig actionConfig = pipelineAssembler.getActionConfig(destination.getFirstConfiguredAction());
         JobHandle jobHandle = new JobHandle(system, name, new JobConfig(actionConfig, false));
-        jobHandle.startJob();
+        jobHandle.startJob(new HashMap<>());
         jobHandleMap.put(destination.getId(), jobHandle);
     }
 
