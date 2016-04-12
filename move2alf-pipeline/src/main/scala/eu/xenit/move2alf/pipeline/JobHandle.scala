@@ -34,9 +34,9 @@ class JobHandle(val actorSystem: ActorSystem, val id: String, val config: JobCon
     }
   }
 
-  def startJob(){
+  def startJob(initJobContext : java.util.Map[String,Object]){
     logger.debug("Starting job: "+id)
-    actor ! Start
+    actor ! StartJob(initJobContext)
   }
 
   def sendTask(key: String, task: Object, replyTo: ActorRef){

@@ -14,9 +14,12 @@ import java.util.List;
  */
 public class JavaActionImpl<T> implements ReceivingAction<T>, HasStateContext, HasSendingContext{
 
+    protected StateContext stateContext;
+
     @Override
     public void setStateContext(StateContext stateContext) {
         //To change body of implemented methods use File | Settings | File Templates.
+        this.stateContext = stateContext;
     }
 
     private String param1;

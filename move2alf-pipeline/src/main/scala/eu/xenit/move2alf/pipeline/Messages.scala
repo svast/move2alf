@@ -13,6 +13,7 @@ case object Start
 case object Stop
 case object EOC
 
+case class StartJob(message: java.util.Map[String,Object])
 case class M2AMessage(message: AnyRef)
 case class TaskMessage(key: String, message: AnyRef, sendResult: ActorRef)
 case class ReplyMessage(key: String, message: AnyRef)

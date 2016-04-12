@@ -7,6 +7,8 @@ import eu.xenit.move2alf.pipeline.state.JobContext
 import akka.routing.Broadcast
 import eu.xenit.move2alf.common.LogHelper
 
+import scala.collection.JavaConversions
+
 
 sealed trait JobState
 case object Running extends JobState
@@ -37,7 +39,14 @@ class JobActor(val id: String, private val config: JobConfig, private val jobInf
 
   when(NotRunning) {
     case Event(Start, Uninitialized) => {
+      throw new RuntimeException("Replaced with StartJob, should not be called anymore!")
+    }
+    case Event(StartJob(initialJobConfig), Uninitialized) => {
       firstActor ! Broadcast(Start)
+
+      JavaConversions.asScalaMap(initialJobConfig)
+        .foreach{case(k,v) => jobContext.setStateValue(k,v)};
+
       if (config.isAutoStop) firstActor ! Broadcast(EOC)
       goto(Running) using CycleData(counter = nmbOfSenders)
     }

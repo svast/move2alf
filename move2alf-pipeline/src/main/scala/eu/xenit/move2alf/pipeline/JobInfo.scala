@@ -21,9 +21,7 @@ class JobInfo {
     this.actorRefs = actorRefs
   }
 
-  def getActorRef(actionId: String){
-    actorRefs.get(actionId).get
-  }
+  def getActorRef(actionId: String) : ActorRef = actorRefs.get(actionId).get
 
   val onStopActions = new mutable.HashSet[Runnable]
 

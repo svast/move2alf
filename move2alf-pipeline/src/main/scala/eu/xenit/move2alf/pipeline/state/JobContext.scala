@@ -4,6 +4,7 @@ import concurrent.stm._
 
 /**
  * Created with IntelliJ IDEA.
+ * Shared memory for a job
  * User: thijs
  * Date: 4/5/13
  * Time: 3:28 PM

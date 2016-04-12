@@ -1,6 +1,7 @@
 package eu.xenit.move2alf.logic;
 
 import akka.actor.ActorSystem;
+import eu.xenit.move2alf.common.GlobalJobState;
 import eu.xenit.move2alf.common.Util;
 import eu.xenit.move2alf.common.exceptions.Move2AlfException;
 import eu.xenit.move2alf.core.dto.*;
@@ -686,7 +687,14 @@ public class JobServiceImpl extends AbstractHibernateService implements
         jobMap.put(job.getId(), jobHandle);
         int cycleId = openCycleForJob(jobId);
         onStopJobActions.get(jobId).cycle = getCycle(cycleId);
-        jobMap.get(jobId).startJob();
+
+
+		HashMap<String,Object> map = new HashMap<String,Object>();
+		map.put(GlobalJobState.JOB_MODEL,getJobConfigForJob(job.getId()));
+		map.put(GlobalJobState.CYCLE_ID, cycleId);
+
+
+        jobMap.get(jobId).startJob(map);
 
     }
 
