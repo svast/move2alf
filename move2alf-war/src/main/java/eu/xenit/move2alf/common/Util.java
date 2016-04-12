@@ -21,6 +21,7 @@ import java.util.*;
 
 public class Util {
     private static final Logger logger = LoggerFactory.getLogger(Util.class);
+    public static String fileSeparator = File.separator; // DONT MODIFY, ONLY FOR TESTING
 
     public static String convertToMd5(final String str) {
         try {
@@ -88,7 +89,7 @@ public class Util {
 
         // If path exists move document
         if (destinationPathExists) {
-            String newFileName = fullDestinationPath + File.separator + file.getName();
+            String newFileName = fullDestinationPath + fileSeparator + file.getName();
             File movedFile = new File(newFileName);
             deleteIfExists(movedFile);
             try {
@@ -262,17 +263,17 @@ public class Util {
 
     public static String createRelativePath(String path, String file, String directory) {
         String newPath = path;
-        if(!(newPath.endsWith(File.separator)))
-            newPath = newPath.concat(File.separator);
-        if(directory.endsWith(File.separator))
+        if(!(newPath.endsWith(fileSeparator)))
+            newPath = newPath.concat(fileSeparator);
+        if(directory.endsWith(fileSeparator))
             directory = directory.substring(0,directory.length()-1);
 
-        String separatorRegex = String.format("\\%s", File.separator);
+        String separatorRegex = String.format("\\%s", fileSeparator);
 
         String[] fileParts = file.split(separatorRegex);
         String[] directoryParts = directory.split(separatorRegex);
         for(int i=(directoryParts.length); i< (fileParts.length - 1) ; i++) {
-            newPath = newPath.concat(fileParts[i]).concat(File.separator);
+            newPath = newPath.concat(fileParts[i]).concat(fileSeparator);
         }
         return newPath;
     }

@@ -1,6 +1,8 @@
 package eu.xenit.move2alf.common;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -65,19 +67,29 @@ public class UtilTest {
     }
 
     private String getCreateRelativePath(String directory, String file, String path, String separator) throws Exception{
-        setFinalStatic(File.class.getDeclaredField("separator"), separator);
+        // MH: Pls dont do this, this breaks spring. setFinalStatic(File.class.getDeclaredField("separator"), separator);
+
+        // Use this less hacky alternative
+        Util.fileSeparator = separator;
 
         return Util.createRelativePath(path, file, directory);
     }
 
-    static void setFinalStatic(Field field, Object newValue) throws Exception {
-        field.setAccessible(true);
+    @After
+    public void tearDown() throws Exception {
+        Util.fileSeparator = File.separator;
 
-        // remove final modifier from field
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-        field.set(null, newValue);
     }
+
+    //    static void setFinalStatic(Field field, Object newValue) throws Exception {
+//        // MH: Pls dont do this, this breaks spring.
+//        field.setAccessible(true);
+//
+//        // remove final modifier from field
+//        Field modifiersField = Field.class.getDeclaredField("modifiers");
+//        modifiersField.setAccessible(true);
+//        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+//
+//        field.set(null, newValue);
+//    }
 }
